@@ -90,8 +90,8 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek di lokal Anda:
 Proyek ini dikembangkan dan dikelola dengan bangga oleh:
 
 **Vexalyn Dev**
-- 🌐 Website: [vexalyn.com](https://vexalyn.com)
-- 📧 Email: contact@vexalyn.com
+- 🌐 Website: [vexalyndev.my.id](https://vexalyndev.my.id)
+- 📧 Email: vioatmajaya@gmail.com
 - 🐙 GitHub: [@vexalyn-dev](https://github.com/vexalyn-dev)
 
 ## 📄 Lisensi & Hak Cipta
