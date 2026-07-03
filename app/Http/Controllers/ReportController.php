@@ -11,38 +11,64 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $startDate = $request->input('start_date', date('Y-m-01'));
-        $endDate = $request->input('end_date', date('Y-m-t'));
-        $selectedTeacher = $request->input('teacher_id', '');
-
-        $teachers = User::where('role', 'guru')->get();
-
-        $query = Attendance::join('users', 'attendances.user_id', '=', 'users.id')
-            ->select('attendances.*', 'users.name', 'users.email')
-            ->whereBetween('date', [$startDate, $endDate]);
-
-        if ($selectedTeacher) {
-            $query->where('user_id', $selectedTeacher);
+        $query = Attendance::query()
+            ->join('users', 'attendances.user_id', '=', 'users.id')
+            ->select(
+                'users.id as user_id',
+                'users.name',
+                'users.email',
+                'attendances.id',
+                'attendances.date',
+                'attendances.check_in',
+                'attendances.check_out',
+                'attendances.status'
+            );
+        
+        // Date range filter
+        if ($request->filled('start_date')) {
+            $query->where('attendances.date', '>=', $request->start_date);
         }
-
-        // Stats
-        $total = $query->count();
-        $hadir = (clone $query)->where('status', 'Hadir')->count();
-        $terlambat = (clone $query)->where('status', 'Terlambat')->count();
-        $izin = (clone $query)->where('status', 'Izin')->count();
-        $alpha = (clone $query)->where('status', 'Alpha')->count();
-
-        $stats = (object)[
-            'total' => $total,
-            'hadir' => $hadir,
-            'terlambat' => $terlambat,
-            'izin' => $izin,
-            'alpha' => $alpha,
+        if ($request->filled('end_date')) {
+            $query->where('attendances.date', '<=', $request->end_date);
+        }
+        
+        // Teacher filter
+        if ($request->filled('teacher_id')) {
+            $query->where('users.id', $request->teacher_id);
+        }
+        
+        $attendances = $query->orderBy('attendances.date', 'desc')->paginate(15);
+        
+        // Calculate stats
+        $stats = (object) [
+            'total' => $attendances->total(),
+            'hadir' => (clone $query)->where('attendances.status', 'Hadir')->count(),
+            'terlambat' => (clone $query)->where('attendances.status', 'Terlambat')->count(),
+            'izin' => (clone $query)->where('attendances.status', 'Izin')->count(),
+            'alpha' => (clone $query)->where('attendances.status', 'Alpha')->count(),
         ];
-
-        $attendances = $query->orderBy('date', 'desc')->paginate(10)->withQueryString();
-
-        return view('reports.index', compact('startDate', 'endDate', 'selectedTeacher', 'teachers', 'stats', 'attendances'));
+        
+        // Get teachers for dropdown
+        $teachers = User::where('role', 'guru')->orderBy('name')->get(['id', 'name', 'email']);
+        
+        // Return JSON for AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'data' => $attendances->items(),
+                'stats' => $stats,
+                'links' => [
+                    'first' => $attendances->url(1),
+                    'last' => $attendances->url($attendances->lastPage()),
+                    'prev' => $attendances->previousPageUrl(),
+                    'next' => $attendances->nextPageUrl(),
+                ],
+                'current_page' => $attendances->currentPage(),
+                'last_page' => $attendances->lastPage(),
+                'total' => $attendances->total(),
+            ]);
+        }
+        
+        return view('reports.index', compact('attendances', 'stats', 'teachers'));
     }
 
     public function exportCsv(Request $request)

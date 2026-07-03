@@ -212,6 +212,35 @@
                                     </div>
                                 </div>
 
+                                <!-- Jadwal Kerja -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <!-- Jam Masuk -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
+                                            Jam Masuk <span class="text-slate-400 font-normal">(Default 07:30)</span>
+                                        </label>
+                                        <div class="relative group">
+                                            <i data-lucide="sunrise" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                            <input type="time" name="start_time" 
+                                                   value="{{ old('start_time', $teacher->start_time ?? '07:30') }}" 
+                                                   class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                        </div>
+                                    </div>
+
+                                    <!-- Jam Pulang -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
+                                            Jam Pulang <span class="text-slate-400 font-normal">(Default 16:00)</span>
+                                        </label>
+                                        <div class="relative group">
+                                            <i data-lucide="sunset" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                            <input type="time" name="end_time" 
+                                                   value="{{ old('end_time', $teacher->end_time ?? '16:00') }}" 
+                                                   class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Mata Pelajaran -->
                                 <div>
                                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Mata Pelajaran</label>

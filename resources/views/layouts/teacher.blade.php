@@ -136,18 +136,25 @@
             </header>
 
             <div class="flex-1 w-full min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-                @if (session('success'))
+                @if (session('success') || session('error'))
+                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 2000)" x-show="show"
+                     x-transition:leave="transition ease-in duration-300"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-2">
+                    @if (session('success'))
                     <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl flex items-start gap-3">
                         <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
-                        <span>{{ session('success') }}</span>
+                        <span>{{ is_array(session('success')) ? implode(' ', session('success')) : session('success') }}</span>
                     </div>
-                @endif
+                    @endif
 
-                @if (session('error'))
+                    @if (session('error'))
                     <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3">
                         <i data-lucide="alert-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
                         <span>{{ session('error') }}</span>
                     </div>
+                    @endif
+                </div>
                 @endif
 
                 @yield('content')

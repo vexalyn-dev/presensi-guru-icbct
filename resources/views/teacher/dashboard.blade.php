@@ -23,7 +23,7 @@
                             <h2 class="text-2xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">Selamat Datang, {{ Auth::user()->name }}! <span class="bg-clip-text-none text-white">👋</span></h2>
                             <span class="w-2.5 h-2.5 bg-green-500 rounded-full pulse-dot flex-shrink-0" style="display:inline-block!important; animation:pulse-green 2s infinite!important;"></span>
                         </div>
-                        <p class="text-slate-300 text-sm">Kelola presensi guru dengan mudah dan efisien</p>
+                        <p class="text-slate-300 text-sm">Pantau riwayat kehadiran dan aktivitas harian Anda dengan mudah</p>
                     </div>
                 </div>
                 
@@ -41,96 +41,74 @@
     </div>
 
     <!-- Stats Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total Guru -->
-        <a href="{{ route('teachers.index') }}" class="card-hover card p-5 group animate-stagger-1 block cursor-pointer">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <i data-lucide="users" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Guru</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $totalGuru }}</h3>
-                    <div class="flex items-center gap-1.5 mt-1.5">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] text-green-600 dark:text-green-400 font-medium">Aktif</span>
-                    </div>
-                </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
-            </div>
-        </a>
-
-        <!-- Hadir Hari Ini -->
-        <a href="{{ route('attendance.history', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString(), 'status' => 'Hadir']) }}" class="card-hover card p-5 group animate-stagger-2 block cursor-pointer">
+        <div class="card-hover card p-5 group animate-stagger-1">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <i data-lucide="circle-check" class="w-6 h-6 text-green-600 dark:text-green-400"></i>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Hadir Hari Ini</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $hadirHariIni }}</h3>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Hadir (Bulan Ini)</p>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $totalHadir }}</h3>
                     <div class="flex items-center gap-1.5 mt-1.5">
                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] text-green-600 dark:text-green-400 font-medium">{{ now()->locale('id')->format('d M') }}</span>
+                        <span class="text-[10px] text-green-600 dark:text-green-400 font-medium">Tepat Waktu</span>
                     </div>
                 </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-green-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </div>
-        </a>
+        </div>
 
-        <!-- Terlambat -->
-        <a href="{{ route('attendance.history', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString(), 'status' => 'Terlambat']) }}" class="card-hover card p-5 group animate-stagger-3 block cursor-pointer">
+        <!-- Hadir Hari Ini -->
+        <div class="card-hover card p-5 group animate-stagger-2">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <i data-lucide="clock" class="w-6 h-6 text-yellow-600 dark:text-yellow-400"></i>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Terlambat</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $terlambat }}</h3>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Terlambat (Bulan Ini)</p>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $totalTerlambat }}</h3>
                     <div class="flex items-center gap-1.5 mt-1.5">
                         <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span>
                         <span class="text-[10px] text-yellow-600 dark:text-yellow-400 font-medium">Perlu perhatian</span>
                     </div>
                 </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-yellow-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </div>
-        </a>
+        </div>
 
-        <!-- Tidak Hadir -->
-        <a href="{{ route('attendance.history', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString(), 'status' => 'Alpha']) }}" class="card-hover card p-5 group animate-stagger-4 block cursor-pointer">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <i data-lucide="circle-x" class="w-6 h-6 text-red-600 dark:text-red-400"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Tidak Hadir</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $tidakHadir }}</h3>
-                    <div class="flex items-center gap-1.5 mt-1.5">
-                        <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] text-red-600 dark:text-red-400 font-medium">Alpha</span>
-                    </div>
-                </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-red-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
-            </div>
-        </a>
-
-        <!-- Izin/Cuti -->
-        <a href="{{ route('attendance.history', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString(), 'status' => 'Izin']) }}" class="card-hover card p-5 group animate-stagger-5 block cursor-pointer">
+        <!-- Terlambat -->
+        <div class="card-hover card p-5 group animate-stagger-3">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <i data-lucide="file-text" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Izin/Cuti</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $izinCuti }}</h3>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Izin / Sakit (Bulan Ini)</p>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $totalIzinSakit }}</h3>
                     <div class="flex items-center gap-1.5 mt-1.5">
                         <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Izin/Sakit/Cuti</span>
+                        <span class="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Dalam keterangan</span>
                     </div>
                 </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </div>
-        </a>
+        </div>
+
+        <!-- Tidak Hadir -->
+        <div class="card-hover card p-5 group animate-stagger-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <i data-lucide="circle-x" class="w-6 h-6 text-red-600 dark:text-red-400"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Alpha (Bulan Ini)</p>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $totalAlpha }}</h3>
+                    <div class="flex items-center gap-1.5 mt-1.5">
+                        <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] text-red-600 dark:text-red-400 font-medium">Tanpa keterangan</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Chart & Attendance Info -->
@@ -148,27 +126,20 @@
                                     <i data-lucide="activity" class="w-3.5 h-3.5 text-gold-500"></i>
                                     Ringkasan
                                 </span>
+                                <span id="chart-total-badge" class="text-[11px] font-medium text-slate-500 dark:text-slate-400 tabular-nums"></span>
                             </div>
-                            <h3 class="text-2xl font-bold text-navy-900 dark:text-white tracking-tight leading-tight">Grafik Kehadiran</h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" id="chart-period">7 hari terakhir</p>
+                            <h3 class="text-xl font-bold text-navy-800 dark:text-white tracking-tight">Grafik Kehadiran</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" id="chart-period">7 hari terakhir</p>
                         </div>
                         <div class="flex items-center gap-3 shrink-0">
                             <div class="hidden sm:flex items-center gap-4 pr-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 shadow-sm shadow-green-500/40"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-gold-400 to-amber-500 shadow-sm shadow-gold-500/40"></span>
                                     <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Hadir</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 shadow-sm shadow-yellow-500/40"></span>
-                                    <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Terlambat</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-red-500 to-rose-600 shadow-sm shadow-red-500/40"></span>
-                                    <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Tidak Hadir</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 shadow-sm shadow-blue-500/40"></span>
-                                    <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Izin/Cuti</span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-500"></span>
+                                    <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Rata-rata</span>
                                 </div>
                             </div>
                             <div class="relative" x-data="{ open: false }" @click.outside="open = false">
@@ -229,22 +200,14 @@
                             <canvas id="attendanceChart" aria-label="Grafik kehadiran harian"></canvas>
                         </div>
                     </div>
-                    <div class="flex sm:hidden items-center justify-center gap-4 flex-wrap mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/80">
+                    <div class="flex sm:hidden items-center justify-center gap-6 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/80">
                         <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-green-500 to-emerald-600"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-gold-400 to-amber-500"></span>
                             <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Hadir</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600"></span>
-                            <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Terlambat</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-red-500 to-rose-600"></span>
-                            <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Tidak Hadir</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600"></span>
-                            <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Izin/Cuti</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-500"></span>
+                            <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Rata-rata</span>
                         </div>
                     </div>
                 </div>
@@ -355,7 +318,7 @@
                 <div class="flex items-center gap-2">
                     <div>
                         <h3 class="text-base font-semibold text-navy-800 dark:text-white">Aktivitas Terakhir</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">5 Presensi terbaru dari semua guru</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">5 Presensi terbaru Anda</p>
                     </div>
                 </div>
                 <a href="{{ route('attendance.history') }}" class="text-xs text-gold-500 hover:text-gold-600 font-medium flex items-center gap-1 transition-colors group icon-click">
@@ -369,7 +332,6 @@
             <table class="w-full">
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>
-                        <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Guru</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tanggal & Hari</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jam Masuk</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jam Keluar</th>
@@ -379,19 +341,6 @@
                 <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
                     @forelse($recentAttendances as $att)
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="relative">
-                                        <img src="{{ $att->user->photo_url }}" 
-                                             class="w-10 h-10 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
-                                        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 {{ $att->user->is_active ? 'bg-green-500' : 'bg-slate-400' }} border-2 border-white dark:border-slate-800 rounded-full"></div>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-navy-800 dark:text-white">{{ $att->user->name }}</p>
-                                        <p class="text-[10px] text-slate-500 dark:text-slate-400">{{ $att->user->email }}</p>
-                                    </div>
-                                </div>
-                            </td>
                             <td class="px-6 py-4">
                                 <div>
                                     <p class="text-sm font-medium text-navy-800 dark:text-white">{{ \Carbon\Carbon::parse($att->date)->format('d M Y') }}</p>
@@ -441,7 +390,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-16 text-center">
+                            <td colspan="4" class="px-6 py-16 text-center">
                                 <div class="flex flex-col items-center gap-4">
                                     <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
                                         <i data-lucide="inbox" class="w-8 h-8 text-slate-400"></i>
@@ -579,26 +528,9 @@
     .animate-stagger-2 { animation: fadeInUp 0.5s ease-out 0.2s forwards; opacity: 0; }
     .animate-stagger-3 { animation: fadeInUp 0.5s ease-out 0.3s forwards; opacity: 0; }
     .animate-stagger-4 { animation: fadeInUp 0.5s ease-out 0.4s forwards; opacity: 0; }
-    .animate-stagger-5 { animation: fadeInUp 0.5s ease-out 0.5s forwards; opacity: 0; }
 
-    /* Confetti canvas overlay */
-    #attendanceChart {
-        position: relative;
-    }
-    
-    /* Bounce animation for holiday bars */
-    @keyframes barBounce {
-        0%, 100% { transform: scaleY(1); }
-        50% { transform: scaleY(1.05); }
-    }
-    
-    .chartjs-render-monitor .bar-holiday {
-        animation: barBounce 1s ease-in-out infinite;
-        transform-origin: bottom;
-    }
-    
     /* ==========================================
-       CHART — Premium shell & loading dot
+       CHART — premium shell & loading dot
        ========================================== */
     .chart-premium-card {
         transition: box-shadow 0.35s ease, border-color 0.35s ease;
@@ -721,22 +653,6 @@
     .tabular-nums {
         font-variant-numeric: tabular-nums;
     }
-
-    /* Confetti canvas overlay */
-    #attendanceChart {
-        position: relative;
-    }
-
-    /* Bounce animation for holiday bars */
-    @keyframes barBounce {
-        0%, 100% { transform: scaleY(1); }
-        50% { transform: scaleY(1.05); }
-    }
-
-    .chartjs-render-monitor .bar-holiday {
-        animation: barBounce 1s ease-in-out infinite;
-        transform-origin: bottom;
-    }
 </style>
 
 <script>
@@ -747,7 +663,6 @@
     let watchId = null;
     let clockInterval = null;
     let chartLoadingTimer = null;
-    let chartAnimationId = null;
 
     // ==========================================
     // ICON CLICK ANIMATION FUNCTION
@@ -965,204 +880,6 @@
     }
 
     // ==========================================
-    // CONFETTI EFFECT PLUGIN
-    // ==========================================
-    const confettiPlugin = {
-        id: 'confettiEffect',
-        afterEvent: (chart, args) => {
-            const { event } = args;
-            if (event.type !== 'mousemove') return;
-            
-            const elements = chart.getElementsAtEventForMode(event, 'index', { intersect: false }, true);
-            if (!elements.length) return;
-            
-            const element = elements[0];
-            const index = element.index;
-            
-            // Cek apakah ini bar libur
-            const isHoliday = window.holidayIndices && window.holidayIndices.includes(index);
-            
-            if (isHoliday) {
-                createConfetti(chart, element.x, element.y);
-            }
-        }
-    };
-
-    // Confetti particles
-    let confettiParticles = [];
-
-    function createConfetti(chart, x, y) {
-        const colors = ['#facc15', '#ef4444', '#3b82f6', '#22c55e', '#a855f7', '#ec4899'];
-        
-        for (let i = 0; i < 8; i++) {
-            confettiParticles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.5) * 8 - 4,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                size: Math.random() * 6 + 3,
-                rotation: Math.random() * 360,
-                rotationSpeed: (Math.random() - 0.5) * 10,
-                life: 1,
-            });
-        }
-    }
-
-    function updateConfetti(chart) {
-        const ctx = chart.ctx;
-        
-        confettiParticles = confettiParticles.filter(p => p.life > 0);
-        
-        confettiParticles.forEach(p => {
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate((p.rotation * Math.PI) / 180);
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = p.life;
-            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
-            ctx.restore();
-            
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += 0.3; // Gravity
-            p.rotation += p.rotationSpeed;
-            p.life -= 0.02;
-        });
-    }
-
-    // ==========================================
-    // HOLIDAY BACKGROUND PLUGIN (Pattern Stripes)
-    // ==========================================
-    const holidayBackgroundPlugin = {
-        id: 'holidayBackground',
-        beforeDraw: (chart) => {
-            const ctx = chart.ctx;
-            const chartArea = chart.chartArea;
-            if (!chartArea || !window.holidayIndices || !window.holidayIndices.length) return;
-
-            window.holidayIndices.forEach(index => {
-                const meta = chart.getDatasetMeta(0);
-                if (!meta.data[index]) return;
-                const bar = meta.data[index];
-                const barWidth = bar.width || 28;
-                const x = bar.x - barWidth / 2 - 4;
-                const width = barWidth + 8;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(x, chartArea.top, width, chartArea.bottom - chartArea.top);
-                ctx.clip();
-
-                ctx.strokeStyle = 'rgba(250, 204, 21, 0.15)';
-                ctx.lineWidth = 2;
-                for (let i = -50; i < 200; i += 8) {
-                    ctx.beginPath();
-                    ctx.moveTo(x + i, chartArea.top);
-                    ctx.lineTo(x + i - 30, chartArea.bottom);
-                    ctx.stroke();
-                }
-
-                ctx.strokeStyle = 'rgba(250, 204, 21, 0.4)';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(x, chartArea.top, width, chartArea.bottom - chartArea.top);
-                ctx.restore();
-            });
-        }
-    };
-
-    // ==========================================
-    // HOLIDAY BADGE PLUGIN (DISABLED)
-    // ==========================================
-    /*
-    const holidayBadgePlugin = {
-        id: 'holidayBadge',
-        afterDraw: (chart) => {
-            const ctx = chart.ctx;
-            
-            if (!window.holidayIndices || !window.holidayIndices.length) return;
-            
-            window.holidayIndices.forEach(index => {
-                const meta = chart.getDatasetMeta(0);
-                if (!meta.data[index]) return;
-                
-                const bar = meta.data[index];
-                const barWidth = bar.width || 28;
-                
-                // Draw badge "LIBUR"
-                const badgeText = 'LIBUR';
-                ctx.font = 'bold 10px system-ui, sans-serif';
-                const textWidth = ctx.measureText(badgeText).width;
-                const badgeWidth = textWidth + 12;
-                const badgeHeight = 18;
-                const badgeX = bar.x - badgeWidth / 2;
-                const badgeY = bar.y - 30;
-                
-                // Badge background
-                ctx.fillStyle = '#facc15';
-                ctx.beginPath();
-                ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 4);
-                ctx.fill();
-                
-                // Badge shadow
-                ctx.shadowColor = 'rgba(250, 204, 21, 0.5)';
-                ctx.shadowBlur = 4;
-                ctx.shadowOffsetY = 2;
-                
-                // Badge text
-                ctx.fillStyle = '#0f172a';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(badgeText, bar.x, badgeY + badgeHeight / 2);
-                
-                ctx.shadowColor = 'transparent';
-            });
-        }
-    };
-    */
-
-    // ==========================================
-    // BOUNCE ANIMATION FOR HOLIDAY BARS
-    // ==========================================
-    const bouncePlugin = {
-        id: 'bounceAnimation',
-        afterDraw: (chart) => {
-            const ctx = chart.ctx;
-            const time = Date.now() / 1000;
-            if (!window.holidayIndices || !window.holidayIndices.length) return;
-
-            window.holidayIndices.forEach(index => {
-                const meta = chart.getDatasetMeta(0);
-                if (!meta.data[index]) return;
-                const bar = meta.data[index];
-                const bounce = Math.sin(time * 3) * 2;
-
-                ctx.save();
-                ctx.fillStyle = 'rgba(250, 204, 21, 0.3)';
-                ctx.beginPath();
-                if (ctx.roundRect) {
-                    ctx.roundRect(
-                        bar.x - bar.width / 2,
-                        bar.y - bounce,
-                        bar.width,
-                        bar.base - bar.y + bounce,
-                        6
-                    );
-                } else {
-                    ctx.rect(
-                        bar.x - bar.width / 2,
-                        bar.y - bounce,
-                        bar.width,
-                        bar.base - bar.y + bounce
-                    );
-                }
-                ctx.fill();
-                ctx.restore();
-            });
-        }
-    };
-
-    // ==========================================
     // 4. CHART.JS — premium line + loading dot (1s)
     // ==========================================
     function showChartLoading() {
@@ -1187,10 +904,7 @@
         const labels = [];
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
-        // ✅ HARI DALAM BAHASA INDONESIA
         const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-        
         for (let i = days - 1; i >= 0; i--) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
@@ -1199,6 +913,28 @@
         return labels;
     }
 
+    function cumulativeAverageSeries(values) {
+        return values.map((_, i, arr) => {
+            const slice = arr.slice(0, i + 1);
+            const sum = slice.reduce((a, b) => a + b, 0);
+            return Math.round((sum / slice.length) * 10) / 10;
+        });
+    }
+
+    function createAttendanceLineGradient(ctx, chartArea, isDark) {
+        if (!chartArea) return 'rgba(250, 204, 21, 0.15)';
+        const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+        if (isDark) {
+            g.addColorStop(0, 'rgba(250, 204, 21, 0.38)');
+            g.addColorStop(0.55, 'rgba(250, 204, 21, 0.08)');
+            g.addColorStop(1, 'rgba(250, 204, 21, 0)');
+        } else {
+            g.addColorStop(0, 'rgba(250, 204, 21, 0.42)');
+            g.addColorStop(0.5, 'rgba(253, 224, 71, 0.12)');
+            g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        }
+        return g;
+    }
 
     function initChart(days = 7) {
         const canvas = document.getElementById('attendanceChart');
@@ -1206,86 +942,33 @@
 
         showChartLoading();
 
-        // Ambil data dari controller
-        let chartHadirData = <?php echo json_encode($chartHadirData ?? []); ?>;
-        let chartTerlambatData = <?php echo json_encode($chartTerlambatData ?? []); ?>;
-        let chartTidakHadirData = <?php echo json_encode($chartTidakHadirData ?? []); ?>;
-        let chartIzinData = <?php echo json_encode($chartIzinData ?? []); ?>;
+        let chartData = <?php echo json_encode($chartData ?? []); ?>;
 
-        // Validasi data
-        const defaultData = new Array(Math.max(days, 7)).fill(0);
-        if (!chartHadirData || !Array.isArray(chartHadirData) || chartHadirData.length === 0) chartHadirData = defaultData;
-        if (!chartTerlambatData || !Array.isArray(chartTerlambatData) || chartTerlambatData.length === 0) chartTerlambatData = defaultData;
-        if (!chartTidakHadirData || !Array.isArray(chartTidakHadirData) || chartTidakHadirData.length === 0) chartTidakHadirData = defaultData;
-        if (!chartIzinData || !Array.isArray(chartIzinData) || chartIzinData.length === 0) chartIzinData = defaultData;
+        if (!chartData || !Array.isArray(chartData) || chartData.length === 0) {
+            chartData = new Array(Math.max(days, 7)).fill(0);
+        }
 
-        // Slice sesuai periode
-        let slicedHadir = chartHadirData.slice(-days);
-        let slicedTerlambat = chartTerlambatData.slice(-days);
-        let slicedTidakHadir = chartTidakHadirData.slice(-days);
-        let slicedIzin = chartIzinData.slice(-days);
-
-        // Padding jika kurang
-        const padIfNeeded = (arr, days) => {
-            if (arr.length < days) {
-                const pad = days - arr.length;
-                return new Array(pad).fill(0).concat(arr);
-            }
-            return arr;
-        };
-        slicedHadir = padIfNeeded(slicedHadir, days);
-        slicedTerlambat = padIfNeeded(slicedTerlambat, days);
-        slicedTidakHadir = padIfNeeded(slicedTidakHadir, days);
-        slicedIzin = padIfNeeded(slicedIzin, days);
+        let slicedData = chartData.slice(-days);
+        if (slicedData.length < days) {
+            const pad = days - slicedData.length;
+            slicedData = new Array(pad).fill(0).concat(slicedData);
+        }
 
         const labels = buildAttendanceChartLabels(days);
-
+        const avgSeries = cumulativeAverageSeries(slicedData);
         const isDark = document.body && document.body.classList.contains('dark');
+
         const tickColor = isDark ? '#94a3b8' : '#64748b';
         const gridColor = isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.18)';
-        const maxVal = Math.max(0, ...slicedHadir, ...slicedTerlambat, ...slicedTidakHadir, ...slicedIzin);
+        const maxVal = Math.max(0, ...slicedData, ...avgSeries);
         const yMax = maxVal > 0 ? maxVal + Math.max(2, Math.ceil(maxVal * 0.15)) : 6;
 
         if (currentChart) {
             currentChart.destroy();
             currentChart = null;
         }
-        if (chartAnimationId) {
-            cancelAnimationFrame(chartAnimationId);
-            chartAnimationId = null;
-        }
 
         const ctx = canvas.getContext('2d');
-
-        // Setup holiday indices & names (dynamic based on current period)
-        let holidayData = <?php echo json_encode($holidayDates ?? []); ?>;
-        const todayMidnight = new Date();
-        todayMidnight.setHours(0, 0, 0, 0);
-
-        window.holidayIndices = [];
-        window.holidayNames = {};
-        holidayData.forEach(h => {
-            const hDate = new Date(h.date + 'T00:00:00');
-            const diffDays = Math.round((todayMidnight - hDate) / 86400000);
-            const chartIndex = (days - 1) - diffDays;
-            if (chartIndex >= 0 && chartIndex < days) {
-                window.holidayIndices.push(chartIndex);
-                window.holidayNames[chartIndex] = h.name;
-            }
-        });
-
-        // Helper untuk buat gradient
-        const makeGradient = (colorStart, colorEnd) => {
-            return (context) => {
-                const chart = context.chart;
-                const {ctx, chartArea} = chart;
-                if (!chartArea) return colorStart;
-                const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                gradient.addColorStop(0, colorStart);
-                gradient.addColorStop(1, colorEnd);
-                return gradient;
-            };
-        };
 
         try {
             currentChart = new Chart(ctx, {
@@ -1295,39 +978,32 @@
                     datasets: [
                         {
                             label: 'Hadir',
-                            data: slicedHadir,
-                            backgroundColor: makeGradient('#10b981', '#22c55e'),
+                            data: slicedData,
+                            backgroundColor: (context) => {
+                                const chart = context.chart;
+                                const {ctx, chartArea} = chart;
+                                if (!chartArea) return 'rgba(250, 204, 21, 0.8)';
+                                const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                                gradient.addColorStop(0, '#eab308');
+                                gradient.addColorStop(1, '#facc15');
+                                return gradient;
+                            },
                             borderRadius: 6,
                             borderSkipped: false,
-                            maxBarThickness: 28,
-                            hoverBackgroundColor: '#34d399',
-                        },
-                        {
-                            label: 'Terlambat',
-                            data: slicedTerlambat,
-                            backgroundColor: makeGradient('#eab308', '#facc15'),
-                            borderRadius: 6,
-                            borderSkipped: false,
-                            maxBarThickness: 28,
+                            maxBarThickness: 32,
                             hoverBackgroundColor: '#fde047',
                         },
                         {
-                            label: 'Tidak Hadir',
-                            data: slicedTidakHadir,
-                            backgroundColor: makeGradient('#ef4444', '#f87171'),
-                            borderRadius: 6,
-                            borderSkipped: false,
-                            maxBarThickness: 28,
-                            hoverBackgroundColor: '#fca5a5',
-                        },
-                        {
-                            label: 'Izin/Cuti',
-                            data: slicedIzin,
-                            backgroundColor: makeGradient('#3b82f6', '#60a5fa'),
-                            borderRadius: 6,
-                            borderSkipped: false,
-                            maxBarThickness: 28,
-                            hoverBackgroundColor: '#93c5fd',
+                            label: 'Rata-rata',
+                            type: 'line',
+                            data: avgSeries,
+                            fill: false,
+                            tension: 0.4,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            borderColor: isDark ? 'rgba(148, 163, 184, 0.6)' : 'rgba(71, 85, 105, 0.4)',
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
                         },
                     ],
                 },
@@ -1353,32 +1029,11 @@
                             borderColor: isDark ? 'rgba(148, 163, 184, 0.25)' : 'rgba(15, 23, 42, 0.08)',
                             borderWidth: 1,
                             callbacks: {
-                                title: (items) => {
-                                    const index = items[0].dataIndex;
-                                    const label = items[0].label;
-                                    
-                                    // Bahasa hari Indonesia
-                                    const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-                                    const date = new Date();
-                                    date.setDate(date.getDate() - ((days - 1) - index));
-                                    const dayName = dayNames[date.getDay()];
-                                    
-                                    if (window.holidayIndices.includes(index)) {
-                                        return `\uD83C\uDF89 ${dayName} - ${window.holidayNames[index] || 'Hari Libur'}`;
-                                    }
-                                    return dayName;
-                                },
+                                title: (items) => (items.length ? items[0].label : ''),
                                 label: (context) => {
                                     const v = context.parsed.y;
                                     const n = typeof v === 'number' && v % 1 !== 0 ? v.toFixed(1) : v;
                                     return ' ' + context.dataset.label + ': ' + n;
-                                },
-                                afterBody: (items) => {
-                                    const index = items[0].dataIndex;
-                                    if (window.holidayIndices.includes(index)) {
-                                        return ['', '\uD83C\uDFD6\uFE0F Hari Libur - Tidak ada absensi'];
-                                    }
-                                    return [];
                                 },
                             },
                         },
@@ -1407,12 +1062,6 @@
                                 maxRotation: 45,
                                 minRotation: 0,
                                 font: { size: 10, weight: '500', family: "system-ui, sans-serif" },
-                                callback: function(value, index) {
-                                    if (window.holidayIndices.includes(index)) {
-                                        return this.getLabelForValue(value);
-                                    }
-                                    return this.getLabelForValue(value);
-                                }
                             },
                         },
                     },
@@ -1421,46 +1070,24 @@
                         easing: 'easeOutQuart',
                     },
                 },
-                plugins: [
-                    holidayBackgroundPlugin,
-                    // holidayBadgePlugin,
-                    bouncePlugin,
-                    confettiPlugin,
-                ],
             });
-
-            // Animation loop for confetti and bounce
-            function animate() {
-                if (currentChart) {
-                    updateConfetti(currentChart);
-                    currentChart.draw();
-                }
-                requestAnimationFrame(animate);
-            }
-            animate();
-
         } catch (e) {
             console.error('Chart error', e);
         } finally {
             scheduleHideChartLoading();
         }
 
-        // Update badge total
-        const totalHadir = slicedHadir.reduce((a, b) => a + b, 0);
-        const totalTerlambat = slicedTerlambat.reduce((a, b) => a + b, 0);
-        const totalTidakHadir = slicedTidakHadir.reduce((a, b) => a + b, 0);
-        const totalIzin = slicedIzin.reduce((a, b) => a + b, 0);
-        const totalAll = totalHadir + totalTerlambat + totalTidakHadir + totalIzin;
-
+        const totalHadir = slicedData.reduce((a, b) => a + b, 0);
         const badgeEl = document.getElementById('chart-total-badge');
         if (badgeEl) {
-            badgeEl.textContent = totalAll > 0
-                ? '· Total ' + totalAll + ' presensi (periode ini)'
-                : '· Belum ada data di periode ini';
+            badgeEl.textContent =
+                totalHadir > 0
+                    ? '· Kumulatif ' + totalHadir + ' (periode ini)'
+                    : '· Belum ada data di periode ini';
         }
 
         const periodEl = document.getElementById('chart-period');
-        if (periodEl) periodEl.textContent = days + ' hari terakhir';
+        if (periodEl) periodEl.textContent = days + ' hari terakhir · garis putus = rata-rata berjalan';
 
         try {
             refreshIcons();
@@ -1543,7 +1170,6 @@
         if (watchId) navigator.geolocation.clearWatch(watchId);
         if (chartLoadingTimer) clearTimeout(chartLoadingTimer);
         if (currentChart) currentChart.destroy();
-        if (chartAnimationId) cancelAnimationFrame(chartAnimationId);
     });
 </script>
 @endsection

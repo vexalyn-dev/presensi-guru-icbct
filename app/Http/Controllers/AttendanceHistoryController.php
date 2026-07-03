@@ -11,44 +11,60 @@ class AttendanceHistoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Attendance::with('user')
-            ->latest('date')
-            ->latest('check_in');
-
-        // Filter by date range
+        $query = Attendance::query();
+        
+        // Date range filter
         if ($request->filled('start_date')) {
             $query->where('date', '>=', $request->start_date);
         }
         if ($request->filled('end_date')) {
             $query->where('date', '<=', $request->end_date);
         }
-
-        // Filter by teacher
+        
+        // Teacher filter
         if ($request->filled('teacher_id')) {
             $query->where('user_id', $request->teacher_id);
         }
-
-        // Filter by status
+        
+        // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
-        $attendances = $query->paginate(15);
-        $teachers = User::where('role', 'guru')->where('is_active', true)->get();
-        $statuses = ['Hadir', 'Terlambat', 'Izin', 'Alpha'];
-
-        // Stats for selected period
-        $startDate = $request->start_date ?? Carbon::now()->startOfMonth();
-        $endDate = $request->end_date ?? Carbon::now()->endOfMonth();
         
+        // Get data with relationships
+        $attendances = $query->with('user')->orderBy('date', 'desc')->orderBy('check_in', 'desc')->paginate(15);
+        
+        // Calculate stats
         $stats = [
-            'total' => Attendance::whereBetween('date', [$startDate, $endDate])->count(),
-            'hadir' => Attendance::whereBetween('date', [$startDate, $endDate])->where('status', 'Hadir')->count(),
-            'terlambat' => Attendance::whereBetween('date', [$startDate, $endDate])->where('status', 'Terlambat')->count(),
-            'alpha' => Attendance::whereBetween('date', [$startDate, $endDate])->where('status', 'Alpha')->count(),
+            'total' => $attendances->total(),
+            'hadir' => $query->clone()->where('status', 'Hadir')->count(),
+            'terlambat' => $query->clone()->where('status', 'Terlambat')->count(),
+            'alpha' => $query->clone()->where('status', 'Alpha')->count(),
+            'izin' => $query->clone()->whereIn('status', ['Izin', 'Sakit', 'Cuti'])->count(),
         ];
-
-        return view('attendance.history', compact('attendances', 'teachers', 'statuses', 'stats'));
+        
+        // Get teachers and statuses for filters
+        $teachers = User::where('role', 'guru')->orderBy('name')->get(['id', 'name']);
+        $statuses = ['Hadir', 'Terlambat', 'Izin', 'Alpha'];
+        
+        // Return JSON for AJAX requests
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'data' => $attendances->items(),
+                'stats' => $stats,
+                'links' => [
+                    'first' => $attendances->url(1),
+                    'last' => $attendances->url($attendances->lastPage()),
+                    'prev' => $attendances->previousPageUrl(),
+                    'next' => $attendances->nextPageUrl(),
+                ],
+                'current_page' => $attendances->currentPage(),
+                'last_page' => $attendances->lastPage(),
+                'total' => $attendances->total(),
+            ]);
+        }
+        
+        return view('attendance.history', compact('attendances', 'stats', 'teachers', 'statuses'));
     }
 
     public function export(Request $request)

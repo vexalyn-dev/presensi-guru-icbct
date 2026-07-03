@@ -167,8 +167,18 @@
               else document.documentElement.classList.remove('dark');
           });
           if (darkMode) document.documentElement.classList.add('dark');
+          Alpine.store('toast', {
+              items: [],
+              show(message, type = 'success') {
+                  const id = Date.now();
+                  this.items.push({ id, message, type });
+                  setTimeout(() => this.items = this.items.filter(i => i.id !== id), 5000);
+              }
+          });
           void 0;
       ">
+
+
 
     <!-- Mobile Overlay -->
     <div x-show="sidebarOpen" 
@@ -216,18 +226,6 @@
             @include('layouts.partials.sidebar-nav')
         </nav>
 
-        <!-- Help Card -->
-        <div class="px-3 pb-4">
-            <div class="p-3 bg-gradient-to-br from-gold-400 to-gold-500 rounded-lg hover-glow cursor-pointer">
-                <div class="flex items-start gap-2">
-                    <i data-lucide="help-circle" class="w-4 h-4 text-navy-900 mt-0.5"></i>
-                    <div>
-                        <p class="text-[10px] font-semibold text-navy-900">Butuh Bantuan?</p>
-                        <p class="text-[9px] text-navy-800 mt-0.5">Hubungi admin untuk dukungan</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </aside>
 
     <!-- ========================================== -->
@@ -360,7 +358,7 @@
                             <p class="text-[11px] font-semibold text-navy-800 dark:text-white leading-tight">{{ Auth::user()->name }}</p>
                             <div class="flex items-center">
                                 <span class="text-[9px] text-green-600 dark:text-green-400 font-medium">
-                                    {{ Auth::user()->isAdmin() ? 'Administrator' : (Auth::user()->subject ?? 'Guru') }}
+                                    {{ Auth::user()->isAdmin() ? 'Operator' : (Auth::user()->subject ?? 'Guru') }}
                                 </span>
                             </div>
                         </div>
@@ -424,18 +422,25 @@
 
         <!-- Page Content -->
         <main class="flex-1 p-5 lg:p-6 overflow-x-hidden">
-            @if (session('success'))
+            @if (session('success') || session('error'))
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 2000)" x-show="show"
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-2">
+                @if (session('success'))
                 <div class="mb-5 flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl slide-up">
                     <i data-lucide="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
-                    <p class="text-sm text-green-800 dark:text-green-200">{{ session('success') }}</p>
+                    <p class="text-sm text-green-800 dark:text-green-200">{{ is_array(session('success')) ? implode(' ', session('success')) : session('success') }}</p>
                 </div>
-            @endif
+                @endif
 
-            @if (session('error'))
+                @if (session('error'))
                 <div class="mb-5 flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl slide-up">
                     <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
                     <p class="text-sm text-red-800 dark:text-red-200">{{ session('error') }}</p>
                 </div>
+                @endif
+            </div>
             @endif
 
             @yield('content')

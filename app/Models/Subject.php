@@ -12,6 +12,7 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'code',
+        'category',
         'is_active',
         'description',
     ];
@@ -19,4 +20,12 @@ class Subject extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Get the teachers assigned to this subject.
+     */
+    public function teachers()
+    {
+        return $this->hasMany(User::class, 'subject', 'name')->where('role', 'guru');
+    }
 }

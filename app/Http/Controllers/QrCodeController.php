@@ -164,14 +164,18 @@ class QrCodeController extends Controller
      */
     public function download(User $teacher)
     {
-        if ($teacher->role !== 'guru' || empty($teacher->qr_code)) {
-            abort(404);
+        if ($teacher->role !== 'guru') {
+            abort(403);
+        }
+        // If QR code does not exist, generate it first
+        if (empty($teacher->qr_code)) {
+            $teacher->generateQrCode();
         }
 
         $path = storage_path('app/public/' . $teacher->qr_code);
-        
+
         session()->flash('success', 'QR Code berhasil diunduh: ' . $teacher->name);
-        
+
         return response()->download($path, 'QR_' . str_replace(' ', '_', $teacher->name) . '.jpg');
     }
 

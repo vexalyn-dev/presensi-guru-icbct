@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Attendance;
 use App\Models\Setting;
 use App\Models\AppSetting;
+use App\Models\Holiday;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -15,7 +16,6 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
 
-        // Mengambil data statistik
         $totalGuru = User::where('role', 'guru')->count();
         
         $hadirHariIni = Attendance::whereDate('date', $today)
@@ -30,34 +30,66 @@ class DashboardController extends Controller
             ->whereIn('status', ['Izin', 'Alpha', 'Sakit'])
             ->count();
 
-        // Mengambil riwayat absensi terbaru (dengan relasi user)
+        $izinCuti = Attendance::whereDate('date', $today)
+            ->whereIn('status', ['Izin', 'Sakit', 'Cuti'])
+            ->count();
+
         $recentAttendances = Attendance::with('user')
             ->latest()
             ->take(5)
             ->get();
 
-        // Mengambil data untuk grafik (7 hari terakhir)
-        $chartData = [];
-        for ($i = 6; $i >= 0; $i--) {
+        // 4 Data chart untuk 30 hari terakhir (support mode 3/7/14/30 hari)
+        $chartHadirData = [];
+        $chartTerlambatData = [];
+        $chartTidakHadirData = [];
+        $chartIzinData = [];
+        
+        for ($i = 29; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $count = Attendance::whereDate('date', $date)
-                ->whereIn('status', ['Hadir', 'Terlambat'])
-                ->count();
-            $chartData[] = $count;
+            
+            $chartHadirData[] = Attendance::whereDate('date', $date)
+                ->where('status', 'Hadir')->count();
+            
+            $chartTerlambatData[] = Attendance::whereDate('date', $date)
+                ->where('status', 'Terlambat')->count();
+            
+            $chartTidakHadirData[] = Attendance::whereDate('date', $date)
+                ->where('status', 'Alpha')->count();
+            
+            $chartIzinData[] = Attendance::whereDate('date', $date)
+                ->whereIn('status', ['Izin', 'Sakit', 'Cuti'])->count();
         }
 
-        // Mengambil pengaturan jam (untuk jam masuk/pulang)
         $appSettings = AppSetting::getInstance();
 
-        // Mengirim semua variabel ke view dashboard
+        // Ambil data holiday untuk 30 hari terakhir
+        $holidayDates = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            if (Holiday::isHoliday($date)) {
+                $holidayName = Holiday::getHolidayName($date);
+                $holidayDates[] = [
+                    'date'  => $date->format('Y-m-d'),
+                    'name'  => $holidayName,
+                    'type'  => $date->isWeekend() ? 'weekend' : 'holiday',
+                ];
+            }
+        }
+
         return view('dashboard', compact(
             'totalGuru',
             'hadirHariIni',
             'terlambat',
             'tidakHadir',
+            'izinCuti',
+            'chartHadirData',
+            'chartTerlambatData',
+            'chartTidakHadirData',
+            'chartIzinData',
             'recentAttendances',
             'appSettings',
-            'chartData'
+            'holidayDates'
         ));
     }
 }

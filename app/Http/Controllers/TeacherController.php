@@ -68,6 +68,8 @@ class TeacherController extends Controller
             'address' => ['nullable', 'string', 'max:500'],
             'bio' => ['nullable', 'string', 'max:500'],
             'subject' => ['nullable', 'string', 'max:255'],
+            'start_time' => ['nullable', 'date_format:H:i'],
+            'end_time' => ['nullable', 'date_format:H:i'],
         ]);
 
         $photoPath = null;
@@ -86,6 +88,8 @@ class TeacherController extends Controller
                 'address' => $validated['address'] ?? null,
                 'bio' => $validated['bio'] ?? null,
                 'subject' => $validated['subject'] ?? null,
+                'start_time' => $validated['start_time'] ?? '07:30',
+                'end_time' => $validated['end_time'] ?? '16:00',
                 'is_active' => true,
             ]);
 
@@ -95,7 +99,7 @@ class TeacherController extends Controller
         // Send notification
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            /** @var \App\Models\User $admin */
+            /** @var User $admin */
             $admin->notify(new SystemNotification(
                 "Data guru baru ({$validated['name']}) berhasil ditambahkan.",
                 'info',
@@ -174,6 +178,8 @@ class TeacherController extends Controller
             'address' => ['nullable', 'string', 'max:1000'],
             'bio' => ['nullable', 'string', 'max:500'],
             'subject' => ['nullable', 'string', 'max:255'],
+            'start_time' => ['nullable', 'date_format:H:i'],
+            'end_time' => ['nullable', 'date_format:H:i'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -184,6 +190,8 @@ class TeacherController extends Controller
             'address' => $validated['address'] ?? null,
             'bio' => $validated['bio'] ?? null,
             'subject' => $validated['subject'] ?? null,
+            'start_time' => $validated['start_time'] ?? $teacher->start_time,
+            'end_time' => $validated['end_time'] ?? $teacher->end_time,
             'is_active' => $request->boolean('is_active', true),
         ];
 
@@ -206,7 +214,7 @@ class TeacherController extends Controller
         // Send notification
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            /** @var \App\Models\User $admin */
+            /** @var User $admin */
             $admin->notify(new SystemNotification(
                 "Data guru ({$teacher->name}) berhasil diperbarui.",
                 'info',
@@ -236,7 +244,7 @@ class TeacherController extends Controller
         // Send notification
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            /** @var \App\Models\User $admin */
+            /** @var User $admin */
             $admin->notify(new SystemNotification(
                 "Data guru ({$teacher->name}) telah dihapus dari sistem.",
                 'warning'
@@ -300,7 +308,7 @@ class TeacherController extends Controller
 
         DB::transaction(function () use ($teachers) {
             foreach ($teachers as $teacher) {
-                /** @var \App\Models\User $teacher */
+                /** @var User $teacher */
                 if ($teacher->photo) {
                     Storage::disk('public')->delete($teacher->photo);
                 }

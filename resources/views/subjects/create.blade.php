@@ -43,19 +43,25 @@
                         @enderror
                     </div>
 
-                    <!-- Kode Mapel -->
+                    <!-- Guru Pengampu -->
                     <div>
                         <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
-                            Kode Mapel
+                            Guru Pengampu
                         </label>
                         <div class="relative">
-                            <i data-lucide="tag"
+                            <i data-lucide="user"
                                 class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                            <input type="text" name="code" value="{{ old('code') }}" required
-                                class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 @error('code') border-red-500 @enderror"
-                                placeholder="Contoh: MTK-001" maxlength="50">
+                            <select name="teacher_id"
+                                class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 @error('teacher_id') border-red-500 @enderror">
+                                <option value="">Pilih Guru Pengampu (Opsional)</option>
+                                @foreach($teachers as $teacher)
+                                    <option value="{{ $teacher->id }}" {{ old('teacher_id') == $teacher->id ? 'selected' : '' }}>
+                                        {{ $teacher->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        @error('code')
+                        @error('teacher_id')
                             <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
                                 <i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}
                             </p>

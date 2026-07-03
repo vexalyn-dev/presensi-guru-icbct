@@ -7,6 +7,8 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class SettingsController extends Controller
 {

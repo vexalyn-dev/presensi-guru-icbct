@@ -77,6 +77,14 @@
         <span>Laporan</span>
     </a>
 
+    <a href="{{ route('holidays.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                      {{ request()->routeIs('holidays.*')
+            ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
+            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+        <i data-lucide="calendar-off" class="w-4 h-4"></i>
+        <span>Kalender Libur</span>
+    </a>
+
     {{--
     <a href="{{ route('messages.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                       {{ request()->routeIs('messages.*')
@@ -118,20 +126,23 @@
         <span>Beranda</span>
     </a>
 
-    <a href="{{ route('teacher.schedule') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                      {{ request()->routeIs('teacher.schedule')
+
+{{--
+    <a href="{{ route('teacher.schedule') }}" class="nav-item flex items_center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200"
+                       {{ request()->routeIs('teacher.schedule')
             ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
-            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}>
         <i data-lucide="calendar" class="w-4 h-4"></i>
         <span>Jadwal Mengajar</span>
     </a>
+--}}
 
     <a href="{{ route('teacher.attendance') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                       {{ request()->routeIs('teacher.attendance')
             ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
             : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-        <i data-lucide="scan-line" class="w-4 h-4"></i>
-        <span>Presensi Saya</span>
+        <i data-lucide="calendar-days" class="w-4 h-4"></i>
+        <span>Riwayat Presensi</span>
     </a>
 
     <a href="{{ route('teacher.profile') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
@@ -142,14 +153,16 @@
         <span>Profil Saya</span>
     </a>
 
-    <a href="{{ route('teacher.dashboard') }}#izin"
-        class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+    <a href="{{ route('teacher.leaves.create') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                      {{ request()->routeIs('teacher.leaves.create')
+            ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
+            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
         <i data-lucide="file-plus" class="w-4 h-4"></i>
         <span>Ajukan Izin / Sakit</span>
     </a>
 
     <a href="{{ route('teacher.leaves') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                      {{ request()->routeIs('teacher.leaves')
+                      {{ request()->routeIs('teacher.leaves') && !request()->routeIs('teacher.leaves.create')
             ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
             : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
         <i data-lucide="clipboard-list" class="w-4 h-4"></i>

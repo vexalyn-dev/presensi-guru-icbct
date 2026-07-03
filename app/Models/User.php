@@ -66,6 +66,17 @@ class User extends Authenticatable
         'provider_id',
         'is_active',
         'subject',
+        'start_time',
+        'end_time',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'photo_url',
     ];
 
     /**

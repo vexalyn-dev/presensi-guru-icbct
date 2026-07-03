@@ -14,6 +14,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
@@ -51,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Attendance
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    Route::get('/attendance/check-status/{teacherId}', [AttendanceController::class, 'checkStatus'])->name('attendance.check-status');
     Route::get('/attendance/history', [AttendanceHistoryController::class, 'index'])->name('attendance.history');
     Route::get('/attendance/export', [AttendanceHistoryController::class, 'export'])->name('attendance.export');
     Route::get('/attendance/scan', [QrCodeController::class, 'scan'])->name('attendance.scan');
@@ -134,16 +136,24 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::delete('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
-    
+
+    // Holiday Management
+    Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');
+    Route::post('/holidays', [HolidayController::class, 'store'])->name('holidays.store');
+    Route::put('/holidays/{holiday}', [HolidayController::class, 'update'])->name('holidays.update');
+    Route::delete('/holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
+    Route::post('/holidays/fetch-national', [HolidayController::class, 'fetchNationalHolidays'])->name('holidays.fetch-national');
+
     // Teacher Routes
     Route::middleware(['role:guru'])->prefix('teacher')->name('teacher.')->group(function () {
-        // Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
-        // Route::get('/schedule', [TeacherDashboardController::class, 'schedule'])->name('schedule');
-        // Route::get('/attendance', [TeacherDashboardController::class, 'attendance'])->name('attendance');
-        // Route::get('/profile', [TeacherDashboardController::class, 'profile'])->name('profile');
-        // Route::post('/profile', [TeacherDashboardController::class, 'updateProfile'])->name('profile.update');
-        // Route::post('/leave-request', [TeacherDashboardController::class, 'storeLeaveRequest'])->name('leave-request.store');
-        // Route::post('/today-notes', [TeacherDashboardController::class, 'updateTodayNotes'])->name('today-notes.update');
-        // Route::get('/leaves', [TeacherDashboardController::class, 'leaves'])->name('leaves');
+        Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/schedule', [TeacherDashboardController::class, 'schedule'])->name('schedule');
+        Route::get('/attendance', [TeacherDashboardController::class, 'attendance'])->name('attendance');
+        Route::get('/profile', [TeacherDashboardController::class, 'profile'])->name('profile');
+        Route::post('/profile', [TeacherDashboardController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/leaves/create', [TeacherDashboardController::class, 'createLeaveRequest'])->name('leaves.create');
+        Route::post('/leave-request', [TeacherDashboardController::class, 'storeLeaveRequest'])->name('leave-request.store');
+        Route::post('/today-notes', [TeacherDashboardController::class, 'updateTodayNotes'])->name('today-notes.update');
+        Route::get('/leaves', [TeacherDashboardController::class, 'leaves'])->name('leaves');
     });
 });

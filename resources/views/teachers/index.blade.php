@@ -130,7 +130,6 @@
                                     <div class="relative group/avatar">
                                         <img src="{{ $teacher->photo_url }}" 
                                              class="w-12 h-12 rounded-2xl object-cover border-2 border-white dark:border-slate-700 shadow-sm group-hover/avatar:scale-105 transition-transform duration-300">
-                                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full shadow-sm"></div>
                                     </div>
                                     <div class="flex flex-col">
                                         <span class="text-sm font-bold text-navy-800 dark:text-white group-hover/row:text-blue-600 transition-colors">{{ $teacher->name }}</span>
