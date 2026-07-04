@@ -7,13 +7,18 @@
     
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Laporan Absensi</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Lihat dan ekspor data absensi guru</p>
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-2xl flex items-center justify-center shadow-lg shadow-navy-800/30 dark:shadow-gold-400/30">
+                <i data-lucide="bar-chart-3" class="w-6 h-6 text-white dark:text-navy-900"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-navy-800 dark:text-white tracking-tight">Laporan Absensi</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Lihat dan ekspor data absensi guru</p>
+            </div>
         </div>
         <button @click="exportReport" class="btn-primary flex items-center gap-2 w-fit">
-            <i data-lucide="download" class="w-4 h-4"></i>
-            Export CSV
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            Export Excel
         </button>
     </div>
 
@@ -235,8 +240,18 @@
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-xs flex-shrink-0">
-                                        <span x-text="att.name?.charAt(0)?.toUpperCase() || '?'"></span>
+                                    <div class="relative flex-shrink-0">
+                                        <template x-if="att.photo_url">
+                                            <img :src="att.photo_url" 
+                                                 :alt="att.name || '?'" 
+                                                 class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-sm"
+                                                 x-on:error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'">
+                                        </template>
+                                        <div :class="att.photo_url ? 'absolute inset-0' : 'w-8 h-8'"
+                                             :style="att.photo_url ? 'display: none;' : ''"
+                                             class="rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-xs flex-shrink-0 shadow-sm">
+                                            <span x-text="att.name?.charAt(0)?.toUpperCase() || '?'"></span>
+                                        </div>
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-navy-800 dark:text-white" x-text="att.name"></p>
@@ -329,6 +344,85 @@
                     </button>
                 </template>
             </nav>
+        </div>
+    </div>
+
+    <!-- Weekly Recap Section -->
+    <div class="card overflow-hidden">
+        <div class="p-5 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-800/30">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-xl flex items-center justify-center shadow-lg shadow-navy-800/30 dark:shadow-gold-400/30">
+                    <i data-lucide="calendar-clock" class="w-5 h-5 text-white dark:text-navy-900"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-navy-800 dark:text-white">Rekap Terlambat Per Minggu</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ringkasan keterlambatan guru berdasarkan periode yang dipilih</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 dark:bg-slate-800/50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Guru</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Minggu 1</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Minggu 2</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Minggu 3</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Minggu 4</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700" id="weekly-recap-body">
+                    @forelse($weeklyRecap as $teacher)
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative flex-shrink-0 w-9 h-9">
+                                        @if($teacher['photo_url'])
+                                            <img src="{{ $teacher['photo_url'] }}" 
+                                                 alt="{{ $teacher['name'] }}" 
+                                                 class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-sm"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        @endif
+                                        <div style="{{ $teacher['photo_url'] ? 'display: none;' : '' }}"
+                                             class="absolute inset-0 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-xs flex-shrink-0 shadow-sm">
+                                            {{ strtoupper(substr($teacher['name'], 0, 1)) }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-navy-800 dark:text-white">{{ $teacher['name'] }}</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ $teacher['email'] }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            @foreach(['week1','week2','week3','week4'] as $wk)
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold
+                                        {{ $teacher[$wk] > 0 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600' }}">
+                                        {{ $teacher[$wk] }}
+                                    </span>
+                                </td>
+                            @endforeach
+                            <td class="px-6 py-4 text-center">
+                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold shadow-sm
+                                    {{ $teacher['total'] > 3 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
+                                    {{ $teacher['total'] }}
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center gap-3">
+                                    <i data-lucide="check-circle-2" class="w-10 h-10 text-green-400"></i>
+                                    <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">Tidak ada keterlambatan pada periode ini</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -453,14 +547,14 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             },
             
-            // Export report
+            // Export to Excel
             exportReport() {
                 const params = new URLSearchParams();
                 if (this.filters.start_date) params.append('start_date', this.filters.start_date);
                 if (this.filters.end_date) params.append('end_date', this.filters.end_date);
                 if (this.filters.teacher_id) params.append('teacher_id', this.filters.teacher_id);
-                
-                const baseUrl = '{{ route("reports.export-csv") }}';
+
+                const baseUrl = '{{ route("reports.export-excel") }}';
                 const url = params.toString() ? `${baseUrl}?${params}` : baseUrl;
                 window.open(url, '_blank');
             },

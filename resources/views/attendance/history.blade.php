@@ -4,7 +4,20 @@
 
 @section('content')
 <div class="space-y-6 animate-fade-in" x-data="attendanceApp()">
-    
+
+    <!-- Premium Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-2xl flex items-center justify-center shadow-lg shadow-navy-800/30 dark:shadow-gold-400/30">
+                <i data-lucide="calendar-check" class="w-6 h-6 text-white dark:text-navy-900"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-navy-800 dark:text-white tracking-tight">Riwayat Presensi</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pantau dan filter data kehadiran guru</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <!-- Total Presensi -->
@@ -411,35 +424,37 @@
                 this.filterData();
             },
             
-            // Build query params for AJAX
-            buildParams() {
+            // Build query params for AJAX (optionally include a specific page)
+            buildParams(page = null) {
                 const params = new URLSearchParams();
                 if (this.filters.start_date) params.append('start_date', this.filters.start_date);
                 if (this.filters.end_date) params.append('end_date', this.filters.end_date);
                 if (this.filters.teacher_id) params.append('teacher_id', this.filters.teacher_id);
                 if (this.filters.status) params.append('status', this.filters.status);
+                if (page && page > 1) params.append('page', page);
                 params.append('ajax', '1');
                 return params;
             },
             
-            // Fetch data via AJAX
-            async fetchData(url) {
+            // Fetch data via AJAX (page param included in buildParams)
+            async fetchData(page = null) {
                 this.loading = true;
+                const baseUrl = '{{ route("attendance.history") }}';
                 try {
-                    const response = await fetch(`${url}?${this.buildParams()}`, {
+                    const response = await fetch(`${baseUrl}?${this.buildParams(page)}`, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
                             'Accept': 'application/json'
                         }
                     });
-                    
+
                     if (!response.ok) throw new Error('Network error');
-                    
+
                     const data = await response.json();
                     this.attendances = data.data || [];
                     this.stats = data.stats || this.stats;
                     this.pagination = data;
-                    
+
                 } catch (error) {
                     console.error('Fetch error:', error);
                     this.showToast('Gagal memuat data', 'error');
@@ -448,17 +463,17 @@
                     if (window.lucide) lucide.createIcons();
                 }
             },
-            
-            // Filter data (called on filter change)
+
+            // Filter data — always reset to page 1
             async filterData() {
-                await this.fetchData('{{ route("attendance.history") }}');
+                await this.fetchData(null);
             },
-            
-            // Load specific page
+
+            // Load specific page — extract page number from Laravel pagination URL
             async loadPage(url) {
-                // Remove ajax=1 from URL if exists, we'll add it back
-                const cleanUrl = url.replace(/[?&]ajax=1/, '');
-                await this.fetchData(cleanUrl);
+                const pageMatch = url.match(/[?&]page=(\d+)/);
+                const page = pageMatch ? parseInt(pageMatch[1]) : 1;
+                await this.fetchData(page);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             },
             

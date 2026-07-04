@@ -33,18 +33,30 @@ class SendDynamicAttendanceReminder extends Command
         }
 
         // Logika Normal
-        $teachers = User::where('role', 'guru')->where('is_active', true)->whereNotNull('start_time')->get();
+        // ✅ Hanya ambil guru yang punya jadwal HARI INI
+        $today = now()->dayOfWeek;
+        $teachers = User::where('role', 'guru')
+            ->where('is_active', true)
+            ->whereHas('schedules', function($query) use ($today) {
+                $query->where('day_of_week', $today)
+                      ->where('is_active', true);
+            })
+            ->get();
         $nowStr = now()->format('H:i'); 
         $sentCount = 0;
 
         foreach ($teachers as $teacher) {
+            // ✅ Ambil jadwal hari ini
+            $todaySchedule = \App\Models\TeacherSchedule::getTodaySchedule($teacher->id);
+            if (!$todaySchedule) continue;
+
             $attendance = Attendance::where('user_id', $teacher->id)->whereDate('date', today())->first();
             $hasCheckedIn = $attendance && !is_null($attendance->check_in);
             $hasCheckedOut = $attendance && !is_null($attendance->check_out);
 
-            $startTime = Carbon::parse($teacher->start_time)->format('H:i');
-            $endTime = Carbon::parse($teacher->end_time)->format('H:i');
-            $lateInTime = Carbon::parse($teacher->start_time)->addMinutes(5)->format('H:i'); // +5 Menit
+            $startTime = Carbon::parse($todaySchedule->start_time)->format('H:i');
+            $endTime = Carbon::parse($todaySchedule->end_time)->format('H:i');
+            $lateInTime = Carbon::parse($todaySchedule->start_time)->addMinutes(5)->format('H:i'); // +5 Menit
 
             // 1. Reminder Masuk (Tepat Waktu)
             if ($nowStr === $startTime && !$hasCheckedIn) {

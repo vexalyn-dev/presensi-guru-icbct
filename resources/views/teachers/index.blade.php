@@ -4,7 +4,20 @@
 
 @section('content')
 <div class="space-y-6 fade-in">
-    
+
+    <!-- Premium Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-2xl flex items-center justify-center shadow-lg shadow-navy-800/30 dark:shadow-gold-400/30">
+                <i data-lucide="users" class="w-6 h-6 text-white dark:text-navy-900"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-navy-800 dark:text-white tracking-tight">Data Guru</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Kelola data dan informasi seluruh guru</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="card-hover card p-5">

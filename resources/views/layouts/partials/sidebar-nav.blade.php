@@ -10,12 +10,23 @@
         <span>Dashboard</span>
     </a>
 
+    <p class="px-3 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-5">Data Master</p>
+    
     <a href="{{ route('teachers.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                       {{ request()->routeIs('teachers.*')
             ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
             : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
         <i data-lucide="users" class="w-4 h-4"></i>
         <span>Data Guru</span>
+    </a>
+
+    <a href="{{ route('classrooms.index') }}" 
+       class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+              {{ request()->routeIs('classrooms.*') 
+                  ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                  : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+        <i data-lucide="school" class="w-4 h-4"></i>
+        <span>Data Kelas</span>
     </a>
 
     <a href="{{ route('subjects.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
@@ -26,40 +37,52 @@
         <span>Mata Pelajaran</span>
     </a>
 
-    {{--
-
-    <a href="{{ route('classes.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                      {{ request()->routeIs('classes.*')
-                          ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
-                          : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-        <i data-lucide="school" class="w-4 h-4"></i>
-        <span>Kelas</span>
+    <a href="{{ route('schedules.index') }}" 
+       class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+              {{ request()->routeIs('schedules.*') 
+                  ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                  : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+        <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+        <span>Jadwal Kerja</span>
     </a>
 
-    <a href="{{ route('schedules.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                      {{ request()->routeIs('schedules.*')
-                          ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
-                          : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-        <i data-lucide="calendar" class="w-4 h-4"></i>
+    <a href="{{ route('teaching-schedules.index') }}" 
+       class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+              {{ request()->routeIs('teaching-schedules.*') 
+                  ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                  : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+        <i data-lucide="calendar-range" class="w-4 h-4"></i>
         <span>Jadwal Mengajar</span>
     </a>
-    --}}
+
+    <p class="px-3 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-5">Presensi</p>
+    
+    <a href="{{ route('attendance.scan') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                      {{ request()->routeIs('attendance.scan')
+            ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
+            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+        <i data-lucide="scan-line" class="w-4 h-4"></i>
+        <span>Absensi Harian</span>
+    </a>
+
+    <a href="{{ route('class-attendance.scan') }}" 
+       class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+              {{ request()->routeIs('class-attendance.*') 
+                  ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                  : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+        <i data-lucide="scan" class="w-4 h-4"></i>
+        <span>Presensi Kelas</span>
+    </a>
 
     <a href="{{ route('attendance.history') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                       {{ request()->routeIs('attendance.history')
             ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
             : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-        <i data-lucide="calendar-days" class="w-4 h-4"></i>
+        <i data-lucide="calendar-check" class="w-4 h-4"></i>
         <span>Riwayat Presensi</span>
     </a>
 
-    <a href="{{ route('attendance.scan') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                      {{ request()->routeIs('attendance.scan')
-            ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
-            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-        <i data-lucide="qr-code" class="w-4 h-4"></i>
-        <span>Absensi</span>
-    </a>
+    <p class="px-3 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-5">Fitur Lainnya</p>
 
     <a href="{{ route('leaves.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                       {{ request()->routeIs('leaves.*')

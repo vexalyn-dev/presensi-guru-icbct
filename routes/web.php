@@ -11,6 +11,7 @@ use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\TeacherScheduleController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
@@ -18,6 +19,9 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
+use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\TeachingScheduleController;
+use App\Http\Controllers\ClassAttendanceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -90,14 +94,23 @@ Route::middleware(['auth'])->group(function () {
     // Route::put('/classes/{class}', [ClassController::class, 'update'])->name('classes.update');
     // Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
     
-    // Schedules
-    // Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
-    // Route::get('/schedules/create', [ScheduleController::class, 'create'])->name('schedules.create');
-    // Route::post('/schedules', [ScheduleController::class, 'store'])->name('schedules.store');
-    // Route::get('/schedules/{schedule}/edit', [ScheduleController::class, 'edit'])->name('schedules.edit');
-    // Route::put('/schedules/{schedule}', [ScheduleController::class, 'update'])->name('schedules.update');
-    // Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy'])->name('schedules.destroy');
-    // Route::get('/my-schedule', [ScheduleController::class, 'mySchedule'])->name('schedules.my');
+    Route::get('/schedules', [TeacherScheduleController::class, 'index'])->name('schedules.index');
+    Route::get('/schedules/{teacher}/edit', [TeacherScheduleController::class, 'edit'])->name('schedules.edit');
+    Route::put('/schedules/{teacher}', [TeacherScheduleController::class, 'update'])->name('schedules.update');
+
+    // Data Kelas
+    Route::resource('classrooms', ClassroomController::class);
+    Route::get('/classrooms/{classroom}/qr', [ClassroomController::class, 'qrCode'])->name('classrooms.qr');
+    
+    // Jadwal Mengajar
+    Route::get('/teaching-schedules', [TeachingScheduleController::class, 'index'])->name('teaching-schedules.index');
+    Route::get('/teaching-schedules/{teacher}/edit', [TeachingScheduleController::class, 'edit'])->name('teaching-schedules.edit');
+    Route::put('/teaching-schedules/{teacher}', [TeachingScheduleController::class, 'update'])->name('teaching-schedules.update');
+    
+    // Presensi Per Kelas
+    Route::get('/class-attendance/scan', [ClassAttendanceController::class, 'scan'])->name('class-attendance.scan');
+    Route::post('/class-attendance', [ClassAttendanceController::class, 'store'])->name('class-attendance.store');
+    Route::get('/class-attendance/history', [ClassAttendanceController::class, 'history'])->name('class-attendance.history');
     
     // Leaves
     Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');
@@ -110,7 +123,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export-csv', [ReportController::class, 'exportCsv'])->name('reports.export-csv');
+    Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
     
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

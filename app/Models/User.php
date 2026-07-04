@@ -207,11 +207,29 @@ class User extends Authenticatable
     // }
 
     /**
+     * Get all schedules
+     */
+    public function schedules()
+    {
+        return $this->hasMany(TeacherSchedule::class);
+    }
+
+    public function teachingSchedules()
+    {
+        return $this->hasMany(TeachingSchedule::class);
+    }
+
+    /**
      * Get all attendances
      */
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class, 'user_id');
+    }
+
+    public function classAttendances()
+    {
+        return $this->hasMany(ClassAttendance::class);
     }
 
     // /**
@@ -397,6 +415,41 @@ class User extends Authenticatable
     // UTILITY METHODS
     // ==========================================
     
+    /**
+     * Cek apakah guru ini dijadwalkan hari ini
+     */
+    public function isScheduledToday()
+    {
+        return TeacherSchedule::isScheduledToday($this->id);
+    }
+
+    /**
+     * Ambil jadwal hari ini
+     */
+    public function getTodaySchedule()
+    {
+        return TeacherSchedule::getTodaySchedule($this->id);
+    }
+
+    /**
+     * Ambil jadwal mengajar hari ini
+     */
+    public function getTodayTeachingSchedules()
+    {
+        return TeachingSchedule::getTodaySchedules($this->id);
+    }
+
+    /**
+     * Hitung total kelas yang sudah diajar hari ini
+     */
+    public function getClassesTaughtToday()
+    {
+        return ClassAttendance::where('user_id', $this->id)
+            ->where('date', today())
+            ->whereNotNull('check_in_time')
+            ->count();
+    }
+
     /**
      * Check if teacher can be deleted (has no attendances)
      */

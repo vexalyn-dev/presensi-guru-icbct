@@ -12,7 +12,7 @@ class AttendanceHistoryController extends Controller
     public function index(Request $request)
     {
         $query = Attendance::query();
-        
+
         // Date range filter
         if ($request->filled('start_date')) {
             $query->where('date', '>=', $request->start_date);
@@ -20,50 +20,60 @@ class AttendanceHistoryController extends Controller
         if ($request->filled('end_date')) {
             $query->where('date', '<=', $request->end_date);
         }
-        
+
         // Teacher filter
         if ($request->filled('teacher_id')) {
             $query->where('user_id', $request->teacher_id);
         }
-        
+
         // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
-        // Get data with relationships
-        $attendances = $query->with('user')->orderBy('date', 'desc')->orderBy('check_in', 'desc')->paginate(15);
-        
-        // Calculate stats
+
+        // Clone BEFORE paginate for accurate stats
+        $statsQuery = clone $query;
+
+        // Calculate stats from the unmodified query clone
         $stats = [
-            'total' => $attendances->total(),
-            'hadir' => $query->clone()->where('status', 'Hadir')->count(),
-            'terlambat' => $query->clone()->where('status', 'Terlambat')->count(),
-            'alpha' => $query->clone()->where('status', 'Alpha')->count(),
-            'izin' => $query->clone()->whereIn('status', ['Izin', 'Sakit', 'Cuti'])->count(),
+            'total'     => (clone $statsQuery)->count(),
+            'hadir'     => (clone $statsQuery)->where('status', 'Hadir')->count(),
+            'terlambat' => (clone $statsQuery)->where('status', 'Terlambat')->count(),
+            'alpha'     => (clone $statsQuery)->where('status', 'Alpha')->count(),
+            'izin'      => (clone $statsQuery)->whereIn('status', ['Izin', 'Sakit', 'Cuti'])->count(),
         ];
-        
+
+        // Get paginated data with relationships
+        $attendances = $query->with('user')
+            ->orderBy('date', 'desc')
+            ->orderBy('check_in', 'desc')
+            ->paginate(15)
+            ->withQueryString();
+
         // Get teachers and statuses for filters
         $teachers = User::where('role', 'guru')->orderBy('name')->get(['id', 'name']);
         $statuses = ['Hadir', 'Terlambat', 'Izin', 'Alpha'];
-        
-        // Return JSON for AJAX requests
+
+        // Return JSON for AJAX requests — use toArray() so frontend gets
+        // the full Laravel pagination structure: links[], prev_page_url, next_page_url, etc.
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'data' => $attendances->items(),
-                'stats' => $stats,
-                'links' => [
-                    'first' => $attendances->url(1),
-                    'last' => $attendances->url($attendances->lastPage()),
-                    'prev' => $attendances->previousPageUrl(),
-                    'next' => $attendances->nextPageUrl(),
-                ],
-                'current_page' => $attendances->currentPage(),
-                'last_page' => $attendances->lastPage(),
-                'total' => $attendances->total(),
-            ]);
+            $paginationData = $attendances->toArray();
+            $paginationData['stats'] = $stats;
+
+            // Ensure user relation is serialised properly in items
+            $paginationData['data'] = $attendances->getCollection()->map(function ($att) {
+                $arr = $att->toArray();
+                $arr['user'] = $att->user ? [
+                    'id'        => $att->user->id,
+                    'name'      => $att->user->name,
+                    'photo_url' => $att->user->photo_url,
+                ] : null;
+                return $arr;
+            })->values()->all();
+
+            return response()->json($paginationData);
         }
-        
+
         return view('attendance.history', compact('attendances', 'stats', 'teachers', 'statuses'));
     }
 

@@ -136,13 +136,14 @@
             transform: scale(0.92) !important;
         }
 
-        /* Rotation Animation */
-        .rotate-center {
-            animation: rotate-center 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
         }
-        @keyframes rotate-center {
-            0% { transform: rotate(0); }
-            100% { transform: rotate(360deg); }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
@@ -222,9 +223,130 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        @if(Auth::user()->isAdmin())
+        <nav class="flex-1 px-3 py-6 space-y-6 overflow-y-auto no-scrollbar">
+            
+            <!-- MENU UTAMA -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Menu Utama</p>
+                
+                <a href="{{ route('dashboard') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('dashboard') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+            <!-- DATA MASTER -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Data Master</p>
+                
+                <a href="{{ route('teachers.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('teachers.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    <span>Data Guru</span>
+                </a>
+
+                <a href="{{ route('subjects.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('subjects.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                    <span>Mata Pelajaran</span>
+                </a>
+
+                <a href="{{ route('schedules.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('schedules.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                    <span>Jadwal Guru</span>
+                </a>
+            </div>
+
+            <!-- PRESENSI -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Presensi</p>
+                
+                <a href="{{ route('attendance.scan') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('attendance.scan') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="scan-line" class="w-4 h-4"></i>
+                    <span>Absensi</span>
+                </a>
+
+                <a href="{{ route('attendance.history') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('attendance.history') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                    <span>Riwayat Presensi</span>
+                </a>
+
+                <a href="{{ route('leaves.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('leaves.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <span>Izin & Sakit</span>
+                </a>
+            </div>
+
+            <!-- LAPORAN -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Laporan</p>
+                
+                <a href="{{ route('reports.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('reports.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    <span>Laporan</span>
+                </a>
+            </div>
+
+            <!-- PENGATURAN -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Pengaturan</p>
+                
+                <a href="{{ route('holidays.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('holidays.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="calendar-off" class="w-4 h-4"></i>
+                    <span>Kalender Libur</span>
+                </a>
+
+                <a href="{{ route('settings.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('settings.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <span>Pengaturan</span>
+                </a>
+            </div>
+        </nav>
+        @else
+        {{-- Menu guru --}}
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
             @include('layouts.partials.sidebar-nav')
         </nav>
+        @endif
 
     </aside>
 

@@ -69,6 +69,22 @@ class AttendanceController extends Controller
                 : back()->with('error', "Hari ini adalah hari libur ({$holidayName}). Tidak perlu absen.");
         }
 
+        // ✅ CEK: Apakah guru dijadwalkan hari ini?
+        if (!\App\Models\TeacherSchedule::isScheduledToday($teacher->id)) {
+            return $ajaxRequest
+                ? response()->json(['success' => false, 'message' => 'Anda tidak dijadwalkan mengajar hari ini.'], 422)
+                : back()->with('error', 'Anda tidak dijadwalkan mengajar hari ini.');
+        }
+
+        // ✅ Ambil jadwal hari ini
+        $todaySchedule = \App\Models\TeacherSchedule::getTodaySchedule($teacher->id);
+        
+        if (!$todaySchedule) {
+            return $ajaxRequest
+                ? response()->json(['success' => false, 'message' => 'Jadwal hari ini tidak ditemukan.'], 422)
+                : back()->with('error', 'Jadwal hari ini tidak ditemukan.');
+        }
+
         $attendance = Attendance::where('user_id', $teacher->id)
             ->where('date', today())
             ->first();
@@ -78,7 +94,7 @@ class AttendanceController extends Controller
 
         // Sudah masuk belum keluar → proses keluar
         if ($attendance && $attendance->check_in && !$attendance->check_out) {
-            $this->processKeluar($attendance, $teacher, $validated);
+            $this->processKeluar($attendance, $teacher, $validated, $todaySchedule);
             return $ajaxRequest
                 ? response()->json(['success' => true, 'message' => 'Presensi keluar berhasil!'])
                 : redirect()->route('dashboard')->with('success', 'Presensi keluar berhasil!');
@@ -105,14 +121,14 @@ class AttendanceController extends Controller
                 'longitude'   => $validated['longitude'] ?? null,
                 'scan_method' => 'qr_code',
             ]);
-            $this->processKeluar($newAttendance, $teacher, $validated);
+            $this->processKeluar($newAttendance, $teacher, $validated, $todaySchedule);
             return $ajaxRequest
                 ? response()->json(['success' => true, 'message' => 'Presensi keluar berhasil dicatat!'])
                 : redirect()->route('dashboard')->with('success', 'Presensi keluar berhasil dicatat!');
         }
 
         // Mode masuk (default)
-        $this->processMasuk($teacher, $validated);
+        $this->processMasuk($teacher, $validated, $todaySchedule);
         return $ajaxRequest
             ? response()->json(['success' => true, 'message' => 'Presensi masuk berhasil!'])
             : redirect()->route('dashboard')->with('success', 'Presensi masuk berhasil!');
@@ -121,12 +137,13 @@ class AttendanceController extends Controller
     /**
      * Process Presensi MASUK
      */
-    private function processMasuk(User $teacher, array $validated)
+    private function processMasuk(User $teacher, array $validated, $todaySchedule = null)
     {
         $now = now();
         $currentTime = Carbon::parse($now->format('H:i'));
 
-        $teacherStart = $teacher->start_time ? Carbon::parse($teacher->start_time) : Carbon::parse('07:30');
+        $teacherStartStr = $todaySchedule ? Carbon::parse($todaySchedule->start_time)->format('H:i') : ($teacher->start_time ? Carbon::parse($teacher->start_time)->format('H:i') : '07:30');
+        $teacherStart = Carbon::parse($teacherStartStr);
         $status = $currentTime->greaterThan($teacherStart) ? 'Terlambat' : 'Tepat Waktu';
 
         Attendance::create([
@@ -148,7 +165,7 @@ class AttendanceController extends Controller
                 . ", telah tercatat dengan baik.\n\n"
                 . "*Detail Presensi:*\n"
                 . "• Waktu Presensi: {$now->format('H:i')} WIB\n"
-                . "• Jadwal Masuk: {$teacher->start_time} WIB\n"
+                . "• Jadwal Masuk: {$teacherStartStr} WIB\n"
                 . "• Status Kehadiran: *{$status}*\n\n"
                 . "Terima kasih atas kedisiplinan Anda. Semoga hari ini menjadi hari yang produktif dan bermanfaat.\n\n"
                 . "Wassalamualaikum Warahmatullahi Wabarakatuh.\n\n"
@@ -161,7 +178,7 @@ class AttendanceController extends Controller
                 . ", telah tercatat.\n\n"
                 . "*Detail Presensi:*\n"
                 . "• Waktu Presensi: {$now->format('H:i')} WIB\n"
-                . "• Jadwal Masuk: {$teacher->start_time} WIB\n"
+                . "• Jadwal Masuk: {$teacherStartStr} WIB\n"
                 . "• Status Kehadiran: *{$status}*\n\n"
                 . "Mohon untuk lebih memperhatikan waktu presensi di kemudian hari. Terima kasih atas pengertiannya.\n\n"
                 . "Wassalamualaikum Warahmatullahi Wabarakatuh.\n\n"
@@ -176,12 +193,13 @@ class AttendanceController extends Controller
     /**
      * Process Presensi KELUAR
      */
-    private function processKeluar(Attendance $attendance, User $teacher, array $validated)
+    private function processKeluar(Attendance $attendance, User $teacher, array $validated, $todaySchedule = null)
     {
         $now = now();
         $currentTime = Carbon::parse($now->format('H:i'));
 
-        $teacherEnd = $teacher->end_time ? Carbon::parse($teacher->end_time) : Carbon::parse('16:00');
+        $teacherEndStr = $todaySchedule ? Carbon::parse($todaySchedule->end_time)->format('H:i') : ($teacher->end_time ? Carbon::parse($teacher->end_time)->format('H:i') : '16:00');
+        $teacherEnd = Carbon::parse($teacherEndStr);
         $statusOut = $currentTime->gte($teacherEnd) ? 'Tepat Waktu' : 'Pulang Cepat';
 
         $checkInTime = Carbon::parse($attendance->check_in);
@@ -200,7 +218,7 @@ class AttendanceController extends Controller
                 . ", telah tercatat dengan baik.\n\n"
                 . "*Detail Presensi:*\n"
                 . "• Waktu Presensi: {$now->format('H:i')} WIB\n"
-                . "• Jadwal Pulang: {$teacher->end_time} WIB\n"
+                . "• Jadwal Pulang: {$teacherEndStr} WIB\n"
                 . "• Status: *{$statusOut}*\n\n"
                 . "Terima kasih atas dedikasi dan kerja keras Anda hari ini. Semoga istirahat Anda berkualitas dan sampai jumpa besok.\n\n"
                 . "Wassalamualaikum Warahmatullahi Wabarakatuh.\n\n"
@@ -213,7 +231,7 @@ class AttendanceController extends Controller
                 . ", telah tercatat.\n\n"
                 . "*Detail Presensi:*\n"
                 . "• Waktu Presensi: {$now->format('H:i')} WIB\n"
-                . "• Jadwal Pulang: {$teacher->end_time} WIB\n"
+                . "• Jadwal Pulang: {$teacherEndStr} WIB\n"
                 . "• Status: *{$statusOut}*\n\n"
                 . "Catatan: Anda melakukan presensi pulang sebelum jadwal yang ditentukan. Mohon untuk menyesuaikan dengan jadwal kerja yang berlaku di kemudian hari. Terima kasih atas pengertiannya.\n\n"
                 . "Wassalamualaikum Warahmatullahi Wabarakatuh.\n\n"
