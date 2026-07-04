@@ -253,6 +253,15 @@
                     <span>Data Guru</span>
                 </a>
 
+                <a href="{{ route('classrooms.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('classrooms.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="school" class="w-4 h-4"></i>
+                    <span>Data Kelas</span>
+                </a>
+
                 <a href="{{ route('subjects.index') }}" 
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('subjects.*') 
@@ -268,7 +277,16 @@
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="calendar-clock" class="w-4 h-4"></i>
-                    <span>Jadwal Guru</span>
+                    <span>Jadwal Kerja</span>
+                </a>
+
+                <a href="{{ route('teaching-schedules.index') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('teaching-schedules.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                    <span>Jadwal Mengajar</span>
                 </a>
             </div>
 
@@ -282,7 +300,16 @@
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="scan-line" class="w-4 h-4"></i>
-                    <span>Absensi</span>
+                    <span>Absensi Harian</span>
+                </a>
+
+                <a href="{{ route('class-attendance.scan') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('class-attendance.*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="scan" class="w-4 h-4"></i>
+                    <span>Presensi Kelas</span>
                 </a>
 
                 <a href="{{ route('attendance.history') }}" 
@@ -293,7 +320,12 @@
                     <i data-lucide="calendar-check" class="w-4 h-4"></i>
                     <span>Riwayat Presensi</span>
                 </a>
+            </div>
 
+            <!-- FITUR LAINNYA -->
+            <div>
+                <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Fitur Lainnya</p>
+                
                 <a href="{{ route('leaves.index') }}" 
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('leaves.*') 
@@ -302,12 +334,7 @@
                     <i data-lucide="file-text" class="w-4 h-4"></i>
                     <span>Izin & Sakit</span>
                 </a>
-            </div>
 
-            <!-- LAPORAN -->
-            <div>
-                <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Laporan</p>
-                
                 <a href="{{ route('reports.index') }}" 
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('reports.*') 

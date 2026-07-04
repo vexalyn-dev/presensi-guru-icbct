@@ -29,7 +29,7 @@
 
             <!-- QR Code -->
             <div class="bg-white p-6 rounded-2xl inline-block shadow-xl mb-6">
-                {!! QrCode::size(300)->generate($classroom->qr_data) !!}
+                {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(300)->generate($classroom->qr_data) !!}
             </div>
 
             <div class="space-y-3">
