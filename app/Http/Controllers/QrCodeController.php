@@ -29,7 +29,7 @@ class QrCodeController extends Controller
 
             // Decode QR data - Handle both JSON and plain ID
             $qrData = json_decode($validated['qr_data'], true);
-            
+
             // If not JSON, assume it's teacher_id
             if (!$qrData || !is_array($qrData)) {
                 $qrData = [
@@ -37,7 +37,7 @@ class QrCodeController extends Controller
                     'token' => null
                 ];
             }
-            
+
             if (!isset($qrData['teacher_id'])) {
                 return response()->json([
                     'success' => false,
@@ -88,10 +88,10 @@ class QrCodeController extends Controller
             // Determine status
             $now = Carbon::now();
             $status = 'Hadir';
-            
+
             $appSettings = AppSetting::getInstance();
             $endTime = $appSettings->attendance_end_time;
-            
+
             if ($now->format('H:i') >= $endTime) {
                 $status = 'Terlambat';
             }
@@ -112,7 +112,7 @@ class QrCodeController extends Controller
             // Send notification to admins
             $admins = User::where('role', 'admin')->get();
             foreach ($admins as $admin) {
-                /** @var \App\Models\User $admin */
+                /** @var User $admin */
                 $admin->notify(new SystemNotification(
                     "Guru {$teacher->name} telah absen ({$status})",
                     'success',
@@ -195,7 +195,7 @@ class QrCodeController extends Controller
             }
 
             $teacher->generateQrCode();
-            
+
             return back()->with('success', 'QR Code berhasil diperbarui!');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui QR Code: ' . $e->getMessage());
