@@ -45,8 +45,9 @@
             @method('PUT')
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Main Info -->
+                <!-- Main Info (col-span-2) -->
                 <div class="lg:col-span-2 space-y-5">
+
                     <!-- Nama Kelas -->
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -58,34 +59,68 @@
                         @error('name')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Nama lengkap kelas yang akan
-                            ditampilkan</p>
+                        <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Nama lengkap kelas yang akan ditampilkan</p>
                     </div>
 
-                    <!-- Kode Kelas -->
+                    <!-- Jurusan/Kompetensi -->
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                            Kode Kelas <span class="text-red-500">*</span>
+                            Jurusan / Kompetensi Keahlian <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" name="code" required placeholder="Contoh: XI-FAR-01, XII-RPL-1"
-                            value="{{ old('code', $classroom->code) }}"
-                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent uppercase @error('code') border-red-500 @enderror">
-                        @error('code')
+                        <input type="text" name="major_code" required
+                            placeholder="Contoh: RPL, TKJ, FAR, AKL"
+                            value="{{ old('major_code', $classroom->major_code) }}"
+                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent uppercase @error('major_code') border-red-500 @enderror">
+                        @error('major_code')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Kode unik untuk kelas (tanpa spasi,
-                            gunakan tanda hubung)</p>
+                        <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                            Kode jurusan (RPL, TKJ, Farmasi, Akuntansi, dll). Kode kelas akan otomatis digenerate.
+                        </p>
                     </div>
+
+                    <!-- Tingkat Kelas -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            Tingkat Kelas <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <select name="class_level" required
+                                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent appearance-none cursor-pointer @error('class_level') border-red-500 @enderror">
+                                <option value="">Pilih Tingkat Kelas</option>
+                                <option value="X" {{ old('class_level', $classroom->class_level) == 'X' ? 'selected' : '' }}>Kelas X (Sepuluh)</option>
+                                <option value="XI" {{ old('class_level', $classroom->class_level) == 'XI' ? 'selected' : '' }}>Kelas XI (Sebelas)</option>
+                                <option value="XII" {{ old('class_level', $classroom->class_level) == 'XII' ? 'selected' : '' }}>Kelas XII (Dua Belas)</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400"></i>
+                            </div>
+                        </div>
+                        @error('class_level')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                        <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Kode kelas bisa sama di tingkat yang berbeda</p>
+                    </div>
+
+                    <!-- Preview Kode Kelas (Read-only) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            Kode Kelas <span class="text-xs text-slate-400 font-normal">(Otomatis)</span>
+                        </label>
+                        <input type="text" id="preview-code" readonly
+                            value="{{ $classroom->code }}"
+                            class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 cursor-not-allowed">
+                        <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Digenerate otomatis dari Tingkat + Jurusan (contoh: X-RPL, XI-TKJ)</p>
+                    </div>
+
                 </div>
 
                 <!-- Sidebar -->
                 <div class="space-y-5">
                     <!-- Status Card -->
-                    <div
-                        class="p-5 bg-gradient-to-br from-slate-50 to-white dark:from-slate-700/30 dark:to-slate-700/10 rounded-xl border-2 border-slate-200 dark:border-slate-700">
+                    <div class="p-5 bg-gradient-to-br from-slate-50 to-white dark:from-slate-700/30 dark:to-slate-700/10 rounded-xl border-2 border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-3 mb-3">
-                            <div
-                                class="w-10 h-10 rounded-lg bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center">
                                 <i data-lucide="toggle-left" class="w-5 h-5 text-white dark:text-navy-900"></i>
                             </div>
                             <div>
@@ -94,21 +129,18 @@
                             </div>
                         </div>
 
-                        <label
-                            class="flex items-start gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <label class="flex items-start gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                             <input type="checkbox" name="is_active" value="1" {{ old('is_active', $classroom->is_active) ? 'checked' : '' }}
                                 class="w-5 h-5 mt-0.5 rounded border-slate-300 text-navy-600 focus:ring-navy-500">
                             <div class="flex-1">
                                 <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Kelas Aktif</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelas yang tidak aktif tidak
-                                    akan muncul dalam jadwal</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kelas yang tidak aktif tidak akan muncul dalam jadwal</p>
                             </div>
                         </label>
                     </div>
 
                     <!-- Info Card -->
-                    <div
-                        class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+                    <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
                         <div class="flex items-start gap-3">
                             <i data-lucide="info" class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5"></i>
                             <div>
@@ -143,6 +175,20 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
+
+            // Auto-generate preview code
+            const majorInput  = document.querySelector('input[name="major_code"]');
+            const levelSelect = document.querySelector('select[name="class_level"]');
+            const previewCode = document.getElementById('preview-code');
+
+            function updatePreview() {
+                const major = majorInput.value.toUpperCase().trim();
+                const level = levelSelect.value;
+                previewCode.value = (major && level) ? `${level}-${major}` : '';
+            }
+
+            majorInput.addEventListener('input', updatePreview);
+            levelSelect.addEventListener('change', updatePreview);
         });
     </script>
 

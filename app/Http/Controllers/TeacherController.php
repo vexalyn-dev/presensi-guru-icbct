@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TeacherController extends Controller
 {
@@ -170,59 +171,36 @@ class TeacherController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $teacher->id],
-            'password' => ['nullable', Rules\Password::defaults()],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
-            'address' => ['nullable', 'string', 'max:1000'],
-            'bio' => ['nullable', 'string', 'max:500'],
-            'subject' => ['nullable', 'string', 'max:255'],
-            'start_time' => ['nullable', 'date_format:H:i'],
-            'end_time' => ['nullable', 'date_format:H:i'],
-            'is_active' => ['nullable', 'boolean'],
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $teacher->id,
+            'password' => 'nullable|min:6',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'subject_id' => 'nullable|exists:subjects,id',
+            'is_active' => 'nullable|boolean',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $data = [
+        $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'bio' => $validated['bio'] ?? null,
-            'subject' => $validated['subject'] ?? null,
-            'start_time' => $validated['start_time'] ?? $teacher->start_time,
-            'end_time' => $validated['end_time'] ?? $teacher->end_time,
-            'is_active' => $request->boolean('is_active', true),
         ];
 
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($validated['password']);
+        if (!empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
         }
 
         if ($request->hasFile('photo')) {
             if ($teacher->photo) {
                 Storage::disk('public')->delete($teacher->photo);
             }
-            $data['photo'] = $request->file('photo')->store('profiles', 'public');
+            $updateData['photo'] = $request->file('photo')->store('profiles', 'public');
         }
 
-        DB::transaction(function () use ($teacher, $data) {
-            // Update teacher data
-            $teacher->update($data);
-        });
+        $teacher->update($updateData);
 
-        // Send notification
-        $admins = User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            /** @var User $admin */
-            $admin->notify(new SystemNotification(
-                "Data guru ({$teacher->name}) berhasil diperbarui.",
-                'info',
-                route('teachers.show', $teacher)
-            ));
-        }
-
-        return redirect()->route('teachers.show', $teacher)->with('success', 'Data guru berhasil diperbarui!');
+        return redirect()->route('teachers.index')
+            ->with('success', 'Data guru berhasil diperbarui');
     }
 
     public function destroy(User $teacher)

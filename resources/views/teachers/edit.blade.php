@@ -150,7 +150,7 @@
                                         <i data-lucide="user"
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                                         <input type="text" name="name" value="{{ old('name', $teacher->name) }}" required
-                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('name') border-red-500 @enderror">
+                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('name') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                                     </div>
                                     @error('name')<p class="mt-1 text-xs text-red-500 flex items-center gap-1"><i
                                     data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
@@ -164,7 +164,7 @@
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                                         <input type="email" name="email" value="{{ old('email', $teacher->email) }}"
                                             required
-                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('email') border-red-500 @enderror">
+                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('email') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                                     </div>
                                     @error('email')<p class="mt-1 text-xs text-red-500 flex items-center gap-1"><i
                                     data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
@@ -190,7 +190,7 @@
                                         <i data-lucide="lock"
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                                         <input type="password" name="password" id="password"
-                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('password') border-red-500 @enderror">
+                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('password') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                                         <button type="button" onclick="togglePassword('password')"
                                             class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                                             <i data-lucide="eye" class="w-4 h-4"></i>
@@ -209,35 +209,6 @@
                                         <input type="text" name="address" value="{{ old('address', $teacher->address) }}"
                                             class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all dark:text-white"
                                             placeholder="Masukkan alamat lengkap...">
-                                    </div>
-                                </div>
-
-                                <!-- Jadwal Kerja -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <!-- Jam Masuk -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
-                                            Jam Masuk <span class="text-slate-400 font-normal">(Default 07:30)</span>
-                                        </label>
-                                        <div class="relative group">
-                                            <i data-lucide="sunrise" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                            <input type="time" name="start_time" 
-                                                   value="{{ old('start_time', $teacher->start_time ?? '07:30') }}" 
-                                                   class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                                        </div>
-                                    </div>
-
-                                    <!-- Jam Pulang -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
-                                            Jam Pulang <span class="text-slate-400 font-normal">(Default 16:00)</span>
-                                        </label>
-                                        <div class="relative group">
-                                            <i data-lucide="sunset" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                            <input type="time" name="end_time" 
-                                                   value="{{ old('end_time', $teacher->end_time ?? '16:00') }}" 
-                                                   class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                                        </div>
                                     </div>
                                 </div>
 

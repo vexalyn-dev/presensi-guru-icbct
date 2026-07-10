@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\AttendanceHistoryController;
@@ -19,10 +19,15 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialAuthController;
-use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\TeachingScheduleController;
 use App\Http\Controllers\ClassAttendanceController;
+use App\Http\Controllers\Teacher\ProfileController as TeacherProfileController;
+use App\Http\Controllers\Teacher\HistoryController as TeacherHistoryController;
+use App\Http\Controllers\Teacher\LeaveController as TeacherLeaveController;
+use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
+use App\Http\Controllers\Teacher\NotificationController as TeacherNotificationController;
+use App\Http\Controllers\Admin\LeaveApprovalController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,17 +42,18 @@ Route::get('/', function () {
 });
 
 // Auth Routes
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+Route::middleware(['guest'])->group(function () {
+    Route::get('/login', function () {
+        return view('auth.login');
+    })->name('login');
 
-Route::get('/register', function () {
-    return redirect()->route('login');
-})->name('register');
+    Route::get('/register', function () {
+        return redirect()->route('login');
+    })->name('register');
 
-Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+    Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+});
 
 // Social Login Routes
 Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect'])->name('social.redirect');
@@ -55,9 +61,10 @@ Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
     // Admin Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
     // Attendance
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
@@ -122,13 +129,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/leaves/create', [LeaveController::class, 'create'])->name('leaves.create');
     Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
     Route::get('/leaves/{leave}', [LeaveController::class, 'show'])->name('leaves.show');
-    Route::post('/leaves/{leave}/approve', [LeaveController::class, 'approve'])->name('leaves.approve');
-    Route::post('/leaves/{leave}/reject', [LeaveController::class, 'reject'])->name('leaves.reject');
+    Route::post('/leaves/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])->name('leaves.approve');
+    Route::post('/leaves/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])->name('leaves.reject');
     Route::get('/my-leaves', [LeaveController::class, 'myLeaves'])->name('leaves.my');
     
     // Reports
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
+    Route::middleware(['auth', 'role:admin'])->group(function () {
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+    });
     
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -151,8 +160,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/admin/notifications', fn() => redirect()->route('notifications.index'))->name('admin.notifications'); // Admin alias
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::post('/admin/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('admin.notifications.read-all');
     Route::delete('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 
     // Holiday Management
@@ -163,12 +175,32 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/holidays/fetch-national', [HolidayController::class, 'fetchNationalHolidays'])->name('holidays.fetch-national');
 
     // Teacher Routes
-    Route::middleware(['role:guru'])->prefix('teacher')->name('teacher.')->group(function () {
+    Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->group(function () {
         Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/schedule', [TeacherDashboardController::class, 'schedule'])->name('schedule');
-        Route::get('/attendance', [TeacherDashboardController::class, 'attendance'])->name('attendance');
-        Route::get('/profile', [TeacherDashboardController::class, 'profile'])->name('profile');
-        Route::post('/profile', [TeacherDashboardController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/schedule', [\App\Http\Controllers\Teacher\ScheduleController::class, 'index'])->name('schedule');
+        Route::get('/attendance', [\App\Http\Controllers\Teacher\AttendanceController::class, 'index'])->name('attendance');
+        Route::post('/attendance/store', [\App\Http\Controllers\Teacher\AttendanceController::class, 'store'])->name('attendance.store');
+        Route::get('/class-attendance', [\App\Http\Controllers\Teacher\AttendanceController::class, 'classAttendance'])->name('class-attendance');
+        Route::post('/class-attendance/store', [\App\Http\Controllers\Teacher\AttendanceController::class, 'storeClassAttendance'])->name('class-attendance.store');
+        Route::get('/profile', [TeacherProfileController::class, 'index'])->name('profile');
+        Route::put('/profile', [TeacherProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [TeacherProfileController::class, 'updatePassword'])->name('profile.password');
+
+        Route::get('/history', [TeacherHistoryController::class, 'index'])->name('history');
+        Route::get('/history/data', [TeacherHistoryController::class, 'getData'])->name('history.data');
+        Route::get('/history-data', [TeacherHistoryController::class, 'getData']);
+        Route::get('/history/export', [TeacherHistoryController::class, 'export'])->name('history.export');
+
+        Route::get('/notifications', [TeacherNotificationController::class, 'index'])->name('notifications');
+        Route::post('/notifications/{id}/read', [TeacherNotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('/notifications/read-all', [TeacherNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
+        Route::get('/leave', [TeacherLeaveController::class, 'index'])->name('leave');
+        Route::get('/leave/create', [TeacherLeaveController::class, 'create'])->name('leave.create');
+        Route::post('/leave', [TeacherLeaveController::class, 'store'])->name('leave.store');
+        Route::get('/leave/{leaveRequest}', [TeacherLeaveController::class, 'show'])->name('leave.show');
+        Route::delete('/leave/{leaveRequest}', [TeacherLeaveController::class, 'destroy'])->name('leave.destroy');
+
         Route::get('/leaves/create', [TeacherDashboardController::class, 'createLeaveRequest'])->name('leaves.create');
         Route::post('/leave-request', [TeacherDashboardController::class, 'storeLeaveRequest'])->name('leave-request.store');
         Route::post('/today-notes', [TeacherDashboardController::class, 'updateTodayNotes'])->name('today-notes.update');

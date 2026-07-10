@@ -77,7 +77,7 @@
                                         <span class="text-white dark:text-navy-900 font-bold text-sm">{{ $schedule->period }}</span>
                                     </div>
                                     <div>
-                                        <h3 class="text-sm font-bold text-navy-800 dark:text-white">{{ $schedule->classroom->name }}
+                                        <h3 class="text-sm font-bold text-navy-800 dark:text-white">{{ $schedule->classroom->code }}
                                         </h3>
                                         <p class="text-xs text-slate-500 dark:text-slate-400">
                                             {{ $schedule->subject?->name ?? 'Mata Pelajaran' }} •

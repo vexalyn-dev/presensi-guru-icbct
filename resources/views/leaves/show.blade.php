@@ -6,15 +6,13 @@
     @php
         $isAdmin = Auth::user()->isAdmin();
         $statusColors = [
-            'Pending' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-            'Approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-            'Rejected' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+            'pending'  => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+            'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+            'rejected' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         ];
         $typeIcons = [
-            'Sakit' => 'pill',
-            'Izin' => 'file-check',
-            'Dinas' => 'briefcase',
-            'Cuti' => 'coffee',
+            'sakit' => 'pill',
+            'izin'  => 'file-check',
         ];
     @endphp
 
@@ -49,7 +47,7 @@
                 </span>
                 <span
                     class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold {{ $statusColors[$leave->status] ?? '' }}">
-                    {{ $leave->status === 'Pending' ? 'Menunggu' : ($leave->status === 'Approved' ? 'Disetujui' : 'Ditolak') }}
+                    {{ $leave->status === 'pending' ? 'Menunggu' : ($leave->status === 'approved' ? 'Disetujui' : 'Ditolak') }}
                 </span>
             </div>
         </div>
@@ -71,13 +69,7 @@
                     </div>
 
                     <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group">
-                        @if($leave->user->photo)
-                            <img src="{{ asset('storage/' . $leave->user->photo) }}" alt="" class="w-16 h-16 rounded-2xl object-cover border-2 border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
-                        @else
-                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-400 to-gold-500 flex items-center justify-center text-navy-900 font-bold text-xl group-hover:scale-105 transition-transform">
-                                {{ mb_substr($leave->user->name, 0, 1) }}
-                            </div>
-                        @endif
+                        <img src="{{ $leave->user->photo_url }}" alt="{{ $leave->user->name }}" class="w-16 h-16 rounded-2xl object-cover border-2 border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold text-navy-800 dark:text-white truncate">{{ $leave->user->name }}</p>
                             <p class="text-sm text-slate-500 dark:text-slate-400 truncate">{{ $leave->user->email }}</p>
@@ -153,9 +145,9 @@
                         <p class="text-[10px] text-slate-500 dark:text-slate-400">{{ $leave->created_at?->locale('id')->isoFormat('D MMM YYYY, HH:mm') }}</p>
                     </div>
                     <div class="relative group">
-                        <div class="absolute -left-[21px] w-4 h-4 {{ $leave->status !== 'Pending' ? 'bg-green-500' : 'bg-slate-300' }} rounded-full border-2 border-white dark:border-slate-800 shadow-lg {{ $leave->status !== 'Pending' ? 'group-hover:scale-125' : '' }} transition-transform"></div>
-                        <p class="text-xs font-medium {{ $leave->status !== 'Pending' ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400' }}">
-                            {{ $leave->status === 'Approved' ? 'Disetujui' : ($leave->status === 'Rejected' ? 'Ditolak' : 'Ditinjau') }}
+                        <div class="absolute -left-[21px] w-4 h-4 {{ $leave->status !== 'pending' ? 'bg-green-500' : 'bg-slate-300' }} rounded-full border-2 border-white dark:border-slate-800 shadow-lg {{ $leave->status !== 'pending' ? 'group-hover:scale-125' : '' }} transition-transform"></div>
+                        <p class="text-xs font-medium {{ $leave->status !== 'pending' ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400' }}">
+                            {{ $leave->status === 'approved' ? 'Disetujui' : ($leave->status === 'rejected' ? 'Ditolak' : 'Ditinjau') }}
                         </p>
                         <p class="text-[10px] text-slate-400">{{ $leave->approved_at?->locale('id')->isoFormat('D MMM YYYY, HH:mm') ?? '-' }}</p>
                     </div>
@@ -214,14 +206,14 @@
                         <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                             <span class="text-xs text-slate-500 dark:text-slate-400">Status</span>
                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $statusColors[$leave->status] ?? '' }}">
-                                {{ $leave->status === 'Pending' ? 'Menunggu' : ($leave->status === 'Approved' ? 'Disetujui' : 'Ditolak') }}
+                                {{ $leave->status === 'pending' ? 'Menunggu' : ($leave->status === 'approved' ? 'Disetujui' : 'Ditolak') }}
                             </span>
                         </div>
 
-                        @if($leave->approver)
+                        @if($leave->approvedBy)
                             <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                                 <span class="text-xs text-slate-500 dark:text-slate-400">Diproses oleh</span>
-                                <span class="text-sm font-semibold text-navy-800 dark:text-white">{{ $leave->approver->name }}</span>
+                                <span class="text-sm font-semibold text-navy-800 dark:text-white">{{ $leave->approvedBy->name }}</span>
                             </div>
                         @endif
                     </div>
@@ -230,7 +222,7 @@
         @endif
 
         <!-- Admin Notes -->
-        @if($leave->notes)
+        @if($leave->admin_notes)
             <div class="card p-6 mb-6 animate-slide-up" style="animation-delay: 0.4s">
                 <div class="flex items-center gap-3 mb-6 pb-5 border-b border-slate-200 dark:border-slate-700">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-400/30">
@@ -241,12 +233,12 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400">Feedback dari peninjau</p>
                     </div>
                 </div>
-                <p class="text-sm text-slate-700 dark:text-slate-200">{{ $leave->notes }}</p>
+                <p class="text-sm text-slate-700 dark:text-slate-200">{{ $leave->admin_notes }}</p>
             </div>
         @endif
 
         <!-- Tindakan Admin (Separate Card) -->
-        @if($isAdmin && $leave->status === 'Pending')
+        @if($isAdmin && $leave->status === 'pending')
             <div class="card p-6 animate-slide-up" style="animation-delay: 0.45s">
                 <div class="flex items-center gap-3 mb-6 pb-5 border-b border-slate-200 dark:border-slate-700">
                     <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-400/30">

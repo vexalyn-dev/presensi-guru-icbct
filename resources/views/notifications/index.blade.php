@@ -26,11 +26,11 @@
             <div class="card p-4 hover:shadow-md transition-all {{ $notification->read_at ? 'opacity-75' : 'border-l-4 border-l-blue-500' }}">
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 
-                        {{ $notification->data['type'] === 'success' ? 'bg-green-100 text-green-600' : 
-                           ($notification->data['type'] === 'error' ? 'bg-red-100 text-red-600' : 
+                        {{ ($notification->data['type'] ?? 'info') === 'success' ? 'bg-green-100 text-green-600' : 
+                           (($notification->data['type'] ?? 'info') === 'error' ? 'bg-red-100 text-red-600' : 
                            'bg-blue-100 text-blue-600') }}">
-                        <i data-lucide="{{ $notification->data['type'] === 'success' ? 'check-circle' : 
-                                         ($notification->data['type'] === 'error' ? 'alert-circle' : 'bell') }}" class="w-5 h-5"></i>
+                        <i data-lucide="{{ ($notification->data['type'] ?? 'info') === 'success' ? 'check-circle' : 
+                                         (($notification->data['type'] ?? 'info') === 'error' ? 'alert-circle' : 'bell') }}" class="w-5 h-5"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between gap-2">

@@ -300,7 +300,7 @@
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="scan-line" class="w-4 h-4"></i>
-                    <span>Absensi Harian</span>
+                    <span>Presensi Harian</span>
                 </a>
 
                 <a href="{{ route('class-attendance.scan') }}" 
@@ -404,34 +404,14 @@
                 </button>
 
                 <!-- Notifications Dropdown -->
-                <div class="relative" 
-                     x-data="{ 
-                        open: false, 
-                        unreadCount: {{ Auth::user()->unreadNotifications->count() }},
-                        markAsRead() {
-                            if (this.unreadCount > 0) {
-                                fetch('{{ route('notifications.mark-all-read') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Accept': 'application/json'
-                                    }
-                                }).then(() => {
-                                    this.unreadCount = 0;
-                                });
-                            }
-                            this.open = !this.open;
-                        }
-                     }" 
-                     @click.outside="open = false">
-                    <button @click="markAsRead()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 relative icon-click">
+                <div class="relative" x-data="notificationDropdownAdmin()"
+                     @click.outside="open = false"
+                     x-init="init()">
+                    <button @click="open = !open" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 relative icon-click">
                         <i data-lucide="bell" class="w-5 h-5 text-slate-600 dark:text-slate-300"></i>
-                        <template x-if="unreadCount > 0">
-                            <span :class="unreadCount > 1 ? '-top-1 -right-1 min-w-[18px] h-[18px] px-1' : 'top-1.5 right-1.5 w-2.5 h-2.5'" 
-                                  class="absolute bg-red-500 text-white text-[9px] font-bold rounded-full border-2 border-white dark:border-navy-900 flex items-center justify-center animate-pulse">
-                                <span x-text="unreadCount > 1 ? (unreadCount > 99 ? '99+' : unreadCount) : ''"></span>
-                            </span>
-                        </template>
+                        @if(Auth::user()->unreadNotifications->count() > 0)
+                        <span class="notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        @endif
                     </button>
 
                     <!-- Dropdown Content -->
@@ -442,16 +422,6 @@
                         
                         <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
                             <h3 class="text-sm font-bold text-navy-800 dark:text-white">Notifikasi</h3>
-                            <div class="flex items-center gap-3">
-                                @if(Auth::user()->unreadNotifications->count() > 0)
-                                    <form action="{{ route('notifications.clear') }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold hover:underline">Tandai Baca</button>
-                                    </form>
-                                @endif
-                                <a href="{{ route('notifications.index') }}" class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold hover:underline">Lihat Semua</a>
-                            </div>
                         </div>
 
                         <div class="max-h-[400px] overflow-y-auto">
@@ -625,6 +595,32 @@
         // Start clock
         updateClock();
         setInterval(updateClock, 1000);
+
+        // Notification Dropdown Functions
+        function notificationDropdownAdmin() {
+            return {
+                open: false,
+                markRead() {
+                    if (this.open) {
+                        fetch('{{ route("admin.notifications.read-all") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }).then(response => {
+                            if (response.ok) {
+                                document.querySelectorAll('.notification-badge').forEach(el => el.remove());
+                            }
+                        });
+                    }
+                },
+                init() {
+                    this.$watch('open', value => this.markRead());
+                }
+            };
+        }
 
         // Initialize on DOM ready (after deferred lucide.min.js)
         document.addEventListener('DOMContentLoaded', function() {

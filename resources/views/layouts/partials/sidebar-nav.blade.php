@@ -62,7 +62,7 @@
             ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
             : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
         <i data-lucide="scan-line" class="w-4 h-4"></i>
-        <span>Absensi Harian</span>
+        <span>Presensi Harian</span>
     </a>
 
     <a href="{{ route('class-attendance.scan') }}" 

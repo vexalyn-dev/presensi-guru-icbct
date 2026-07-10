@@ -2,41 +2,51 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = auth()->user()->notifications()->paginate(20);
-        auth()->user()->unreadNotifications->markAsRead();
-        
+        $notifications = Notification::where('notifiable_type', get_class(Auth::user()))
+            ->where('notifiable_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
         return view('notifications.index', compact('notifications'));
     }
 
-    public function markAsRead($id)
+    public function markAsRead(string $id)
     {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->markAsRead();
-        
-        return back();
-    }
+        $notification = Notification::where('id', $id)
+            ->where('notifiable_type', get_class(Auth::user()))
+            ->where('notifiable_id', Auth::id())
+            ->first();
 
-    public function clearAll()
-    {
-        auth()->user()->notifications()->delete();
-        
-        return back()->with('success', 'Semua notifikasi telah dihapus');
+        if ($notification && !$notification->is_read) {
+            $notification->markAsRead();
+        }
+
+        return response()->json(['success' => true]);
     }
 
     public function markAllAsRead()
     {
-        auth()->user()->unreadNotifications->markAsRead();
-        
-        if (request()->ajax()) {
-            return response()->json(['success' => true]);
-        }
-        
-        return back();
+        Notification::where('notifiable_type', get_class(Auth::user()))
+            ->where('notifiable_id', Auth::id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return back()->with('success', 'Semua notifikasi telah ditandai sebagai dibaca');
+    }
+
+    public function clearAll()
+    {
+        Notification::where('notifiable_type', get_class(Auth::user()))
+            ->where('notifiable_id', Auth::id())
+            ->delete();
+
+        return back()->with('success', 'Semua notifikasi telah dihapus');
     }
 }

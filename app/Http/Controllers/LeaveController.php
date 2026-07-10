@@ -2,46 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Leave;
-use App\Models\User;
+use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class LeaveController extends Controller
 {
     public function index()
     {
-        $query = Leave::with(['user', 'approver']);
-        
-        if (auth()->user()->role !== 'admin') {
-            $query->where('user_id', auth()->id());
-        }
-        
-        $leaves = $query->orderBy('created_at', 'desc')->paginate(15);
+        $leaveRequests = LeaveRequest::with(['user', 'approvedBy'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        if (auth()->user()->isAdmin()) {
-            $stats = [
-                'total' => Leave::count(),
-                'pending' => Leave::where('status', 'Pending')->count(),
-                'approved' => Leave::where('status', 'Approved')->count(),
-                'rejected' => Leave::where('status', 'Rejected')->count(),
-            ];
-        } else {
-            $uid = auth()->id();
-            $stats = [
-                'total' => Leave::where('user_id', $uid)->count(),
-                'pending' => Leave::where('user_id', $uid)->where('status', 'Pending')->count(),
-                'approved' => Leave::where('user_id', $uid)->where('status', 'Approved')->count(),
-                'rejected' => Leave::where('user_id', $uid)->where('status', 'Rejected')->count(),
-            ];
-        }
-        
-        return view('leaves.index', compact('leaves', 'stats'));
+        $stats = [
+            'total'    => $leaveRequests->count(),
+            'pending'  => $leaveRequests->where('status', 'pending')->count(),
+            'approved' => $leaveRequests->where('status', 'approved')->count(),
+            'rejected' => $leaveRequests->where('status', 'rejected')->count(),
+        ];
+
+        return view('leaves.index', compact('leaveRequests', 'stats'));
     }
 
     public function create()
     {
-        if (! auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin()) {
             return redirect()->to(route('teacher.dashboard') . '#izin');
         }
 
@@ -51,100 +35,98 @@ class LeaveController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'required|in:Sakit,Izin,Dinas,Cuti',
+            'type'       => 'required|in:izin,sakit',
             'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'required|string|max:1000',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+            'reason'     => 'required|string|max:1000',
             'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        $validated['user_id'] = auth()->id();
-        $validated['status'] = 'Pending';
+        $data = [
+            'user_id'    => auth()->id(),
+            'type'       => $validated['type'],
+            'start_date' => $validated['start_date'],
+            'end_date'   => $validated['end_date'],
+            'reason'     => $validated['reason'],
+            'status'     => 'pending',
+        ];
 
         if ($request->hasFile('attachment')) {
-            $validated['attachment'] = $request->file('attachment')->store('leaves', 'public');
+            $data['attachment'] = $request->file('attachment')->store('leave-attachments', 'public');
         }
 
-        $leave = Leave::create($validated);
-
-        // Notify Admins
-        $admins = User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            $admin->notify(new \App\Notifications\SystemNotification(
-                "Guru " . auth()->user()->name . " mengajukan " . $leave->type,
-                'info',
-                route('leaves.show', $leave)
-            ));
-        }
+        $leaveRequest = LeaveRequest::create($data);
 
         if (auth()->user()->isAdmin()) {
             return redirect()->route('leaves.index')->with('success', 'Pengajuan izin berhasil dikirim!');
         }
 
-        return redirect()->route('teacher.leaves')->with('success', 'Pengajuan izin berhasil dikirim!');
+        return redirect()->route('teacher.leave')->with('success', 'Pengajuan izin berhasil dikirim!');
     }
 
-    public function show(Leave $leave)
+    public function show(LeaveRequest $leave)
     {
-        if (! auth()->user()->isAdmin() && (int) $leave->user_id !== (int) auth()->id()) {
+        if (!auth()->user()->isAdmin() && (int) $leave->user_id !== (int) auth()->id()) {
             abort(403);
         }
 
-        $leave->load(['user', 'approver']);
+        $leave->load(['user', 'approvedBy']);
 
         return view('leaves.show', compact('leave'));
     }
 
-    public function approve(Request $request, Leave $leave)
+    public function approve(LeaveRequest $leave)
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
-        $validated = $request->validate([
-            'notes' => 'nullable|string|max:500',
+        $leave->update([
+            'status'      => 'approved',
+            'admin_notes' => request('admin_notes'),
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
         ]);
 
-        $leave->approve(auth()->id(), $validated['notes'] ?? null);
-
-        // Notify Teacher
-        $leave->user->notify(new \App\Notifications\SystemNotification(
-            "Pengajuan " . $leave->type . " Anda telah DISETUJUI",
+        // Kirim notifikasi ke guru
+        \App\Helpers\NotificationHelper::send(
+            $leave->user,
             'success',
-            route('leaves.show', $leave)
-        ));
+            'Pengajuan ' . ucfirst($leave->type) . ' Disetujui',
+            'Pengajuan ' . $leave->type . ' Anda dari tanggal ' . $leave->start_date->format('d M Y') . ' s/d ' . $leave->end_date->format('d M Y') . ' telah disetujui oleh admin.',
+            route('teacher.leave.show', $leave),
+            'check-circle',
+            'bg-green-100 text-green-600'
+        );
 
-        return redirect()->route('leaves.index')->with('success', 'Pengajuan izin disetujui!');
+        return back()->with('success', 'Pengajuan berhasil disetujui');
     }
 
-    public function reject(Request $request, Leave $leave)
+    public function reject(LeaveRequest $leave)
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
-        $validated = $request->validate([
-            'notes' => 'nullable|string|max:500',
+        $leave->update([
+            'status'      => 'rejected',
+            'admin_notes' => request('admin_notes'),
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
         ]);
 
-        $leave->reject(auth()->id(), $validated['notes'] ?? 'Ditolak oleh admin');
-
-        // Notify Teacher
-        $leave->user->notify(new \App\Notifications\SystemNotification(
-            "Pengajuan " . $leave->type . " Anda telah DITOLAK",
+        // Kirim notifikasi ke guru
+        \App\Helpers\NotificationHelper::send(
+            $leave->user,
             'error',
-            route('leaves.show', $leave)
-        ));
+            'Pengajuan ' . ucfirst($leave->type) . ' Ditolak',
+            'Pengajuan ' . $leave->type . ' Anda dari tanggal ' . $leave->start_date->format('d M Y') . ' s/d ' . $leave->end_date->format('d M Y') . ' ditolak. Alasan: ' . (request('admin_notes') ?? '-'),
+            route('teacher.leave.show', $leave),
+            'x-circle',
+            'bg-red-100 text-red-600'
+        );
 
-        return redirect()->route('leaves.index')->with('success', 'Pengajuan izin ditolak!');
+        return back()->with('success', 'Pengajuan ditolak');
     }
 
     public function myLeaves()
     {
-        $leaves = Leave::where('user_id', auth()->id())
+        $leaveRequests = LeaveRequest::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(15);
-        
-        return view('leaves.my-leaves', compact('leaves'));
+
+        return view('leaves.my-leaves', compact('leaveRequests'));
     }
 }

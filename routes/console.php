@@ -20,3 +20,12 @@ Schedule::command('reminder:attendance checkout')
 
 // Dynamic Reminder (Jalankan setiap 1 menit agar presisi)
 Schedule::command('reminder:dynamic')->everyMinute()->withoutOverlapping();
+
+// Reminder Jadwal Mengajar (Jalankan setiap 1 menit agar presisi)
+Schedule::command('reminder:teaching-schedule')->everyMinute()->withoutOverlapping();
+
+// Reminder Absensi Harian (Jam 08:00 Pagi)
+Schedule::command('reminder:daily-attendance')->dailyAt('08:00')->withoutOverlapping();
+
+// Generate Alpha Absences (Jam 23:59 Malam - Akhir Hari)
+Schedule::command('attendance:generate-alpha')->dailyAt('23:59')->withoutOverlapping();

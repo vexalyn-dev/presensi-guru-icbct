@@ -17,6 +17,10 @@ class LoginController extends Controller
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+        ], [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'password.required' => 'Password wajib diisi',
         ]);
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
@@ -33,9 +37,9 @@ class LoginController extends Controller
             return redirect()->intended('/dashboard')->with('success', 'Selamat datang, ' . $user->name . '!');
         }
 
-        throw ValidationException::withMessages([
+        return redirect()->back()->withErrors([
             'email' => 'Email atau password yang Anda masukkan salah.',
-        ]);
+        ])->withInput($request->only('email'));
     }
 
     /**

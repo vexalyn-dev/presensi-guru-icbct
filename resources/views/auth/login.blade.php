@@ -320,11 +320,37 @@
         .error-message {
             background: #FEF2F2;
             border: 1px solid #FECACA;
+            border-left: 4px solid #DC2626;
             color: #DC2626;
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 14px 16px;
+            border-radius: 8px;
             margin-bottom: 1.5rem;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        .error-message div {
+            margin: 5px 0;
+        }
+
+        .error-message div:first-child {
+            margin-top: 0;
+        }
+
+        .error-message div:last-child {
+            margin-bottom: 0;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .success-message {
@@ -467,14 +493,18 @@
                 </div>
 
                 @if ($errors->any())
-                    <div class="error-message">{{ $errors->first() }}</div>
+                    <div class="error-message">
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
                 @endif
 
                 @if (session('success'))
                     <div class="success-message">{{ session('success') }}</div>
                 @endif
 
-                <form method="POST" action="{{ route('login.post') }}">
+                <form method="POST" action="{{ route('login.post') }}" id="loginFormElement" novalidate>
                     @csrf
                     <div class="input-group">
                         <label for="login-email">Email</label>
@@ -639,6 +669,25 @@
     {{-- END .auth-container --}}
 
     <script>
+        // Debug form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginFormElement');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    console.log('Form submitted');
+                    const email = document.getElementById('login-email').value;
+                    const password = document.getElementById('login-password').value;
+                    console.log('Email:', email);
+                    console.log('Password length:', password.length);
+                    
+                    // Show loading state
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Memproses...';
+                });
+            }
+        });
+
         function toggleAuth() {
             const panel = document.getElementById('authPanel');
             const loginForm = document.getElementById('loginForm');

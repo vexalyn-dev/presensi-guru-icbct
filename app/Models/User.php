@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -68,6 +71,8 @@ class User extends Authenticatable
         'subject',
         'start_time',
         'end_time',
+        'default_check_in',
+        'default_check_out',
     ];
 
     /**
@@ -158,7 +163,7 @@ class User extends Authenticatable
      * Scope: Filter only teachers (role = 'guru')
      * ⚠️ METHOD INI YANG MENGHILANGKAN ERROR teachers()
      */
-    public function scopeTeachers($query)
+    public function scopeTeachers(Builder $query): Builder
     {
         return $query->where('role', 'guru');
     }
@@ -166,7 +171,7 @@ class User extends Authenticatable
     /**
      * Scope: Filter only active users
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
@@ -174,7 +179,7 @@ class User extends Authenticatable
     /**
      * Scope: Filter only inactive users
      */
-    public function scopeInactive($query)
+    public function scopeInactive(Builder $query): Builder
     {
         return $query->where('is_active', false);
     }
@@ -230,6 +235,31 @@ class User extends Authenticatable
     public function classAttendances()
     {
         return $this->hasMany(ClassAttendance::class);
+    }
+
+    /**
+     * Get the teacher profile associated with this user
+     */
+    public function teacher()
+    {
+        return $this->hasOne(Teacher::class, 'user_id');
+    }
+
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable')
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function unreadNotifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable')
+            ->whereNull('read_at');
+    }
+
+    public function unreadCount(): int
+    {
+        return $this->unreadNotifications()->count();
     }
 
     // /**
