@@ -22,10 +22,11 @@ class Subject extends Model
     ];
 
     /**
-     * Get the teachers assigned to this subject.
+     * Get the teachers assigned to this subject (many-to-many).
      */
     public function teachers()
     {
-        return $this->hasMany(User::class, 'subject', 'name')->where('role', 'guru');
+        return $this->belongsToMany(Teacher::class, 'subject_teacher', 'subject_id', 'teacher_id')
+                    ->withTimestamps();
     }
 }

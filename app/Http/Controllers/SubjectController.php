@@ -36,7 +36,9 @@ class SubjectController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $subjects = $query->with('teachers')->orderBy('name')->paginate(15)->withQueryString();
+        $subjects = $query->with(['teachers' => function($q) {
+            $q->select('teachers.id', 'teachers.name', 'teachers.email');
+        }])->orderBy('name')->paginate(15)->withQueryString();
 
         // Return JSON for AJAX requests
         if ($request->ajax() || $request->wantsJson()) {
@@ -62,7 +64,7 @@ class SubjectController extends Controller
      */
     public function create()
     {
-        $teachers = \App\Models\User::where('role', 'guru')->orderBy('name')->get();
+        $teachers = \App\Models\Teacher::orderBy('name')->get();
         return view('subjects.create', compact('teachers'));
     }
 
@@ -75,7 +77,8 @@ class SubjectController extends Controller
             'name' => 'required|string|max:255',
             'is_active' => 'nullable|boolean',
             'description' => 'nullable|string',
-            'teacher_id' => 'nullable|integer|exists:users,id',
+            'teacher_ids' => 'nullable|array',
+            'teacher_ids.*' => 'exists:teachers,id',
         ]);
 
         // Auto-generate code
@@ -88,12 +91,9 @@ class SubjectController extends Controller
 
         $subject = Subject::create($validated);
 
-        // Assign teacher if selected
-        if ($request->filled('teacher_id')) {
-            $teacher = \App\Models\User::find($request->teacher_id);
-            if ($teacher) {
-                $teacher->update(['subject' => $subject->name]);
-            }
+        // Sync multiple teachers
+        if ($request->filled('teacher_ids')) {
+            $subject->teachers()->sync($request->teacher_ids);
         }
 
         return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil ditambahkan.');
@@ -112,9 +112,11 @@ class SubjectController extends Controller
      */
     public function edit(Subject $subject)
     {
-        $teachers = \App\Models\User::where('role', 'guru')->orderBy('name')->get();
-        $currentTeacher = $subject->teachers->first();
-        return view('subjects.edit', compact('subject', 'teachers', 'currentTeacher'));
+        $teachers = \App\Models\Teacher::with('user')->orderBy('name')->get();
+        $subject->load('teachers');
+        $selectedTeacherIds = $subject->teachers->pluck('id')->toArray();
+        
+        return view('subjects.edit', compact('subject', 'teachers', 'selectedTeacherIds'));
     }
 
     /**
@@ -126,32 +128,50 @@ class SubjectController extends Controller
             'name' => 'required|string|max:255',
             'is_active' => 'nullable|boolean',
             'description' => 'nullable|string',
-            'teacher_id' => 'nullable|integer|exists:users,id',
+            'teacher_ids' => 'nullable|array',
+            'teacher_ids.*' => 'exists:teachers,id',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
         $validated['category'] = 'Umum'; // Set default category
 
-        $oldName = $subject->name;
         $subject->update($validated);
 
-        // Sync teacher subject names if name changed
-        if ($oldName !== $subject->name) {
-            \App\Models\User::where('role', 'guru')
-                ->where('subject', $oldName)
-                ->update(['subject' => $subject->name]);
+        // Get old teacher IDs before sync
+        $oldTeacherIds = $subject->teachers->pluck('id')->toArray();
+
+        // Sync multiple teachers (replace all existing with new selection)
+        if ($request->has('teacher_ids')) {
+            $subject->teachers()->sync($request->teacher_ids);
+            $newTeacherIds = $request->teacher_ids;
+        } else {
+            $subject->teachers()->sync([]);
+            $newTeacherIds = [];
         }
 
-        // Clear current teachers for this subject
-        \App\Models\User::where('role', 'guru')
-            ->where('subject', $subject->name)
-            ->update(['subject' => null]);
-
-        // Assign new teacher if selected
-        if ($request->filled('teacher_id')) {
-            $teacher = \App\Models\User::find($request->teacher_id);
+        // Update major_specialty for teachers that were removed from this subject
+        $removedTeacherIds = array_diff($oldTeacherIds, $newTeacherIds);
+        foreach ($removedTeacherIds as $teacherId) {
+            $teacher = \App\Models\Teacher::find($teacherId);
             if ($teacher) {
-                $teacher->update(['subject' => $subject->name]);
+                // Check if teacher still has other subjects
+                $otherSubjects = $teacher->subjects()->where('subjects.id', '!=', $subject->id)->get();
+                if ($otherSubjects->isEmpty()) {
+                    // No other subjects, clear major_specialty
+                    $teacher->update(['major_specialty' => null]);
+                } else {
+                    // Set to first other subject
+                    $teacher->update(['major_specialty' => $otherSubjects->first()->name]);
+                }
+            }
+        }
+
+        // Update major_specialty for newly assigned teachers
+        foreach ($newTeacherIds as $teacherId) {
+            $teacher = \App\Models\Teacher::find($teacherId);
+            if ($teacher) {
+                // Update to this subject name
+                $teacher->update(['major_specialty' => $subject->name]);
             }
         }
 
@@ -163,11 +183,9 @@ class SubjectController extends Controller
      */
     public function destroy(Request $request, Subject $subject)
     {
-        // Clear assigned teachers' subject
-        \App\Models\User::where('role', 'guru')
-            ->where('subject', $subject->name)
-            ->update(['subject' => null]);
-
+        // Detach all teachers (akan otomatis terhapus di pivot table karena cascade)
+        $subject->teachers()->detach();
+        
         $subject->delete();
 
         // Return JSON for AJAX/fetch requests

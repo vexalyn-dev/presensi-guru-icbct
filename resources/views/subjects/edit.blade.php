@@ -112,26 +112,30 @@
 
                             <!-- Guru Pengampu & Status in 2 columns -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Modern Teacher Dropdown -->
+                                <!-- Multi-Select Teacher with Checkboxes -->
                                 <div>
                                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                                         Guru Pengampu
-                                        <span class="text-slate-400 font-normal">(Opsional)</span>
+                                        <span class="text-slate-400 font-normal">(Dapat pilih lebih dari 1)</span>
                                     </label>
-                                    <div class="relative" x-data="{ open: false, search: '', selected: {{ old('teacher_id', isset($currentTeacher) ? $currentTeacher->id : 'null') }} }"
+                                    <div class="relative" x-data="{ 
+                                        open: false, 
+                                        search: '', 
+                                        selected: @json($selectedTeacherIds ?? [])
+                                    }"
                                          @click.outside="open = false">
 
                                         <!-- Dropdown Trigger -->
                                         <div @click="open = !open" 
                                              class="relative group cursor-pointer">
                                             <div class="absolute left-4 top-1/2 -translate-y-1/2">
-                                                <i data-lucide="user" class="w-5 h-5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
+                                                <i data-lucide="users" class="w-5 h-5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
                                             </div>
-                                            <div class="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 flex items-center justify-between"
+                                            <div class="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 flex items-center justify-between min-h-[56px]"
                                                  :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-navy-500 dark:border-gold-500': open}">
                                                 <span class="truncate" 
-                                                      x-text="getSelectedTeacherName()">
-                                                    {{ old('teacher_id', isset($currentTeacher) ? $currentTeacher->name : 'Pilih Guru Pengampu') }}
+                                                      x-text="selected.length > 0 ? selected.length + ' guru dipilih' : 'Pilih Guru Pengampu'">
+                                                    {{ $subject->teachers->count() > 0 ? $subject->teachers->count() . ' guru dipilih' : 'Pilih Guru Pengampu' }}
                                                 </span>
                                                 <i data-lucide="chevron-down" 
                                                    class="w-5 h-5 text-slate-400 transition-transform duration-200"
@@ -161,24 +165,29 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Teachers List -->
+                                            <!-- Teachers List with Checkboxes -->
                                             <div class="max-h-60 overflow-y-auto p-2">
                                                 <template x-for="teacher in filteredTeachers" :key="teacher.id">
-                                                    <div @click="selectTeacher(teacher)" 
-                                                         class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-navy-50 dark:hover:bg-navy-900/20"
-                                                         :class="selected === teacher.id ? 'bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800' : ''">
+                                                    <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-navy-50 dark:hover:bg-navy-900/20"
+                                                           :class="selected.includes(teacher.id) ? 'bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800' : ''">
+                                                        
+                                                        <!-- Checkbox -->
+                                                        <input type="checkbox" 
+                                                               :value="teacher.id"
+                                                               x-model="selected"
+                                                               class="w-5 h-5 rounded border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer">
+                                                        
+                                                        <!-- Avatar -->
                                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0">
                                                             <span x-text="teacher.name.charAt(0).toUpperCase()"></span>
                                                         </div>
+                                                        
+                                                        <!-- Teacher Info -->
                                                         <div class="flex-1 min-w-0">
                                                             <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate" x-text="teacher.name"></p>
                                                             <p class="text-xs text-slate-500 dark:text-slate-400 truncate" x-text="teacher.email"></p>
                                                         </div>
-                                                        <i data-lucide="check" 
-                                                           class="w-5 h-5 text-navy-600 dark:text-gold-500 flex-shrink-0"
-                                                           x-show="selected === teacher.id"
-                                                           x-transition></i>
-                                                    </div>
+                                                    </label>
                                                 </template>
 
                                                 <!-- No Results -->
@@ -188,12 +197,29 @@
                                                     <p>Tidak ada guru ditemukan</p>
                                                 </div>
                                             </div>
+                                            
+                                            <!-- Selected Count Footer -->
+                                            <div x-show="selected.length > 0" 
+                                                 class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                                                <div class="flex items-center justify-between">
+                                                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                                                        <span class="font-bold" x-text="selected.length"></span> guru dipilih
+                                                    </p>
+                                                    <button type="button" 
+                                                            @click="selected = []"
+                                                            class="text-xs text-red-600 dark:text-red-400 hover:underline">
+                                                        Hapus semua
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <!-- Hidden Input -->
-                                        <input type="hidden" name="teacher_id" :value="selected">
+                                        <!-- Hidden Inputs for Selected Teachers -->
+                                        <template x-for="teacherId in selected" :key="teacherId">
+                                            <input type="hidden" name="teacher_ids[]" :value="teacherId">
+                                        </template>
                                     </div>
-                                    @error('teacher_id')
+                                    @error('teacher_ids')
                                         <p class="mt-2 text-xs text-red-500 flex items-center gap-1 animate-shake">
                                             <i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}
                                         </p>
@@ -292,7 +318,6 @@
                 subjectName: '{{ $subject->name }}',
                 isActive: {{ $subject->is_active ? 'true' : 'false' }},
                 teachers: @json($teachers ?? []),
-                selectedTeacher: {{ old('teacher_id', isset($currentTeacher) ? $currentTeacher->id : 'null') }},
 
                 updateSubjectName() {
                     // Real-time update logic if needed
@@ -300,17 +325,6 @@
 
                 toggleStatus() {
                     // Status toggle animation
-                },
-
-                getSelectedTeacherName() {
-                    if (!this.selectedTeacher) return 'Pilih Guru Pengampu';
-                    const teacher = this.teachers.find(t => t.id == this.selectedTeacher);
-                    return teacher ? teacher.name : 'Pilih Guru Pengampu';
-                },
-
-                selectTeacher(teacher) {
-                    this.selectedTeacher = teacher.id;
-                    this.open = false;
                 },
 
                 get filteredTeachers() {

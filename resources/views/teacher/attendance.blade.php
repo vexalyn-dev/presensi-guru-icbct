@@ -1,6 +1,6 @@
 @extends('layouts.teacher')
 
-@section('page-title', 'Absensi Harian')
+@section('page-title', 'Presensi Harian')
 
 @section('content')
 <div class="fade-in space-y-6">
@@ -12,7 +12,7 @@
                 <i data-lucide="scan-line" class="w-6 h-6 text-white dark:text-navy-900"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Absensi Harian</h1>
+                <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Presensi Harian</h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Scan QR Code untuk presensi datang dan pulang</p>
             </div>
         </div>
@@ -124,7 +124,7 @@
                             <i data-lucide="qr-code" class="w-6 h-6 text-white dark:text-navy-900"></i>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-navy-800 dark:text-white">QR Code Absensi Anda</h2>
+                            <h2 class="text-xl font-bold text-navy-800 dark:text-white">QR Code Presensi Anda</h2>
                             <p class="text-sm text-slate-500 dark:text-slate-400">Tunjukkan QR Code ini untuk presensi</p>
                         </div>
                     </div>
@@ -146,7 +146,7 @@
                         ])) !!}
                     </div>
                     <div class="mt-6 text-center">
-                        <p class="text-sm font-semibold text-navy-800 dark:text-white">Scan QR Code ini untuk absensi</p>
+                        <p class="text-sm font-semibold text-navy-800 dark:text-white">Scan QR Code ini untuk presensi</p>
                     </div>
                 </div>
             </div>
@@ -162,7 +162,7 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-bold text-navy-800 dark:text-white">Riwayat 7 Hari</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Absensi terakhir</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Presensi terakhir</p>
                         </div>
                     </div>
                     <a href="{{ route('teacher.history') }}" class="text-xs font-semibold text-navy-800 dark:text-gold-400 hover:underline">

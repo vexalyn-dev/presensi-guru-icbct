@@ -74,17 +74,112 @@
 
     <!-- Action Bar -->
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <form action="{{ route('teachers.index') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            <div class="relative flex-1 lg:w-64">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+        <form action="{{ route('teachers.index') }}" method="GET" id="filterForm" class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div class="relative flex-1 lg:w-80">
+                <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, email, telepon..." 
-                       class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400">
+                       class="w-full pl-11 pr-4 py-3 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 transition-all shadow-sm hover:shadow-md">
             </div>
-            <select name="status" onchange="this.form.submit()" class="px-4 py-2.5 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400">
-                <option value="">Semua Status</option>
-                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
-                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
-            </select>
+            
+            <!-- Premium Custom Status Dropdown -->
+            <div x-data="{ 
+                open: false, 
+                selected: '{{ request('status') }}',
+                get displayText() {
+                    if (this.selected === 'active') return 'Aktif';
+                    if (this.selected === 'inactive') return 'Nonaktif';
+                    return 'Semua Status';
+                },
+                get displayIcon() {
+                    if (this.selected === 'active') return 'circle-check';
+                    if (this.selected === 'inactive') return 'circle-x';
+                    return 'filter';
+                },
+                get displayColor() {
+                    if (this.selected === 'active') return 'text-green-600 dark:text-green-400';
+                    if (this.selected === 'inactive') return 'text-slate-500 dark:text-slate-400';
+                    return 'text-navy-800 dark:text-white';
+                },
+                selectStatus(value) {
+                    this.selected = value;
+                    this.open = false;
+                    document.querySelector('input[name=status]').value = value;
+                    document.getElementById('filterForm').submit();
+                }
+            }" 
+            @click.away="open = false" 
+            class="relative">
+                
+                <input type="hidden" name="status" value="{{ request('status') }}">
+                
+                <!-- Trigger Button -->
+                <button type="button" 
+                        @click="open = !open"
+                        class="group relative flex items-center gap-2.5 pl-4 pr-11 py-3 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 min-w-[180px]"
+                        :class="open && 'ring-2 ring-navy-800 dark:ring-gold-400 border-navy-800 dark:border-gold-400'">
+                    <i :data-lucide="displayIcon" class="w-4 h-4 transition-colors" :class="displayColor"></i>
+                    <span class="transition-colors" :class="displayColor" x-text="displayText"></span>
+                    <i data-lucide="chevron-down" 
+                       class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 transition-transform duration-200"
+                       :class="open && 'rotate-180'"></i>
+                </button>
+
+                <!-- Dropdown Panel -->
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute top-full mt-2 w-full min-w-[220px] bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50"
+                     style="display: none;">
+                    
+                    <div class="py-1">
+                        <!-- All Status Option -->
+                        <button type="button"
+                                @click="selectStatus('')"
+                                class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50 group"
+                                :class="selected === '' && 'bg-slate-50 dark:bg-slate-700/50'">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i data-lucide="filter" class="w-4 h-4 text-navy-800 dark:text-white"></i>
+                            </div>
+                            <span class="flex-1 text-left font-medium text-navy-800 dark:text-white">Semua Status</span>
+                            <svg x-show="selected === ''" class="w-4 h-4 text-navy-800 dark:text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Active Option -->
+                        <button type="button"
+                                @click="selectStatus('active')"
+                                class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-green-50 dark:hover:bg-green-900/20 group"
+                                :class="selected === 'active' && 'bg-green-50 dark:bg-green-900/20'">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50"></div>
+                            </div>
+                            <span class="flex-1 text-left font-medium text-green-700 dark:text-green-400">Aktif</span>
+                            <svg x-show="selected === 'active'" class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Inactive Option -->
+                        <button type="button"
+                                @click="selectStatus('inactive')"
+                                class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50 group"
+                                :class="selected === 'inactive' && 'bg-slate-50 dark:bg-slate-700/50'">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+                            </div>
+                            <span class="flex-1 text-left font-medium text-slate-600 dark:text-slate-400">Nonaktif</span>
+                            <svg x-show="selected === 'inactive'" class="w-4 h-4 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </form>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('teachers.create') }}" class="btn-ripple btn-primary flex items-center gap-2 text-sm">
@@ -118,94 +213,97 @@
                         <th class="px-3 py-3 w-10">
                             <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 rounded border-slate-300 text-navy-800 focus:ring-navy-800">
                         </th>
-                        <th class="px-3 py-3 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">ID</th>
-                        <th class="px-3 py-3 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Guru</th>
-                        <th class="px-3 py-3 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Email</th>
-                        <th class="px-3 py-3 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Telepon</th>
-                        <th class="px-3 py-3 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Status</th>
-                        <th class="px-3 py-3 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Mapel</th>
-                        <th class="px-3 py-3 text-center text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Aksi</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID Guru</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Guru</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
+                        <th class="px-4 py-3 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">NIP</th>
+                        <th class="px-4 py-3 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mapel</th>
+                        <th class="px-4 py-3 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
                     @forelse($teachers as $teacher)
-                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all group/row">
-                            <td class="px-3 py-3 text-center">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="px-4 py-3">
                                 <input type="checkbox" name="teacher_ids[]" value="{{ $teacher->id }}" 
-                                       class="teacher-checkbox w-4 h-4 rounded border-slate-300 text-navy-800 focus:ring-navy-800"
+                                       class="teacher-checkbox rounded border-slate-300 text-navy-600 focus:ring-navy-500"
                                        onchange="updateBulkActions()">
                             </td>
-                            <td class="px-5 py-4">
-                                <span class="text-xs font-mono text-slate-400">#{{ str_pad($teacher->id, 4, '0', STR_PAD_LEFT) }}</span>
+                            <td class="px-4 py-3 align-middle">
+                                @if($teacher->teacher && $teacher->teacher->employee_code)
+                                    @php
+                                        // Ambil 5 digit terakhir dari SMKICBCT-XXXXX
+                                        $lastDigits = substr($teacher->teacher->employee_code, -5);
+                                    @endphp
+                                    <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400">#{{ $lastDigits }}</span>
+                                @else
+                                    <span class="text-[11px] text-slate-400 italic">Belum ada</span>
+                                @endif
                             </td>
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="relative group/avatar">
-                                        <img src="{{ $teacher->photo_url }}" 
-                                             class="w-12 h-12 rounded-2xl object-cover border-2 border-white dark:border-slate-700 shadow-sm group-hover/avatar:scale-105 transition-transform duration-300">
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-bold text-navy-800 dark:text-white group-hover/row:text-blue-600 transition-colors">{{ $teacher->name }}</span>
-                                        <span class="text-[10px] text-slate-400 font-medium tracking-tight">ID: {{ $teacher->formatted_id }}</span>
+                            <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center gap-3">
+                                    <img src="{{ $teacher->photo_url }}" 
+                                         class="w-10 h-10 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700">
+                                    <div class="flex flex-col gap-0.5">
+                                        <p class="text-[13px] font-bold text-navy-800 dark:text-white leading-tight">{{ $teacher->name }}</p>
+                                        @if($teacher->teacher && $teacher->teacher->employee_code)
+                                        <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono leading-none">{{ $teacher->teacher->employee_code }}</p>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-3 py-3 text-xs text-slate-600 dark:text-slate-300">{{ $teacher->email }}</td>
-                            <td class="px-3 py-3 text-xs text-slate-600 dark:text-slate-300">{{ $teacher->phone ?? '-' }}</td>
-                            <td class="px-3 py-3">
-                                <form action="{{ route('teachers.toggle-status', $teacher) }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors
-                                        {{ $teacher->is_active 
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200' 
-                                            : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400 hover:bg-slate-200' }}">
-                                        <span class="w-1.5 h-1.5 rounded-full {{ $teacher->is_active ? 'bg-green-500 animate-pulse' : 'bg-slate-400' }}"></span>
-                                        {{ $teacher->is_active ? 'Aktif' : 'Nonaktif' }}
-                                    </button>
-                                </form>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="text-[13px] text-slate-700 dark:text-slate-300">{{ $teacher->email }}</span>
                             </td>
-                            <td class="px-3 py-3">
-                                @if($teacher->subject)
-                                    <span class="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-bold border border-blue-100 dark:border-blue-800 uppercase tracking-wider">
-                                        {{ $teacher->subject }}
-                                    </span>
+                            <td class="px-4 py-3 text-center align-middle">
+                                @if($teacher->teacher && $teacher->teacher->nip)
+                                <span class="inline-flex items-center px-2.5 py-1 bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300 rounded-lg text-[11px] font-mono font-semibold">
+                                    {{ $teacher->teacher->nip }}
+                                </span>
                                 @else
-                                    <span class="text-xs text-slate-400 italic">Belum diatur</span>
+                                <span class="text-[11px] text-slate-400 italic">Belum diatur</span>
                                 @endif
                             </td>
-                            <td class="px-3 py-3">
-                                <div class="flex items-center justify-center gap-1">
-                                    <a href="{{ route('teachers.show', $teacher) }}" class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/30" title="Lihat Detail">
-                                        <i data-lucide="eye" class="w-3.5 h-3.5 text-slate-600 dark:text-slate-300"></i>
+                            <td class="px-4 py-3 text-center align-middle">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold
+                                    {{ $teacher->is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $teacher->is_active ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                                    {{ $teacher->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center align-middle">
+                                @if($teacher->teacher && $teacher->teacher->major_specialty)
+                                <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-[11px] font-bold">
+                                    {{ strtoupper($teacher->teacher->major_specialty) }}
+                                </span>
+                                @else
+                                <span class="text-[11px] text-slate-400 italic">Belum diatur</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <div class="flex items-center justify-center gap-2">
+                                    <a href="{{ route('teachers.show', $teacher) }}" class="p-2 w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all" title="Lihat Detail">
+                                        <i data-lucide="eye" class="w-4 h-4 text-slate-600 dark:text-slate-400"></i>
                                     </a>
-                                    <a href="{{ route('teachers.edit', $teacher) }}" class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/30" title="Edit">
-                                        <i data-lucide="edit-2" class="w-3.5 h-3.5 text-blue-500"></i>
+                                    <a href="{{ route('teachers.edit', $teacher) }}" class="p-2 w-9 h-9 flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg transition-all" title="Edit">
+                                        <i data-lucide="pencil" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
                                     </a>
-                                    <button type="button"
-                                            data-delete-url="{{ route('teachers.destroy', $teacher) }}"
-                                            data-delete-label="guru {{ addslashes($teacher->name) }}"
-                                            class="delete-btn p-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg transition-colors hover:bg-red-100 dark:hover:bg-red-900/30" title="Hapus">
-                                        <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
-                                    </button>
+                                    <form action="{{ route('teachers.destroy', $teacher) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus guru ini?')" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-2 w-9 h-9 flex items-center justify-center bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-lg transition-all" title="Hapus">
+                                            <i data-lucide="trash-2" class="w-4 h-4 text-red-600 dark:text-red-400"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-5 py-16 text-center">
-                                <div class="flex flex-col items-center gap-4">
-                                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                                        <i data-lucide="inbox" class="w-8 h-8 text-slate-400"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-slate-500 dark:text-slate-400 font-medium">Belum ada data guru</p>
-                                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Mulai dengan menambahkan guru pertama</p>
-                                    </div>
-                                    <a href="{{ route('teachers.create') }}" class="btn-primary flex items-center gap-2 text-sm">
-                                        <i data-lucide="plus" class="w-4 h-4"></i>
-                                        Tambah Guru
-                                    </a>
-                                </div>
+                            <td colspan="8" class="px-4 py-12 text-center">
+                                <i data-lucide="inbox" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada data guru</p>
                             </td>
                         </tr>
                     @endforelse
@@ -215,15 +313,6 @@
 
         @if($teachers->hasPages())
             <div class="p-4 border-t border-slate-200 dark:border-slate-700">
-                <div class="relative inline-block">
-                    <div id="photoPreview" class="w-28 h-28 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-gold-400 transition-colors" onclick="document.getElementById('photo').click()">
-                        <img id="previewImg" src="{{ asset('images/default-teacher.png') }}" class="w-28 h-28 rounded-full object-cover shadow-lg">
-                        <div class="absolute inset-0 flex flex-col items-center justify-center opacity-0 hover:opacity-100 bg-black/20 rounded-full transition-opacity">
-                            <i data-lucide="camera" class="w-8 h-8 text-white"></i>
-                            <span class="text-[10px] text-white font-bold uppercase tracking-wider">Ubah Foto</span>
-                        </div>
-                    </div>
-                </div>
                 {{ $teachers->links() }}
             </div>
         @endif

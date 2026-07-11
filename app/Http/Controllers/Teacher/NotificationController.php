@@ -41,4 +41,35 @@ class NotificationController extends Controller
 
         return back()->with('success', 'Semua notifikasi telah ditandai sebagai dibaca');
     }
+
+    public function destroy(string $id)
+    {
+        $notification = Notification::where('id', $id)
+            ->where('notifiable_type', get_class(Auth::user()))
+            ->where('notifiable_id', Auth::id())
+            ->first();
+
+        if ($notification) {
+            $notification->delete();
+            return response()->json(['success' => true, 'message' => 'Notifikasi berhasil dihapus']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Notifikasi tidak ditemukan'], 404);
+    }
+
+    public function bulkDelete()
+    {
+        $ids = request()->input('ids', []);
+        
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada notifikasi yang dipilih'], 400);
+        }
+
+        $deleted = Notification::whereIn('id', $ids)
+            ->where('notifiable_type', get_class(Auth::user()))
+            ->where('notifiable_id', Auth::id())
+            ->delete();
+
+        return response()->json(['success' => true, 'message' => "{$deleted} notifikasi berhasil dihapus"]);
+    }
 }

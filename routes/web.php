@@ -194,6 +194,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/notifications', [TeacherNotificationController::class, 'index'])->name('notifications');
         Route::post('/notifications/{id}/read', [TeacherNotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [TeacherNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+        Route::delete('/notifications/{id}', [TeacherNotificationController::class, 'destroy'])->name('notifications.destroy');
+        Route::post('/notifications/bulk-delete', [TeacherNotificationController::class, 'bulkDelete'])->name('notifications.bulk-delete');
 
         Route::get('/leave', [TeacherLeaveController::class, 'index'])->name('leave');
         Route::get('/leave/create', [TeacherLeaveController::class, 'create'])->name('leave.create');

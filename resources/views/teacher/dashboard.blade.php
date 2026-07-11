@@ -6,7 +6,7 @@
 <div class="fade-in space-y-6">
     
     <!-- Welcome Card -->
-    <div class="card p-6 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:via-gold-500 dark:to-gold-600 text-white">
+    <div class="card p-6 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:to-gold-400 text-white">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-bold mb-2">Selamat Datang, {{ auth()->user()->name }}! 👋</h2>
@@ -51,7 +51,7 @@
         <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all">
             <div class="flex items-center gap-3 sm:gap-4">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="check-circle" class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400"></i>
+                    <i data-lucide="file-text" class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400"></i>
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">Izin/Sakit</p>
@@ -75,126 +75,127 @@
         </div>
     </div>
 
-    <!-- Today's Schedule -->
-    <div class="card p-6">
+    <!-- Jadwal Mengajar Hari Ini dengan Progress -->
+    <div class="card p-5 sm:p-6">
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
                     <i data-lucide="calendar" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-navy-800 dark:text-white">Jadwal Mengajar Hari Ini</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
+                    <h3 class="text-base font-bold text-navy-800 dark:text-white">Jadwal Mengajar Hari Ini</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
                 </div>
             </div>
-            <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-bold">
+            <span class="px-3 py-1.5 bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300 rounded-full text-xs font-bold">
                 {{ $todaySchedules->count() }} Kelas
             </span>
         </div>
 
-        @if($todaySchedules->isEmpty())
-        <div class="text-center py-8">
-            <i data-lucide="calendar-off" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada jadwal mengajar hari ini</p>
-        </div>
-        @else
-        <div class="space-y-3">
-            @foreach($todaySchedules as $schedule)
+        @if($todaySchedules->count() > 0)
             @php
-                $isDone = $todayClassAttendances->where('classroom_id', $schedule->classroom_id)
-                    ->where('period', $schedule->period)
-                    ->whereNotNull('check_out_time')
-                    ->isNotEmpty();
-                $isInProgress = $todayClassAttendances->where('classroom_id', $schedule->classroom_id)
-                    ->where('period', $schedule->period)
-                    ->whereNotNull('check_in_time')
-                    ->whereNull('check_out_time')
-                    ->isNotEmpty();
+                $totalClasses = $todaySchedules->count();
+                $completedClasses = $todaySchedules->filter(function($schedule) {
+                    return $schedule->classAttendances->where('user_id', auth()->id())->whereNotNull('check_out_time')->count() > 0;
+                })->count();
+                $progress = $totalClasses > 0 ? ($completedClasses / $totalClasses) * 100 : 0;
             @endphp
-            <div class="p-4 rounded-xl border-2 transition-all {{ $isDone ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' : ($isInProgress ? 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700') }}">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center shadow-lg">
-                            <span class="text-white dark:text-navy-900 font-bold text-sm">{{ $schedule->period }}</span>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-bold text-navy-800 dark:text-white">{{ $schedule->classroom->name }}</h4>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ $schedule->subject?->name ?? '-' }}</p>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                                <i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1"></i>
-                                {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        @if($isDone)
-                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-bold">
-                            <i data-lucide="check-circle" class="w-3 h-3"></i>
-                            Selesai
-                        </span>
-                        @elseif($isInProgress)
-                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full text-xs font-bold">
-                            <i data-lucide="clock" class="w-3 h-3"></i>
-                            Berlangsung
-                        </span>
-                        @else
-                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-full text-xs font-bold">
-                            <i data-lucide="circle" class="w-3 h-3"></i>
-                            Belum
-                        </span>
-                        @endif
-                    </div>
+            
+            <!-- Progress Bar -->
+            <div class="mb-5">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Progress Mengajar</p>
+                    <p class="text-xs font-bold text-navy-800 dark:text-white">{{ round($progress) }}%</p>
+                </div>
+                <div class="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-400 rounded-full transition-all duration-500" 
+                         style="width: {{ $progress }}%"></div>
+                </div>
+                <div class="flex items-center justify-between mt-2 text-xs">
+                    <span class="text-green-600 dark:text-green-400 font-semibold">
+                        <i data-lucide="check-circle" class="w-3 h-3 inline mr-1"></i>
+                        {{ $completedClasses }} Selesai
+                    </span>
+                    <span class="text-orange-600 dark:text-orange-400 font-semibold">
+                        <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
+                        {{ $totalClasses - $completedClasses }} Belum
+                    </span>
                 </div>
             </div>
-            @endforeach
-        </div>
+
+            <!-- List Jadwal -->
+            <div class="space-y-3">
+                @foreach($todaySchedules as $schedule)
+                    @php
+                        $attendance = $schedule->classAttendances->where('user_id', auth()->id())->first();
+                        $isCompleted = $attendance && $attendance->check_out_time;
+                        $isInProgress = $attendance && $attendance->check_in_time && !$attendance->check_out_time;
+                    @endphp
+                    <div class="p-4 rounded-xl border-2 transition-all
+                        {{ $isCompleted 
+                            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+                            : ($isInProgress 
+                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' 
+                                : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700') }}">
+                        
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3 flex-1">
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
+                                    {{ $isCompleted 
+                                        ? 'bg-green-100 dark:bg-green-900/30' 
+                                        : ($isInProgress 
+                                            ? 'bg-blue-100 dark:bg-blue-900/30' 
+                                            : 'bg-slate-200 dark:bg-slate-600') }}">
+                                    @if($isCompleted)
+                                        <i data-lucide="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
+                                    @elseif($isInProgress)
+                                        <i data-lucide="clock" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                                    @else
+                                        <i data-lucide="circle" class="w-5 h-5 text-slate-500 dark:text-slate-400"></i>
+                                    @endif
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-navy-800 dark:text-white">
+                                        {{ $schedule->classroom->name ?? '-' }}
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                        {{ $schedule->subject->name ?? '-' }} • Jam ke-{{ $schedule->period }}
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                        {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex-shrink-0">
+                                @if($isCompleted)
+                                    <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-bold">
+                                        Selesai
+                                    </span>
+                                @elseif($isInProgress)
+                                    <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-bold">
+                                        Berlangsung
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-1 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-400 rounded-full text-xs font-bold">
+                                        Belum
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <div class="w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="calendar-x" class="w-10 h-10 text-slate-400 dark:text-slate-500"></i>
+                </div>
+                <p class="text-sm font-semibold text-navy-800 dark:text-white mb-1">Tidak ada jadwal mengajar hari ini</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Nikmati hari libur Anda!</p>
+            </div>
         @endif
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-2 gap-3 sm:gap-4">
-        <a href="{{ route('teacher.attendance') }}" class="card p-4 sm:p-5 hover:shadow-xl transition-all group border-2 border-slate-200 dark:border-slate-700 hover:border-navy-800 dark:hover:border-gold-400">
-            <div class="flex items-center gap-3 sm:gap-4">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="scan-line" class="w-5 h-5 sm:w-6 sm:h-6 text-white dark:text-navy-900"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h4 class="text-xs sm:text-sm font-bold text-navy-800 dark:text-white">Presensi Harian</h4>
-                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Scan QR untuk datang & pulang</p>
-                    @if($todayAttendance)
-                    <div class="mt-1.5 flex flex-col gap-1">
-                        @if($todayAttendance->check_in)
-                        <span class="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-[9px] font-bold truncate">
-                            ✓ Masuk: {{ $todayAttendance->check_in }}
-                        </span>
-                        @endif
-                        @if($todayAttendance->check_out)
-                        <span class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-[9px] font-bold truncate">
-                            ✓ Pulang: {{ $todayAttendance->check_out }}
-                        </span>
-                        @endif
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </a>
-
-        <a href="{{ route('teacher.class-attendance') }}" class="card p-4 sm:p-5 hover:shadow-xl transition-all group border-2 border-slate-200 dark:border-slate-700 hover:border-navy-800 dark:hover:border-gold-400">
-            <div class="flex items-center gap-3 sm:gap-4">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-gold-400 to-gold-500 dark:from-navy-800 dark:to-navy-900 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="scan" class="w-5 h-5 sm:w-6 sm:h-6 text-navy-900 dark:text-white"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h4 class="text-xs sm:text-sm font-bold text-navy-800 dark:text-white">Presensi Kelas</h4>
-                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Scan QR di setiap kelas</p>
-                    <div class="mt-1.5">
-                        <span class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded text-[9px] font-bold">
-                            {{ $todayClassAttendances->whereNotNull('check_in_time')->count() }}/{{ $todaySchedules->count() }} selesai
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </a>
     </div>
 </div>
 

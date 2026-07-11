@@ -51,11 +51,15 @@
                     <div class="flex items-center gap-4 w-full">
                         <div
                             class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-400/30 group-hover:scale-110 transition-transform flex-shrink-0">
-                            <i data-lucide="user" class="w-6 h-6 text-white"></i>
+                            <i data-lucide="hash" class="w-6 h-6 text-white"></i>
                         </div>
                         <div class="truncate">
                             <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">ID Guru</p>
-                            <p class="text-lg font-bold text-navy-800 dark:text-white truncate">{{ $teacher->formatted_id }}</p>
+                            @if($teacher->teacher && $teacher->teacher->employee_code)
+                                <p class="text-lg font-bold font-mono text-navy-800 dark:text-white truncate">{{ $teacher->teacher->employee_code }}</p>
+                            @else
+                                <p class="text-lg font-bold text-slate-400 dark:text-slate-500 truncate">Belum diatur</p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -97,7 +101,7 @@
                 <div class="lg:col-span-2 space-y-6">
 
                     <!-- Personal Info Card -->
-                    <div class="card lg:mt-6">
+                    <div class="card">
                         <div
                             class="p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-white dark:from-slate-800/50 dark:to-slate-800/30">
                             <div class="flex items-center gap-3">
@@ -145,7 +149,7 @@
                                 <!-- Nama -->
                                 <div>
                                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Nama
-                                        Lengkap</label>
+                                        Lengkap <span class="text-red-500">*</span></label>
                                     <div class="relative">
                                         <i data-lucide="user"
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
@@ -156,9 +160,28 @@
                                     data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
                                 </div>
 
+                                <!-- NIP -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">NIP 
+                                        <span class="text-xs text-slate-400 font-normal">(Nomor Induk Pegawai - 18 digit)</span></label>
+                                    <div class="relative">
+                                        <i data-lucide="id-card"
+                                            class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                        <input type="text" name="nip" value="{{ old('nip', $teacher->nip) }}" 
+                                            placeholder="Masukkan 18 digit NIP..."
+                                            maxlength="18"
+                                            pattern="[0-9]{18}"
+                                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 18)"
+                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('nip') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                    </div>
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">NIP harus 18 digit angka</p>
+                                    @error('nip')<p class="mt-1 text-xs text-red-500 flex items-center gap-1"><i
+                                    data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
+                                </div>
+
                                 <!-- Email -->
                                 <div>
-                                    <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Email</label>
+                                    <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Email <span class="text-red-500">*</span></label>
                                     <div class="relative">
                                         <i data-lucide="mail"
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
@@ -177,7 +200,7 @@
                                     <div class="relative">
                                         <i data-lucide="phone"
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                        <input type="text" name="phone" value="{{ old('phone', $teacher->phone) }}"
+                                        <input type="text" name="phone" value="{{ old('phone', $teacher->phone) }}" placeholder="08xxxxxxxxxx"
                                             class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                                     </div>
                                 </div>
@@ -217,7 +240,7 @@
                                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Mata Pelajaran</label>
                                     <div x-data="subjectDropdown({{ Js::from($subjects) }}, {{ Js::from($teacherSubject) }})" class="relative">
                                         {{-- Hidden input for single subject --}}
-                                        <input type="hidden" name="subject" :value="selected.length > 0 ? selected[0] : ''">
+                                        <input type="hidden" name="subject" :value="selected">
 
                                         {{-- The Standard-looking Trigger --}}
                                         <div class="relative">
@@ -225,14 +248,14 @@
                                             <div @click="open = !open" 
                                                  class="w-full pl-11 pr-10 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm cursor-pointer flex flex-wrap items-center gap-2 hover:border-blue-400 transition-all shadow-sm">
                                                 
-                                                <template x-if="selected.length === 0">
+                                                <template x-if="!selected || selected === ''">
                                                     <span class="text-slate-400">Pilih mata pelajaran...</span>
                                                 </template>
 
-                                                <template x-if="selected.length > 0">
+                                                <template x-if="selected && selected !== ''">
                                                     <div class="flex items-center gap-2 group/item animate-scale-in">
                                                         <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold border border-blue-200 dark:border-blue-800"
-                                                              x-text="getSubject(selected[0]).name"></span>
+                                                              x-text="selected"></span>
                                                         <button type="button" @click.stop="clear()" class="text-slate-400 hover:text-red-500 transition-colors">
                                                             <i data-lucide="x-circle" class="w-4 h-4"></i>
                                                         </button>
@@ -248,7 +271,7 @@
                                             </div>
                                         </div>
 
-                                        {{-- Floating Overlay Panel (Standard dropdown approach) --}}
+                                        {{-- Floating Overlay Panel (muncul ke ATAS) --}}
                                         <div x-show="open" 
                                              @click.outside="open = false"
                                              class="absolute left-0 z-[100] w-full min-w-[300px] max-w-sm p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none origin-bottom"
@@ -267,7 +290,9 @@
                                                             <span class="text-sm tracking-tight" x-text="subject.name"></span>
                                                         </div>
                                                         <template x-if="isSelected(subject.name)">
-                                                            <i data-lucide="check" class="w-4 h-4 text-blue-600 animate-scale-in"></i>
+                                                            <svg class="w-4 h-4 text-blue-600 animate-scale-in" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                            </svg>
                                                         </template>
                                                     </div>
                                                 </template>
@@ -344,8 +369,9 @@
                         </div>
 
                         <div class="p-5">
-                            <p class="text-xs text-red-600 dark:text-red-400 mb-4 font-medium italic">Tindakan menghapus
-                                data tidak dapat dikembalikan.</p>
+                            <p class="text-xs text-red-600 dark:text-red-400 mb-4 font-medium">
+                                ⚠️ Perhatian: Tindakan menghapus data tidak dapat dibatalkan.
+                            </p>
                             <button type="button"
                                 @click="openDeleteModal('{{ route('teachers.destroy', $teacher) }}', '{{ $teacher->name }}')"
                                 class="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 flex items-center justify-center gap-2">
@@ -425,51 +451,75 @@
             window.subjectDropdown = (options, initialSelected) => {
                 return {
                     open: false,
-                    options: Array.isArray(options) ? options : Object.values(options),
-                    selected: initialSelected ? [String(initialSelected)] : [],
+                    options: [],
+                    selected: initialSelected ? String(initialSelected).trim() : '',
 
                     init() {
-                        // Ensure unique options
-                        const uniqueNames = new Set();
-                        this.options = this.options.filter(opt => {
-                            const nameKey = String(opt.name).trim().toUpperCase();
-                            if (uniqueNames.has(nameKey)) return false;
-                            uniqueNames.add(nameKey);
-                            return true;
+                        // Parse and ensure unique options by ID using Map
+                        const rawOptions = Array.isArray(options) ? options : Object.values(options);
+                        const uniqueMap = new Map();
+                        
+                        rawOptions.forEach(opt => {
+                            if (opt && opt.name && opt.id) {
+                                const key = String(opt.id); // Use ID as unique key
+                                if (!uniqueMap.has(key)) {
+                                    uniqueMap.set(key, {
+                                        id: String(opt.id),
+                                        name: String(opt.name).trim()
+                                    });
+                                }
+                            }
                         });
+                        
+                        this.options = Array.from(uniqueMap.values());
+                        
+                        console.log('=== Subject Dropdown Initialized ===');
+                        console.log('Selected:', this.selected);
+                        console.log('Options:', this.options);
 
+                        // Watch dropdown open/close
                         this.$watch('open', value => {
                             if (value) {
+                                console.log('Dropdown opened, selected:', this.selected);
+                                // Force icon re-render
                                 this.$nextTick(() => {
-                                    if (window.lucide) window.lucide.createIcons();
+                                    if (window.lucide) {
+                                        window.lucide.createIcons();
+                                    }
                                 });
                             }
                         });
-                        return; // Ensure u is not a function crash is avoided
                     },
 
                     select(name) {
-                        this.selected = [String(name)];
+                        const strName = String(name).trim();
+                        console.log('Selecting:', strName, 'was:', this.selected);
+                        
+                        // Single select: replace the value
+                        this.selected = strName;
                         this.open = false;
+                        
+                        // Re-render icons after selection
                         this.$nextTick(() => {
-                            if (window.lucide) lucide.createIcons();
+                            if (window.lucide) {
+                                lucide.createIcons();
+                            }
                         });
                     },
 
                     clear() {
-                        this.selected = [];
+                        console.log('Clearing selection');
+                        this.selected = '';
                         this.$nextTick(() => {
-                            if (window.lucide) lucide.createIcons();
+                            if (window.lucide) {
+                                lucide.createIcons();
+                            }
                         });
                     },
 
                     isSelected(name) {
-                        return this.selected.includes(String(name));
-                    },
-
-                    getSubject(name) {
-                        const strName = String(name);
-                        return this.options.find(opt => String(opt.name) === strName) || { name: strName || 'Unknown' };
+                        const strName = String(name).trim();
+                        return this.selected === strName;
                     }
                 };
             };

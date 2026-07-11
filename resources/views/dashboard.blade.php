@@ -370,6 +370,7 @@
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Guru</th>
+                        <th class="px-6 py-4 text-center text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">NIP</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tanggal & Hari</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jam Masuk</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jam Keluar</th>
@@ -391,6 +392,15 @@
                                         <p class="text-[10px] text-slate-500 dark:text-slate-400">{{ $att->user->email }}</p>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                @if($att->user->nip)
+                                <span class="inline-flex items-center px-2.5 py-1 bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300 rounded-lg text-sm font-semibold tracking-wide">
+                                    {{ $att->user->nip }}
+                                </span>
+                                @else
+                                <span class="text-xs text-slate-400 italic">-</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <div>
@@ -441,7 +451,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-16 text-center">
+                            <td colspan="6" class="px-6 py-16 text-center">
                                 <div class="flex flex-col items-center gap-4">
                                     <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
                                         <i data-lucide="inbox" class="w-8 h-8 text-slate-400"></i>

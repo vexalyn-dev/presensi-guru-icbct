@@ -1,6 +1,6 @@
 @extends('layouts.teacher')
 
-@section('page-title', 'Riwayat Absensi')
+@section('page-title', 'Riwayat Presensi')
 
 @section('content')
 <div class="fade-in space-y-6">
@@ -12,7 +12,7 @@
                 <i data-lucide="history" class="w-6 h-6 text-white dark:text-navy-900"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Riwayat Absensi</h1>
+                <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Riwayat Presensi</h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Lihat riwayat kehadiran Anda</p>
             </div>
         </div>
@@ -175,7 +175,7 @@
             container.innerHTML = `
                 <div class="p-12 text-center">
                     <i data-lucide="inbox" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada data absensi</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada data presensi</p>
                 </div>
             `;
             return;

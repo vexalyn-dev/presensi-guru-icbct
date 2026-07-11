@@ -156,13 +156,16 @@
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                 class="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 max-h-[480px] overflow-y-auto scrollbar-hide"
+                                 class="absolute right-0 mt-2 w-72 sm:w-80 md:w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 max-h-[400px] sm:max-h-[480px] overflow-y-auto scrollbar-hide"
                                  x-cloak>
                                 
                                 <!-- Header -->
-                                <div class="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                                <div class="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 sticky top-0 z-10">
                                     <div class="flex items-center justify-between">
                                         <h3 class="text-sm font-bold text-navy-800 dark:text-white">Notifikasi</h3>
+                                        <button @click="open = false" class="sm:hidden p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded transition-colors">
+                                            <i data-lucide="x" class="w-4 h-4 text-slate-500"></i>
+                                        </button>
                                     </div>
                                 </div>
                                 
@@ -170,15 +173,15 @@
                                 <div class="divide-y divide-slate-200 dark:divide-slate-700">
                                     @forelse(auth()->user()->notifications()->take(5)->get() as $notif)
                                     <a href="{{ $notif->action_url ?? '#' }}" 
-                                       class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                        <div class="flex items-start gap-3">
+                                       class="block p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                        <div class="flex items-start gap-2.5">
                                             <div class="w-8 h-8 rounded-lg {{ $notif->color }} flex items-center justify-center flex-shrink-0">
                                                 <i data-lucide="{{ $notif->icon }}" class="w-4 h-4"></i>
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-semibold text-navy-800 dark:text-white truncate">{{ $notif->title }}</p>
-                                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{{ $notif->message }}</p>
-                                                <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{{ $notif->time_ago }}</p>
+                                                <p class="text-xs font-semibold text-navy-800 dark:text-white line-clamp-1">{{ $notif->title }}</p>
+                                                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">{{ $notif->message }}</p>
+                                                <p class="text-[9px] text-slate-400 dark:text-slate-500 mt-1">{{ $notif->time_ago }}</p>
                                             </div>
                                         </div>
                                     </a>
@@ -191,7 +194,7 @@
                                 </div>
                                 
                                 <!-- Footer -->
-                                <div class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 text-center">
+                                <div class="p-2.5 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 text-center sticky bottom-0">
                                     <a href="{{ route('teacher.notifications') }}" class="text-xs font-semibold text-navy-800 dark:text-gold-400 hover:underline">
                                         Lihat Semua Notifikasi
                                     </a>
@@ -302,7 +305,7 @@
                     <span class="text-[10px] font-bold {{ $isSchedule ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400 dark:text-slate-500' }} leading-tight text-center">Jadwal</span>
                 </a>
 
-                {{-- Absensi --}}
+                {{-- Presensi --}}
                 @php $isAttendance = request()->routeIs('teacher.attendance') && !request()->routeIs('teacher.class-attendance'); @endphp
                 <a href="{{ route('teacher.attendance') }}" 
                    class="relative flex flex-col items-center justify-end pb-2 pt-2 transition-all duration-300 active:scale-95">
@@ -310,7 +313,7 @@
                         <i data-lucide="scan-line" class="{{ $isAttendance ? 'w-7 h-7' : 'w-6 h-6' }} {{ $isAttendance ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400 dark:text-slate-500' }}"></i>
                     </div>
                     @if($isAttendance) <div class="h-10"></div> @endif
-                    <span class="text-[10px] font-bold {{ $isAttendance ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400 dark:text-slate-500' }} leading-tight text-center">Absensi</span>
+                    <span class="text-[10px] font-bold {{ $isAttendance ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400 dark:text-slate-500' }} leading-tight text-center">Presensi</span>
                 </a>
 
                 {{-- Kelas --}}
