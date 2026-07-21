@@ -77,28 +77,39 @@ class ClassAttendanceController extends Controller
         $dayOfWeek = $now->dayOfWeek;
         $mode      = $request->mode;
 
-        // Decode QR data (format: classroom_id|random_token atau JSON)
+        // Decode QR data (format: JSON dengan classroom_id dan token)
         $qrData = $request->qr_data;
         $classroomId = null;
+        $qrToken = null;
 
-        // Coba parse JSON (jika QR menggunakan format JSON seperti di ClassAttendanceController)
+        // Parse JSON format QR code
         $parsedJson = json_decode($qrData, true);
         if (json_last_error() === JSON_ERROR_NONE && isset($parsedJson['classroom_id'])) {
             $classroomId = $parsedJson['classroom_id'];
+            $qrToken = $parsedJson['token'] ?? null;
         } else {
+            // Fallback: coba parse format lama (classroom_id|token)
             $qrParts = explode('|', $qrData);
-            if (count($qrParts) < 1) {
-                $this->logScan($user, null, $mode, 'failed', 'QR Code tidak valid', $request);
-                return response()->json(['success' => false, 'message' => 'QR Code tidak valid'], 400);
+            if (!empty($qrParts[0]) && is_numeric($qrParts[0])) {
+                $classroomId = $qrParts[0];
+                $qrToken = $qrParts[1] ?? null;
+            } else {
+                $this->logScan($user, null, $mode, 'failed', 'Format QR Code tidak valid', $request);
+                return response()->json(['success' => false, 'message' => 'Format QR Code tidak valid'], 422);
             }
-            $classroomId = $qrParts[0];
         }
 
-        // 1. Cari kelas dari QR
+        // 1. Cari kelas dari QR dan validasi token
         $classroom = Classroom::find($classroomId);
         if (!$classroom) {
             $this->logScan($user, null, $mode, 'failed', 'Kelas tidak ditemukan (ID: ' . $classroomId . ')', $request);
             return response()->json(['success' => false, 'message' => 'Kelas tidak ditemukan'], 404);
+        }
+
+        // Validasi QR token jika tersedia
+        if ($qrToken && $classroom->qr_token !== $qrToken) {
+            $this->logScan($user, $classroom, $mode, 'failed', 'QR token tidak cocok untuk kelas ' . $classroom->name, $request);
+            return response()->json(['success' => false, 'message' => 'QR Code tidak valid untuk kelas ini'], 422);
         }
 
         // 2. Cek apakah ini shared space (aula/gor/mushola)
@@ -167,12 +178,12 @@ class ClassAttendanceController extends Controller
                 ->first();
 
             if (!$attendance) {
-                return response()->json(['success' => false, 'message' => 'Tidak ada presensi masuk yang ditemukan untuk data ini!'], 400);
+                return response()->json(['success' => false, 'message' => 'Tidak ada presensi masuk yang ditemukan untuk data ini!'], 422);
             }
 
             $duration = $now->diffInMinutes($attendance->check_in_time);
             if ($duration < 30) {
-                return response()->json(['success' => false, 'message' => "Durasi mengajar terlalu singkat! Minimal 30 menit (baru {$duration} menit)"], 400);
+                return response()->json(['success' => false, 'message' => "Durasi mengajar terlalu singkat! Minimal 30 menit (baru {$duration} menit)"], 422);
             }
 
             $attendance->check_out_time = $now;
@@ -208,7 +219,7 @@ class ClassAttendanceController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki jadwal mengajar hari ini'
-            ], 400);
+            ], 422);
         }
 
         // Jika guru mensubmit pilihan kelas spesifik
@@ -221,7 +232,7 @@ class ClassAttendanceController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Jadwal yang dipilih tidak valid.'
-            ], 400);
+            ], 422);
         }
 
         // 4. Handle jika shared space dengan multiple jadwal ATAU reguler space tapi multiple jadwal
@@ -259,11 +270,11 @@ class ClassAttendanceController extends Controller
                 : "Waktu scan sudah lewat. Jadwal berakhir pukul " . Carbon::parse($nearestSchedule->end_time)->format('H:i');
 
             $this->logScan($user, $classroom, $mode, 'failed', $message, $request);
-            return response()->json(['success' => false, 'message' => $message], 400);
+            return response()->json(['success' => false, 'message' => $message], 422);
         }
 
         $res = $this->processAttendanceForSchedule($activeSchedule, $user, $now, $mode, $classroom, $request);
-        return response()->json($res, $res['success'] ? 200 : 400);
+        return response()->json($res, $res['success'] ? 200 : 422);
     }
 
     public function saveSharedSpaceAttendance(Request $request)
@@ -273,7 +284,7 @@ class ClassAttendanceController extends Controller
             'selected_classroom_id' => 'required|exists:classrooms,id',
             'subject_id' => 'required|exists:subjects,id',
             'period' => 'required|integer|min:1|max:12',
-            'check_in_time' => 'required|date',
+            'check_in_time' => 'nullable|string', // Accept ISO 8601 string
         ]);
 
         $user = auth()->user();
@@ -284,8 +295,16 @@ class ClassAttendanceController extends Controller
         $selectedClassroom = Classroom::find($request->selected_classroom_id);
         $subject = Subject::find($request->subject_id);
 
-        if (!$location || (! $location->is_shared && $location->type !== 'shared')) {
-            return response()->json(['success' => false, 'message' => 'Ruangan bersama tidak valid'], 400);
+        if (!$location || (!$location->is_shared && $location->type !== 'shared')) {
+            return response()->json(['success' => false, 'message' => 'Ruangan bersama tidak valid'], 422);
+        }
+
+        if (!$selectedClassroom) {
+            return response()->json(['success' => false, 'message' => 'Kelas yang dipilih tidak valid'], 422);
+        }
+
+        if (!$subject) {
+            return response()->json(['success' => false, 'message' => 'Mata pelajaran tidak valid'], 422);
         }
 
         $existing = ClassAttendance::where('user_id', $user->id)
@@ -297,7 +316,17 @@ class ClassAttendanceController extends Controller
             ->first();
 
         if ($existing) {
-            return response()->json(['success' => false, 'message' => 'Presensi untuk sesi ini sudah ada!'], 400);
+            return response()->json(['success' => false, 'message' => 'Presensi untuk sesi ini sudah ada!'], 409);
+        }
+
+        // Parse check_in_time or use now()
+        $checkInTime = $now;
+        if ($request->check_in_time) {
+            try {
+                $checkInTime = Carbon::parse($request->check_in_time);
+            } catch (\Exception $e) {
+                return response()->json(['success' => false, 'message' => 'Format waktu tidak valid'], 422);
+            }
         }
 
         $attendance = ClassAttendance::create([
@@ -307,7 +336,7 @@ class ClassAttendanceController extends Controller
             'subject_id' => $request->subject_id,
             'period' => $request->period,
             'date' => $today,
-            'check_in_time' => Carbon::parse($request->check_in_time),
+            'check_in_time' => $checkInTime,
             'status' => 'Hadir',
             'scan_method' => 'qr_shared_space',
             'notes' => "Mengajar {$selectedClassroom->name} - {$subject->name} di {$location->name}",
@@ -325,7 +354,7 @@ class ClassAttendanceController extends Controller
                 'period' => $request->period,
                 'check_in_time' => $attendance->check_in_time->format('H:i'),
             ],
-        ]);
+        ], 200);
     }
 
     private function processAttendanceForSchedule($activeSchedule, $user, $now, $mode, $scannedClassroom, $request)

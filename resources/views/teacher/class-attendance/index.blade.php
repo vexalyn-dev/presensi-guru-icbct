@@ -547,16 +547,21 @@
                 try {
                     const parsed = JSON.parse(qrData);
                     if (parsed.classroom_id) return parsed.classroom_id;
-                } catch (e) {}
+                } catch (e) {
+                    console.error('Error parsing QR JSON:', e);
+                }
 
-                return String(qrData).split('|')[0];
+                const parts = String(qrData).split('|');
+                return parts[0] || null;
             },
 
             handleScanResponse(status, data) {
                 this.showResult = true;
-                this.resultSuccess = status === 200 || data.success;
-                this.resultMessage = data.message;
-                this.resultData = data.data || null;
+                // Accept status 200, 201, or data.success flag
+                this.resultSuccess = (status >= 200 && status < 300) || (data && data.success);
+                this.resultMessage = data?.message || 'Terjadi kesalahan sistem';
+                this.resultData = data?.data || null;
+                
                 if (this.resultSuccess) {
                     setTimeout(() => window.location.reload(), 3000);
                 }

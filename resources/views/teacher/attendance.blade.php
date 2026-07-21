@@ -139,10 +139,8 @@
                 <div class="flex flex-col items-center justify-center p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-slate-200 dark:border-slate-700">
                     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg">
                         {!! QrCode::size(250)->generate(json_encode([
-                            'type' => 'teacher',
-                            'user_id' => auth()->id(),
-                            'name' => auth()->user()->name,
-                            'date' => now()->toDateString()
+                            'teacher_id' => auth()->id(),
+                            'token' => auth()->user()->qr_token
                         ])) !!}
                     </div>
                     <div class="mt-6 text-center">

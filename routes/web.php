@@ -66,7 +66,6 @@ Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/leaves/{leave}', [LeaveController::class, 'show'])->name('leaves.show');
-    Route::get('/teacher/leave/{leaveRequest}', [TeacherLeaveController::class, 'show'])->name('teacher.leave.show');
 });
 
 // Admin Routes
@@ -222,10 +221,6 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::get('/leave', [TeacherLeaveController::class, 'index'])->name('leave');
         Route::get('/leave/create', [TeacherLeaveController::class, 'create'])->name('leave.create');
         Route::post('/leave', [TeacherLeaveController::class, 'store'])->name('leave.store');
+        Route::get('/leave/{leaveRequest}', [TeacherLeaveController::class, 'show'])->name('leave.show');
         Route::delete('/leave/{leaveRequest}', [TeacherLeaveController::class, 'destroy'])->name('leave.destroy');
-
-        Route::get('/leaves/create', [TeacherLeaveController::class, 'create'])->name('leaves.create');
-        Route::post('/leave-request', [TeacherLeaveController::class, 'store'])->name('leave-request.store');
-        Route::post('/today-notes', [TeacherDashboardController::class, 'updateTodayNotes'])->name('today-notes.update');
-        Route::get('/leaves', [TeacherLeaveController::class, 'index'])->name('leaves');
 });
