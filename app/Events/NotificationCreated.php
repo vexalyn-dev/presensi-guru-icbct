@@ -15,7 +15,7 @@ class NotificationCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $notification;
+    public Notification $notification;
 
     public function __construct(Notification $notification)
     {

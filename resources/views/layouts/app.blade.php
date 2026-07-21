@@ -751,6 +751,5 @@
     </script>
 
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
-    <script src="{{ asset('js/leaves-realtime.js') }}?v={{ filemtime(public_path('js/leaves-realtime.js')) }}"></script>
 </body>
 </html>

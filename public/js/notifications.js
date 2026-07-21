@@ -119,6 +119,45 @@
     };
     window.notificationDropdownAdmin = window.notificationDropdown;
 
+    function refreshLeaveRequestCards() {
+        const list = document.getElementById('leave-requests-list');
+        if (!list) return;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('_', Date.now().toString());
+
+        fetch(url.toString(), {
+            cache: 'no-store',
+            headers: {
+                'Accept': 'text/html',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.ok ? response.text() : null)
+            .then(html => {
+                if (!html) return;
+
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const freshList = doc.getElementById('leave-requests-list');
+                if (!freshList) return;
+
+                list.innerHTML = freshList.innerHTML;
+
+                ['total', 'pending', 'approved', 'rejected'].forEach(key => {
+                    const stat = document.querySelector(`[data-leave-stat="${key}"]`);
+                    const freshStat = doc.querySelector(`[data-leave-stat="${key}"]`);
+                    if (stat && freshStat) stat.textContent = freshStat.textContent;
+                });
+
+                initIcons();
+            })
+            .catch(error => console.error('Error refreshing leave request cards:', error));
+    }
+
+    window.refreshLeaveRequests = refreshLeaveRequestCards;
+
     // --- Notification polling ---
     let lastNotificationIds = new Set();
     let notificationsSeeded = false;
@@ -233,9 +272,7 @@
                             lastNotificationIds.add(notification.id);
                             playNotificationSound();
                             showNotificationToast(notification);
-                            if (typeof window.refreshLeaveRequests === 'function') {
-                                window.refreshLeaveRequests();
-                            }
+                            refreshLeaveRequestCards();
                             window.dispatchEvent(new CustomEvent('notifications:new', { detail: notification }));
                         }
 
@@ -277,10 +314,16 @@
     // Start polling on page load
     document.addEventListener('DOMContentLoaded', function() {
         checkNotifications();
+        refreshLeaveRequestCards();
         setInterval(checkNotifications, 3000);
+        setInterval(refreshLeaveRequestCards, 2000);
         window.addEventListener('focus', checkNotifications);
+        window.addEventListener('focus', refreshLeaveRequestCards);
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) checkNotifications();
+            if (!document.hidden) {
+                checkNotifications();
+                refreshLeaveRequestCards();
+            }
         });
     });
 })();
