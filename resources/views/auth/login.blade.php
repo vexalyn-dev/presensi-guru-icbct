@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">Login - {{ config('app.name', 'ICB CT') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -22,13 +21,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+            margin: 0;
         }
 
         .auth-container {
             position: relative;
             width: 900px;
-            max-width: 95%;
+            max-width: calc(100% - 32px);
             background: white;
             border-radius: 24px;
             box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
@@ -55,12 +56,12 @@
         }
 
         .auth-panel.login {
-            background: #0F172A;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
             transform: translateX(0);
         }
 
         .auth-panel.register {
-            background: #FACC15;
+            background: linear-gradient(135deg, #FACC15 0%, #F59E0B 100%);
             transform: translateX(100%);
         }
 
@@ -72,12 +73,16 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .logo-container img {
-            width: 100%;
-            height: 100%;
+            width: 70%;
+            height: 70%;
             object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
         }
 
         .panel-content {
@@ -89,12 +94,15 @@
             font-size: 1.5rem;
             font-weight: 800;
             margin-bottom: 0.75rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .panel-content p {
             font-size: 0.85rem;
             opacity: 0.9;
             margin-bottom: 2rem;
+            max-width: 300px;
+            line-height: 1.6;
         }
 
         .btn-toggle {
@@ -107,12 +115,16 @@
             font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.4s ease;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.02em;
         }
 
         .btn-toggle:hover {
             background: white;
             color: #0F172A;
             transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 255, 255, 0.2);
         }
 
         /* Container Form di Kanan */
@@ -229,26 +241,7 @@
             font-size: 0.95rem;
             background: #F8FAFC;
             font-family: 'Inter', sans-serif;
-        }
-
-        .input-wrapper input[type="password"],
-        .input-wrapper input.password-input {
-            padding-right: 48px;
-        }
-
-        /* Hide browser native password reveal button */
-        input[type="password"]::-ms-reveal,
-        input[type="password"]::-ms-clear {
-            display: none;
-        }
-        input[type="password"]::-webkit-credentials-auto-fill-button,
-        input[type="password"]::-webkit-textfield-decoration-container {
-            display: none !important;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        input[type="password"] {
-            -webkit-appearance: none;
+            transition: all 0.3s ease;
         }
 
         .input-wrapper input:focus {
@@ -298,7 +291,7 @@
 
         .btn-submit {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: #0F172A;
             color: white;
             border: none;
@@ -309,6 +302,9 @@
             transition: all 0.4s ease;
             box-shadow: 0 4px 20px rgba(15, 23, 42, 0.25);
             margin-top: 0.75rem;
+            letter-spacing: 0.02em;
+            min-height: 48px;
+            touch-action: manipulation;
         }
 
         .btn-submit:hover {
@@ -401,11 +397,13 @@
             transition: all 0.4s ease;
             background: white;
             text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .social-btn:hover {
             border-color: #FACC15;
             transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 6px 15px rgba(250, 204, 21, 0.3);
         }
 
         .social-btn img,
@@ -426,12 +424,21 @@
             color: #FACC15;
             font-weight: 600;
             text-decoration: none;
+            transition: all 0.2s ease;
         }
 
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* MOBILE RESPONSIVE */
         @media (max-width: 768px) {
             .auth-container {
                 flex-direction: column;
                 height: auto;
+                min-height: auto;
+                padding: 20px;
+                box-shadow: none;
             }
 
             .auth-panel {
@@ -449,17 +456,491 @@
                 width: 100%;
                 opacity: 1 !important;
                 z-index: 2 !important;
+                padding: 30px 25px;
+            }
+
+            #loginForm {
+                display: flex;
+                opacity: 1 !important;
+                z-index: 2 !important;
+            }
+
+            #loginForm.hidden {
+                display: none;
+                opacity: 0 !important;
+                z-index: 1 !important;
             }
 
             #registerForm {
                 display: none;
+                opacity: 0 !important;
+                z-index: 1 !important;
             }
 
             #registerForm.visible {
                 display: flex;
+                opacity: 1 !important;
+                z-index: 2 !important;
+            }
+
+            .form-header h2 {
+                font-size: 1.75rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .form-header p {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            .input-wrapper input {
+                padding: 12px 14px 12px 40px;
+                font-size: 0.9rem;
+            }
+
+            .input-group {
+                margin-bottom: 1rem;
+            }
+
+            .btn-submit {
+                padding: 14px;
+                font-size: 1.05rem;
+            }
+
+            .divider {
+                margin: 1.25rem 0;
+            }
+
+            .panel-content h1 {
+                font-size: 1.3rem;
+            }
+
+            .panel-content p {
+                font-size: 0.8rem;
+                max-width: 100%;
+            }
+
+            .btn-toggle {
+                padding: 12px 35px;
+                font-size: 0.9rem;
+            }
+
+            .social-btn {
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        /* SMALL MOBILE */
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 15px;
+            }
+
+            .form-container {
+                padding: 25px 20px;
+            }
+
+            .form-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .form-header p {
+                font-size: 0.85rem;
+            }
+
+            .input-wrapper input {
+                padding: 11px 12px 11px 36px;
+                font-size: 0.85rem;
+            }
+
+            .btn-submit {
+                padding: 13px;
+                font-size: 1rem;
+            }
+
+            .divider {
+                margin: 1rem 0;
+            }
+
+            .terms-text {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Mobile Header Panel - NAVY/GOLD THEME */
+        .mobile-header {
+            display: none;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            padding: 30px 20px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            color: white;
+            margin-bottom: 0;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+        }
+
+        .mobile-logo-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+            background: rgba(250, 204, 21, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(250, 204, 21, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .mobile-logo-container img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+        }
+
+        .mobile-header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #FACC15;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 280px;
+            margin: 0 auto;
+            color: #E2E8F0;
+        }
+
+        /* Register Link Styling */
+        .register-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E2E8F0;
+        }
+
+        .register-link p {
+            color: #64748B;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .register-link a {
+            color: #FACC15;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .register-link a:hover,
+        .register-link a:active {
+            color: #F59E0B;
+            text-decoration: underline;
+        }
+
+        /* Update Mobile Responsive */
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: block;
+                padding: 25px 20px;
+                margin-bottom: 0;
+            }
+
+            .mobile-logo-container {
+                width: 90px;
+                height: 90px;
+            }
+
+            .mobile-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .mobile-header p {
+                font-size: 0.8rem;
+            }
+
+            .auth-container {
+                flex-direction: column;
+                padding: 0;
+                min-height: auto;
+                box-shadow: none;
+                border-radius: 20px 20px 0 0;
+                max-width: 100%;
+            }
+
+            .auth-panel {
+                display: none !important;
+            }
+
+            .forms-container {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .form-container {
+                position: relative;
+                width: 100%;
+                opacity: 1 !important;
+                z-index: 2 !important;
+                padding: 28px 24px 32px;
+                overflow-y: auto;
+                max-height: calc(100vh - 280px);
+            }
+
+            #loginForm {
+                display: flex;
+                opacity: 1 !important;
+                z-index: 2 !important;
+            }
+
+            #loginForm.hidden {
+                display: none;
+                opacity: 0 !important;
+                z-index: 1 !important;
+            }
+
+            #registerForm {
+                display: none;
+                opacity: 0 !important;
+                z-index: 1 !important;
+            }
+
+            #registerForm.visible {
+                display: flex;
+                opacity: 1 !important;
+                z-index: 2 !important;
+            }
+
+            .form-header h2 {
+                font-size: 1.65rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .form-header p {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            .input-wrapper input {
+                padding: 13px 14px 13px 42px;
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .input-icon {
+                width: 18px;
+                height: 18px;
+            }
+
+            .password-toggle {
+                width: 18px;
+                height: 18px;
+            }
+
+            .input-group {
+                margin-bottom: 1.1rem;
+            }
+
+            .btn-submit {
+                padding: 15px;
+                font-size: 1.05rem;
+                min-height: 50px;
+            }
+
+            .divider {
+                margin: 1.25rem 0;
+                font-size: 0.85rem;
+            }
+
+            .social-btn {
+                width: 48px;
+                height: 48px;
+            }
+
+            .terms-text {
+                font-size: 0.75rem;
+                line-height: 1.5;
+            }
+
+            .register-link {
+                margin-top: 1.25rem;
+                padding-top: 1.25rem;
+            }
+
+            .register-link p {
+                font-size: 0.9rem;
+            }
+
+            .register-link a {
+                font-weight: 600;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 480px) {
+            .mobile-header {
+                padding: 25px 20px;
+            }
+
+            .mobile-logo-container {
+                width: 90px;
+                height: 90px;
+            }
+
+            .mobile-header h1 {
+                font-size: 1.25rem;
+            }
+
+            .mobile-header p {
+                font-size: 0.8rem;
+            }
+
+            .form-container {
+                padding: 20px 20px 25px;
+            }
+
+            .form-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .btn-submit {
+                padding: 13px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Extra Small Mobile (360px and below) */
+        @media (max-width: 360px) {
+            body {
+                padding: 12px;
+            }
+
+            .mobile-header {
+                padding: 20px 16px;
+            }
+
+            .mobile-logo-container {
+                width: 80px;
+                height: 80px;
+            }
+
+            .mobile-header h1 {
+                font-size: 1.1rem;
+            }
+
+            .mobile-header p {
+                font-size: 0.7rem;
+                max-width: 250px;
+            }
+
+            .auth-container {
+                max-width: 100%;
+            }
+
+            .form-container {
+                padding: 20px 16px 24px;
+                max-height: calc(100vh - 240px);
+            }
+
+            #loginForm {
+                display: flex;
+                opacity: 1 !important;
+                z-index: 2 !important;
+            }
+
+            #loginForm.hidden {
+                display: none;
+                opacity: 0 !important;
+                z-index: 1 !important;
+            }
+
+            #registerForm {
+                display: none;
+                opacity: 0 !important;
+                z-index: 1 !important;
+            }
+
+            #registerForm.visible {
+                display: flex;
+                opacity: 1 !important;
+                z-index: 2 !important;
+            }
+
+            .form-header h2 {
+                font-size: 1.4rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .form-header p {
+                font-size: 0.8rem;
+            }
+
+            .input-wrapper input {
+                padding: 11px 11px 11px 36px;
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .input-group {
+                margin-bottom: 0.9rem;
+            }
+
+            .btn-submit {
+                padding: 13px;
+                font-size: 0.95rem;
+                min-height: 44px;
+                margin-top: 0.5rem;
+            }
+
+            .divider {
+                margin: 0.9rem 0;
+                font-size: 0.75rem;
+            }
+
+            .terms-text {
+                font-size: 0.65rem;
+                line-height: 1.4;
+                margin-top: 0.8rem;
+            }
+
+            .register-link {
+                margin-top: 1rem;
+                padding-top: 1rem;
+            }
+
+            .register-link p {
+                font-size: 0.85rem;
+            }
+
+            .register-link a {
+                font-weight: 600;
             }
         }
     </style>
+
+    <!-- Mobile Header Panel -->
+    <div class="mobile-header" id="mobileHeader" style="display: none;">
+        <div class="mobile-logo-container">
+            @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
+            @if($appSettings->app_logo)
+                <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo">
+            @else
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+            @endif
+        </div>
+        <h1 id="mobileTitle">SMK ICB Cinta Teknika</h1>
+        <p id="mobileDesc">Sistem presensi digital sekolah yang mudah, cepat, dan terpercaya.</p>
+    </div>
 </head>
 
 <body>
@@ -554,6 +1035,10 @@
                             class="w-5 h-5">
                         <span>Masuk dengan Google</span>
                     </a>
+                </div>
+
+                <div class="register-link">
+                    <p>Belum punya akun? <a href="#" onclick="toggleAuth(); return false;">Daftar sekarang</a></p>
                 </div>
             </div>
             {{-- END #loginForm --}}
@@ -660,6 +1145,10 @@
                         <span>Daftar dengan Google</span>
                     </a>
                 </div>
+
+                <div class="register-link">
+                    <p>Sudah punya akun? <a href="#" onclick="toggleAuth(); return false;">Login sekarang</a></p>
+                </div>
             </div>
             {{-- END #registerForm --}}
 
@@ -669,25 +1158,6 @@
     {{-- END .auth-container --}}
 
     <script>
-        // Debug form submission
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginFormElement');
-            if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
-                    console.log('Form submitted');
-                    const email = document.getElementById('login-email').value;
-                    const password = document.getElementById('login-password').value;
-                    console.log('Email:', email);
-                    console.log('Password length:', password.length);
-                    
-                    // Show loading state
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Memproses...';
-                });
-            }
-        });
-
         function toggleAuth() {
             const panel = document.getElementById('authPanel');
             const loginForm = document.getElementById('loginForm');
@@ -695,6 +1165,9 @@
             const panelTitle = document.getElementById('panelTitle');
             const panelText = document.getElementById('panelText');
             const toggleBtn = document.getElementById('toggleBtn');
+            const mobileTitle = document.getElementById('mobileTitle');
+            const mobileDesc = document.getElementById('mobileDesc');
+            const formsContainer = document.querySelector('.forms-container');
 
             if (loginForm.classList.contains('hidden')) {
                 // Show Login
@@ -702,21 +1175,50 @@
                 panel.classList.add('login');
                 loginForm.classList.remove('hidden');
                 registerForm.classList.remove('visible');
+                
+                // Update mobile header text
+                if (mobileTitle) mobileTitle.textContent = 'SMK ICB Cinta Teknika';
+                if (mobileDesc) mobileDesc.textContent = 'Sistem presensi digital sekolah yang mudah, cepat, dan terpercaya.';
+                
                 panelTitle.textContent = 'Selamat Datang Di Website ICB CINTA TEKNIKA';
                 panelText.textContent = 'Aplikasi Presensi Guru ICB Cinta Teknika';
                 toggleBtn.textContent = 'Buat Akun';
-                document.getElementById('pageTitle').textContent = 'Login - {{ config('app.name', 'ICB CT') }}';
+                document.getElementById('pageTitle').textContent = "Login - {{ config('app.name', 'ICB CT') }}";
+                
+                // Scroll to top of form
+                if (formsContainer) {
+                    formsContainer.scrollTop = 0;
+                }
+                if (loginForm) {
+                    loginForm.scrollTop = 0;
+                }
             } else {
                 // Show Register
                 panel.classList.remove('login');
                 panel.classList.add('register');
                 loginForm.classList.add('hidden');
                 registerForm.classList.add('visible');
+                
+                // Update mobile header text
+                if (mobileTitle) mobileTitle.textContent = 'Daftar Akun Baru';
+                if (mobileDesc) mobileDesc.textContent = 'Buat akun untuk mulai menggunakan aplikasi';
+                
                 panelTitle.textContent = 'Daftar Akun Baru';
                 panelText.textContent = 'Silahkan register untuk mulai menggunakan aplikasi';
                 toggleBtn.textContent = 'Sudah Punya Akun?';
-                document.getElementById('pageTitle').textContent = 'Register - {{ config('app.name', 'ICB CT') }}';
+                document.getElementById('pageTitle').textContent = "Register - {{ config('app.name', 'ICB CT') }}";
+                
+                // Scroll to top of form
+                if (formsContainer) {
+                    formsContainer.scrollTop = 0;
+                }
+                if (registerForm) {
+                    registerForm.scrollTop = 0;
+                }
             }
+            
+            // Scroll page to top on mobile (for better UX)
+            window.scrollTo(0, 0);
         }
 
         // Toggle Password Visibility
@@ -744,6 +1246,14 @@
                 `;
             }
         }
+
+        // Auto-focus email input on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('login-email');
+            if (emailInput) {
+                emailInput.focus();
+            }
+        });
     </script>
 </body>
 

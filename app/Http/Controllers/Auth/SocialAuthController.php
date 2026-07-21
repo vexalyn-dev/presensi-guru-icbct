@@ -47,13 +47,13 @@ class SocialAuthController extends Controller
 
                 Auth::login($existingUser);
 
-                // Redirect based on role
+                // Redirect based on role - TIDAK MENGGUNAKAN intended() untuk social auth
                 if ($existingUser->isTeacher()) {
-                    return redirect()->intended(route('teacher.dashboard'))
+                    return redirect('/teacher/dashboard')
                         ->with('success', 'Login berhasil melalui ' . ucfirst($provider));
                 }
 
-                return redirect()->intended(route('dashboard'))
+                return redirect('/dashboard')
                     ->with('success', 'Login berhasil melalui ' . ucfirst($provider));
             }
 
@@ -70,13 +70,13 @@ class SocialAuthController extends Controller
 
             Auth::login($newUser);
 
-            // Redirect based on role
+            // Redirect based on role - TIDAK MENGGUNAKAN intended() untuk social auth
             if ($newUser->isTeacher()) {
-                return redirect()->intended(route('teacher.dashboard'))
+                return redirect('/teacher/dashboard')
                     ->with('success', 'Akun berhasil dibuat dan Anda telah masuk melalui ' . ucfirst($provider) . '!');
             }
 
-            return redirect()->intended(route('dashboard'))
+            return redirect('/dashboard')
                 ->with('success', 'Akun berhasil dibuat dan Anda telah masuk melalui ' . ucfirst($provider) . '!');
 
         } catch (\Exception $e) {
