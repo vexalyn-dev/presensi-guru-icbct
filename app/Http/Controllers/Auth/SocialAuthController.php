@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WelcomeEmail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
 
@@ -80,6 +83,16 @@ class SocialAuthController extends Controller
                 'provider'    => $provider,
                 'provider_id' => $socialUser->getId(),
             ]);
+
+            // Kirim email sambutan setelah akun dibuat
+            try {
+                Mail::to($newUser->email)->send(new WelcomeEmail($newUser));
+            } catch (\Exception $e) {
+                Log::error('Failed to send welcome email: ' . $e->getMessage(), [
+                    'user_id' => $newUser->id,
+                    'email' => $newUser->email,
+                ]);
+            }
 
             Auth::login($newUser);
 
