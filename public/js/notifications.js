@@ -64,10 +64,11 @@
 
                     const badge = document.querySelector('.notification-badge, [data-notif-count]');
                     if (badge) {
-                        const count = parseInt(badge.textContent || '0') - 1;
-                        if (count <= 0) badge.remove();
-                        else badge.textContent = count;
+                        const count = Number.parseInt(badge.textContent || '0', 10);
+                        if (Number.isFinite(count) && count > 1) badge.textContent = count - 1;
+                        else badge.remove();
                     }
+                    setTimeout(checkNotifications, 150);
                 }
             }
         });
@@ -116,9 +117,11 @@
             }
         };
     };
+    window.notificationDropdownAdmin = window.notificationDropdown;
 
     // --- Notification polling ---
     let lastNotificationIds = new Set();
+    let notificationsSeeded = false;
 
     function initNotificationSound() {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -182,6 +185,7 @@
                 if (!notifBadge && bellBtn) {
                     notifBadge = document.createElement('span');
                     notifBadge.className = 'notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse';
+                    notifBadge.setAttribute('aria-label', `${data.unreadCount} notifikasi belum dibaca`);
                     // ensure the bell button is the positioning context
                     if (getComputedStyle(bellBtn).position === 'static') bellBtn.style.position = 'relative';
                     bellBtn.appendChild(notifBadge);
@@ -193,6 +197,7 @@
                         if (getComputedStyle(bellBtn).position === 'static') bellBtn.style.position = 'relative';
                     }
                     notifBadge.style.display = 'block';
+                    notifBadge.setAttribute('aria-label', `${data.unreadCount} notifikasi belum dibaca`);
                 }
             } else if (notifBadge) {
                 notifBadge.style.display = 'none';
@@ -202,8 +207,9 @@
             const notifsList = dropdown ? dropdown.querySelector('.divide-y') : null;
 
             // First poll: seed known ids to avoid toasting existing notifications
-            if (lastNotificationIds.size === 0) {
+            if (!notificationsSeeded) {
                 (data.notifications || []).forEach(n => lastNotificationIds.add(n.id));
+                notificationsSeeded = true;
             }
 
             // Re-render dropdown list entirely so UI always matches backend
@@ -267,6 +273,10 @@
     // Start polling on page load
     document.addEventListener('DOMContentLoaded', function() {
         checkNotifications();
-        setInterval(checkNotifications, 5000);
+        setInterval(checkNotifications, 3000);
+        window.addEventListener('focus', checkNotifications);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkNotifications();
+        });
     });
 })();

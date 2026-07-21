@@ -396,6 +396,10 @@
     <!-- ========================================== -->
     <!-- MAIN CONTENT                               -->
     <!-- ========================================== -->
+    <div id="laravel-config" style="display:none;"
+         data-unread-url="{{ Auth::user()->isAdmin() ? route('notifications.api.unread') : route('teacher.notifications.api.unread') }}"
+         data-user-id="{{ Auth::id() }}"></div>
+
     <div class="lg:ml-64 min-h-screen flex flex-col transition-all duration-300">
         
         <!-- Top Header -->
@@ -447,10 +451,10 @@
                             @endif
                         </div>
 
-                        <div class="max-h-[400px] overflow-y-auto">
+                        <div class="max-h-[400px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
                             @forelse(Auth::user()->notifications->take(5) as $notification)
                                 <div class="flex items-start border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors notif-item">
-                                    <a href="{{ $notification->data['url'] ?? '#' }}" class="flex-1 block p-4">
+                                    <a href="{{ $notification->action_url ?? '#' }}" class="flex-1 block p-4">
                                         <div class="flex gap-3 items-start">
                                             <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 
                                                 {{ ($notification->data['type'] ?? '') === 'success' ? 'bg-green-100 text-green-600' : 
@@ -747,122 +751,6 @@
         }
     </script>
 
-    <!-- Real-time Notification System -->
-    <script>
-        let lastNotificationIds = new Set();
-
-        // Initialize notification sound (iPhone-like)
-        function initNotificationSound() {
-            // Create iPhone-like notification sound using Web Audio API
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Create a simple notification tone
-            const duration = 0.5;
-            const now = audioContext.currentTime;
-            
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            
-            // iPhone notification tone frequencies
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.setValueAtTime(1000, now + 0.1);
-            
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
-            
-            osc.start(now);
-            osc.stop(now + duration);
-        }
-
-        // Play notification sound
-        function playNotificationSound() {
-            try {
-                initNotificationSound();
-            } catch (e) {
-                console.log('Audio API not available:', e.message);
-            }
-        }
-
-        // Show toast notification
-        function showNotificationToast(notification) {
-            const toast = document.createElement('div');
-            toast.className = `
-                fixed bottom-6 right-6 p-4 rounded-lg shadow-lg animate-bounce-in
-                flex items-start gap-3 max-w-sm z-50
-                ${notification.bg_color} transition-all duration-300
-            `;
-            
-            toast.innerHTML = `
-                <div class="flex-1">
-                    <h3 class="font-semibold text-sm">${notification.title}</h3>
-                    <p class="text-xs opacity-90 mt-1">${notification.message}</p>
-                    <p class="text-xs opacity-75 mt-2">${notification.created_at}</p>
-                </div>
-                <button onclick="this.parentElement.remove()" class="flex-shrink-0 opacity-50 hover:opacity-100">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Render lucide icons
-            lucide.createIcons();
-            
-            // Auto remove after 6 seconds
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 6000);
-        }
-
-        // Poll for new notifications
-        async function checkNotifications() {
-            try {
-                const response = await fetch('{{ route("notifications.api.unread") }}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success && data.notifications.length > 0) {
-                    // Update notification badge if it exists
-                    const notifBadge = document.querySelector('.notification-badge');
-                    if (notifBadge) {
-                        notifBadge.textContent = data.unreadCount;
-                        if (data.unreadCount > 0) {
-                            notifBadge.style.display = 'block';
-                        }
-                    }
-                    
-                    // Show new notifications only
-                    data.notifications.forEach(notification => {
-                        if (!lastNotificationIds.has(notification.id)) {
-                            lastNotificationIds.add(notification.id);
-                            playNotificationSound();
-                            showNotificationToast(notification);
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Error checking notifications:', error);
-            }
-        }
-
-        // Start polling on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check immediately
-            checkNotifications();
-            
-            // Then check every 5 seconds
-            setInterval(checkNotifications, 5000);
-        });
-    </script>
+    <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
 </body>
 </html>

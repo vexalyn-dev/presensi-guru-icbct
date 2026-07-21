@@ -90,6 +90,7 @@ class NotificationController extends Controller
                     'icon' => $notification->icon ?? ($notification->data['icon'] ?? 'bell'),
                     // Prefer model accessor `color` but fallback to data key
                     'bg_color' => $notification->color ?? ($notification->data['bg_color'] ?? 'bg-blue-100 text-blue-600'),
+                    'action_url' => $notification->action_url ?? ($notification->data['action_url'] ?? null),
                     'created_at' => $notification->created_at->diffForHumans(),
                 ];
             });

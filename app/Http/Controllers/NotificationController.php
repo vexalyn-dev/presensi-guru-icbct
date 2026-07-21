@@ -66,6 +66,7 @@ class NotificationController extends Controller
                     'message' => $notification->message ?? ($notification->data['message'] ?? ''),
                     'icon' => $notification->icon ?? ($notification->data['icon'] ?? 'bell'),
                     'bg_color' => $notification->color ?? ($notification->data['bg_color'] ?? 'bg-blue-100 text-blue-600'),
+                    'action_url' => $notification->action_url ?? ($notification->data['action_url'] ?? null),
                     'created_at' => $notification->created_at->diffForHumans(),
                 ];
             });
