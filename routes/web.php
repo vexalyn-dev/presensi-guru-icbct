@@ -133,6 +133,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     
     // Leaves
     Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');
+    Route::get('/leaves/api/latest', [LeaveController::class, 'latest'])->name('leaves.api.latest');
     Route::get('/leaves/create', [LeaveController::class, 'create'])->name('leaves.create');
     Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
     Route::post('/leaves/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])->name('leaves.approve');

@@ -23,6 +23,40 @@ class LeaveController extends Controller
         return view('leaves.index', compact('leaveRequests', 'stats'));
     }
 
+    public function latest()
+    {
+        $leaveRequests = LeaveRequest::with(['user', 'approvedBy'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'stats' => [
+                'total'    => $leaveRequests->count(),
+                'pending'  => $leaveRequests->where('status', 'pending')->count(),
+                'approved' => $leaveRequests->where('status', 'approved')->count(),
+                'rejected' => $leaveRequests->where('status', 'rejected')->count(),
+            ],
+            'leaves' => $leaveRequests->map(fn (LeaveRequest $leave) => [
+                'id' => $leave->id,
+                'teacher_name' => $leave->user?->name ?? 'Guru',
+                'teacher_photo_url' => $leave->user?->photo_url,
+                'type' => $leave->type,
+                'type_text' => ucfirst($leave->type),
+                'status' => $leave->status,
+                'status_text' => ucfirst($leave->status),
+                'start_date' => $leave->start_date->format('d M Y'),
+                'end_date' => $leave->end_date->format('d M Y'),
+                'duration' => $leave->duration,
+                'reason' => $leave->reason,
+                'admin_notes' => $leave->admin_notes,
+                'show_url' => route('leaves.show', $leave),
+                'approve_url' => route('leaves.approve', $leave),
+                'reject_url' => route('leaves.reject', $leave),
+            ]),
+        ]);
+    }
+
     public function create()
     {
         if (!auth()->user()->isAdmin()) {
