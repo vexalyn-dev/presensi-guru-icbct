@@ -115,20 +115,13 @@
                     <span>Presensi Harian</span>
                 </a>
 
-                <a href="{{ route('teacher.class-attendance') }}" 
+                    <a href="{{ route('teacher.class-attendance') }}" 
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('teacher.class-attendance') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
                     <i data-lucide="scan" class="w-4 h-4"></i>
                     <span>Presensi Kelas</span>
-                </a>
-
-                <a href="{{ route('teacher.history', ['type' => 'daily']) }}" 
-                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('teacher.history') 
-                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
-                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
                     <i data-lucide="history" class="w-4 h-4"></i>
                     <span>Riwayat</span>
                 </a>
@@ -142,9 +135,14 @@
                     <span>Izin/Sakit</span>
                 </a>
             </nav>
-        </aside>
+           </aside>
 
-        <!-- Main Content -->
+           <!-- Notification config (used by external JS) -->
+           <div id="laravel-config" style="display:none;"
+               data-unread-url="{{ route('teacher.notifications.api.unread') }}"
+               data-user-id="{{ auth()->id() ?? '' }}"></div>
+
+           <!-- Main Content -->
         <main class="flex-1 lg:ml-64 min-h-screen">
             <!-- Top Bar -->
             <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
@@ -328,254 +326,11 @@
         <!-- Mobile Overlay (tidak digunakan lagi karena sidebar hidden di mobile) -->
     </div>
 
-    <script>
-        // Check saved theme on load — HARUS di atas segalanya
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
+</aside>
 
-        // Initialize Lucide icons
-        function initIcons() {
-            if (window.lucide) lucide.createIcons();
-        }
-
-        // Toggle Dark Mode
-        function toggleDarkMode() {
-            const html = document.documentElement;
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-            initIcons();
-        }
-
-        // Mark notification as read
-        function markAsRead(notificationId) {
-            fetch(`/teacher/notifications/${notificationId}/read`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(response => {
-                if (response.ok) {
-                    setTimeout(() => window.location.reload(), 400);
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => initIcons());
-        document.addEventListener('alpine:initialized', () => initIcons());
-
-        // Mark single notification as read
-        function markNotifRead(btn, id, type) {
-            const url = type === 'admin'
-                ? `/notifications/${id}/read`
-                : `/teacher/notifications/${id}/read`;
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(res => {
-                if (res.ok) {
-                    const wrapper = btn.closest('.group');
-                    if (wrapper) {
-                        // Hilangkan bold dari teks
-                        const boldText = wrapper.querySelector('.font-semibold');
-                        if (boldText) boldText.classList.add('opacity-60');
-
-                        // Ganti tombol jadi icon check-check hijau
-                        btn.outerHTML = `<div class="shrink-0 self-center mr-3 p-1.5"><i data-lucide="check-check" class="w-3.5 h-3.5 text-green-400"></i></div>`;
-                        initIcons();
-
-                        // Update badge count di bell icon
-                        const badge = document.querySelector('.notification-badge, [data-notif-count]');
-                        if (badge) {
-                            const count = parseInt(badge.textContent) - 1;
-                            if (count <= 0) badge.remove();
-                            else badge.textContent = count;
-                        }
-                    }
-                }
-            });
-        }
-
-        // Mark ALL notifications as read
-        function markAllNotifRead(type) {
-            const url = type === 'teacher'
-                ? '/teacher/notifications/read-all'
-                : '/notifications/mark-all-read';
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(res => {
-                if (res.ok) {
-                    // Semua single check → double check hijau
-                    document.querySelectorAll('.notif-check-wrap').forEach(wrap => {
-                        const single = wrap.querySelector('.notif-check-single');
-                        const double = wrap.querySelector('.notif-check-double');
-                        if (single) single.classList.add('hidden');
-                        if (double) double.classList.remove('hidden');
-                    });
-
-                    // Semua teks bold → normal
-                    document.querySelectorAll('.notif-text').forEach(el => {
-                        el.classList.remove('font-bold', 'font-semibold');
-                        el.classList.add('font-medium', 'opacity-60');
-                    });
-
-                    // Hapus tombol "Tandai Dibaca"
-                    const btn = document.querySelector('[onclick*="markAllNotifRead"]');
-                    if (btn) btn.remove();
-
-                    // Hapus badge notifikasi
-                    document.querySelectorAll('.notification-badge, [data-notif-count]').forEach(b => b.remove());
-                }
-            });
-        }
-    </script>
-    
-    <!-- Alpine.js for dropdown -->
-    <script>
-        function notificationDropdown() {
-            return {
-                open: false,
-                markRead() {
-                    // Badge hanya dihapus manual via tombol "Tandai Dibaca"
-                    // Tidak auto-remove saat buka dropdown
-                },
-                init() {
-                    this.$watch('open', value => this.markRead());
-                }
-            };
-        }
-    </script>
+    <script src="{{ asset('js/notifications.js') }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <!-- Real-time Notification System -->
-    <script>
-        let lastNotificationIds = new Set();
 
-        // Initialize notification sound (iPhone-like)
-        function initNotificationSound() {
-            // Create iPhone-like notification sound using Web Audio API
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Create a simple notification tone
-            const duration = 0.5;
-            const now = audioContext.currentTime;
-            
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            
-            // iPhone notification tone frequencies
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.setValueAtTime(1000, now + 0.1);
-            
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
-            
-            osc.start(now);
-            osc.stop(now + duration);
-        }
-
-        // Play notification sound
-        function playNotificationSound() {
-            try {
-                initNotificationSound();
-            } catch (e) {
-                console.log('Audio API not available:', e.message);
-            }
-        }
-
-        // Show toast notification
-        function showNotificationToast(notification) {
-            const toast = document.createElement('div');
-            toast.className = `
-                fixed bottom-6 right-6 p-4 rounded-lg shadow-lg animate-bounce-in
-                flex items-start gap-3 max-w-sm z-50
-                ${notification.bg_color} transition-all duration-300
-            `;
-            
-            toast.innerHTML = `
-                <div class="flex-1">
-                    <h3 class="font-semibold text-sm">${notification.title}</h3>
-                    <p class="text-xs opacity-90 mt-1">${notification.message}</p>
-                    <p class="text-xs opacity-75 mt-2">${notification.created_at}</p>
-                </div>
-                <button onclick="this.parentElement.remove()" class="flex-shrink-0 opacity-50 hover:opacity-100">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Render lucide icons
-            lucide.createIcons();
-            
-            // Auto remove after 6 seconds
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 6000);
-        }
-
-        // Poll for new notifications
-        async function checkNotifications() {
-            try {
-                const response = await fetch('{{ route("teacher.notifications.api.unread") }}', {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success && data.notifications.length > 0) {
-                    // Update notification badge if it exists
-                    const notifBadge = document.querySelector('.notification-badge');
-                    if (notifBadge) {
-                        notifBadge.textContent = data.unreadCount;
-                        if (data.unreadCount > 0) {
-                            notifBadge.style.display = 'block';
-                        }
-                    }
-                    
-                    // Show new notifications only
-                    data.notifications.forEach(notification => {
-                        if (!lastNotificationIds.has(notification.id)) {
-                            lastNotificationIds.add(notification.id);
-                            playNotificationSound();
-                            showNotificationToast(notification);
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Error checking notifications:', error);
-            }
-        }
-
-        // Start polling on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check immediately
-            checkNotifications();
-            
-            // Then check every 5 seconds
-            setInterval(checkNotifications, 5000);
-        });
-    </script>
-    
     @stack('scripts')
 </body>
 </html>

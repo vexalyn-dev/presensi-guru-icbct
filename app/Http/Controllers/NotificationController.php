@@ -62,10 +62,10 @@ class NotificationController extends Controller
                 return [
                     'id' => $notification->id,
                     'type' => $notification->type,
-                    'title' => $notification->data['title'] ?? 'Notifikasi',
-                    'message' => $notification->data['message'] ?? '',
-                    'icon' => $notification->data['icon'] ?? 'bell',
-                    'bg_color' => $notification->data['bg_color'] ?? 'bg-blue-100 text-blue-600',
+                    'title' => $notification->title ?? ($notification->data['title'] ?? 'Notifikasi'),
+                    'message' => $notification->message ?? ($notification->data['message'] ?? ''),
+                    'icon' => $notification->icon ?? ($notification->data['icon'] ?? 'bell'),
+                    'bg_color' => $notification->color ?? ($notification->data['bg_color'] ?? 'bg-blue-100 text-blue-600'),
                     'created_at' => $notification->created_at->diffForHumans(),
                 ];
             });

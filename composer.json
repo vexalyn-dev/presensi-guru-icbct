@@ -11,6 +11,7 @@
         "laravel/socialite": "^5.26",
         "laravel/tinker": "^2.10.1",
         "phpoffice/phpspreadsheet": "^5.8",
+        "pusher/pusher-php-server": "^7.2",
         "simplesoftwareio/simple-qrcode": "^4.2"
     },
     "require-dev": {

@@ -692,8 +692,8 @@
                         const boldText = wrapper.querySelector('.font-bold');
                         if (boldText) boldText.classList.remove('font-bold');
 
-                        // Ganti tombol jadi icon check-check hijau
-                        btn.outerHTML = `<div class="shrink-0 self-center mr-3 p-1.5"><i data-lucide="check-check" class="w-3.5 h-3.5 text-green-400"></i></div>`;
+                        // Ganti tombol jadi icon check-circle hijau
+                        btn.outerHTML = `<div class="shrink-0 self-center mr-3 p-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i></div>`;
                         initIcons();
 
                         // Update badge count di bell icon

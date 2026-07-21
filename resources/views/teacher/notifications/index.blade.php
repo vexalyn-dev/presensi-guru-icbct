@@ -54,7 +54,7 @@
             <form x-show="!selectionMode" action="{{ route('teacher.notifications.read-all') }}" method="POST" class="w-full sm:w-auto">
                 @csrf
                 <button type="submit" class="w-full sm:w-auto px-4 py-2.5 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl text-sm font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                    <i data-lucide="check-check" class="w-4 h-4"></i>
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
                     Tandai Semua Dibaca
                 </button>
             </form>
