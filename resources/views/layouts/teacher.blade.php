@@ -115,13 +115,20 @@
                     <span>Presensi Harian</span>
                 </a>
 
-                    <a href="{{ route('teacher.class-attendance') }}" 
+                <a href="{{ route('teacher.class-attendance') }}" 
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('teacher.class-attendance') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
                     <i data-lucide="scan" class="w-4 h-4"></i>
                     <span>Presensi Kelas</span>
+                </a>
+
+                <a href="{{ route('teacher.history') }}" 
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('teacher.history*') 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
                     <i data-lucide="history" class="w-4 h-4"></i>
                     <span>Riwayat</span>
                 </a>

@@ -173,17 +173,30 @@
             const data = await response.json();
             if (!data || !data.success) return;
 
-            // Badge
-            let notifBadge = document.querySelector('.notification-badge');
-            const bellBtn = document.querySelector('[x-data*="notificationDropdown"]')?.querySelector('button');
+            // Badge: always scope to the bell button to avoid duplicates or mis-positioned badges
+            const dropdownRoot = document.querySelector('[x-data*="notificationDropdown"]');
+            const bellBtn = dropdownRoot ? dropdownRoot.querySelector('button') : null;
+            let notifBadge = bellBtn ? bellBtn.querySelector('.notification-badge') : document.querySelector('.notification-badge');
+
             if (data.unreadCount > 0) {
                 if (!notifBadge && bellBtn) {
                     notifBadge = document.createElement('span');
                     notifBadge.className = 'notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse';
-                    bellBtn.style.position = 'relative';
+                    // ensure the bell button is the positioning context
+                    if (getComputedStyle(bellBtn).position === 'static') bellBtn.style.position = 'relative';
                     bellBtn.appendChild(notifBadge);
-                } else if (notifBadge) notifBadge.style.display = 'block';
-            } else if (notifBadge) notifBadge.style.display = 'none';
+                } else if (notifBadge) {
+                    // if it's present elsewhere, move it into the bell button to keep layout consistent
+                    if (bellBtn && notifBadge.closest('[x-data*="notificationDropdown"]') !== dropdownRoot) {
+                        notifBadge.remove();
+                        bellBtn.appendChild(notifBadge);
+                        if (getComputedStyle(bellBtn).position === 'static') bellBtn.style.position = 'relative';
+                    }
+                    notifBadge.style.display = 'block';
+                }
+            } else if (notifBadge) {
+                notifBadge.style.display = 'none';
+            }
 
             const dropdown = document.querySelector('[x-data*="notificationDropdown"]');
             const notifsList = dropdown ? dropdown.querySelector('.divide-y') : null;
