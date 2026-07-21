@@ -11,6 +11,26 @@ use Illuminate\Support\Str;
 
 class SocialAuthController extends Controller
 {
+    private function redirectByRole(User $user, string $provider, bool $isNew = false)
+    {
+        $message = $isNew
+            ? 'Akun berhasil dibuat dan Anda telah masuk melalui ' . ucfirst($provider) . '!'
+            : 'Login berhasil melalui ' . ucfirst($provider);
+
+        if ($user->isTeacher()) {
+            return redirect()->route('teacher.dashboard')->with('success', $message);
+        }
+
+        if ($user->isAdmin()) {
+            return redirect()->route('dashboard')->with('success', $message);
+        }
+
+        Auth::logout();
+
+        return redirect()->route('login')
+            ->with('error', 'Role akun tidak dikenali. Hubungi admin.');
+    }
+
     /**
      * Redirect to provider
      */
@@ -47,14 +67,7 @@ class SocialAuthController extends Controller
 
                 Auth::login($existingUser);
 
-                // Redirect based on role - TIDAK MENGGUNAKAN intended() untuk social auth
-                if ($existingUser->isTeacher()) {
-                    return redirect('/teacher/dashboard')
-                        ->with('success', 'Login berhasil melalui ' . ucfirst($provider));
-                }
-
-                return redirect('/dashboard')
-                    ->with('success', 'Login berhasil melalui ' . ucfirst($provider));
+                return $this->redirectByRole($existingUser, $provider);
             }
 
             // User is NEW — create account and auto-login
@@ -70,14 +83,7 @@ class SocialAuthController extends Controller
 
             Auth::login($newUser);
 
-            // Redirect based on role - TIDAK MENGGUNAKAN intended() untuk social auth
-            if ($newUser->isTeacher()) {
-                return redirect('/teacher/dashboard')
-                    ->with('success', 'Akun berhasil dibuat dan Anda telah masuk melalui ' . ucfirst($provider) . '!');
-            }
-
-            return redirect('/dashboard')
-                ->with('success', 'Akun berhasil dibuat dan Anda telah masuk melalui ' . ucfirst($provider) . '!');
+            return $this->redirectByRole($newUser, $provider, true);
 
         } catch (\Exception $e) {
             return redirect('/login')

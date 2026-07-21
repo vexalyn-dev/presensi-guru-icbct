@@ -437,8 +437,12 @@
                 flex-direction: column;
                 height: auto;
                 min-height: auto;
-                padding: 20px;
-                box-shadow: none;
+                padding: 0;
+                margin: 0 auto;
+                box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.15);
+                border-radius: 20px;
+                overflow: hidden;
+                background: white;
             }
 
             .auth-panel {
@@ -456,7 +460,10 @@
                 width: 100%;
                 opacity: 1 !important;
                 z-index: 2 !important;
-                padding: 30px 25px;
+                padding: 32px 26px 40px;
+                border-radius: 0 0 20px 20px;
+                overflow-y: auto;
+                max-height: calc(100vh - 300px);
             }
 
             #loginForm {
@@ -533,12 +540,27 @@
 
         /* SMALL MOBILE */
         @media (max-width: 480px) {
-            .auth-container {
-                padding: 15px;
+            .mobile-header {
+                padding: 32px 20px 28px;
+                border-radius: 16px 16px 0 0;
             }
 
-            .form-container {
-                padding: 25px 20px;
+            .mobile-logo-container {
+                width: 100px;
+                height: 100px;
+                margin: 0 auto 16px;
+                border-radius: 18px;
+            }
+
+            .mobile-header h1 {
+                font-size: 1.35rem;
+                margin-bottom: 8px;
+            }
+
+            .mobile-header p {
+                font-size: 0.85rem;
+                line-height: 1.6;
+                max-width: 290px;
             }
 
             .form-header h2 {
@@ -572,49 +594,84 @@
         .mobile-header {
             display: none;
             background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-            padding: 30px 20px;
+            padding: 40px 24px 36px;
             border-radius: 20px 20px 0 0;
             text-align: center;
             color: white;
             margin-bottom: 0;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+            box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(250, 204, 21, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .mobile-header::after {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -50px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(250, 204, 21, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         .mobile-logo-container {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 15px;
-            background: rgba(250, 204, 21, 0.1);
-            border-radius: 16px;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.15) 0%, rgba(250, 204, 21, 0.08) 100%);
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(250, 204, 21, 0.3);
+            border: 2.5px solid rgba(250, 204, 21, 0.4);
             backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
         }
 
         .mobile-logo-container img {
-            width: 80%;
-            height: 80%;
+            width: 85%;
+            height: 85%;
             object-fit: contain;
-            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
         }
 
         .mobile-header h1 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 8px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
             color: #FACC15;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+            letter-spacing: -0.3px;
+            position: relative;
+            z-index: 1;
         }
 
         .mobile-header p {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            line-height: 1.6;
-            max-width: 280px;
+            font-size: 0.9rem;
+            opacity: 0.95;
+            line-height: 1.7;
+            max-width: 300px;
             margin: 0 auto;
             color: #E2E8F0;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
         }
 
         /* Register Link Styling */
@@ -649,21 +706,26 @@
         @media (max-width: 768px) {
             .mobile-header {
                 display: block;
-                padding: 25px 20px;
+                padding: 35px 22px 32px;
                 margin-bottom: 0;
+                border-radius: 20px 20px 0 0;
+                background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
             }
 
             .mobile-logo-container {
-                width: 90px;
-                height: 90px;
+                width: 105px;
+                height: 105px;
+                margin: 0 auto 18px;
             }
 
             .mobile-header h1 {
-                font-size: 1.3rem;
+                font-size: 1.45rem;
+                margin-bottom: 10px;
             }
 
             .mobile-header p {
-                font-size: 0.8rem;
+                font-size: 0.88rem;
+                line-height: 1.65;
             }
 
             .auth-container {
@@ -824,30 +886,39 @@
             }
 
             .mobile-header {
-                padding: 20px 16px;
+                padding: 28px 18px 24px;
+                border-radius: 16px 16px 0 0;
             }
 
             .mobile-logo-container {
-                width: 80px;
-                height: 80px;
+                width: 95px;
+                height: 95px;
+                margin: 0 auto 14px;
+                border-radius: 16px;
             }
 
             .mobile-header h1 {
-                font-size: 1.1rem;
+                font-size: 1.25rem;
+                margin-bottom: 6px;
             }
 
             .mobile-header p {
-                font-size: 0.7rem;
-                max-width: 250px;
+                font-size: 0.8rem;
+                line-height: 1.55;
+                max-width: 270px;
             }
 
             .auth-container {
                 max-width: 100%;
+                padding: 0;
+                border-radius: 16px;
+                overflow: hidden;
             }
 
             .form-container {
-                padding: 20px 16px 24px;
+                padding: 24px 18px 32px;
                 max-height: calc(100vh - 240px);
+                border-radius: 0 0 16px 16px;
             }
 
             #loginForm {
@@ -924,27 +995,294 @@
                 font-weight: 600;
             }
         }
+
+        @media (max-width: 768px) {
+            html,
+            body {
+                min-height: 100%;
+            }
+
+            body {
+                align-items: flex-start;
+                padding: 18px 14px;
+                background:
+                    radial-gradient(circle at 18% 12%, rgba(250, 204, 21, 0.16), transparent 30%),
+                    radial-gradient(circle at 88% 22%, rgba(15, 23, 42, 0.12), transparent 26%),
+                    linear-gradient(135deg, #EAF2FF 0%, #F8FAFC 48%, #E2E8F0 100%);
+            }
+
+            .auth-container {
+                width: min(100%, 390px);
+                max-width: 390px;
+                min-height: auto;
+                display: block;
+                border-radius: 24px;
+                overflow: hidden;
+                background: #FFFFFF;
+                box-shadow: 0 22px 45px rgba(15, 23, 42, 0.18);
+                border: 1px solid rgba(226, 232, 240, 0.9);
+            }
+
+            .auth-container::before,
+            .auth-container::after {
+                content: '';
+                position: absolute;
+                width: 34px;
+                height: 34px;
+                background: #EAF2FF;
+                z-index: 30;
+                pointer-events: none;
+            }
+
+            .auth-container::before {
+                top: -1px;
+                left: -1px;
+                border-bottom-right-radius: 20px;
+                box-shadow: inset -1px -1px 0 rgba(226, 232, 240, 0.9);
+            }
+
+            .auth-container::after {
+                right: -1px;
+                bottom: -1px;
+                border-top-left-radius: 20px;
+                box-shadow: inset 1px 1px 0 rgba(226, 232, 240, 0.9);
+            }
+
+            .auth-panel {
+                display: none !important;
+            }
+
+            .mobile-header {
+                display: block !important;
+                padding: 36px 24px 18px;
+                background: #FFFFFF;
+                border-radius: 24px 24px 0 0;
+                box-shadow: none;
+                color: #0F172A;
+                overflow: visible;
+            }
+
+            .mobile-header::before,
+            .mobile-header::after {
+                display: none;
+            }
+
+            .mobile-logo-container {
+                width: 92px;
+                height: 92px;
+                margin: 0 auto 16px;
+                border-radius: 999px;
+                background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(15, 23, 42, 0.08));
+                border: 4px solid #F8FAFC;
+                box-shadow: 0 14px 28px rgba(15, 23, 42, 0.15);
+            }
+
+            .mobile-logo-container img {
+                width: 78%;
+                height: 78%;
+                object-fit: contain;
+                filter: none;
+            }
+
+            .mobile-logo-container svg {
+                width: 50%;
+                height: 50%;
+                color: #0F172A;
+            }
+
+            .mobile-header h1 {
+                font-size: 1.25rem;
+                color: #0F172A;
+                text-shadow: none;
+                margin-bottom: 6px;
+                letter-spacing: 0;
+            }
+
+            .mobile-header p {
+                font-size: 0.82rem;
+                line-height: 1.55;
+                color: #64748B;
+                max-width: 280px;
+            }
+
+            .forms-container {
+                position: relative;
+                width: 100%;
+                height: auto;
+                overflow: visible;
+            }
+
+            .form-container {
+                position: relative;
+                width: 100%;
+                height: auto;
+                min-height: 0;
+                max-height: none;
+                padding: 10px 24px 34px;
+                overflow: visible;
+                justify-content: flex-start;
+                background: #FFFFFF;
+                border-radius: 0 0 24px 24px;
+            }
+
+            #loginForm {
+                display: flex;
+                right: auto;
+                opacity: 1 !important;
+                z-index: 2 !important;
+            }
+
+            #loginForm.hidden {
+                display: none;
+            }
+
+            #registerForm {
+                display: none;
+                left: auto;
+                opacity: 0 !important;
+            }
+
+            #registerForm.visible {
+                display: flex;
+                opacity: 1 !important;
+            }
+
+            .form-header {
+                margin-bottom: 1.35rem;
+                text-align: center;
+            }
+
+            .form-header h2 {
+                font-size: 1.35rem;
+                margin-bottom: 0.3rem;
+                color: #0F172A;
+            }
+
+            .form-header p {
+                font-size: 0.82rem;
+                color: #64748B;
+            }
+
+            .input-group {
+                margin-bottom: 0.9rem;
+            }
+
+            .input-group label {
+                font-size: 0.78rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .input-wrapper input {
+                min-height: 42px;
+                padding: 11px 44px 11px 40px;
+                border-width: 0;
+                border-radius: 999px;
+                background: #F1F5F9;
+                font-size: 16px;
+                box-shadow: inset 0 0 0 1px #E2E8F0;
+            }
+
+            .input-wrapper input:focus {
+                border-color: transparent;
+                box-shadow: inset 0 0 0 2px #0F172A, 0 0 0 4px rgba(250, 204, 21, 0.18);
+            }
+
+            .input-icon {
+                width: 16px;
+                height: 16px;
+                left: 15px;
+            }
+
+            .password-toggle {
+                right: 15px;
+                width: 18px;
+                height: 18px;
+            }
+
+            .btn-submit {
+                min-height: 42px;
+                padding: 11px 16px;
+                border-radius: 999px;
+                margin-top: 0.35rem;
+                font-size: 0.95rem;
+                background: linear-gradient(135deg, #0F172A, #1E293B);
+                box-shadow: 0 10px 22px rgba(15, 23, 42, 0.24);
+            }
+
+            .divider {
+                margin: 1rem 0;
+                font-size: 0.72rem;
+            }
+
+            .social-login a {
+                min-height: 42px;
+                border-radius: 999px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+
+            .register-link {
+                margin-top: 1rem;
+                padding-top: 1rem;
+            }
+
+            .register-link p {
+                font-size: 0.82rem;
+            }
+
+            .error-message,
+            .success-message {
+                border-radius: 14px;
+                font-size: 0.82rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            body {
+                padding: 12px;
+            }
+
+            .auth-container {
+                border-radius: 20px;
+            }
+
+            .mobile-header {
+                padding: 32px 20px 14px;
+            }
+
+            .mobile-logo-container {
+                width: 82px;
+                height: 82px;
+                margin-bottom: 14px;
+            }
+
+            .form-container {
+                padding: 8px 20px 28px;
+            }
+        }
     </style>
 
-    <!-- Mobile Header Panel -->
-    <div class="mobile-header" id="mobileHeader" style="display: none;">
-        <div class="mobile-logo-container">
-            @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
-            @if($appSettings->app_logo)
-                <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo">
-            @else
-                <svg fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-            @endif
-        </div>
-        <h1 id="mobileTitle">SMK ICB Cinta Teknika</h1>
-        <p id="mobileDesc">Sistem presensi digital sekolah yang mudah, cepat, dan terpercaya.</p>
-    </div>
 </head>
 
 <body>
     <div class="auth-container">
+        <!-- Mobile Header Panel -->
+        <div class="mobile-header" id="mobileHeader" style="display: none;">
+            <div class="mobile-logo-container">
+                @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
+                @if($appSettings->app_logo)
+                    <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo">
+                @else
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    </svg>
+                @endif
+            </div>
+            <h1 id="mobileTitle">SMK ICB Cinta Teknika</h1>
+            <p id="mobileDesc">Sistem presensi digital sekolah yang mudah, cepat, dan terpercaya.</p>
+        </div>
+
         <!-- Sliding Panel (KIRI) -->
         <div class="auth-panel login" id="authPanel">
             <div class="logo-container">

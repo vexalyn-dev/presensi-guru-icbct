@@ -9,6 +9,24 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
+    private function redirectByRole($user)
+    {
+        if ($user->isTeacher()) {
+            return redirect()->route('teacher.dashboard')
+                ->with('success', 'Selamat datang, ' . $user->name . '!');
+        }
+
+        if ($user->isAdmin()) {
+            return redirect()->route('dashboard')
+                ->with('success', 'Selamat datang, ' . $user->name . '!');
+        }
+
+        Auth::logout();
+
+        return redirect()->route('login')
+            ->with('error', 'Role akun tidak dikenali. Hubungi admin.');
+    }
+
     /**
      * Handle login request
      */
@@ -29,12 +47,7 @@ class LoginController extends Controller
             /** @var \App\Models\User $user */
             $user = Auth::user();
             
-            // Redirect based on role
-            if ($user->isTeacher()) {
-                return redirect()->intended(route('teacher.dashboard'))->with('success', 'Selamat datang, ' . $user->name . '!');
-            }
-            
-            return redirect()->intended(route('dashboard'))->with('success', 'Selamat datang, ' . $user->name . '!');
+            return $this->redirectByRole($user);
         }
 
         return redirect()->back()->withErrors([

@@ -20,7 +20,17 @@ class CheckRole
             return redirect()->route('login');
         }
 
-        if (!in_array($request->user()->role, $roles)) {
+        $user = $request->user();
+
+        if (!in_array($user->role, $roles)) {
+            if ($user->isTeacher()) {
+                return redirect()->route('teacher.dashboard');
+            }
+
+            if ($user->isAdmin()) {
+                return redirect()->route('dashboard');
+            }
+
             abort(403, 'Unauthorized access. You do not have permission to access this page.');
         }
 

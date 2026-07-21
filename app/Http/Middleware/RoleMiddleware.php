@@ -14,7 +14,17 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        if (auth()->user()->role !== $role) {
+        $user = auth()->user();
+
+        if ($user->role !== $role) {
+            if ($user->isTeacher()) {
+                return redirect()->route('teacher.dashboard');
+            }
+
+            if ($user->isAdmin()) {
+                return redirect()->route('dashboard');
+            }
+
             abort(403, 'Unauthorized');
         }
 
