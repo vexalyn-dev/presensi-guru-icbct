@@ -142,7 +142,7 @@
 
     function showNotificationToast(notification) {
         const toast = document.createElement('div');
-        toast.className = `fixed bottom-6 right-6 p-4 rounded-lg shadow-lg animate-bounce-in flex items-start gap-3 max-w-sm z-50 ${notification.bg_color || ''} transition-all duration-300`;
+        toast.className = `fixed bottom-6 right-6 p-4 rounded-lg shadow-lg animate-bounce-in flex items-start gap-3 max-w-sm z-50 ${notification.bg_color || 'bg-blue-100 text-blue-600'} transition-all duration-300`;
         toast.innerHTML = `
             <div class="flex-1">
                 <h3 class="font-semibold text-sm">${notification.title}</h3>
@@ -187,45 +187,64 @@
 
             const dropdown = document.querySelector('[x-data*="notificationDropdown"]');
             const notifsList = dropdown ? dropdown.querySelector('.divide-y') : null;
-            const emptyState = dropdown ? dropdown.querySelector('.p-8.text-center') : null;
 
+            // First poll: seed known ids to avoid toasting existing notifications
             if (lastNotificationIds.size === 0) {
-                data.notifications.forEach(n => lastNotificationIds.add(n.id));
-                return;
+                (data.notifications || []).forEach(n => lastNotificationIds.add(n.id));
             }
 
-            data.notifications.forEach(notification => {
-                if (!lastNotificationIds.has(notification.id)) {
-                    lastNotificationIds.add(notification.id);
-                    playNotificationSound();
-                    showNotificationToast(notification);
-                    if (notifsList) {
-                        if (emptyState) emptyState.style.display = 'none';
-                        const notifItem = document.createElement('div');
-                        notifItem.className = 'flex items-start hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors notif-item border-b border-slate-100 dark:border-slate-700/50';
-                        notifItem.innerHTML = `
+            // Re-render dropdown list entirely so UI always matches backend
+            if (notifsList) {
+                // Clear existing items
+                notifsList.innerHTML = '';
+
+                if (!data.notifications || data.notifications.length === 0) {
+                    // Empty state
+                    notifsList.innerHTML = `
+                        <div class="p-8 text-center">
+                            <i data-lucide="bell-off" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Tidak ada notifikasi</p>
+                        </div>
+                    `;
+                } else {
+                    // Build list from latest notifications
+                    data.notifications.forEach(notification => {
+                        // Show toast only for newly added notifications
+                        if (!lastNotificationIds.has(notification.id)) {
+                            lastNotificationIds.add(notification.id);
+                            playNotificationSound();
+                            showNotificationToast(notification);
+                        }
+
+                        const item = document.createElement('div');
+                        item.className = 'flex items-start hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors notif-item';
+                        const isRead = !!notification.is_read;
+                        item.innerHTML = `
                             <a href="${notification.action_url || '#'}" class="flex-1 p-3 min-w-0">
                                 <div class="flex items-start gap-2.5">
                                     <div class="w-8 h-8 rounded-lg ${notification.bg_color || 'bg-blue-100 text-blue-600'} flex items-center justify-center flex-shrink-0">
                                         <i data-lucide="${notification.icon || 'bell'}" class="w-4 h-4"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs text-navy-800 dark:text-white line-clamp-1 notif-text font-bold">${notification.title}</p>
+                                        <p class="text-xs text-navy-800 dark:text-white line-clamp-1 notif-text ${isRead ? 'font-medium opacity-60' : 'font-semibold'}">${notification.title}</p>
                                         <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">${notification.message}</p>
                                         <p class="text-[9px] text-slate-400 dark:text-slate-500 mt-1">${notification.created_at}</p>
                                     </div>
                                 </div>
                             </a>
-                            <div class="shrink-0 self-center mr-3 p-1.5">
-                                <svg class="notif-check-single" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            <div class="shrink-0 self-center mr-3 notif-check-wrap">
+                                ${isRead ? `
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
+                                ` : `
+                                    <svg class="notif-check-single" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                `}
                             </div>
                         `;
-                        if (notifsList.firstChild) notifsList.insertBefore(notifItem, notifsList.firstChild);
-                        else notifsList.appendChild(notifItem);
-                        initIcons();
-                    }
+                        notifsList.appendChild(item);
+                    });
+                    initIcons();
                 }
-            });
+            }
 
         } catch (error) {
             console.error('Error checking notifications:', error);
