@@ -275,48 +275,143 @@
                             </p>
                         </div>
 
-                        <!-- Kelas -->
-                        <div>
+                        <!-- Kelas — custom searchable dropdown -->
+                        <div x-data="{ openKelas: false, searchKelas: '' }">
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">
                                 Kelas <span class="text-red-500">*</span>
                             </label>
-                            <select x-model="sharedSpaceSelectedClass"
-                                    class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
-                                <option value="">Pilih kelas...</option>
-                                <template x-for="cls in sharedSpaceClasses" :key="cls.id">
-                                    <option :value="cls.id" x-text="cls.code ? `${cls.name} (${cls.code})` : cls.name"></option>
-                                </template>
-                            </select>
+                            <!-- Trigger -->
+                            <button type="button" @click="openKelas = !openKelas"
+                                    class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-2 rounded-xl text-sm transition-all"
+                                    :class="openKelas ? 'border-navy-800 dark:border-gold-400' : 'border-slate-200 dark:border-slate-600'">
+                                <span :class="sharedSpaceSelectedClass ? 'text-navy-800 dark:text-white font-semibold' : 'text-slate-400'"
+                                      x-text="sharedSpaceSelectedClass
+                                        ? (sharedSpaceClasses.find(c => c.id == sharedSpaceSelectedClass)?.code
+                                            ? sharedSpaceClasses.find(c => c.id == sharedSpaceSelectedClass)?.name + ' (' + sharedSpaceClasses.find(c => c.id == sharedSpaceSelectedClass)?.code + ')'
+                                            : sharedSpaceClasses.find(c => c.id == sharedSpaceSelectedClass)?.name)
+                                        : 'Pilih kelas...'">
+                                </span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0"
+                                   :class="openKelas ? 'rotate-180' : ''"></i>
+                            </button>
+                            <!-- Dropdown panel -->
+                            <div x-show="openKelas" @click.away="openKelas = false; searchKelas = ''"
+                                 x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-100"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl overflow-hidden z-10 relative">
+                                <!-- Search bar -->
+                                <div class="p-2 border-b border-slate-100 dark:border-slate-700">
+                                    <div class="relative">
+                                        <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
+                                        <input type="text" x-model="searchKelas" placeholder="Cari kelas..."
+                                               class="w-full pl-7 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-navy-800 dark:focus:ring-gold-400"
+                                               @click.stop>
+                                    </div>
+                                </div>
+                                <!-- List -->
+                                <div class="max-h-44 overflow-y-auto">
+                                    <template x-for="cls in sharedSpaceClasses.filter(c =>
+                                        !searchKelas ||
+                                        c.name.toLowerCase().includes(searchKelas.toLowerCase()) ||
+                                        (c.code && c.code.toLowerCase().includes(searchKelas.toLowerCase()))
+                                    )" :key="cls.id">
+                                        <button type="button"
+                                                @click="sharedSpaceSelectedClass = cls.id; openKelas = false; searchKelas = ''"
+                                                class="w-full text-left px-3.5 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between gap-2"
+                                                :class="sharedSpaceSelectedClass == cls.id ? 'bg-navy-50 dark:bg-navy-900/20 text-navy-800 dark:text-gold-400 font-semibold' : 'text-slate-700 dark:text-slate-300'">
+                                            <span x-text="cls.code ? cls.name + ' (' + cls.code + ')' : cls.name"></span>
+                                            <i x-show="sharedSpaceSelectedClass == cls.id" data-lucide="check" class="w-3.5 h-3.5 flex-shrink-0 text-navy-800 dark:text-gold-400"></i>
+                                        </button>
+                                    </template>
+                                    <!-- empty state -->
+                                    <div x-show="sharedSpaceClasses.filter(c =>
+                                        !searchKelas ||
+                                        c.name.toLowerCase().includes(searchKelas.toLowerCase()) ||
+                                        (c.code && c.code.toLowerCase().includes(searchKelas.toLowerCase()))
+                                    ).length === 0" class="px-3.5 py-4 text-center text-xs text-slate-400">
+                                        Tidak ada kelas ditemukan
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Mapel -->
-                        <div>
+                        <!-- Mapel — custom searchable dropdown -->
+                        <div x-data="{ openMapel: false, searchMapel: '' }">
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">
                                 Mata Pelajaran <span class="text-red-500">*</span>
                             </label>
-                            <select x-model="sharedSpaceSelectedSubject"
-                                    class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
-                                <option value="">Pilih mata pelajaran...</option>
-                                <template x-for="subject in sharedSpaceSubjects" :key="subject.id">
-                                    <option :value="subject.id" x-text="subject.name"></option>
-                                </template>
-                            </select>
+                            <!-- Trigger -->
+                            <button type="button" @click="openMapel = !openMapel"
+                                    class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-2 rounded-xl text-sm transition-all"
+                                    :class="openMapel ? 'border-navy-800 dark:border-gold-400' : 'border-slate-200 dark:border-slate-600'">
+                                <span :class="sharedSpaceSelectedSubject ? 'text-navy-800 dark:text-white font-semibold' : 'text-slate-400'"
+                                      x-text="sharedSpaceSelectedSubject
+                                        ? sharedSpaceSubjects.find(s => s.id == sharedSpaceSelectedSubject)?.name
+                                        : 'Pilih mata pelajaran...'">
+                                </span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0"
+                                   :class="openMapel ? 'rotate-180' : ''"></i>
+                            </button>
+                            <!-- Dropdown panel -->
+                            <div x-show="openMapel" @click.away="openMapel = false; searchMapel = ''"
+                                 x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-100"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl overflow-hidden z-10 relative">
+                                <!-- Search bar -->
+                                <div class="p-2 border-b border-slate-100 dark:border-slate-700">
+                                    <div class="relative">
+                                        <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
+                                        <input type="text" x-model="searchMapel" placeholder="Cari mata pelajaran..."
+                                               class="w-full pl-7 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-navy-800 dark:focus:ring-gold-400"
+                                               @click.stop>
+                                    </div>
+                                </div>
+                                <!-- List -->
+                                <div class="max-h-44 overflow-y-auto">
+                                    <template x-for="subject in sharedSpaceSubjects.filter(s =>
+                                        !searchMapel ||
+                                        s.name.toLowerCase().includes(searchMapel.toLowerCase())
+                                    )" :key="subject.id">
+                                        <button type="button"
+                                                @click="sharedSpaceSelectedSubject = subject.id; openMapel = false; searchMapel = ''"
+                                                class="w-full text-left px-3.5 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between gap-2"
+                                                :class="sharedSpaceSelectedSubject == subject.id ? 'bg-navy-50 dark:bg-navy-900/20 text-navy-800 dark:text-gold-400 font-semibold' : 'text-slate-700 dark:text-slate-300'">
+                                            <span x-text="subject.name"></span>
+                                            <i x-show="sharedSpaceSelectedSubject == subject.id" data-lucide="check" class="w-3.5 h-3.5 flex-shrink-0 text-navy-800 dark:text-gold-400"></i>
+                                        </button>
+                                    </template>
+                                    <div x-show="sharedSpaceSubjects.filter(s =>
+                                        !searchMapel ||
+                                        s.name.toLowerCase().includes(searchMapel.toLowerCase())
+                                    ).length === 0" class="px-3.5 py-4 text-center text-xs text-slate-400">
+                                        Tidak ada mapel ditemukan
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Jam ke- (grid button) -->
+                        <!-- Jam Ke- grid 4×3 -->
                         <div>
-                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                                 Jam Ke- <span class="text-red-500">*</span>
                                 <span class="text-xs font-normal text-slate-400 ml-1">(1–12)</span>
                             </label>
-                            <div class="grid grid-cols-6 gap-2">
+                            <div class="grid grid-cols-4 gap-2">
                                 <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
                                     <button type="button"
                                             @click="sharedSpacePeriod = jam"
                                             :class="sharedSpacePeriod == jam
-                                                ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 ring-2 ring-navy-800 dark:ring-gold-400 font-bold'
-                                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
-                                            class="h-10 rounded-lg text-sm transition-all"
+                                                ? 'bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-lg scale-105 ring-2 ring-navy-800/40 dark:ring-gold-400/40'
+                                                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 hover:scale-105'"
+                                            class="h-11 rounded-xl text-sm font-bold transition-all duration-150 flex flex-col items-center justify-center"
                                             x-text="jam">
                                     </button>
                                 </template>
