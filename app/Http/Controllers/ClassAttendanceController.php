@@ -150,9 +150,18 @@ class ClassAttendanceController extends Controller
 
         } elseif ($existingAttendance->check_in_time && !$existingAttendance->check_out_time) {
             // ── SCAN KELUAR ──────────────────────────────────────────────────
+            $checkInStr = $existingAttendance->check_in_time ? Carbon::parse($existingAttendance->check_in_time)->format('H:i:s') : '00:00:00';
+            $dateStr    = $existingAttendance->date ? Carbon::parse($existingAttendance->date)->toDateString() : $now->toDateString();
+            $checkIn    = Carbon::parse("{$dateStr} {$checkInStr}");
+            $duration   = (int) max(0, round($checkIn->diffInMinutes($now)));
+
+            if ($duration < 30) {
+                return $this->respond($isAjax, false, "Durasi mengajar terlalu singkat untuk kelas {$classroom->name}! Minimal 30 menit (baru {$duration} menit).", 422);
+            }
+
             $existingAttendance->update(['check_out_time' => $currentTime]);
 
-            $message = "✅ Presensi KELUAR kelas {$classroom->name} berhasil!\nJam Pelajaran: {$schedule->period}\nWaktu: {$now->format('H:i')} WIB";
+            $message = "✅ Presensi KELUAR kelas {$classroom->name} berhasil!\nJam Pelajaran: {$schedule->period}\nWaktu: {$now->format('H:i')} WIB\nDurasi mengajar: {$duration} menit";
             return $this->respond($isAjax, true, $message);
 
         } else {

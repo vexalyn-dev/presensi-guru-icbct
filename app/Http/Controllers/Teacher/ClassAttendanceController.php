@@ -316,16 +316,23 @@ class ClassAttendanceController extends Controller
                 ->whereNull('check_out_time')
                 ->with(['selectedClassroom', 'subject'])
                 ->get()
-                ->map(fn ($a) => [
-                    'id'               => $a->id,
-                    'classroom_name'   => $a->selectedClassroom?->name ?? '-',
-                    'classroom_id'     => $a->selected_classroom_id,
-                    'subject_name'     => $a->subject?->name ?? '-',
-                    'subject_id'       => $a->subject_id,
-                    'period'           => $a->period,
-                    'check_in_time'    => $a->check_in_time->format('H:i'),
-                    'duration_minutes' => $a->check_in_time->diffInMinutes(now()),
-                ])
+                ->map(function ($a) {
+                    $checkInStr = $a->check_in_time ? Carbon::parse($a->check_in_time)->format('H:i:s') : '00:00:00';
+                    $dateStr    = $a->date ? Carbon::parse($a->date)->toDateString() : now()->toDateString();
+                    $checkIn    = Carbon::parse("{$dateStr} {$checkInStr}");
+                    $duration   = (int) max(0, round($checkIn->diffInMinutes(now())));
+
+                    return [
+                        'id'               => $a->id,
+                        'classroom_name'   => $a->selectedClassroom?->name ?? '-',
+                        'classroom_id'     => $a->selected_classroom_id,
+                        'subject_name'     => $a->subject?->name ?? '-',
+                        'subject_id'       => $a->subject_id,
+                        'period'           => $a->period,
+                        'check_in_time'    => Carbon::parse($a->check_in_time)->format('H:i'),
+                        'duration_minutes' => $duration,
+                    ];
+                })
                 ->values()
                 ->toArray();
         }
@@ -461,7 +468,11 @@ class ClassAttendanceController extends Controller
             }
         }
 
-        $duration = $now->diffInMinutes($attendance->check_in_time);
+        $checkInStr = $attendance->check_in_time ? Carbon::parse($attendance->check_in_time)->format('H:i:s') : '00:00:00';
+        $dateStr    = $attendance->date ? Carbon::parse($attendance->date)->toDateString() : $now->toDateString();
+        $checkIn    = Carbon::parse("{$dateStr} {$checkInStr}");
+        $duration   = (int) max(0, round($checkIn->diffInMinutes($now)));
+
         if ($duration < 30) {
             return response()->json([
                 'success' => false,
@@ -573,7 +584,11 @@ class ClassAttendanceController extends Controller
                 ];
             }
 
-            $duration = $now->diffInMinutes($attendance->check_in_time);
+            $checkInStr = $attendance->check_in_time ? Carbon::parse($attendance->check_in_time)->format('H:i:s') : '00:00:00';
+            $dateStr    = $attendance->date ? Carbon::parse($attendance->date)->toDateString() : $now->toDateString();
+            $checkIn    = Carbon::parse("{$dateStr} {$checkInStr}");
+            $duration   = (int) max(0, round($checkIn->diffInMinutes($now)));
+
             if ($duration < 30) {
                 $this->logScan($user, $scannedClassroom, 'out', 'failed',
                     "Durasi terlalu singkat ({$duration} menit) di kelas {$scheduleClassroomName}", $request);

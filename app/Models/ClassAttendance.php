@@ -62,6 +62,14 @@ class ClassAttendance extends Model
     public function getDurationMinutes()
     {
         if (!$this->check_in_time || !$this->check_out_time) return 0;
-        return $this->check_in_time->diffInMinutes($this->check_out_time);
+
+        $dateStr    = $this->date ? \Carbon\Carbon::parse($this->date)->toDateString() : now()->toDateString();
+        $checkInStr = \Carbon\Carbon::parse($this->check_in_time)->format('H:i:s');
+        $checkOutStr = \Carbon\Carbon::parse($this->check_out_time)->format('H:i:s');
+
+        $checkIn  = \Carbon\Carbon::parse("{$dateStr} {$checkInStr}");
+        $checkOut = \Carbon\Carbon::parse("{$dateStr} {$checkOutStr}");
+
+        return (int) max(0, round($checkIn->diffInMinutes($checkOut)));
     }
 }

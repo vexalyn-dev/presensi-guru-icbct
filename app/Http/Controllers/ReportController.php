@@ -161,7 +161,12 @@ class ReportController extends Controller
                         if ($attendance) {
                             // SMART MODE: Hanya hitung kalau IN + OUT lengkap
                             if ($attendance->check_in_time && $attendance->check_out_time) {
-                                $duration = $attendance->check_in_time->diffInMinutes($attendance->check_out_time);
+                                $dateStr     = $attendance->date ? Carbon::parse($attendance->date)->toDateString() : $dateStr;
+                                $checkInStr  = Carbon::parse($attendance->check_in_time)->format('H:i:s');
+                                $checkOutStr = Carbon::parse($attendance->check_out_time)->format('H:i:s');
+                                $checkIn     = Carbon::parse("{$dateStr} {$checkInStr}");
+                                $checkOut    = Carbon::parse("{$dateStr} {$checkOutStr}");
+                                $duration    = (int) max(0, round($checkIn->diffInMinutes($checkOut)));
                                 
                                 // Harus minimal 30 menit durasi
                                 if ($duration >= 30) {
