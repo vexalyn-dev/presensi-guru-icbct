@@ -148,14 +148,20 @@
                         </td>
                         <td class="px-6 py-4">
                             @if($att->check_in_time)
-                            <span class="text-sm font-mono text-green-600 dark:text-green-400">{{ \Carbon\Carbon::parse($att->check_in_time)->format('H:i') }}</span>
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-green-500"></i>
+                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">{{ \Carbon\Carbon::parse($att->check_in_time)->format('H:i') }}</span>
+                            </div>
                             @else
                             <span class="text-sm text-slate-400">-</span>
                             @endif
                         </td>
                         <td class="px-6 py-4">
                             @if($att->check_out_time)
-                            <span class="text-sm font-mono text-blue-600 dark:text-blue-400">{{ \Carbon\Carbon::parse($att->check_out_time)->format('H:i') }}</span>
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i>
+                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">{{ \Carbon\Carbon::parse($att->check_out_time)->format('H:i') }}</span>
+                            </div>
                             @else
                             <span class="text-sm text-slate-400">-</span>
                             @endif

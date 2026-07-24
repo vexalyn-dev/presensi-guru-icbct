@@ -369,7 +369,7 @@
                         ${att.check_in_time ? `
                             <div class="flex items-center gap-2">
                                 <i data-lucide="clock" class="w-4 h-4 text-green-500"></i>
-                                <span class="text-sm font-mono text-green-600 dark:text-green-400">${att.check_in_time}</span>
+                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${att.check_in_time}</span>
                             </div>
                         ` : '<span class="text-sm text-slate-400">-</span>'}
                     </td>
@@ -377,7 +377,7 @@
                         ${att.check_out_time ? `
                             <div class="flex items-center gap-2">
                                 <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i>
-                                <span class="text-sm font-mono text-blue-600 dark:text-blue-400">${att.check_out_time}</span>
+                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${att.check_out_time}</span>
                             </div>
                         ` : '<span class="text-sm text-slate-400">-</span>'}
                     </td>

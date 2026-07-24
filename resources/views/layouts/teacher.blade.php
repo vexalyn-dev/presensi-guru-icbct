@@ -56,7 +56,7 @@
 
         <!-- Sidebar -->
         <aside id="sidebar" 
-               class="fixed top-0 bottom-0 left-0 h-screen w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col z-50 transition-transform duration-300 lg:translate-x-0"
+               class="fixed inset-y-0 left-0 z-50 flex h-full min-h-screen w-64 flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-transform duration-300 ease-in-out lg:translate-x-0"
                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
             
             <!-- Logo -->
