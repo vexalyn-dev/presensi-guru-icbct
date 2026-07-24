@@ -22,23 +22,375 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $viewMode = $request->input('view_mode', 'weekly');
+        $viewMode   = $request->input('view_mode', 'weekly');
         $reportType = $request->input('report_type', 'daily');
-        $search = $request->input('search', '');
+        $search     = $request->input('search', '');
         
         if ($viewMode === 'daily') {
             $startDate = $request->input('start_date', Carbon::today()->toDateString());
-            $endDate = $startDate;
+            $endDate   = $startDate;
         } elseif ($viewMode === 'weekly') {
-            $baseDate = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
+            $baseDate  = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
             $startDate = $baseDate->copy()->startOfWeek()->toDateString();
-            $endDate = $baseDate->copy()->endOfWeek()->toDateString();
+            $endDate   = $baseDate->copy()->endOfWeek()->toDateString();
         } else {
-            $baseDate = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
+            $baseDate  = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
             $startDate = $baseDate->copy()->startOfMonth()->toDateString();
-            $endDate = $baseDate->copy()->endOfMonth()->toDateString();
+            $endDate   = $baseDate->copy()->endOfMonth()->toDateString();
         }
 
+        $calculated = $this->calculateReportData($startDate, $endDate, $reportType, $search);
+        $reportData  = $calculated['reportData'];
+        $dates       = $calculated['dates'];
+        $totalStats  = $calculated['totalStats'];
+
+        $totalAbsensi  = array_sum($totalStats);
+        $totalHadir    = $totalStats['hadir'];
+        $kehadiranRate = $totalAbsensi > 0 ? round(($totalHadir / $totalAbsensi) * 100) : 0;
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html'          => view('reports._table', compact('reportData', 'dates', 'reportType', 'viewMode'))->render(),
+                'stats'         => $totalStats,
+                'totalAbsensi'  => $totalAbsensi,
+                'kehadiranRate' => $kehadiranRate,
+            ]);
+        }
+
+        return view('reports.index', compact(
+            'reportData', 'dates', 'totalStats', 'totalAbsensi', 'kehadiranRate',
+            'startDate', 'endDate', 'viewMode', 'search', 'reportType'
+        ));
+    }
+
+    public function export(Request $request)
+    {
+        $reportType = $request->input('report_type', 'daily');
+        $viewMode   = $request->input('view_mode', 'weekly');
+        $search     = $request->input('search', '');
+        
+        if ($viewMode === 'daily') {
+            $startDate = $request->input('start_date', Carbon::today()->toDateString());
+            $endDate   = $startDate;
+        } elseif ($viewMode === 'weekly') {
+            $baseDate  = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
+            $startDate = $baseDate->copy()->startOfWeek()->toDateString();
+            $endDate   = $baseDate->copy()->endOfWeek()->toDateString();
+        } else {
+            $baseDate  = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
+            $startDate = $baseDate->copy()->startOfMonth()->toDateString();
+            $endDate   = $baseDate->copy()->endOfMonth()->toDateString();
+        }
+
+        $calculated = $this->calculateReportData($startDate, $endDate, $reportType, $search);
+        $reportData = $calculated['reportData'];
+        $dates      = $calculated['dates'];
+        $totalStats = $calculated['totalStats'];
+
+        $totalAbsensi  = array_sum($totalStats);
+        $totalHadir    = $totalStats['hadir'];
+        $kehadiranRate = $totalAbsensi > 0 ? round(($totalHadir / $totalAbsensi) * 100) : 0;
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle($reportType === 'daily' ? 'Presensi Harian' : 'Presensi Kelas');
+        $spreadsheet->getDefaultStyle()->getFont()->setName('Segoe UI')->setSize(10);
+
+        // Enable Gridlines
+        $sheet->setShowGridLines(true);
+
+        // ============================================
+        // 1. HEADER SECTION (Title & Info)
+        // ============================================
+        $logoPath = public_path('images/logo.png');
+        if (file_exists($logoPath)) {
+            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+            $drawing->setName('Logo ICB CT');
+            $drawing->setPath($logoPath);
+            $drawing->setHeight(44);
+            $drawing->setCoordinates('A1');
+            $drawing->setOffsetX(5);
+            $drawing->setOffsetY(5);
+            $drawing->setWorksheet($sheet);
+        }
+
+        // Title
+        $sheet->setCellValue('B1', 'LAPORAN ' . strtoupper($reportType === 'daily' ? 'PRESENSI HARIAN' : 'PRESENSI KELAS') . ' GURU');
+        $sheet->getStyle('B1')->applyFromArray([
+            'font' => [
+                'bold'  => true,
+                'size'  => 16,
+                'color' => ['argb' => 'FF0F172A'],
+                'name'  => 'Segoe UI',
+            ],
+        ]);
+        $sheet->getStyle('B1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Subtitle
+        $sheet->setCellValue('B2', 'SMK ICB CINTA TEKNIKA');
+        $sheet->getStyle('B2')->applyFromArray([
+            'font' => [
+                'bold'  => true,
+                'size'  => 11,
+                'color' => ['argb' => 'FF334155'],
+            ],
+        ]);
+
+        // Periode & Mode
+        $periodText = Carbon::parse($startDate)->format('d M Y') . ' - ' . Carbon::parse($endDate)->format('d M Y');
+        $sheet->setCellValue('B3', 'Periode Laporan: ' . $periodText . '  |  Mode Tampilan: ' . ucfirst($viewMode));
+        $sheet->getStyle('B3')->applyFromArray([
+            'font' => [
+                'size'  => 10,
+                'color' => ['argb' => 'FF64748B'],
+            ],
+        ]);
+
+        // Row heights header
+        $sheet->getRowDimension(1)->setRowHeight(40);
+        $sheet->getRowDimension(2)->setRowHeight(20);
+        $sheet->getRowDimension(3)->setRowHeight(18);
+        $sheet->getRowDimension(4)->setRowHeight(12);
+
+        // ============================================
+        // 2. TABLE HEADER
+        // ============================================
+        $headerRow = 5;
+        $sheet->setCellValue('A' . $headerRow, 'No');
+        $sheet->setCellValue('B' . $headerRow, 'Nama Guru');
+        $sheet->setCellValue('C' . $headerRow, 'Mata Pelajaran');
+        if ($reportType === 'class') {
+            $sheet->setCellValue('D' . $headerRow, 'Kelas Utama');
+        }
+        
+        $col = $reportType === 'class' ? 5 : 4;
+        foreach ($dates as $date) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            $sheet->setCellValue($colLetter . $headerRow, $date->format('d/m'));
+            $col++;
+        }
+        
+        $summaryStartCol = $col;
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Hadir (H)');
+        $col++;
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Izin (I)');
+        $col++;
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Sakit (S)');
+        $col++;
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Alpha (A)');
+        $col++;
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Terlambat (T)');
+        $lastCol = $col;
+
+        // Header Base Style (Dark Indigo)
+        $lastColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastCol);
+        $headerRange   = 'A' . $headerRow . ':' . $lastColLetter . $headerRow;
+        
+        $sheet->getStyle($headerRange)->applyFromArray([
+            'font' => ['bold' => true, 'size' => 10, 'color' => ['argb' => 'FFFFFFFF'], 'name' => 'Segoe UI'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1E293B']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            'borders' => [
+                'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FF334155']],
+            ],
+        ]);
+        $sheet->getRowDimension($headerRow)->setRowHeight(28);
+
+        // Distinct colors for summary headers
+        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol) . $headerRow)
+            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF059669'); // Emerald
+        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . $headerRow)
+            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF2563EB'); // Blue
+        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . $headerRow)
+            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF0891B2'); // Cyan
+        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . $headerRow)
+            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFDC2626'); // Red
+        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . $headerRow)
+            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD97706'); // Amber
+
+        // ============================================
+        // 3. DATA ROWS
+        // ============================================
+        $row = $headerRow + 1;
+        $no  = 1;
+
+        foreach ($reportData as $data) {
+            $teacher = $data['user'];
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $teacher->name);
+            $sheet->setCellValue('C' . $row, $data['teacher']?->major_specialty ?? '-');
+
+            if ($reportType === 'class') {
+                $firstClass = collect($data['days'])->first(fn($day) => !empty($day['classes']));
+                $classroom  = $firstClass && !empty($firstClass['classes']) ? $firstClass['classes'][0]['classroom'] : '-';
+                $sheet->setCellValue('D' . $row, $classroom);
+            }
+
+            $dateCol = $reportType === 'class' ? 5 : 4;
+            foreach ($dates as $date) {
+                $dateStr   = $date->toDateString();
+                $dayData   = $data['days'][$dateStr] ?? ['code' => '-', 'status' => 'libur'];
+                $code      = $dayData['code'];
+                $cellCoord = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row;
+
+                $sheet->setCellValue($cellCoord, $code);
+
+                // Highlight status cells cleanly
+                $cellStyle = $sheet->getStyle($cellCoord);
+                $cellStyle->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+
+                switch ($code) {
+                    case 'H':
+                        $cellStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD1FAE5');
+                        $cellStyle->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF065F46'))->setBold(true);
+                        break;
+                    case 'T':
+                        $cellStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFEF3C7');
+                        $cellStyle->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF92400E'))->setBold(true);
+                        break;
+                    case 'I':
+                        $cellStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFDBEAFE');
+                        $cellStyle->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF1E40AF'))->setBold(true);
+                        break;
+                    case 'S':
+                        $cellStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFCFFAFE');
+                        $cellStyle->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF155E75'))->setBold(true);
+                        break;
+                    case 'A':
+                        $cellStyle->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFEE2E2');
+                        $cellStyle->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF991B1B'))->setBold(true);
+                        break;
+                    default:
+                        $cellStyle->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF94A3B8'));
+                        break;
+                }
+
+                $dateCol++;
+            }
+
+            // Write Teacher Summaries
+            $summary = $data['summary'];
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['H']);
+            $dateCol++;
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['I']);
+            $dateCol++;
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['S']);
+            $dateCol++;
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['A']);
+            $dateCol++;
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['T']);
+
+            // Row style
+            $rowRange = 'A' . $row . ':' . $lastColLetter . $row;
+            $sheet->getStyle($rowRange)->applyFromArray([
+                'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
+                'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFE2E8F0']]],
+                'font'      => ['size' => 10, 'color' => ['argb' => 'FF1E293B'], 'name' => 'Segoe UI'],
+            ]);
+
+            // Alignment tweaks
+            $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('B' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            if ($reportType === 'class') {
+                $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            }
+
+            // Summary numbers center
+            for ($i = $summaryStartCol; $i <= $lastCol; $i++) {
+                $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i) . $row)
+                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            }
+
+            // Subtle Zebra Striping
+            if ($no % 2 === 0) {
+                $sheet->getStyle('A' . $row . ':C' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF8FAFC');
+                if ($reportType === 'class') {
+                    $sheet->getStyle('D' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF8FAFC');
+                }
+            }
+
+            $sheet->getStyle('B' . $row)->getFont()->setBold(true);
+            $sheet->getRowDimension($row)->setRowHeight(22);
+            $row++;
+        }
+
+        // ============================================
+        // 4. TOTAL / SUMMARY ROW
+        // ============================================
+        $totalRow = $row;
+        $sheet->setCellValue('A' . $totalRow, '');
+        $sheet->setCellValue('B' . $totalRow, 'TOTAL KESELURUHAN');
+        $sheet->setCellValue('C' . $totalRow, '');
+        if ($reportType === 'class') {
+            $sheet->setCellValue('D' . $totalRow, '');
+        }
+
+        $dateCol = $reportType === 'class' ? 5 : 4;
+        foreach ($dates as $date) {
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $totalRow, '');
+            $dateCol++;
+        }
+
+        $startDataRow = $headerRow + 1;
+        $endDataRow   = $row - 1;
+
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol) . "{$endDataRow})");
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . "{$endDataRow})");
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . "{$endDataRow})");
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . "{$endDataRow})");
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . "{$endDataRow})");
+
+        $totalRange = 'A' . $totalRow . ':' . $lastColLetter . $totalRow;
+        $sheet->getStyle($totalRange)->applyFromArray([
+            'font'      => ['bold' => true, 'size' => 10, 'color' => ['argb' => 'FFFFFFFF'], 'name' => 'Segoe UI'],
+            'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF0F172A']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FF334155']]],
+        ]);
+        $sheet->getStyle('B' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->getRowDimension($totalRow)->setRowHeight(26);
+
+        // ============================================
+        // 5. COLUMN WIDTHS
+        // ============================================
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(28);
+        $sheet->getColumnDimension('C')->setWidth(22);
+        if ($reportType === 'class') {
+            $sheet->getColumnDimension('D')->setWidth(18);
+        }
+        
+        $dateStartCol = $reportType === 'class' ? 5 : 4;
+        for ($i = $dateStartCol; $i < $summaryStartCol; $i++) {
+            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i))->setWidth(7);
+        }
+        for ($i = $summaryStartCol; $i <= $lastCol; $i++) {
+            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i))->setWidth(14);
+        }
+
+        // Freeze Panes
+        $freezeCol = $reportType === 'class' ? 'E' : 'D';
+        $sheet->freezePane($freezeCol . ($headerRow + 1));
+        $sheet->setAutoFilter('A' . $headerRow . ':' . $lastColLetter . ($row - 1));
+
+        // Output Excel
+        $filename = 'Laporan_' . ($reportType === 'daily' ? 'Harian' : 'Kelas') . '_' . Carbon::parse($startDate)->format('dmY') . '_' . Carbon::parse($endDate)->format('dmY') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+    /**
+     * Private helper to calculate synchronized report data
+     */
+    private function calculateReportData($startDate, $endDate, $reportType, $search = '')
+    {
         $teachersQuery = User::where('role', 'guru')->where('is_active', true);
         if ($search) {
             $teachersQuery->where('name', 'like', "%{$search}%");
@@ -65,15 +417,17 @@ class ReportController extends Controller
 
             foreach ($teachers as $teacher) {
                 $teacherData = [
-                    'user' => $teacher, 'teacher' => $teacher->teacher,
-                    'days' => [], 'summary' => ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0, 'T' => 0],
+                    'user'    => $teacher,
+                    'teacher' => $teacher->teacher,
+                    'days'    => [],
+                    'summary' => ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0, 'T' => 0],
                 ];
 
                 foreach ($dates as $date) {
-                    $dayOfWeek = $date->dayOfWeek;
-                    $dateStr = $date->toDateString();
-                    $isWeekend = in_array($dayOfWeek, [0, 6]);
-                    $isHoliday = in_array($dateStr, $holidays);
+                    $dayOfWeek   = $date->dayOfWeek;
+                    $dateStr     = $date->toDateString();
+                    $isWeekend   = in_array($dayOfWeek, [0, 6]);
+                    $isHoliday   = in_array($dateStr, $holidays);
                     $hasSchedule = TeacherSchedule::where('user_id', $teacher->id)
                         ->where('day_of_week', $dayOfWeek)->where('is_active', true)->exists();
 
@@ -82,12 +436,17 @@ class ReportController extends Controller
                         continue;
                     }
 
-                    $attKey = $teacher->id . '_' . $dateStr;
+                    $attKey     = $teacher->id . '_' . $dateStr;
                     $attendance = $attendances->get($attKey)?->first();
 
                     if ($attendance) {
                         $code = match($attendance->status) {
-                            'Hadir' => 'H', 'Terlambat' => 'T', 'Izin' => 'I', 'Sakit' => 'S', 'Alpha' => 'A', default => 'A',
+                            'Hadir'     => 'H',
+                            'Terlambat' => 'T',
+                            'Izin'      => 'I',
+                            'Sakit'     => 'S',
+                            'Alpha'     => 'A',
+                            default     => 'A',
                         };
                         $teacherData['days'][$dateStr] = ['status' => strtolower($attendance->status), 'code' => $code];
                         $teacherData['summary'][$code]++;
@@ -119,17 +478,19 @@ class ReportController extends Controller
 
             foreach ($teachers as $teacher) {
                 $teacherData = [
-                    'user' => $teacher, 'teacher' => $teacher->teacher,
-                    'days' => [], 'summary' => ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0, 'T' => 0],
+                    'user'          => $teacher,
+                    'teacher'       => $teacher->teacher,
+                    'days'          => [],
+                    'summary'       => ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0, 'T' => 0],
                     'class_details' => [],
                 ];
 
                 foreach ($dates as $date) {
-                    $dateStr = $date->toDateString();
+                    $dateStr   = $date->toDateString();
                     $dayOfWeek = $date->dayOfWeek;
                     $isWeekend = in_array($dayOfWeek, [0, 6]);
                     
-                    $schedules = \App\Models\TeachingSchedule::where('user_id', $teacher->id)
+                    $schedules = TeacherSchedule::where('user_id', $teacher->id)
                         ->where('day_of_week', $dayOfWeek)->where('is_active', true)
                         ->with(['classroom', 'subject'])->orderBy('start_time')->get();
 
@@ -139,9 +500,9 @@ class ReportController extends Controller
                     }
 
                     $attendedCount = 0;
-                    $lateCount = 0;
-                    $totalClasses = $schedules->count();
-                    $classDetails = [];
+                    $lateCount     = 0;
+                    $totalClasses  = $schedules->count();
+                    $classDetails  = [];
 
                     foreach ($schedules as $schedule) {
                         $attendance = $classAttendances->first(function($att) use ($teacher, $dateStr, $schedule) {
@@ -153,22 +514,20 @@ class ReportController extends Controller
 
                         $classInfo = [
                             'classroom' => $schedule->classroom->name ?? '-',
-                            'subject' => $schedule->subject->name ?? '-',
-                            'period' => $schedule->period,
-                            'status' => 'A', // Default Alpha
+                            'subject'   => $schedule->subject->name ?? '-',
+                            'period'    => $schedule->period,
+                            'status'    => 'A',
                         ];
 
                         if ($attendance) {
-                            // SMART MODE: Hanya hitung kalau IN + OUT lengkap
                             if ($attendance->check_in_time && $attendance->check_out_time) {
-                                $dateStr     = $attendance->date ? Carbon::parse($attendance->date)->toDateString() : $dateStr;
-                                $checkInStr  = Carbon::parse($attendance->check_in_time)->format('H:i:s');
-                                $checkOutStr = Carbon::parse($attendance->check_out_time)->format('H:i:s');
-                                $checkIn     = Carbon::parse("{$dateStr} {$checkInStr}");
-                                $checkOut    = Carbon::parse("{$dateStr} {$checkOutStr}");
-                                $duration    = (int) max(0, round($checkIn->diffInMinutes($checkOut)));
+                                $checkInDateStr = $attendance->date ? Carbon::parse($attendance->date)->toDateString() : $dateStr;
+                                $checkInStr     = Carbon::parse($attendance->check_in_time)->format('H:i:s');
+                                $checkOutStr    = Carbon::parse($attendance->check_out_time)->format('H:i:s');
+                                $checkIn        = Carbon::parse("{$checkInDateStr} {$checkInStr}");
+                                $checkOut       = Carbon::parse("{$checkInDateStr} {$checkOutStr}");
+                                $duration       = (int) max(0, round($checkIn->diffInMinutes($checkOut)));
                                 
-                                // Harus minimal 30 menit durasi
                                 if ($duration >= 30) {
                                     if ($attendance->status === 'Hadir') { 
                                         $attendedCount++; 
@@ -178,10 +537,10 @@ class ReportController extends Controller
                                         $classInfo['status'] = 'T'; 
                                     }
                                 } else {
-                                    $classInfo['status'] = 'A'; // Durasi terlalu singkat = Alpha
+                                    $classInfo['status'] = 'A';
                                 }
                             } elseif ($attendance->check_in_time && !$attendance->check_out_time) {
-                                $classInfo['status'] = 'NL'; // Tidak Lengkap (belum scan keluar)
+                                $classInfo['status'] = 'NL';
                             }
                         }
 
@@ -207,290 +566,11 @@ class ReportController extends Controller
             }
         }
 
-        $totalAbsensi = array_sum($totalStats);
-        $totalHadir = $totalStats['hadir'];
-        $kehadiranRate = $totalAbsensi > 0 ? round(($totalHadir / $totalAbsensi) * 100) : 0;
-
-        if ($request->ajax()) {
-            return response()->json([
-                'html' => view('reports._table', compact('reportData', 'dates', 'reportType', 'viewMode'))->render(),
-                'stats' => $totalStats,
-                'totalAbsensi' => $totalAbsensi,
-                'kehadiranRate' => $kehadiranRate,
-            ]);
-        }
-
-        return view('reports.index', compact(
-            'reportData', 'dates', 'totalStats', 'totalAbsensi', 'kehadiranRate',
-            'startDate', 'endDate', 'viewMode', 'search', 'reportType'
-        ));
-    }
-
-    public function export(Request $request)
-    {
-        $reportType = $request->input('report_type', 'daily');
-        $viewMode = $request->input('view_mode', 'weekly');
-        $search = $request->input('search', '');
-        
-        if ($viewMode === 'daily') {
-            $startDate = $request->input('start_date', Carbon::today()->toDateString());
-            $endDate = $startDate;
-        } elseif ($viewMode === 'weekly') {
-            $baseDate = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
-            $startDate = $baseDate->copy()->startOfWeek()->toDateString();
-            $endDate = $baseDate->copy()->endOfWeek()->toDateString();
-        } else {
-            $baseDate = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
-            $startDate = $baseDate->copy()->startOfMonth()->toDateString();
-            $endDate = $baseDate->copy()->endOfMonth()->toDateString();
-        }
-
-        $teachersQuery = User::where('role', 'guru')->where('is_active', true);
-        if ($search) $teachersQuery->where('name', 'like', "%{$search}%");
-        $teachers = $teachersQuery->with('teacher')->orderBy('name')->get();
-
-        $dates = [];
-        $period = CarbonPeriod::create($startDate, $endDate);
-        foreach ($period as $date) $dates[] = $date->copy();
-
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle($reportType === 'daily' ? 'Presensi Harian' : 'Presensi Kelas');
-        $spreadsheet->getDefaultStyle()->getFont()->setName('Segoe UI')->setSize(10);
-
-        // ============================================
-        // 1. HEADER SECTION (Logo + Title)
-        // ============================================
-        $logoPath = public_path('images/logo.png');
-        if (file_exists($logoPath)) {
-            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-            $drawing->setName('Logo ICB CT');
-            $drawing->setPath($logoPath);
-            $drawing->setHeight(40);
-            $drawing->setCoordinates('A1');
-            $drawing->setOffsetX(5);
-            $drawing->setOffsetY(5);
-            $drawing->setWorksheet($sheet);
-        }
-
-        // Title
-        $sheet->setCellValue('B1', 'LAPORAN ' . strtoupper($reportType === 'daily' ? 'PRESENSI HARIAN' : 'PRESENSI KELAS') . ' GURU');
-        $sheet->mergeCells('B1:F1');
-        $sheet->getStyle('B1')->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'size' => 16,
-                'color' => ['argb' => 'FF0F172A'],
-                'name' => 'Segoe UI',
-            ],
-        ]);
-        $sheet->getStyle('B1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-
-        // Subtitle
-        $sheet->setCellValue('B2', 'ICB CINTA TEKNIKA');
-        $sheet->getStyle('B2')->applyFromArray([
-            'font' => [
-                'size' => 11,
-                'color' => ['argb' => 'FF64748B'],
-            ],
-        ]);
-
-        // Periode
-        $periodText = Carbon::parse($startDate)->format('d M Y') . ' - ' . Carbon::parse($endDate)->format('d M Y');
-        $sheet->setCellValue('B3', 'Periode Laporan: ' . $periodText);
-        $sheet->getStyle('B3')->applyFromArray([
-            'font' => [
-                'size' => 10,
-                'color' => ['argb' => 'FF94A3B8'],
-            ],
-        ]);
-
-        // Row heights
-        $sheet->getRowDimension(1)->setRowHeight(45);
-        $sheet->getRowDimension(2)->setRowHeight(20);
-        $sheet->getRowDimension(3)->setRowHeight(18);
-        $sheet->getRowDimension(4)->setRowHeight(10);
-
-        // ============================================
-        // 2. TABLE HEADER
-        // ============================================
-        $headerRow = 5;
-        $sheet->setCellValue('A' . $headerRow, 'No');
-        $sheet->setCellValue('B' . $headerRow, 'Nama Guru');
-        $sheet->setCellValue('C' . $headerRow, 'Mata Pelajaran');
-        if ($reportType === 'class') $sheet->setCellValue('D' . $headerRow, 'Kelas');
-        
-        $col = $reportType === 'class' ? 5 : 4;
-        foreach ($dates as $date) {
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, $date->format('d/m'));
-            $col++;
-        }
-        $summaryStartCol = $col;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Hadir');
-        $col++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Izin');
-        $col++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Sakit');
-        $col++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Alpha');
-        $col++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Terlambat');
-        $lastCol = $col;
-
-        // Header style (Navy background, white text)
-        $headerRange = 'A' . $headerRow . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastCol) . $headerRow;
-        $sheet->getStyle($headerRange)->applyFromArray([
-            'font' => ['bold' => true, 'size' => 11, 'color' => ['argb' => 'FFFFFFFF'], 'name' => 'Segoe UI'],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF0F172A']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-            'borders' => [
-                'top' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['argb' => 'FF0F172A']],
-                'bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['argb' => 'FF0F172A']],
-                'left' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FF0F172A']],
-                'right' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FF0F172A']],
-            ],
-        ]);
-        $sheet->getRowDimension($headerRow)->setRowHeight(30);
-
-        // Summary header colors
-        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol) . $headerRow)
-            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF10B981'); // Green
-        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . $headerRow)
-            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF3B82F6'); // Blue
-        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . $headerRow)
-            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF06B6D4'); // Cyan
-        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . $headerRow)
-            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFEF4444'); // Red
-        $sheet->getStyle(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . $headerRow)
-            ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF59E0B'); // Yellow
-
-        // ============================================
-        // 3. DATA ROWS
-        // ============================================
-        $row = $headerRow + 1;
-        $no = 1;
-        foreach ($teachers as $teacher) {
-            $sheet->setCellValue('A' . $row, $no++);
-            $sheet->setCellValue('B' . $row, $teacher->name);
-            $sheet->setCellValue('C' . $row, $teacher->teacher?->major_specialty ?? '-');
-            if ($reportType === 'class') $sheet->setCellValue('D' . $row, '-');
-
-            $summary = ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0, 'T' => 0];
-            $dateCol = $reportType === 'class' ? 5 : 4;
-            
-            foreach ($dates as $date) {
-                $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, '-');
-                $dateCol++;
-            }
-
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['H']);
-            $dateCol++;
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['I']);
-            $dateCol++;
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['S']);
-            $dateCol++;
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['A']);
-            $dateCol++;
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['T']);
-
-            // Row style
-            $rowRange = 'A' . $row . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastCol) . $row;
-            $sheet->getStyle($rowRange)->applyFromArray([
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FFE2E8F0']]],
-                'font' => ['size' => 10, 'color' => ['argb' => 'FF1E293B'], 'name' => 'Segoe UI'],
-            ]);
-
-            // Left align for name and subject
-            $sheet->getStyle('B' . $row . ':C' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            if ($reportType === 'class') {
-                $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            }
-
-            // Zebra striping (subtle)
-            if ($row % 2 === 0) {
-                $sheet->getStyle($rowRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF8FAFC');
-            }
-
-            // Bold name
-            $sheet->getStyle('B' . $row)->applyFromArray([
-                'font' => [
-                    'bold' => true,
-                    'color' => ['argb' => 'FF0F172A'],
-                ],
-            ]);
-            $row++;
-        }
-
-        // ============================================
-        // 4. SUMMARY ROW (Total)
-        // ============================================
-        $totalRow = $row;
-        $sheet->setCellValue('A' . $totalRow, '');
-        $sheet->setCellValue('B' . $totalRow, 'TOTAL');
-        $sheet->setCellValue('C' . $totalRow, '');
-        if ($reportType === 'class') $sheet->setCellValue('D' . $totalRow, '');
-
-        $dateCol = $reportType === 'class' ? 5 : 4;
-        foreach ($dates as $date) {
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $totalRow, '');
-            $dateCol++;
-        }
-
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $totalRow, '=SUM(' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol) . ($headerRow + 1) . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol) . ($row - 1) . ')');
-        $dateCol++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $totalRow, '=SUM(' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . ($headerRow + 1) . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . ($row - 1) . ')');
-        $dateCol++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $totalRow, '=SUM(' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . ($headerRow + 1) . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . ($row - 1) . ')');
-        $dateCol++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $totalRow, '=SUM(' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . ($headerRow + 1) . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . ($row - 1) . ')');
-        $dateCol++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $totalRow, '=SUM(' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . ($headerRow + 1) . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . ($row - 1) . ')');
-
-        // Total row style
-        $totalRange = 'A' . $totalRow . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastCol) . $totalRow;
-        $sheet->getStyle($totalRange)->applyFromArray([
-            'font' => ['bold' => true, 'size' => 11, 'color' => ['argb' => 'FFFFFFFF'], 'name' => 'Segoe UI'],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF0F172A']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['argb' => 'FF0F172A']]],
-        ]);
-        $sheet->getStyle('B' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $sheet->getRowDimension($totalRow)->setRowHeight(28);
-
-        // ============================================
-        // 5. COLUMN WIDTHS
-        // ============================================
-        $sheet->getColumnDimension('A')->setWidth(6);
-        $sheet->getColumnDimension('B')->setWidth(30);
-        $sheet->getColumnDimension('C')->setWidth(20);
-        if ($reportType === 'class') $sheet->getColumnDimension('D')->setWidth(15);
-        
-        $dateStartCol = $reportType === 'class' ? 5 : 4;
-        for ($i = $dateStartCol; $i < $summaryStartCol; $i++) {
-            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i))->setWidth(10);
-        }
-        for ($i = $summaryStartCol; $i <= $lastCol; $i++) {
-            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i))->setWidth(14);
-        }
-
-        // ============================================
-        // 6. FREEZE PANES & AUTO FILTER
-        // ============================================
-        $sheet->freezePane('A' . ($headerRow + 1));
-        $sheet->setAutoFilter('A' . $headerRow . ':' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($lastCol) . ($row - 1));
-
-        // ============================================
-        // 7. OUTPUT
-        // ============================================
-        $filename = 'Laporan_' . ($reportType === 'daily' ? 'Harian' : 'Kelas') . '_' . Carbon::parse($startDate)->format('dmY') . '_' . Carbon::parse($endDate)->format('dmY') . '.xlsx';
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
+        return [
+            'teachers'   => $teachers,
+            'dates'      => $dates,
+            'reportData' => $reportData,
+            'totalStats' => $totalStats,
+        ];
     }
 }
