@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $totalGuru = User::where('role', 'guru')->count();
         
         $hadirHariIni = Attendance::whereDate('date', $today)
-            ->whereIn('status', ['Hadir', 'Terlambat'])
+            ->whereIn('status', ['Hadir', 'Terlambat', 'Tepat Waktu'])
             ->count();
 
         $terlambat = Attendance::whereDate('date', $today)
@@ -49,7 +49,7 @@ class DashboardController extends Controller
             $date = Carbon::today()->subDays($i);
             
             $chartHadirData[] = Attendance::whereDate('date', $date)
-                ->where('status', 'Hadir')->count();
+                ->whereIn('status', ['Hadir', 'Tepat Waktu'])->count();
             
             $chartTerlambatData[] = Attendance::whereDate('date', $date)
                 ->where('status', 'Terlambat')->count();

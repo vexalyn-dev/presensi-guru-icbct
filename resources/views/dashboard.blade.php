@@ -450,21 +450,31 @@
                             <td class="px-6 py-4">
                                 @php
                                     $statusColors = [
-                                        'Hadir' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-                                        'Terlambat' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-                                        'Izin' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-                                        'Alpha' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                        'Hadir'       => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                        'Tepat Waktu' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                        'Terlambat'   => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                                        'Izin'        => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                        'Sakit'       => 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+                                        'Alpha'       => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                        'Cuti'        => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                        'Pulang Cepat'=> 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
                                     ];
                                     $statusIcons = [
-                                        'Hadir' => 'check-circle',
-                                        'Terlambat' => 'clock',
-                                        'Izin' => 'file-text',
-                                        'Alpha' => 'x-circle',
+                                        'Hadir'       => 'check-circle',
+                                        'Tepat Waktu' => 'check-circle',
+                                        'Terlambat'   => 'clock',
+                                        'Izin'        => 'file-text',
+                                        'Sakit'       => 'file-text',
+                                        'Alpha'       => 'x-circle',
+                                        'Cuti'        => 'file-text',
+                                        'Pulang Cepat'=> 'log-out',
                                     ];
+                                    // Normalise label untuk tampilan
+                                    $displayStatus = $att->status === 'Tepat Waktu' ? 'Hadir' : $att->status;
                                 @endphp
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium {{ $statusColors[$att->status] ?? 'bg-slate-100 text-slate-700' }}">
                                     <i data-lucide="{{ $statusIcons[$att->status] ?? 'circle' }}" class="w-3 h-3"></i>
-                                    {{ $att->status }}
+                                    {{ $displayStatus }}
                                 </span>
                             </td>
                         </tr>

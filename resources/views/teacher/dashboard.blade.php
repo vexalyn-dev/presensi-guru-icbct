@@ -56,7 +56,7 @@
                 <div class="min-w-0">
                     <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">Izin/Sakit</p>
                     <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white mt-0.5">{{ $stats['izin'] }}</h3>
-                    <p class="text-[10px] text-green-500 mt-0.5">Hari</p>
+                    <p class="text-[10px] text-green-500 mt-0.5">Disetujui</p>
                 </div>
             </div>
         </div>
@@ -73,6 +73,88 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Presensi Harian Hari Ini -->
+    <div class="card p-5 sm:p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                    <i data-lucide="scan-line" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-navy-800 dark:text-white">Presensi Harian</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
+                </div>
+            </div>
+            <a href="{{ route('teacher.attendance') }}" class="text-xs font-semibold text-navy-800 dark:text-gold-400 hover:underline">Detail</a>
+        </div>
+
+        @if($todayAttendance)
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Check In -->
+                <div class="p-4 rounded-2xl border-2
+                    {{ $todayAttendance->check_in
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                        : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-7 h-7 rounded-lg {{ $todayAttendance->check_in ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center">
+                            <i data-lucide="log-in" class="w-3.5 h-3.5 text-white"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Jam Masuk</p>
+                    </div>
+                    <p class="text-xl font-bold {{ $todayAttendance->check_in ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}">
+                        {{ $todayAttendance->check_in ? \Carbon\Carbon::parse($todayAttendance->check_in)->format('H:i') : '--:--' }}
+                    </p>
+                    @if($todayAttendance->status)
+                    @php
+                        $statusBadge = match($todayAttendance->status) {
+                            'Tepat Waktu', 'Hadir' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                            'Terlambat'            => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                            'Alpha'                => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                            'Izin', 'Sakit'        => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                            default                => 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400',
+                        };
+                        $statusLabel = $todayAttendance->status === 'Tepat Waktu' ? 'Hadir' : $todayAttendance->status;
+                    @endphp
+                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold {{ $statusBadge }}">
+                        {{ $statusLabel }}
+                    </span>
+                    @endif
+                </div>
+                <!-- Check Out -->
+                <div class="p-4 rounded-2xl border-2
+                    {{ $todayAttendance->check_out
+                        ? 'bg-navy-50 dark:bg-navy-900/20 border-navy-200 dark:border-navy-800'
+                        : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-7 h-7 rounded-lg {{ $todayAttendance->check_out ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5 text-white dark:text-navy-900"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Jam Pulang</p>
+                    </div>
+                    <p class="text-xl font-bold {{ $todayAttendance->check_out ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400' }}">
+                        {{ $todayAttendance->check_out ? \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') : '--:--' }}
+                    </p>
+                    @if($todayAttendance->check_out_status)
+                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        {{ $todayAttendance->check_out_status === 'Tepat Waktu' ? 'Tepat Waktu' : ucfirst($todayAttendance->check_out_status) }}
+                    </span>
+                    @endif
+                </div>
+            </div>
+        @else
+            <!-- Belum scan hari ini -->
+            <div class="flex items-center gap-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl border border-yellow-200 dark:border-yellow-800">
+                <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="alert-circle" class="w-5 h-5 text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-yellow-800 dark:text-yellow-300">Belum Presensi Hari Ini</p>
+                    <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-0.5">Scan QR di meja operator untuk presensi masuk</p>
+                </div>
+            </div>
+        @endif
     </div>
 
     <!-- Jadwal Mengajar Hari Ini dengan Progress -->

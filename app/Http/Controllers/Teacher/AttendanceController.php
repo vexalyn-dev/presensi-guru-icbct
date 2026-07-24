@@ -60,10 +60,11 @@ class AttendanceController extends Controller
         $now = Carbon::now();
         $today = $now->toDateString();
 
-        // Parse QR data
+        // Parse QR data — QR guru di-generate dengan field 'teacher_id' (bukan 'user_id')
         try {
             $qrData = json_decode($validated['qr_data'], true);
-            if (!isset($qrData['user_id']) || $qrData['user_id'] != $user->id) {
+            $userId = $qrData['teacher_id'] ?? $qrData['user_id'] ?? null;
+            if (!$userId || $userId != $user->id) {
                 return back()->with('error', 'QR Code tidak valid untuk akun Anda.');
             }
         } catch (\Exception $e) {
