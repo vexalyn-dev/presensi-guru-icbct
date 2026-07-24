@@ -403,24 +403,80 @@
                         </div>
 
                         <!-- JAM PELAJARAN -->
-                        <div>
-                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-                                <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black" :class="sharedSpacePeriod?'bg-emerald-500 text-white':'bg-slate-200 dark:bg-slate-700 text-slate-500'">
-                                    <i data-lucide="check" class="w-2.5 h-2.5" x-show="sharedSpacePeriod"></i><span x-show="!sharedSpacePeriod">3</span>
-                                </span>
-                                Jam Ke- <span class="text-red-400 normal-case font-normal">*</span>
-                            </label>
-                            <div class="grid grid-cols-4 gap-2.5">
-                                <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
+                        <div x-data="{ viewMode: 'grid' }">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                    <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black transition-all duration-300"
+                                          :class="sharedSpacePeriod?'bg-emerald-500 text-white scale-110':'bg-slate-200 dark:bg-slate-700 text-slate-500'">
+                                        <i data-lucide="check" class="w-2.5 h-2.5" x-show="sharedSpacePeriod"
+                                           x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100"></i>
+                                        <span x-show="!sharedSpacePeriod">3</span>
+                                    </span>
+                                    Jam Ke- <span class="text-red-400 normal-case font-normal">*</span>
+                                    <span x-show="sharedSpacePeriod"
+                                          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+                                          class="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-[10px] font-black normal-case"
+                                          x-text="'JP ' + sharedSpacePeriod"></span>
+                                </label>
+                                <!-- Toggle grid / list -->
+                                <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                                    <button type="button" @click="viewMode='grid'"
+                                            class="w-7 h-7 flex items-center justify-center rounded-lg transition-all duration-200"
+                                            :class="viewMode==='grid'?'bg-white dark:bg-slate-700 shadow-sm text-emerald-600':'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'">
+                                        <i data-lucide="grid-2x2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button type="button" @click="viewMode='list'"
+                                            class="w-7 h-7 flex items-center justify-center rounded-lg transition-all duration-200"
+                                            :class="viewMode==='list'?'bg-white dark:bg-slate-700 shadow-sm text-emerald-600':'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'">
+                                        <i data-lucide="list" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- GRID VIEW — 6 kolom, kotak kecil compact -->
+                            <div x-show="viewMode==='grid'"
+                                 x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0 scale-95"
+                                 class="grid grid-cols-6 gap-2">
+                                <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="'g'+jam">
                                     <button type="button" @click="sharedSpacePeriod = jam"
-                                            class="relative flex flex-col items-center justify-center rounded-2xl font-bold transition-all duration-150 active:scale-90 select-none"
-                                            style="aspect-ratio:1/1"
+                                            class="relative flex flex-col items-center justify-center rounded-xl font-bold transition-all duration-150 active:scale-90 select-none py-2.5"
                                             :class="sharedSpacePeriod==jam
-                                                ?'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 scale-105 ring-2 ring-white dark:ring-slate-900'
-                                                :'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/10'">
-                                        <span class="text-base leading-none font-extrabold" x-text="jam"></span>
-                                        <span class="text-[8px] mt-0.5 leading-none font-semibold opacity-60">JP</span>
-                                        <span x-show="sharedSpacePeriod==jam" class="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-emerald-500 shadow-sm"></span>
+                                                ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/40 scale-105 ring-2 ring-white dark:ring-slate-900'
+                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800'">
+                                        <span class="text-sm leading-none font-extrabold" x-text="jam"></span>
+                                        <span class="text-[8px] leading-none mt-0.5 font-semibold"
+                                              :class="sharedSpacePeriod==jam?'opacity-80':'opacity-40'">JP</span>
+                                        <span x-show="sharedSpacePeriod==jam"
+                                              x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-0" x-transition:enter-end="opacity-100 scale-100"
+                                              class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-white rounded-full border-2 border-emerald-500 shadow-sm"></span>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <!-- LIST VIEW — baris dengan label lengkap -->
+                            <div x-show="viewMode==='list'"
+                                 x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0 translate-y-1"
+                                 class="grid grid-cols-2 gap-1.5">
+                                <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="'l'+jam">
+                                    <button type="button" @click="sharedSpacePeriod = jam"
+                                            class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-150 active:scale-95 text-left border"
+                                            :class="sharedSpacePeriod==jam
+                                                ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/25'
+                                                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10'">
+                                        <div class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black transition-all"
+                                             :class="sharedSpacePeriod==jam?'bg-white/20':'bg-slate-200 dark:bg-slate-700'">
+                                            <span x-text="jam"></span>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-bold leading-none" x-text="'Jam ke-'+jam"></p>
+                                            <p class="text-[9px] mt-0.5 leading-none"
+                                               :class="sharedSpacePeriod==jam?'text-white/70':'text-slate-400'">Jam Pelajaran</p>
+                                        </div>
+                                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 flex-shrink-0"
+                                           x-show="sharedSpacePeriod==jam"
+                                           x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-100 scale-100"></i>
                                     </button>
                                 </template>
                             </div>
