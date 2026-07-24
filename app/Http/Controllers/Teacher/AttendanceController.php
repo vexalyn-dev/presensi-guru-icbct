@@ -63,12 +63,25 @@ class AttendanceController extends Controller
         // Parse QR data — QR guru di-generate dengan field 'teacher_id' (bukan 'user_id')
         try {
             $qrData = json_decode($validated['qr_data'], true);
-            $userId = $qrData['teacher_id'] ?? $qrData['user_id'] ?? null;
-            if (!$userId || $userId != $user->id) {
-                return back()->with('error', 'QR Code tidak valid untuk akun Anda.');
+            if (is_array($qrData)) {
+                $userId = $qrData['teacher_id'] ?? $qrData['user_id'] ?? null;
+                $token = $qrData['token'] ?? null;
+
+                if ($userId && $userId != $user->id) {
+                    return back()->with('error', 'QR Code tidak valid untuk akun Anda.');
+                }
+                if ($token && $user->qr_token && $token !== $user->qr_token) {
+                    return back()->with('error', 'Token QR Code tidak sesuai.');
+                }
+            } else {
+                if ($validated['qr_data'] !== $user->qr_token && $validated['qr_data'] != $user->id) {
+                    return back()->with('error', 'Format QR Code tidak valid.');
+                }
             }
         } catch (\Exception $e) {
-            return back()->with('error', 'Format QR Code tidak valid.');
+            if ($validated['qr_data'] !== $user->qr_token && $validated['qr_data'] != $user->id) {
+                return back()->with('error', 'Format QR Code tidak valid.');
+            }
         }
 
         // Gunakan jadwal default dari profil pengguna (TIDAK memakai TeacherSchedule)
