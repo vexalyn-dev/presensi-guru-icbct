@@ -98,29 +98,18 @@ class HistoryController extends Controller
                 ->orderBy('date', 'desc')
                 ->paginate(10, ['*'], 'page', $page);
 
-            $attendances->getCollection()->transform(function ($att) use ($user) {
+            $items = $attendances->getCollection()->map(function ($att) use ($user) {
                 $date = Carbon::parse($att->date);
-                $dayOfWeek = $date->dayOfWeek;
-
-                $schedules = TeachingSchedule::where('user_id', $user->id)
-                    ->where('day_of_week', $dayOfWeek)
-                    ->where('is_active', true)
-                    ->get();
-
-                $totalHours = 0;
-                foreach ($schedules as $schedule) {
-                    $start = Carbon::parse($schedule->start_time);
-                    $end = Carbon::parse($schedule->end_time);
-                    $totalHours += $start->diffInHours($end);
-                }
-
-                $att->teaching_duration = $totalHours;
-                $att->date_formatted = $date->format('d M Y');
-                $att->day_name = $date->locale('id')->isoFormat('dddd');
-                $att->check_in = $att->check_in ? Carbon::parse($att->check_in)->format('H:i') : null;
-                $att->check_out = $att->check_out ? Carbon::parse($att->check_out)->format('H:i') : null;
-
-                return $att;
+                return [
+                    'id' => $att->id,
+                    'date' => $att->date ? Carbon::parse($att->date)->toDateString() : '',
+                    'date_formatted' => $date->format('d M Y'),
+                    'day_name' => $date->locale('id')->isoFormat('dddd'),
+                    'check_in' => $att->check_in ? Carbon::parse($att->check_in)->format('H:i') : null,
+                    'check_out' => $att->check_out ? Carbon::parse($att->check_out)->format('H:i') : null,
+                    'status' => $att->status ?? 'Hadir',
+                    'notes' => $att->notes ?? '',
+                ];
             });
 
             $stats = [
@@ -129,7 +118,7 @@ class HistoryController extends Controller
                     ->count(),
                 'hadir' => Attendance::where('user_id', $user->id)
                     ->whereBetween('date', [$startDate, $endDate])
-                    ->where('status', 'Hadir')
+                    ->whereIn('status', ['Hadir', 'Tepat Waktu'])
                     ->count(),
                 'terlambat' => Attendance::where('user_id', $user->id)
                     ->whereBetween('date', [$startDate, $endDate])
@@ -137,7 +126,7 @@ class HistoryController extends Controller
                     ->count(),
                 'izin' => Attendance::where('user_id', $user->id)
                     ->whereBetween('date', [$startDate, $endDate])
-                    ->where('status', 'Izin')
+                    ->whereIn('status', ['Izin', 'Sakit'])
                     ->count(),
                 'alpha' => Attendance::where('user_id', $user->id)
                     ->whereBetween('date', [$startDate, $endDate])
@@ -146,30 +135,34 @@ class HistoryController extends Controller
             ];
 
             return response()->json([
-                'attendances' => $attendances,
+                'attendances' => $items,
                 'stats' => $stats,
                 'links' => $attendances->links()->toHtml(),
                 'last_page' => $attendances->lastPage(),
             ]);
         }
 
-        $classAttendances = ClassAttendance::with(['classroom', 'teachingSchedule.subject'])
+        $classAttendances = ClassAttendance::with(['classroom', 'selectedClassroom', 'teachingSchedule.subject', 'subject'])
             ->where('user_id', $user->id)
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date', 'desc')
             ->orderBy('period', 'asc')
             ->paginate(10, ['*'], 'page', $page);
 
-        $classAttendances->getCollection()->transform(function ($att) {
+        $items = $classAttendances->getCollection()->map(function ($att) {
             $date = Carbon::parse($att->date);
-            $att->date_formatted = $date->format('d M Y');
-            $att->day_name = $date->locale('id')->isoFormat('dddd');
-            $att->classroom_name = $att->classroom->name ?? '-';
-            $att->subject_name = $att->teachingSchedule?->subject?->name ?? ($att->subject?->name ?? '-');
-            $att->check_in_time = $att->check_in_time ? Carbon::parse($att->check_in_time)->format('H:i') : null;
-            $att->check_out_time = $att->check_out_time ? Carbon::parse($att->check_out_time)->format('H:i') : null;
-
-            return $att;
+            return [
+                'id' => $att->id,
+                'date' => $att->date ? Carbon::parse($att->date)->toDateString() : '',
+                'date_formatted' => $date->format('d M Y'),
+                'day_name' => $date->locale('id')->isoFormat('dddd'),
+                'classroom_name' => $att->classroom->name ?? ($att->selectedClassroom->name ?? '-'),
+                'subject_name' => $att->teachingSchedule?->subject?->name ?? ($att->subject?->name ?? '-'),
+                'period' => $att->period,
+                'check_in_time' => $att->check_in_time ? Carbon::parse($att->check_in_time)->format('H:i') : null,
+                'check_out_time' => $att->check_out_time ? Carbon::parse($att->check_out_time)->format('H:i') : null,
+                'status' => $att->status ?? ($att->check_in_time ? 'Hadir' : 'Belum Presensi'),
+            ];
         });
 
         $stats = [
@@ -182,7 +175,7 @@ class HistoryController extends Controller
                 ->count(),
             'hadir' => ClassAttendance::where('user_id', $user->id)
                 ->whereBetween('date', [$startDate, $endDate])
-                ->where('status', 'Hadir')
+                ->whereIn('status', ['Hadir', 'Tepat Waktu'])
                 ->count(),
             'terlambat' => ClassAttendance::where('user_id', $user->id)
                 ->whereBetween('date', [$startDate, $endDate])
@@ -191,7 +184,7 @@ class HistoryController extends Controller
         ];
 
         return response()->json([
-            'attendances' => $classAttendances,
+            'attendances' => $items,
             'stats' => $stats,
             'links' => $classAttendances->links()->toHtml(),
             'last_page' => $classAttendances->lastPage(),

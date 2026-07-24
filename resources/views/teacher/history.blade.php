@@ -255,9 +255,9 @@
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
-                            ${att.status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
+                            ${(att.status === 'Hadir' || att.status === 'Tepat Waktu') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
                             ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
-                            ${att.status === 'Izin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
+                            ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
                             ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
                             ${att.status}
                         </span>
@@ -272,33 +272,33 @@
         html += '<div class="md:hidden space-y-3 p-4">';
         attendances.forEach(att => {
             html += `
-                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <div class="flex items-start justify-between mb-3">
+                <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700/60">
                         <div>
                             <p class="text-sm font-bold text-navy-800 dark:text-white">${att.date_formatted}</p>
                             <p class="text-xs text-slate-500 dark:text-slate-400">${att.day_name}</p>
                         </div>
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
-                            ${att.status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-xs
+                            ${(att.status === 'Hadir' || att.status === 'Tepat Waktu') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
                             ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
-                            ${att.status === 'Izin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
+                            ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
                             ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
                             ${att.status}
                         </span>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="flex items-center gap-2">
+                    <div class="grid grid-cols-2 gap-3 pt-1">
+                        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/40">
                             <i data-lucide="clock" class="w-4 h-4 text-green-500 flex-shrink-0"></i>
-                            <div>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400">Masuk</p>
-                                <p class="text-sm font-mono font-semibold text-slate-700 dark:text-slate-300">${att.check_in || '-'}</p>
+                            <div class="min-w-0">
+                                <p class="text-[10px] font-semibold text-slate-400 uppercase">Masuk</p>
+                                <p class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 truncate">${formatTimeClean(att.check_in)}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/40">
                             <i data-lucide="clock" class="w-4 h-4 text-blue-500 flex-shrink-0"></i>
-                            <div>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400">Pulang</p>
-                                <p class="text-sm font-mono font-semibold text-slate-700 dark:text-slate-300">${att.check_out || '-'}</p>
+                            <div class="min-w-0">
+                                <p class="text-[10px] font-semibold text-slate-400 uppercase">Pulang</p>
+                                <p class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 truncate">${formatTimeClean(att.check_out)}</p>
                             </div>
                         </div>
                     </div>
@@ -315,6 +315,20 @@
         container.innerHTML = html;
         
         if (window.lucide) lucide.createIcons();
+    }
+
+    function formatTimeClean(timeStr) {
+        if (!timeStr || timeStr === '-') return '-';
+        if (typeof timeStr === 'string' && timeStr.includes('T')) {
+            const d = new Date(timeStr);
+            if (!isNaN(d.getTime())) {
+                const h = String(d.getHours()).padStart(2, '0');
+                const m = String(d.getMinutes()).padStart(2, '0');
+                return `${h}:${m} WIB`;
+            }
+        }
+        const match = String(timeStr).match(/(\d{2}:\d{2})/);
+        return match ? `${match[1]} WIB` : `${timeStr} WIB`;
     }
 
     function renderClassTable(data) {
@@ -369,7 +383,7 @@
                         ${att.check_in_time ? `
                             <div class="flex items-center gap-2">
                                 <i data-lucide="clock" class="w-4 h-4 text-green-500"></i>
-                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${att.check_in_time} WIB</span>
+                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${formatTimeClean(att.check_in_time)}</span>
                             </div>
                         ` : '<span class="text-sm text-slate-400">-</span>'}
                     </td>
@@ -377,14 +391,16 @@
                         ${att.check_out_time ? `
                             <div class="flex items-center gap-2">
                                 <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i>
-                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${att.check_out_time} WIB</span>
+                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${formatTimeClean(att.check_out_time)}</span>
                             </div>
                         ` : '<span class="text-sm text-slate-400">-</span>'}
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
-                            ${att.status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
-                            ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}">
+                            ${(att.status === 'Hadir' || att.status === 'Tepat Waktu' || att.status === 'Selesai') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
+                            ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
+                            ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
+                            ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
                             ${att.status}
                         </span>
                     </td>
@@ -395,48 +411,54 @@
         html += '</tbody></table></div>';
         
         // Mobile: Card view
-        html += '<div class="md:hidden space-y-3 p-4">';
+        html += '<div class="md:hidden space-y-4 p-4">';
         attendances.forEach(att => {
             html += `
-                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <div class="flex items-start justify-between mb-3">
+                <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700/60">
                         <div>
-                            <p class="text-sm font-bold text-navy-800 dark:text-white">${att.date_formatted}</p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">${att.day_name}</p>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">${att.day_name}</p>
+                            <h4 class="text-base font-bold text-navy-900 dark:text-white">${att.date_formatted}</h4>
                         </div>
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
-                            ${att.status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
-                            ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-xs
+                            ${(att.status === 'Hadir' || att.status === 'Tepat Waktu' || att.status === 'Selesai') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
+                            ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
+                            ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
+                            ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
                             ${att.status}
                         </span>
                     </div>
-                    <div class="space-y-2 mb-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Kelas</span>
-                            <span class="text-sm font-bold text-navy-800 dark:text-white">${att.classroom_name || '-'}</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700/40">
+                            <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-0.5">Kelas</p>
+                            <p class="font-bold text-navy-900 dark:text-white text-sm truncate">${att.classroom_name || '-'}</p>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Mapel</span>
-                            <span class="text-sm text-slate-700 dark:text-slate-300">${att.subject_name || '-'}</span>
+                        <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700/40">
+                            <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-0.5">Jam Pelajaran</p>
+                            <p class="font-bold text-navy-900 dark:text-white text-sm">Jam ${att.period || '-'}</p>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Jam Pelajaran</span>
-                            <span class="text-sm font-mono text-slate-700 dark:text-slate-300">Jam ${att.period}</span>
+                        <div class="col-span-2 bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700/40">
+                            <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-0.5">Mata Pelajaran</p>
+                            <p class="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">${att.subject_name || '-'}</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="clock" class="w-4 h-4 text-green-500 flex-shrink-0"></i>
-                            <div>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400">Masuk</p>
-                                <p class="text-sm font-mono font-semibold text-slate-700 dark:text-slate-300">${att.check_in_time ? att.check_in_time + ' WIB' : '-'}</p>
+                    <div class="grid grid-cols-2 gap-3 pt-1">
+                        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="clock" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-[10px] font-semibold text-emerald-700/70 dark:text-emerald-400/70 uppercase">Masuk</p>
+                                <p class="text-xs font-mono font-bold text-emerald-900 dark:text-emerald-300 truncate">${formatTimeClean(att.check_in_time)}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="clock" class="w-4 h-4 text-blue-500 flex-shrink-0"></i>
-                            <div>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400">Keluar</p>
-                                <p class="text-sm font-mono font-semibold text-slate-700 dark:text-slate-300">${att.check_out_time ? att.check_out_time + ' WIB' : '-'}</p>
+                        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-[10px] font-semibold text-blue-700/70 dark:text-blue-400/70 uppercase">Keluar</p>
+                                <p class="text-xs font-mono font-bold text-blue-900 dark:text-blue-300 truncate">${formatTimeClean(att.check_out_time)}</p>
                             </div>
                         </div>
                     </div>
