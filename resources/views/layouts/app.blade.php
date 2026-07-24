@@ -204,7 +204,7 @@
     <!-- ========================================== -->
     <aside id="sidebar" 
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-           class="fixed top-0 left-0 z-50 flex h-screen w-64 flex-col bg-white dark:bg-navy-900 border-r border-slate-200 dark:border-slate-800 
+           class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-white dark:bg-navy-900 border-r border-slate-200 dark:border-slate-800 
                   transition-transform duration-300 ease-out">
         
         @php
