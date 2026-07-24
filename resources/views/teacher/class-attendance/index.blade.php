@@ -563,15 +563,20 @@
 
                         <!-- Summary chip -->
                         <div x-show="sharedSpaceSelectedClass && sharedSpaceSelectedSubject && sharedSpacePeriod"
-                             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
                              class="flex items-start gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-200/70 dark:border-emerald-800/50">
                             <div class="w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="check-circle-2" class="w-4 h-4 text-white"></i>
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
                             </div>
                             <div class="flex-1 min-w-0 text-xs space-y-0.5">
                                 <p class="font-bold text-emerald-700 dark:text-emerald-400 mb-1">Siap disimpan ✓</p>
                                 <p class="text-slate-600 dark:text-slate-400 truncate">📚 <span class="font-semibold text-slate-800 dark:text-white" x-text="sharedSpaceSubjects.find(s=>s.id==sharedSpaceSelectedSubject)?.name"></span></p>
-                                <p class="text-slate-600 dark:text-slate-400 truncate">🏫 <span class="font-semibold text-slate-800 dark:text-white" x-text="sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.code?sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.name+' ('+sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.code+')':sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.name"></span></p>
+                                <p class="text-slate-600 dark:text-slate-400 truncate">🏫 <span class="font-semibold text-slate-800 dark:text-white"
+                                   x-text="sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.code
+                                       ? sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.name+' ('+sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.code+')'
+                                       : sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.name"></span></p>
                                 <p class="text-slate-600 dark:text-slate-400">⏰ Jam ke-<span class="font-semibold text-slate-800 dark:text-white" x-text="sharedSpacePeriod"></span> · <span x-text="sharedSpaceLocation"></span></p>
                             </div>
                         </div>
