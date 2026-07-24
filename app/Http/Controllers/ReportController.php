@@ -470,16 +470,19 @@ class ReportController extends Controller
 
                     if ($attendance) {
                         $code = match($attendance->status) {
-                            'Hadir'     => 'H',
-                            'Terlambat' => 'T',
-                            'Izin'      => 'I',
-                            'Sakit'     => 'S',
-                            'Alpha'     => 'A',
-                            default     => 'A',
+                            'Hadir', 'Tepat Waktu' => 'H',
+                            'Terlambat'           => 'T',
+                            'Izin'                => 'I',
+                            'Sakit'               => 'S',
+                            'Alpha'               => 'A',
+                            default               => 'A',
                         };
                         $teacherData['days'][$dateStr] = ['status' => strtolower($attendance->status), 'code' => $code];
                         $teacherData['summary'][$code]++;
                         $statusKey = strtolower($attendance->status);
+                        if ($statusKey === 'tepat waktu') {
+                            $statusKey = 'hadir';
+                        }
                         if (isset($totalStats[$statusKey])) $totalStats[$statusKey]++;
                     } else {
                         $onLeave = $leaves->first(fn($l) => $l->user_id === $teacher->id 
@@ -558,7 +561,7 @@ class ReportController extends Controller
                                 $duration       = (int) max(0, round($checkIn->diffInMinutes($checkOut)));
                                 
                                 if ($duration >= 30) {
-                                    if ($attendance->status === 'Hadir') { 
+                                    if (in_array($attendance->status, ['Hadir', 'Tepat Waktu', 'Selesai'])) { 
                                         $attendedCount++; 
                                         $classInfo['status'] = 'H'; 
                                     } elseif ($attendance->status === 'Terlambat') { 

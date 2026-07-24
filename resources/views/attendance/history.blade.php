@@ -16,6 +16,13 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pantau dan filter data kehadiran guru</p>
             </div>
         </div>
+        <div class="flex items-center gap-3">
+            <a :href="getExportUrl()" 
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Export CSV</span>
+            </a>
+        </div>
     </div>
 
     <!-- Stats Cards -->
@@ -95,6 +102,19 @@
 
     <!-- Modern Filters with AJAX -->
     <div class="card p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-navy-800 dark:text-white flex items-center gap-2">
+                <i data-lucide="filter" class="w-4 h-4 text-navy-600 dark:text-gold-400"></i>
+                Filter Data Presensi
+            </h3>
+            <button type="button" 
+                    @click="resetFilters()" 
+                    x-show="filters.start_date || filters.end_date || filters.teacher_id || filters.status" 
+                    class="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1 transition-all">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                Reset Filter
+            </button>
+        </div>
         <form @submit.prevent="filterData" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
             <!-- Start Date -->
@@ -241,7 +261,7 @@
         </div>
     </div>
 
-    <!-- Table (Removed Lokasi & Keterangan columns) -->
+    <!-- Table -->
     <div class="card overflow-hidden" x-show="!loading">
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -276,13 +296,13 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 font-mono">
-                                <span x-text="att.check_in || '-'"></span>
+                                <span x-text="formatTime(att.check_in)"></span>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 font-mono">
-                                <span x-text="att.check_out || '-'"></span>
+                                <span x-text="formatTime(att.check_out)"></span>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
                                       :class="getStatusClass(att.status)"
                                       x-text="att.status"></span>
                             </td>
@@ -359,7 +379,7 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('attendanceApp', () => ({
             // Initial data from server
-            attendances: {!! json_encode($attendances->items() ?? []) !!},
+            attendances: {!! json_encode($transformedItems ?? ($attendances->items() ?? [])) !!},
             stats: {!! json_encode($stats ?? ['total' => 0, 'hadir' => 0, 'terlambat' => 0, 'alpha' => 0, 'izin' => 0]) !!},
             pagination: {!! json_encode($attendances ?? null) !!},
             teachers: {!! json_encode($teachers ?? []) !!},
@@ -424,7 +444,7 @@
                 this.filterData();
             },
             
-            // Build query params for AJAX (optionally include a specific page)
+            // Build query params for AJAX
             buildParams(page = null) {
                 const params = new URLSearchParams();
                 if (this.filters.start_date) params.append('start_date', this.filters.start_date);
@@ -436,7 +456,7 @@
                 return params;
             },
             
-            // Fetch data via AJAX (page param included in buildParams)
+            // Fetch data via AJAX
             async fetchData(page = null) {
                 this.loading = true;
                 const baseUrl = '{{ route("attendance.history") }}';
@@ -460,16 +480,18 @@
                     this.showToast('Gagal memuat data', 'error');
                 } finally {
                     this.loading = false;
-                    if (window.lucide) lucide.createIcons();
+                    this.$nextTick(() => {
+                        if (window.lucide) lucide.createIcons();
+                    });
                 }
             },
 
-            // Filter data — always reset to page 1
+            // Filter data — reset page
             async filterData() {
                 await this.fetchData(null);
             },
 
-            // Load specific page — extract page number from Laravel pagination URL
+            // Load page
             async loadPage(url) {
                 const pageMatch = url.match(/[?&]page=(\d+)/);
                 const page = pageMatch ? parseInt(pageMatch[1]) : 1;
@@ -503,16 +525,35 @@
                 const date = new Date(dateString);
                 return days[date.getDay()];
             },
+
+            // Format time display clean
+            formatTime(timeStr) {
+                if (!timeStr || timeStr === '-') return '-';
+                if (typeof timeStr === 'string' && timeStr.includes('WIB')) return timeStr;
+                if (typeof timeStr === 'string' && timeStr.includes('T')) {
+                    const d = new Date(timeStr);
+                    if (!isNaN(d.getTime())) {
+                        const h = String(d.getHours()).padStart(2, '0');
+                        const m = String(d.getMinutes()).padStart(2, '0');
+                        return `${h}:${m} WIB`;
+                    }
+                }
+                const match = String(timeStr).match(/(\d{2}:\d{2})/);
+                return match ? `${match[1]} WIB` : `${timeStr} WIB`;
+            },
             
             // Get status badge class
             getStatusClass(status) {
                 const classes = {
                     'Hadir': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                    'Tepat Waktu': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
                     'Terlambat': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-                    'Izin': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                    'Izin': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+                    'Sakit': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+                    'Cuti': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
                     'Alpha': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
                 };
-                return classes[status] || 'bg-slate-100 text-slate-700';
+                return classes[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
             },
             
             // Show toast notification
