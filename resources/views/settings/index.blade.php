@@ -139,7 +139,7 @@
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                 class="absolute z-50 w-full bottom-full mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                 class="absolute z-50 w-full top-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
                                  style="max-height: 320px;">
 
                                 <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
@@ -205,7 +205,7 @@
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                 class="absolute z-50 w-full bottom-full mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                 class="absolute z-50 w-full top-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
                                  style="max-height: 320px;">
 
                                 <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
@@ -521,13 +521,13 @@
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Latitude</label>
                             <input type="text" id="school_lat" name="school_latitude" 
-                                   value="{{ old('school_latitude', $settings['maps']['school_latitude'] ?? '-6.2087634') }}" required
+                                   value="{{ old('school_latitude', $settings['maps']['school_latitude'] ?? '-6.9142402999999995') }}" required
                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Longitude</label>
                             <input type="text" id="school_lng" name="school_longitude" 
-                                   value="{{ old('school_longitude', $settings['maps']['school_longitude'] ?? '106.8455994') }}" required
+                                   value="{{ old('school_longitude', $settings['maps']['school_longitude'] ?? '107.64586179999999') }}" required
                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono">
                         </div>
                         <div>
@@ -796,8 +796,8 @@
     function initLeafletMap() {
         if (mapInitialized) return;
 
-        const defaultLat = parseFloat(document.getElementById('school_lat').value) || -6.2087634;
-        const defaultLng = parseFloat(document.getElementById('school_lng').value) || 106.8455994;
+        const defaultLat = parseFloat(document.getElementById('school_lat').value) || -6.9142402999999995;
+        const defaultLng = parseFloat(document.getElementById('school_lng').value) || 107.64586179999999;
         const defaultRadius = parseInt(document.getElementById('school_radius').value) || 50;
 
         leafletMap = L.map('leaflet-map').setView([defaultLat, defaultLng], 17);
@@ -956,8 +956,8 @@
     }
 
     function resetMapToDefault() {
-        const defaultLat = -6.2087634;
-        const defaultLng = 106.8455994;
+        const defaultLat = -6.9142402999999995;
+        const defaultLng = 107.64586179999999;
         const defaultRadius = 50;
 
         document.getElementById('school_lat').value = defaultLat;
