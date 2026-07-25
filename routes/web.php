@@ -233,9 +233,9 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::post('/leave', [TeacherLeaveController::class, 'store'])->name('leave.store');
         Route::get('/leave/{leaveRequest}', [TeacherLeaveController::class, 'show'])->name('leave.show');
         Route::delete('/leave/{leaveRequest}', [TeacherLeaveController::class, 'destroy'])->name('leave.destroy');
+});
 
-        Route::get('/run-migrate-secret', function () {
+Route::get('/run-migrate-secret', function () {
         Artisan::call('migrate', ['--force' => true]);
     return '<pre>' . Artisan::output() . '</pre>';
     });
-});
