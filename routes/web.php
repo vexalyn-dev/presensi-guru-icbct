@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\LeaveApprovalController;
 use App\Http\Controllers\Admin\ManualClassAttendanceController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -235,7 +236,12 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::delete('/leave/{leaveRequest}', [TeacherLeaveController::class, 'destroy'])->name('leave.destroy');
 });
 
-Route::get('/run-migrate-secret', function () {
-        Artisan::call('migrate', ['--force' => true]);
+Route::get('/run-migrate-secret', function (Request $request) {
+    // Lu cuma bisa akses kalo bawa key yang bener
+    if ($request->get('key') !== 'vexalyn19052009') {
+        abort(404); // Bikin seolah-olah halaman emang gak ada
+    }
+
+    Artisan::call('migrate', ['--force' => true]);
     return '<pre>' . Artisan::output() . '</pre>';
-    });
+});
