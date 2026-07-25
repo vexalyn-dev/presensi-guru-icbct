@@ -218,8 +218,8 @@
     <!-- Table Container -->
     <div class="card overflow-hidden relative" id="table-container">
         <!-- Modern Premium Loading Overlay -->
-        <div id="loading-overlay" class="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-slate-50/95 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-800/95 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center">
-            <div class="text-center relative">
+        <div id="loading-overlay" class="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-slate-50/95 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-800/95 backdrop-blur-md z-50 hidden">
+            <div class="flex flex-col items-center justify-center text-center relative min-h-full">
                 <!-- Animated Background Circle -->
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-32 h-32 rounded-full bg-gradient-to-br from-navy-100 to-gold-100 dark:from-navy-900/30 dark:to-gold-900/30 animate-pulse"></div>

@@ -67,6 +67,8 @@ class ClassAttendanceController extends Controller
 
         // ── Parse QR data ────────────────────────────────────────────────────
         [$classroomId, $qrToken] = $this->parseQrData($raw);
+        $decodedQrData = json_decode($raw, true);
+        $timestamp = is_array($decodedQrData) && isset($decodedQrData['timestamp']) ? (int) $decodedQrData['timestamp'] : null;
 
         if (!$classroomId) {
             $this->logScan($user, null, $mode, 'failed', 'Format QR Code tidak valid: ' . $raw, $request);
@@ -78,6 +80,53 @@ class ClassAttendanceController extends Controller
         if (!$classroom) {
             $this->logScan($user, null, $mode, 'failed', "Kelas tidak ditemukan (ID: {$classroomId})", $request);
             return response()->json(['success' => false, 'message' => 'Kelas tidak ditemukan.'], 404);
+        }
+
+        // ── Validasi waktu QR (30 detik) ───────────────────────────────────
+        if ($timestamp && ($now->timestamp - $timestamp) > 30) {
+            $this->logScan($user, $classroom, $mode, 'failed',
+                'QR Code telah kadaluarsa (30 detik)', $request);
+            return response()->json([
+                'success' => false,
+                'message' => 'QR Code telah kadaluarsa (30 detik)',
+                'debug' => [
+                    'message' => 'Silakan scan ulang QR Code yang baru dibuat.',
+                    'elapsed' => ($now->timestamp - $timestamp) . ' detik',
+                    'current' => $now->timestamp,
+                    'qr' => $timestamp,
+                ],
+            ], 403);
+        }
+
+        // ── Validasi GPS (radius 5 meter) ─────────────────────────────────
+        $userLat = $request->input('latitude');
+        $userLng = $request->input('longitude');
+
+        if ($userLat !== null && $userLng !== null && $classroomId) {
+            $classroom = Classroom::find($classroomId);
+
+            if ($classroom && $classroom->latitude && $classroom->longitude) {
+                $distance = $this->calculateDistance(
+                    (float) $userLat,
+                    (float) $userLng,
+                    (float) $classroom->latitude,
+                    (float) $classroom->longitude
+                );
+
+                if ($distance > 5) {
+                    $this->logScan($user, $classroom, $mode, 'failed',
+                        'Anda tidak berada di lokasi kelas (radius 5m)', $request);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Anda tidak berada di lokasi kelas (radius 5m)',
+                        'debug' => [
+                            'message' => 'Pastikan Anda berada di area kelas yang sama.',
+                            'distance' => round($distance, 2) . 'm',
+                            'classroom' => $classroom->name,
+                        ],
+                    ], 403);
+                }
+            }
         }
 
         // ── Validasi token ───────────────────────────────────────────────────
@@ -245,6 +294,19 @@ class ClassAttendanceController extends Controller
     // ──────────────────────────────────────────────────────────────────────────
     // Private helpers
     // ──────────────────────────────────────────────────────────────────────────
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371;
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c * 1000;
+    }
 
     /**
      * Parse QR data string ke [classroomId, token|null].

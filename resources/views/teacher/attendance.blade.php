@@ -147,10 +147,19 @@
                     <!-- QR Code Container -->
                     <div class="flex flex-col items-center justify-center p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-slate-200 dark:border-slate-700">
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
-                            {!! QrCode::size(250)->generate(json_encode([
-        'teacher_id' => auth()->id(),
-        'token' => auth()->user()->qr_token
-    ])) !!}
+                            @if($qrCodeUrl)
+                                <img src="{{ $qrCodeUrl }}" id="qr-code-img" alt="QR Code Presensi" class="w-64 h-64 mx-auto">
+                            @else
+                                <div class="w-64 h-64 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">QR Code tidak tersedia</p>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="mt-4 flex items-center justify-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                QR Code berlaku <span id="qr-timer">30</span> detik
+                            </p>
                         </div>
                         <div class="mt-6 text-center space-y-1">
                             <p class="text-sm font-bold text-navy-800 dark:text-white">{{ auth()->user()->name }}</p>
@@ -257,6 +266,42 @@
             if (window.lucide) lucide.createIcons();
             updateLiveClock();
             setInterval(updateLiveClock, 1000);
+
+            let countdown = 30;
+            const timerElement = document.getElementById('qr-timer');
+            const qrCodeImage = document.getElementById('qr-code-img');
+
+            const updateTimer = () => {
+                if (timerElement) {
+                    timerElement.textContent = countdown;
+                }
+            };
+
+            const refreshQrCode = () => {
+                if (!qrCodeImage) return;
+
+                fetch('{{ route("teacher.attendance.refresh-qr") }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.qrCodeUrl) {
+                            qrCodeImage.src = data.qrCodeUrl;
+                        }
+                    })
+                    .catch(() => {});
+
+                countdown = 30;
+                updateTimer();
+            };
+
+            updateTimer();
+            setInterval(() => {
+                countdown = Math.max(0, countdown - 1);
+                updateTimer();
+
+                if (countdown <= 0) {
+                    refreshQrCode();
+                }
+            }, 1000);
         });
     </script>
 @endsection

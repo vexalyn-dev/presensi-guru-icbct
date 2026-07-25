@@ -878,20 +878,66 @@
         // Handle attendance form submit (untuk hardware & camera)
         if (attendanceForm) {
             attendanceForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
                 const submitBtn = document.getElementById('btn-confirm-attendance');
+                if (submitBtn && submitBtn.hasAttribute('data-submitting')) return;
+
                 if (submitBtn) {
-                    // Prevent double clicks but allow native form submission
-                    if (submitBtn.hasAttribute('data-submitting')) {
-                        e.preventDefault();
-                        return;
-                    }
                     submitBtn.setAttribute('data-submitting', 'true');
-                    
-                    setTimeout(() => {
-                        submitBtn.disabled = true;
-                        submitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> Memproses...';
-                    }, 10);
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> Memproses...';
                 }
+
+                // Try to get GPS coordinates first
+                if (!navigator.geolocation) {
+                    // No geolocation available, submit without coords
+                    attendanceForm.submit();
+                    return;
+                }
+
+                const geoOptions = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const latInput = document.getElementById('latitude-input') || document.getElementById('hardware-latitude');
+                        const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
+
+                        if (latInput) latInput.value = lat;
+                        if (lngInput) lngInput.value = lng;
+
+                        attendanceForm.submit();
+                    },
+                    (error) => {
+                        // On error, show toast and still submit (server will validate)
+                        let message = 'Gagal mendapatkan lokasi GPS. ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                message += 'Izin GPS ditolak.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                message += 'Informasi lokasi tidak tersedia.';
+                                break;
+                            case error.TIMEOUT:
+                                message += 'Request GPS timeout.';
+                                break;
+                            default:
+                                message += 'Coba lagi.';
+                        }
+
+                        showToast(message, 'error');
+
+                        // remove submitting state so user can retry
+                        if (submitBtn) {
+                            submitBtn.removeAttribute('data-submitting');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = document.getElementById('btn-confirm-text')?.textContent || 'Konfirmasi';
+                        }
+                    },
+                    geoOptions
+                );
             });
         }
 

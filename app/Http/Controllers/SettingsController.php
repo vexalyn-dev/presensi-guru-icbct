@@ -41,9 +41,31 @@ class SettingsController extends Controller
                 'primary_color' => $appSettings->primary_color,
                 'accent_color' => $appSettings->accent_color,
             ],
+            'maps' => [
+                'school_latitude' => $appSettings->location_latitude,
+                'school_longitude' => $appSettings->location_longitude,
+            ],
         ];
 
         return view('settings.index', compact('appSettings', 'settings'));
+    }
+
+    public function updateMaps(Request $request)
+    {
+        $validated = $request->validate([
+            'school_latitude' => 'required|numeric|between:-90,90',
+            'school_longitude' => 'required|numeric|between:-180,180',
+        ]);
+
+        $appSettings = AppSetting::getInstance();
+        $appSettings->location_latitude = $validated['school_latitude'];
+        $appSettings->location_longitude = $validated['school_longitude'];
+        $appSettings->save();
+
+        Setting::set('location_latitude', $validated['school_latitude'], 'float', 'maps', 'Latitude lokasi sekolah');
+        Setting::set('location_longitude', $validated['school_longitude'], 'float', 'maps', 'Longitude lokasi sekolah');
+
+        return back()->with('success', 'Koordinat sekolah berhasil disimpan!');
     }
 
     public function updateGeneral(Request $request)

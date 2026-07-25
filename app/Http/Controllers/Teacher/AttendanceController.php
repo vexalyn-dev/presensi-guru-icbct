@@ -6,10 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Classroom;
 use App\Models\ClassAttendance;
-use App\Models\TeachingSchedule;
+use App\Models\Setting;
 use App\Models\TeacherSchedule;
+use App\Models\TeachingSchedule;
+use App\Models\Teacher as TeacherModel;
+use App\Helpers\GpsHelper;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class AttendanceController extends Controller
 {
@@ -41,12 +46,48 @@ class AttendanceController extends Controller
             ->take(7)
             ->get();
 
+        $qrCodeUrl = $this->generateDailyAttendanceQrCodeUrl($user);
+
         return view('teacher.attendance', compact(
             'todayAttendance',
             'recentAttendance',
             'scheduleStart',
-            'scheduleEnd'
+            'scheduleEnd',
+            'qrCodeUrl'
         ));
+    }
+
+    public function refreshQr()
+    {
+        $user = auth()->user();
+
+        return response()->json([
+            'qrCodeUrl' => $this->generateDailyAttendanceQrCodeUrl($user),
+            'timestamp' => now()->timestamp,
+        ]);
+    }
+
+    private function buildDailyAttendanceQrData(User $user): array
+    {
+        return [
+            'teacher_id' => $user->id,
+            'type' => 'daily_attendance',
+            'timestamp' => now()->timestamp,
+            'token' => $user->qr_token,
+            'name' => $user->name,
+            'email' => $user->email,
+        ];
+    }
+
+    private function generateDailyAttendanceQrCodeUrl(User $user): string
+    {
+        $qrData = json_encode($this->buildDailyAttendanceQrData($user), JSON_UNESCAPED_SLASHES);
+        $svg = QrCode::size(300)
+            ->backgroundColor(255, 255, 255)
+            ->color(0, 0, 0)
+            ->generate($qrData);
+
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 
     public function store(Request $request)
@@ -54,6 +95,8 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'qr_data' => 'required|string',
             'mode' => 'required|in:masuk,keluar',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $user = auth()->user();
@@ -92,6 +135,13 @@ class AttendanceController extends Controller
             ['status' => 'Hadir']
         );
 
+        // ===== GPS VALIDATION =====
+        $gpsValidation = GpsHelper::validateLocation($request->input('latitude'), $request->input('longitude'));
+        if (!$gpsValidation['valid']) {
+            return back()->with('error', $gpsValidation['message']);
+        }
+        // ===== END GPS VALIDATION =====
+
         if ($validated['mode'] === 'masuk') {
             if ($attendance->check_in) {
                 return back()->with('error', 'Anda sudah melakukan presensi masuk hari ini.');
@@ -105,6 +155,8 @@ class AttendanceController extends Controller
             $attendance->update([
                 'check_in' => $now->format('H:i:s'),
                 'status' => $isLate ? 'Terlambat' : 'Hadir',
+                'check_in_latitude' => $request->input('latitude'),
+                'check_in_longitude' => $request->input('longitude'),
             ]);
 
             return back()->with('success', 'Presensi masuk berhasil dicatat!');
@@ -118,6 +170,8 @@ class AttendanceController extends Controller
 
             $attendance->update([
                 'check_out' => $now->format('H:i:s'),
+                'check_out_latitude' => $request->input('latitude'),
+                'check_out_longitude' => $request->input('longitude'),
             ]);
 
             return back()->with('success', 'Presensi pulang berhasil dicatat!');

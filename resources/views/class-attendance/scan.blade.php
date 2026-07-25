@@ -166,7 +166,7 @@
                 Mulai Scan
             </button>
             <button id="btn-stop" onclick="stopCamera()"
-                    class="hidden flex-1 px-4 py-3 bg-red-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:bg-red-600 active:scale-95">
+                    class="hidden basis-1/2 px-4 py-3 bg-red-500 text-white rounded-xl font-bold items-center justify-center gap-2 transition-all hover:bg-red-600 active:scale-95">
                 <i data-lucide="square" class="w-4 h-4"></i>
                 Stop Scan
             </button>
@@ -242,7 +242,11 @@
                 document.getElementById('cam-idle').classList.add('hidden');
                 document.getElementById('cam-scan-overlay').classList.remove('hidden');
                 document.getElementById('btn-start').classList.add('hidden');
-                document.getElementById('btn-stop').classList.remove('hidden');
+                const stopBtn = document.getElementById('btn-stop');
+                if (stopBtn) {
+                    stopBtn.classList.add('flex');
+                    stopBtn.classList.remove('hidden');
+                }
 
                 camScanning = true;
                 requestAnimationFrame(scanTick);
@@ -340,16 +344,18 @@
     function submitScan(qrData) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-        fetch('{{ route("class-attendance.store") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type':  'application/json',
-                'X-CSRF-TOKEN':  csrfToken,
-                'Accept':        'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            body: JSON.stringify({ qr_data: qrData })
-        })
+        // Try to obtain GPS coords first (best-effort). If unavailable, proceed without.
+        const sendRequest = (payload) => {
+            fetch('{{ route("class-attendance.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type':  'application/json',
+                    'X-CSRF-TOKEN':  csrfToken,
+                    'Accept':        'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify(payload)
+            })
         .then(res => res.json().then(data => ({ status: res.status, data })))
         .then(({ status, data }) => {
             stopCamera();
@@ -374,6 +380,23 @@
         .finally(() => {
             submitting = false;
         });
+        };
+
+        if (navigator.geolocation) {
+            const geoOptions = { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 };
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    sendRequest({ qr_data: qrData, latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+                },
+                (err) => {
+                    // proceed anyway without coordinates
+                    sendRequest({ qr_data: qrData });
+                },
+                geoOptions
+            );
+        } else {
+            sendRequest({ qr_data: qrData });
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────

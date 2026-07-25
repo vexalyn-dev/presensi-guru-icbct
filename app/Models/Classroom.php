@@ -25,6 +25,8 @@ class Classroom extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'is_shared' => 'boolean',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     protected static function boot()

@@ -203,6 +203,15 @@
                         <template x-if="resultData?.status">
                             <p><strong>Status:</strong> <span x-text="resultData.status"></span></p>
                         </template>
+                        <template x-if="resultData?.debug?.message">
+                            <p><strong>Debug:</strong> <span x-text="resultData.debug.message"></span></p>
+                        </template>
+                        <template x-if="resultData?.debug?.distance">
+                            <p><strong>Jarak:</strong> <span x-text="resultData.debug.distance"></span></p>
+                        </template>
+                        <template x-if="resultData?.debug?.elapsed">
+                            <p><strong>Waktu berlalu:</strong> <span x-text="resultData.debug.elapsed"></span></p>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -1073,6 +1082,8 @@
                 classSchedules: [],
                 selectedScheduleId: null,
                 scannedQrData: '',
+                userLatitude: null,
+                userLongitude: null,
 
                 // Shared space state
                 showSharedSpaceModal: false,
@@ -1115,7 +1126,37 @@
                 processScan(qrData) {
                     this.scannedQrData = qrData;
 
-                    this._post('{{ route("teacher.class-attendance.scan") }}', { qr_data: qrData, mode: this.mode })
+                    if (!navigator.geolocation) {
+                        alert('GPS tidak tersedia. Pastikan lokasi diaktifkan untuk presensi.');
+                        this.sendScan(qrData);
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            this.userLatitude = position.coords.latitude;
+                            this.userLongitude = position.coords.longitude;
+                            this.sendScan(qrData, this.userLatitude, this.userLongitude);
+                        },
+                        error => {
+                            console.error('Gagal mendapatkan lokasi:', error);
+                            alert('GPS tidak tersedia. Pastikan lokasi diaktifkan untuk presensi.');
+                            this.userLatitude = null;
+                            this.userLongitude = null;
+                            this.sendScan(qrData);
+                        },
+                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                    );
+                },
+
+                sendScan(qrData, latitude = null, longitude = null) {
+                    const payload = { qr_data: qrData, mode: this.mode };
+                    if (latitude !== null && longitude !== null) {
+                        payload.latitude = latitude;
+                        payload.longitude = longitude;
+                    }
+
+                    this._post('{{ route("teacher.class-attendance.scan") }}', payload)
                         .then(({ status, data }) => {
                             if (data.is_shared_space) {
                                 this.showSharedSpaceModal = true;
@@ -1150,11 +1191,18 @@
                 },
 
                 processScanWithSchedule() {
-                    this._post('{{ route("teacher.class-attendance.scan") }}', {
+                    const payload = {
                         qr_data: this.scannedQrData,
                         mode: this.mode,
                         schedule_id: this.selectedScheduleId
-                    })
+                    };
+
+                    if (this.userLatitude !== null && this.userLongitude !== null) {
+                        payload.latitude = this.userLatitude;
+                        payload.longitude = this.userLongitude;
+                    }
+
+                    this._post('{{ route("teacher.class-attendance.scan") }}', payload)
                         .then(({ status, data }) => { this.handleScanResponse(status, data); });
                 },
 
@@ -1241,7 +1289,7 @@
                     this.showResult = true;
                     this.resultSuccess = (status >= 200 && status < 300) && data?.success;
                     this.resultMessage = data?.message || 'Terjadi kesalahan sistem';
-                    this.resultData = data?.data || null;
+                    this.resultData = data?.data || data || null;
 
                     if (this.resultSuccess) {
                         setTimeout(() => window.location.reload(), 2500);

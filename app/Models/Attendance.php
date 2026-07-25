@@ -20,10 +20,23 @@ class Attendance extends Model
         'photo_out',
         'latitude',
         'longitude',
+        'check_in_latitude',
+        'check_in_longitude',
+        'check_out_latitude',
+        'check_out_longitude',
         'location_name',
         'location_address',
         'scan_method',
         'notes',
+    ];
+    
+    protected $casts = [
+        'check_in' => 'datetime:H:i:s',
+        'check_out' => 'datetime:H:i:s',
+        'check_in_latitude' => 'decimal:7',
+        'check_in_longitude' => 'decimal:7',
+        'check_out_latitude' => 'decimal:7',
+        'check_out_longitude' => 'decimal:7',
     ];
     
     public function user()

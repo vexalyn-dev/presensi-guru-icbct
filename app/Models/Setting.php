@@ -15,13 +15,13 @@ class Setting extends Model
         'value' => 'string',
     ];
 
-    public static function get($key, $default = null)
+    public static function get(string $key, $default = null): mixed
     {
         $setting = self::where('key', $key)->first();
         return $setting ? self::castValue($setting->value, $setting->type) : $default;
     }
 
-    public static function set($key, $value, $type = 'string', $group = 'general', $description = null)
+    public static function set(string $key, mixed $value, string $type = 'string', string $group = 'general', ?string $description = null): Setting
     {
         return self::updateOrCreate(
             ['key' => $key],
@@ -29,12 +29,12 @@ class Setting extends Model
         );
     }
 
-    private static function castValue($value, $type)
+    private static function castValue(mixed $value, string $type): mixed
     {
         return match($type) {
-            'boolean' => (bool) $value,
+            'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
             'integer' => (int) $value,
-            'float' => (float) $value,
+            'float', 'number' => (float) $value,
             'json' => json_decode($value, true),
             default => $value,
         };

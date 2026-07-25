@@ -6,7 +6,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\AttendanceHistoryController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\Teacher\ClassAttendanceController as TeacherClassAttendanceController;
@@ -155,12 +155,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // Settings
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::post('/settings/general', [SettingsController::class, 'updateGeneral'])->name('settings.general');
-    Route::post('/settings/attendance', [SettingsController::class, 'updateAttendance'])->name('settings.attendance');
-    Route::post('/settings/appearance', [SettingsController::class, 'updateAppearance'])->name('settings.appearance');
-    Route::post('/settings/notification', [SettingsController::class, 'updateNotification'])->name('settings.notification');
-    Route::post('/settings/reset', [SettingsController::class, 'resetSettings'])->name('settings.reset');
+    Route::middleware(['auth', 'role:admin'])->prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingController::class, 'index'])->name('index');
+        Route::post('/general', [SettingController::class, 'updateGeneral'])->name('general');
+        Route::post('/attendance', [SettingController::class, 'updateAttendance'])->name('attendance');
+        Route::post('/appearance', [SettingController::class, 'updateAppearance'])->name('appearance');
+        Route::post('/notification', [SettingController::class, 'updateNotification'])->name('notification');
+        Route::post('/maps', [SettingController::class, 'updateMaps'])->name('maps');
+        Route::post('/reset', [SettingController::class, 'reset'])->name('reset');
+    });
     
     // Messages / CS Chat
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
@@ -200,6 +203,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::get('/schedule', [\App\Http\Controllers\Teacher\ScheduleController::class, 'index'])->name('schedule');
         Route::get('/work-schedule', [WorkScheduleController::class, 'index'])->name('work-schedule');
         Route::get('/attendance', [\App\Http\Controllers\Teacher\AttendanceController::class, 'index'])->name('attendance');
+        Route::get('/attendance/refresh-qr', [\App\Http\Controllers\Teacher\AttendanceController::class, 'refreshQr'])->name('attendance.refresh-qr');
         Route::post('/attendance/store', [\App\Http\Controllers\Teacher\AttendanceController::class, 'store'])->name('attendance.store');
         
         // Class Attendance
