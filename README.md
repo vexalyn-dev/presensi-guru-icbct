@@ -632,3 +632,4 @@ Untuk pertanyaan, saran, atau kerjasama:
 Made with ❤️ by **Vexalyn Dev** • © 2024 ICB Cinta Teknika
 
 [⬆️ Back to Top](#-icb-ct---sistem-presensi-guru)
+ q
