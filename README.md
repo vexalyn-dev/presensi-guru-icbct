@@ -105,38 +105,38 @@
 
 ```mermaid
 flowchart TD
-    A[👤 Guru Login] --> B{ Autentikasi}
-    B -->|Email/Password| C[✅ Login Berhasil]
+    A["👤 Guru Login"] --> B{ Autentikasi}
+    B -->|Email/Password| C["✅ Login Berhasil"]
     B -->|Google OAuth| C
-    B -->|❌ Gagal| D[🚫 Tampilkan Error]
+    B -->|"❌ Gagal"| D["🚫 Tampilkan Error"]
     
-    C --> E{📱 Pilih Menu}
+C --> E{"📱 Pilih Menu"}
+
+    E -->|Presensi Harian| F["🌍 Ambil GPS Location"]
+    F --> G["📏 Validasi Radius"]
+    G --> H{"📏 Validasi Radius"}
+    H -->|Dalam Radius| I["✅ Absen Berhasil"]
+    H -->|Luar Radius| J["❌ Error: Di Luar Area"]
+    I --> K["💾 Simpan ke Database"]
     
-    E -->|Presensi Harian| F[ Halaman Presensi Harian]
-    F --> G[🌍 Ambil GPS Location]
-    G --> H{📏 Validasi Radius}
-    H -->|Dalam Radius| I[✅ Absen Berhasil]
-    H -->|Luar Radius| J[❌ Error: Di Luar Area]
-    I --> K[💾 Simpan ke Database]
-    
-    E -->|Presensi Kelas| L[📷 Scan QR Code]
-    L --> M{🔍 Deteksi QR}
-    M -->|Kelas Reguler| N[✅ Presensi Langsung]
-    M -->|Shared Space| O[📋 Pilih Kelas & Mapel]
-    O --> P[✅ Presensi Tersimpan]
-    N --> Q[💾 Simpan Data]
+    E -->|Presensi Kelas| L["📷 Scan QR Code"]
+    L --> M{"🔍 Deteksi QR"}
+    M -->|Kelas Reguler| N["✅ Presensi Langsung"]
+    M -->|Shared Space| O["📋 Pilih Kelas & Mapel"]
+    O --> P["✅ Presensi Tersimpan"]
+    N --> Q["💾 Simpan Data"]
     P --> Q
     
-    E -->|Laporan| R[📊 Halaman Laporan]
-    R --> S{📅 Pilih Periode}
-    S --> T[📈 Tampilkan Statistik]
-    T --> U[📥 Export Excel]
+    E -->|Laporan| R["📊 Halaman Laporan"]
+    R --> S{"📅 Pilih Periode"}
+    S --> T["📈 Tampilkan Statistik"]
+    T --> U["📥 Export Excel"]
     
-    E -->|Settings| V[️ Pengaturan]
-    V --> W{🔧 Pilih Tab}
+    E -->|Settings| V["️ Pengaturan"]
+    V --> W{"🔧 Pilih Tab"}
     W -->|Umum| X[ Identitas Sekolah]
-    W -->|Presensi| Y[⏰ Aturan Presensi]
-    W -->|Peta| Z[️ Konfigurasi GPS]
+    W -->|Presensi| Y["⏰ Aturan Presensi"]
+    W -->|Peta| Z["️ Konfigurasi GPS"]
     
     style A fill:#3B82F6,color:#fff
     style C fill:#10B981,color:#fff
@@ -210,10 +210,10 @@ erDiagram
 
 ```mermaid
 sequenceDiagram
-    participant G as 👤 Guru
-    participant F as 📱 Frontend
-    participant S as ⚙️ Server
-    participant D as 💾 Database
+    participant G as "👤 Guru"
+    participant F as "📱 Frontend"
+    participant S as "⚙️ Server"
+    participant D as "💾 Database"
     
     G->>F: Klik Absen Masuk
     F->>F: Request GPS Location
@@ -227,10 +227,10 @@ sequenceDiagram
         S->>D: Insert Attendance
         D-->>S: Success
         S-->>F: Response {success: true}
-        F-->>G: ✅ Toast Success
+        F-->>G: "✅ Toast Success"
     else Luar Radius
         S-->>F: Response {success: false, message}
-        F-->>G: ❌ Toast Error
+        F-->>G: "❌ Toast Error"
     end
 ```
 
