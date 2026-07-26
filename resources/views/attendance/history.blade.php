@@ -25,6 +25,17 @@
         </div>
     </div>
 
+        <!-- Server data (JSON) to avoid Blade directives inside JS -->
+        <script id="attendance-server-data" type="application/json">
+        {!! json_encode([
+            'attendances' => $transformedItems ?? ($attendances->items() ?? []),
+            'stats' => $stats ?? ['total' => 0, 'hadir' => 0, 'terlambat' => 0, 'alpha' => 0, 'izin' => 0],
+            'pagination' => $attendances ?? null,
+            'teachers' => $teachers ?? [],
+            'statuses' => $statuses ?? [],
+        ]) !!}
+        </script>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <!-- Total Presensi -->
@@ -283,13 +294,13 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <img x-show="att.user?.photo_url"
+                                     <img x-show="att.user?.photo_url"
                                          :src="att.user?.photo_url || ''"
                                          :alt="att.user?.name || '?'"
-                                         class="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm flex-shrink-0"
+                                         class="profile-avatar flex-shrink-0"
                                          x-on:error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'">
-                                    <div x-show="!att.user?.photo_url"
-                                         class="w-10 h-10 rounded-full bg-gradient-to-br from-gold-400 to-gold-500 flex items-center justify-center text-navy-900 font-bold text-xs flex-shrink-0">
+                                     <div x-show="!att.user?.photo_url"
+                                         class="profile-avatar bg-gradient-to-br from-gold-400 to-gold-500 flex items-center justify-center text-navy-900 font-bold text-sm flex-shrink-0">
                                         <span x-text="att.user?.name?.charAt(0)?.toUpperCase() || '?'"></span>
                                     </div>
                                     <span class="text-sm font-medium text-navy-800 dark:text-white truncate" x-text="att.user?.name || '-'"></span>
@@ -377,13 +388,17 @@
 
 <script>
     document.addEventListener('alpine:init', () => {
+        const serverDataEl = document.getElementById('attendance-server-data');
+        let serverData = {};
+        try { serverData = serverDataEl ? JSON.parse(serverDataEl.textContent || '{}') : {}; } catch(e) { serverData = {}; }
+
         Alpine.data('attendanceApp', () => ({
-            // Initial data from server
-            attendances: {!! json_encode($transformedItems ?? ($attendances->items() ?? [])) !!},
-            stats: {!! json_encode($stats ?? ['total' => 0, 'hadir' => 0, 'terlambat' => 0, 'alpha' => 0, 'izin' => 0]) !!},
-            pagination: {!! json_encode($attendances ?? null) !!},
-            teachers: {!! json_encode($teachers ?? []) !!},
-            statuses: {!! json_encode($statuses ?? []) !!},
+            // Initial data from server (read from JSON script to keep JS parsing clean)
+            attendances: serverData.attendances || [],
+            stats: serverData.stats || { total: 0, hadir: 0, terlambat: 0, alpha: 0, izin: 0 },
+            pagination: serverData.pagination || null,
+            teachers: serverData.teachers || [],
+            statuses: serverData.statuses || [],
             
             // Filters
             filters: {

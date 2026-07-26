@@ -103,7 +103,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-4 flex-1">
                     <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($leave->user->name) }}" 
-                         class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700">
+                        class="profile-avatar">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 class="text-base font-bold text-navy-800 dark:text-white">{{ $leave->user->name }}</h3>

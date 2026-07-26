@@ -94,7 +94,7 @@
     <!-- Data Table Container -->
     <div class="card overflow-hidden relative" style="min-height: 400px;">
         <!-- Modern Premium Loading Overlay -->
-        <div id="loading-spinner" class="hidden absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-slate-50/95 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-800/95 backdrop-blur-md z-50 flex items-center justify-center">
+        <div id="loading-spinner" class="hidden absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-slate-50/95 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-800/95 backdrop-blur-md z-50 items-center justify-center">
             <div class="text-center relative">
                 <!-- Animated Background Circle -->
                 <div class="absolute inset-0 flex items-center justify-center">
@@ -166,7 +166,9 @@
 
     function loadData(page = 1) {
         currentPage = page;
-        document.getElementById('loading-spinner').classList.remove('hidden');
+        const spinner = document.getElementById('loading-spinner');
+        spinner.classList.remove('hidden');
+        spinner.classList.add('flex');
         document.getElementById('table-container').classList.add('hidden');
         
         fetch(`${historyDataUrl}?type=${currentTab}&page=${page}`, {
@@ -180,12 +182,16 @@
         .then(data => {
             renderTable(data);
             updateStats(data.stats);
-            document.getElementById('loading-spinner').classList.add('hidden');
+            const spinner = document.getElementById('loading-spinner');
+            spinner.classList.add('hidden');
+            spinner.classList.remove('flex');
             document.getElementById('table-container').classList.remove('hidden');
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('loading-spinner').classList.add('hidden');
+            const spinner = document.getElementById('loading-spinner');
+            spinner.classList.add('hidden');
+            spinner.classList.remove('flex');
         });
     }
 

@@ -23,6 +23,19 @@
         .scrollbar-hide::-webkit-scrollbar {
             display: none;             /* Chrome, Safari, Opera */
         }
+        /* Standardized profile avatar used across teacher pages */
+        .profile-avatar {
+            width: 64px; /* matches dashboard w-16 */
+            height: 64px;
+            border-radius: 9999px;
+            object-fit: cover;
+            border: 3px solid rgba(226, 232, 240, 0.8); /* slate-200 approx */
+            box-shadow: 0 8px 20px rgba(2,6,23,0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        @media (max-width: 640px) {
+            .profile-avatar { width: 48px; height: 48px; }
+        }
     </style>
     @stack('styles')
 </head>
