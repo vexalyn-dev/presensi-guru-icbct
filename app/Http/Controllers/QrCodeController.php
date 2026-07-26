@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Attendance;
 use App\Models\AppSetting;
 use App\Notifications\SystemNotification;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,15 @@ use Carbon\Carbon;
 
 class QrCodeController extends Controller
 {
+    /**
+     * Display QR code scanner page
+     */
+    public function scan()
+    {
+        $gpsValidationStatus = Setting::get('gps_validation_status', 'on');
+        return view('attendance.scan', compact('gpsValidationStatus'));
+    }
+
     /**
      * Process QR Code scan for attendance
      */
@@ -200,13 +210,5 @@ class QrCodeController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui QR Code: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Display QR code scanner page
-     */
-    public function scan()
-    {
-        return view('attendance.scan');
     }
 }

@@ -937,7 +937,7 @@
                                 message += 'Coba lagi.';
                         }
 
-                        showToast(message, 'success');
+                        showToast(message, 'warning');
 
                         const latInput = document.getElementById('latitude-input') || document.getElementById('hardware-latitude');
                         const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
