@@ -889,6 +889,12 @@
                     submitBtn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> Memproses...';
                 }
 
+                // If GPS validation is disabled in settings, skip geolocation request
+                if (gpsValidationStatus !== 'on') {
+                    attendanceForm.submit();
+                    return;
+                }
+
                 // Try to get GPS coordinates first
                 if (!navigator.geolocation) {
                     // No geolocation available, submit without coords

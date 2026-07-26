@@ -138,9 +138,12 @@ class AttendanceController extends Controller
         );
 
         // ===== GPS VALIDATION =====
-        $gpsValidation = GpsHelper::validateLocation($request->input('latitude'), $request->input('longitude'));
-        if (!$gpsValidation['valid']) {
-            return back()->with('error', $gpsValidation['message']);
+        $gpsValidationStatus = Setting::get('gps_validation_status', 'on');
+        if ($gpsValidationStatus === 'on') {
+            $gpsValidation = GpsHelper::validateLocation($request->input('latitude'), $request->input('longitude'));
+            if (!$gpsValidation['valid']) {
+                return back()->with('error', $gpsValidation['message']);
+            }
         }
         // ===== END GPS VALIDATION =====
 

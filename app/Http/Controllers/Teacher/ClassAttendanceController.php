@@ -295,7 +295,7 @@ class ClassAttendanceController extends Controller
     // Private helpers
     // ──────────────────────────────────────────────────────────────────────────
 
-    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
         $earthRadius = 6371;
         $dLat = deg2rad($lat2 - $lat1);

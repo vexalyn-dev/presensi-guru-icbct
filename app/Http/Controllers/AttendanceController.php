@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,8 @@ class AttendanceController extends Controller
      */
     public function scan()
     {
-        return view('attendance.scan');
+        $gpsValidationStatus = Setting::get('gps_validation_status', 'on');
+        return view('attendance.scan', compact('gpsValidationStatus'));
     }
 
     /**
