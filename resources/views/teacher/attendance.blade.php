@@ -157,7 +157,7 @@
                         <div class="mt-4 flex items-center justify-center gap-2">
                             <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
-                                QR Code berlaku <span id="qr-timer">30</span> detik
+                                QR Code berlaku <span id="qr-timer" data-expiration="{{ $qrExpiration ?? 30 }}">{{ $qrExpiration ?? 30 }}</span> detik
                             </p>
                         </div>
                         <div class="mt-6 text-center space-y-1">
@@ -276,16 +276,21 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
 
-            let countdown = 30;
             const timerElement = document.getElementById('qr-timer');
             const qrCodeImage = document.getElementById('qr-code-img');
+            const qrExpiration = Number(timerElement?.dataset.expiration ?? 30);
+            let countdown = qrExpiration;
 
             const setTimerColor = (value) => {
                 if (!timerElement) return;
                 timerElement.classList.remove('timer-green','timer-yellow','timer-red');
-                if (value >= 21) timerElement.classList.add('timer-green');
-                else if (value >= 11) timerElement.classList.add('timer-yellow');
-                else timerElement.classList.add('timer-red');
+                if (value <= 10) {
+                    timerElement.classList.add('timer-red');
+                } else if (value <= 30) {
+                    timerElement.classList.add('timer-yellow');
+                } else {
+                    timerElement.classList.add('timer-green');
+                }
             };
 
             const updateTimer = () => {
@@ -307,7 +312,7 @@
                     })
                     .catch(() => {});
 
-                countdown = 30;
+                countdown = qrExpiration;
                 updateTimer();
             };
 

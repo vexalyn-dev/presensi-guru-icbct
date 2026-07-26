@@ -47,13 +47,15 @@ class AttendanceController extends Controller
             ->get();
 
         $qrCodeUrl = $this->generateDailyAttendanceQrCodeUrl($user);
+        $qrExpiration = Setting::get('qr_expiration', 30);
 
         return view('teacher.attendance', compact(
             'todayAttendance',
             'recentAttendance',
             'scheduleStart',
             'scheduleEnd',
-            'qrCodeUrl'
+            'qrCodeUrl',
+            'qrExpiration'
         ));
     }
 
