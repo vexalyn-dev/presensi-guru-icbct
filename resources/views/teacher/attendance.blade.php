@@ -243,14 +243,33 @@
             animation: fadeIn 0.3s ease-out forwards;
         }
 
-        /* QR timer color transitions */
+        /* QR timer color transitions (enhanced) */
         #qr-timer {
-            transition: color 0.6s ease, opacity 0.4s ease;
+            display: inline-block;
+            transition: color 0.7s cubic-bezier(.2,.9,.2,1),
+                        transform 0.35s cubic-bezier(.2,.9,.2,1),
+                        text-shadow 0.7s ease, opacity 0.35s ease;
             font-variant-numeric: tabular-nums;
+            will-change: color, transform, text-shadow;
         }
-        .timer-green { color: #16a34a; } /* green-600 */
-        .timer-yellow { color: #d97706; } /* amber-600 */
-        .timer-red { color: #dc2626; } /* red-600 */
+
+        .timer-green {
+            color: #10b981; /* emerald-500 */
+            text-shadow: 0 10px 30px rgba(16,185,129,0.12);
+            transform: scale(1.03);
+        }
+
+        .timer-yellow {
+            color: #f59e0b; /* amber-500 */
+            text-shadow: 0 8px 26px rgba(245,158,11,0.10);
+            transform: scale(1.015);
+        }
+
+        .timer-red {
+            color: #ef4444; /* red-500 */
+            text-shadow: 0 12px 36px rgba(239,68,68,0.12);
+            transform: scale(1.05);
+        }
     </style>
 
     <script>
@@ -264,8 +283,8 @@
             const setTimerColor = (value) => {
                 if (!timerElement) return;
                 timerElement.classList.remove('timer-green','timer-yellow','timer-red');
-                if (value >= 25) timerElement.classList.add('timer-green');
-                else if (value >= 20) timerElement.classList.add('timer-yellow');
+                if (value >= 21) timerElement.classList.add('timer-green');
+                else if (value >= 11) timerElement.classList.add('timer-yellow');
                 else timerElement.classList.add('timer-red');
             };
 
