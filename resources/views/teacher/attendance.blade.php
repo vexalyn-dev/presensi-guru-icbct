@@ -59,10 +59,9 @@
                             <div>
                                 <h2 class="text-lg font-bold text-navy-800 dark:text-white">Status Hari Ini</h2>
                                 <div class="flex items-center gap-2 mt-0.5">
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
-                                    <span class="text-slate-300 dark:text-slate-600">•</span>
-                                    <p id="live-running-clock" class="text-xs font-mono font-bold text-navy-800 dark:text-gold-400">00:00:00 WIB</p>
-                                </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
+                                        <span class="text-slate-300 dark:text-slate-600">•</span>
+                                    </div>
                             </div>
                         </div>
                         @if($todayAttendance)
@@ -243,37 +242,37 @@
         .animate-fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
+
+        /* QR timer color transitions */
+        #qr-timer {
+            transition: color 0.6s ease, opacity 0.4s ease;
+            font-variant-numeric: tabular-nums;
+        }
+        .timer-green { color: #16a34a; } /* green-600 */
+        .timer-yellow { color: #d97706; } /* amber-600 */
+        .timer-red { color: #dc2626; } /* red-600 */
     </style>
 
     <script>
-        function updateLiveClock() {
-            const clockEl = document.getElementById('live-running-clock');
-            if (!clockEl) return;
-
-            const now = new Date();
-            const optionsTime = {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                timeZone: 'Asia/Jakarta',
-                hour12: false
-            };
-            const timeStr = now.toLocaleTimeString('id-ID', optionsTime).replace(/\./g, ':');
-            clockEl.textContent = `${timeStr} WIB`;
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
-            updateLiveClock();
-            setInterval(updateLiveClock, 1000);
 
             let countdown = 30;
             const timerElement = document.getElementById('qr-timer');
             const qrCodeImage = document.getElementById('qr-code-img');
 
+            const setTimerColor = (value) => {
+                if (!timerElement) return;
+                timerElement.classList.remove('timer-green','timer-yellow','timer-red');
+                if (value >= 25) timerElement.classList.add('timer-green');
+                else if (value >= 20) timerElement.classList.add('timer-yellow');
+                else timerElement.classList.add('timer-red');
+            };
+
             const updateTimer = () => {
                 if (timerElement) {
                     timerElement.textContent = countdown;
+                    setTimerColor(countdown);
                 }
             };
 
