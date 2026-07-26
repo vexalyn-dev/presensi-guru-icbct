@@ -20,10 +20,12 @@ class SettingController extends Controller
                 'admin_email' => Setting::get('admin_email', ''),
             ],
             'attendance' => [
-                'attendance_start_time' => Setting::get('attendance_start_time', '07:30'),
-                'attendance_end_time' => Setting::get('attendance_end_time', '08:00'),
-                'attendance_late_grace_period' => Setting::get('attendance_late_grace_period', 15),
-                'location_radius' => Setting::get('location_radius', 50), // dalam meter
+                'attendance_start_time' => Setting::get('attendance_start_time', '06:30'),
+                'attendance_end_time' => Setting::get('attendance_end_time', '16:00'),
+                'attendance_late_grace_period' => Setting::get('attendance_late_grace_period', 5),
+                'gps_validation_status' => Setting::get('gps_validation_status', 'on'),
+                'qr_expiration' => Setting::get('qr_expiration', 30),
+                'auto_logout' => Setting::get('auto_logout', 'off'),
             ],
             'appearance' => [
                 'primary_color' => Setting::get('primary_color', '#0F172A'),
@@ -68,13 +70,17 @@ class SettingController extends Controller
             'attendance_start_time' => 'required|date_format:H:i',
             'attendance_end_time' => 'required|date_format:H:i|after:attendance_start_time',
             'attendance_late_grace_period' => 'required|integer|min:0|max:60',
-            'location_radius' => 'required|integer|min:10|max:1000', // 10m - 1000m
+            'gps_validation_status' => 'required|in:on,off',
+            'qr_expiration' => 'required|integer|in:15,30,45,60',
+            'auto_logout' => 'required|in:off,5,10,15,30,60,120',
         ]);
 
         Setting::set('attendance_start_time', $validated['attendance_start_time']);
         Setting::set('attendance_end_time', $validated['attendance_end_time']);
         Setting::set('attendance_late_grace_period', $validated['attendance_late_grace_period'], 'number');
-        Setting::set('location_radius', $validated['location_radius'], 'number'); // INI YANG PENTING!
+        Setting::set('gps_validation_status', $validated['gps_validation_status'], 'string');
+        Setting::set('qr_expiration', $validated['qr_expiration'], 'number');
+        Setting::set('auto_logout', $validated['auto_logout'], 'string');
 
         return back()->with('success', 'Aturan presensi berhasil disimpan!');
     }
@@ -155,10 +161,12 @@ class SettingController extends Controller
             'app_timezone' => ['value' => 'Asia/Jakarta', 'type' => 'string'],
             'app_language' => ['value' => 'id', 'type' => 'string'],
             'admin_email' => ['value' => '', 'type' => 'string'],
-            'attendance_start_time' => ['value' => '07:30', 'type' => 'string'],
-            'attendance_end_time' => ['value' => '08:00', 'type' => 'string'],
-            'attendance_late_grace_period' => ['value' => '15', 'type' => 'number'],
-            'location_radius' => ['value' => '50', 'type' => 'number'],
+            'attendance_start_time' => ['value' => '06:30', 'type' => 'string'],
+            'attendance_end_time' => ['value' => '16:00', 'type' => 'string'],
+            'attendance_late_grace_period' => ['value' => '5', 'type' => 'number'],
+            'gps_validation_status' => ['value' => 'on', 'type' => 'string'],
+            'qr_expiration' => ['value' => '30', 'type' => 'number'],
+            'auto_logout' => ['value' => 'off', 'type' => 'string'],
             'primary_color' => ['value' => '#0F172A', 'type' => 'string'],
             'accent_color' => ['value' => '#FACC15', 'type' => 'string'],
             'email_notification' => ['value' => '1', 'type' => 'boolean'],

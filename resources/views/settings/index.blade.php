@@ -289,32 +289,188 @@
                 <form action="{{ route('settings.attendance') }}" method="POST" class="space-y-5">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Jam Mulai Presensi -->
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Jam Mulai Presensi</label>
                             <div class="relative group">
                                 <i data-lucide="sunrise" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input type="time" name="attendance_start_time" value="{{ old('attendance_start_time', $settings['attendance']['attendance_start_time'] ?? '07:30') }}" required
+                                <input type="time" name="attendance_start_time" 
+                                       value="{{ old('attendance_start_time', $settings['attendance']['attendance_start_time'] ?? '06:30') }}" required
                                        class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                             </div>
                         </div>
+
+                        <!-- Batas Akhir Presensi -->
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Batas Akhir Presensi</label>
                             <div class="relative group">
                                 <i data-lucide="sunset" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input type="time" name="attendance_end_time" value="{{ old('attendance_end_time', $settings['attendance']['attendance_end_time'] ?? '08:00') }}" required
+                                <input type="time" name="attendance_end_time" 
+                                       value="{{ old('attendance_end_time', $settings['attendance']['attendance_end_time'] ?? '16:00') }}" required
                                        class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                             </div>
                         </div>
+
+                        <!-- Toleransi Terlambat -->
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Toleransi Terlambat (Menit)</label>
                             <div class="relative group">
                                 <i data-lucide="timer" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input type="number" name="attendance_late_grace_period" value="{{ old('attendance_late_grace_period', $settings['attendance']['attendance_late_grace_period'] ?? 15) }}" min="0" max="60"
+                                <input type="number" name="attendance_late_grace_period" 
+                                       value="{{ old('attendance_late_grace_period', $settings['attendance']['attendance_late_grace_period'] ?? 5) }}" min="0" max="60"
                                        class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                             </div>
                         </div>
-                        
+
+                        <!-- ✅ Validasi GPS (DIPINDAH KE SINI) -->
+                        <div>
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Validasi GPS</label>
+                            <div class="relative" x-data="{ openGps: false }" @click.outside="openGps = false">
+                                <button type="button" @click="openGps = !openGps"
+                                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 flex items-center justify-between hover:border-navy-300 dark:hover:border-gold-600 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-6 h-6 rounded-lg flex items-center justify-center" 
+                                             :class="selectedGpsValidation === 'on' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'">
+                                            <i data-lucide="map-pin" :class="selectedGpsValidation === 'on' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'" class="w-4 h-4"></i>
+                                        </div>
+                                        <span class="text-slate-700 dark:text-slate-300 font-medium" x-text="selectedGpsValidation === 'on' ? 'Aktif' : 'Nonaktif'"></span>
+                                    </div>
+                                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{'rotate-180': openGps}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+
+                                <div x-show="openGps"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+                                     class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                     x-cloak>
+                                    <div class="overflow-y-auto" style="max-height: 240px;">
+                                        <template x-for="option in gpsValidationOptions" :key="option.value">
+                                            <button type="button" @click="selectedGpsValidation = option.value; openGps = false"
+                                                    class="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 last:border-0"
+                                                    :class="selectedGpsValidation === option.value ? 'bg-navy-50 dark:bg-navy-900/30' : ''">
+                                                <div class="w-6 h-6 rounded-lg flex items-center justify-center" 
+                                                     :class="option.value === 'on' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'">
+                                                    <i data-lucide="map-pin" :class="option.value === 'on' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'" class="w-4 h-4"></i>
+                                                </div>
+                                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300" x-text="option.name"></span>
+                                                <svg x-show="selectedGpsValidation === option.value" class="w-5 h-5 text-navy-800 dark:text-gold-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="gps_validation_status" :value="selectedGpsValidation">
+                            </div>
+                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Aktifkan validasi lokasi saat presensi</p>
+                        </div>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- QR Code Expiration -->
+                        <div>
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">QR Code Berlaku (Detik)</label>
+                            <div class="relative" x-data="{ openQr: false }" @click.outside="openQr = false">
+                                <button type="button" @click="openQr = !openQr"
+                                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 flex items-center justify-between hover:border-navy-300 dark:hover:border-gold-600 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-6 h-6 rounded-lg flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
+                                            <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                                        </div>
+                                        <span class="text-slate-700 dark:text-slate-300 font-medium" x-text="selectedQrExpiration + ' detik'"></span>
+                                    </div>
+                                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{'rotate-180': openQr}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+
+                                <div x-show="openQr"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+                                     class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                     x-cloak>
+                                    <div class="overflow-y-auto" style="max-height: 240px;">
+                                        <template x-for="option in qrExpirationOptions" :key="option.value">
+                                            <button type="button" @click="selectedQrExpiration = option.value; openQr = false"
+                                                    class="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 last:border-0"
+                                                    :class="selectedQrExpiration === option.value ? 'bg-navy-50 dark:bg-navy-900/30' : ''">
+                                                <div class="w-6 h-6 rounded-lg flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
+                                                    <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                                                </div>
+                                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300" x-text="option.name"></span>
+                                                <svg x-show="selectedQrExpiration === option.value" class="w-5 h-5 text-navy-800 dark:text-gold-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="qr_expiration" :value="selectedQrExpiration">
+                            </div>
+                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Durasi QR Code tetap valid</p>
+                        </div>
+
+                        <!-- ✅ Auto Logout -->
+                        <div>
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Auto Logout</label>
+                            <div class="relative" x-data="{ openLogout: false }" @click.outside="openLogout = false">
+                                <button type="button" @click="openLogout = !openLogout"
+                                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 flex items-center justify-between hover:border-navy-300 dark:hover:border-gold-600 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-6 h-6 rounded-lg flex items-center justify-center" 
+                                             :class="selectedAutoLogout === 'off' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-purple-100 dark:bg-purple-900/30'">
+                                            <i data-lucide="log-out" :class="selectedAutoLogout === 'off' ? 'text-red-600 dark:text-red-400' : 'text-purple-600 dark:text-purple-400'" class="w-4 h-4"></i>
+                                        </div>
+                                        <span class="text-slate-700 dark:text-slate-300 font-medium" 
+                                              x-text="selectedAutoLogout === 'off' ? 'Nonaktif' : selectedAutoLogout + ' menit'"></span>
+                                    </div>
+                                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{'rotate-180': openLogout}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+
+                                <div x-show="openLogout"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+                                     class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                     x-cloak>
+                                    <div class="overflow-y-auto" style="max-height: 240px;">
+                                        <template x-for="option in autoLogoutOptions" :key="option.value">
+                                            <button type="button" @click="selectedAutoLogout = option.value; openLogout = false"
+                                                    class="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 last:border-0"
+                                                    :class="selectedAutoLogout === option.value ? 'bg-navy-50 dark:bg-navy-900/30' : ''">
+                                                <div class="w-6 h-6 rounded-lg flex items-center justify-center" 
+                                                     :class="option.value === 'off' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-purple-100 dark:bg-purple-900/30'">
+                                                    <i data-lucide="log-out" :class="option.value === 'off' ? 'text-red-600 dark:text-red-400' : 'text-purple-600 dark:text-purple-400'" class="w-4 h-4"></i>
+                                                </div>
+                                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300" x-text="option.name"></span>
+                                                <svg x-show="selectedAutoLogout === option.value" class="w-5 h-5 text-navy-800 dark:text-gold-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="auto_logout" :value="selectedAutoLogout">
+                            </div>
+                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Auto logout jika tidak aktif</p>
+                        </div>
+                    </div>
+
                     <div class="flex justify-end pt-5 border-t border-slate-200 dark:border-slate-700">
                         <button type="submit" class="px-8 py-3 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i> Simpan Aturan
@@ -716,15 +872,43 @@
                 { value: 'Africa/Johannesburg', name: 'South Africa (GMT+2)', badge: 'ZA' },
             ],
 
+            gpsValidationOptions: [
+                { value: 'on', name: 'Aktif' },
+                { value: 'off', name: 'Nonaktif' },
+            ],
+
+            qrExpirationOptions: [
+                { value: '15', name: '15 detik' },
+                { value: '30', name: '30 detik' },
+                { value: '45', name: '45 detik' },
+                { value: '60', name: '60 detik' },
+            ],
+
+            autoLogoutOptions: [
+                { value: 'off', name: 'Nonaktif' },
+                { value: '5', name: '5 menit' },
+                { value: '10', name: '10 menit' },
+                { value: '15', name: '15 menit' },
+                { value: '30', name: '30 menit' },
+                { value: '60', name: '60 menit' },
+                { value: '120', name: '120 menit' },
+            ],
+
             // Dropdown state
             languageDropdownOpen: false,
             languageSearch: '',
             timezoneDropdownOpen: false,
             timezoneSearch: '',
+            gpsDropdownOpen: false,
+            qrDropdownOpen: false,
+            autoLogoutDropdownOpen: false,
 
             // Selected values
             selectedLanguage: null,
             selectedTimezone: null,
+            selectedGpsValidation: '{{ old("gps_validation_status", $settings["attendance"]["gps_validation_status"] ?? "on") }}',
+            selectedQrExpiration: '{{ old("qr_expiration", $settings["attendance"]["qr_expiration"] ?? "30") }}',
+            selectedAutoLogout: '{{ old("auto_logout", $settings["attendance"]["auto_logout"] ?? "off") }}',
 
             // Computed properties for filtering
             get filteredLanguages() {
@@ -754,6 +938,21 @@
                 this.selectedTimezone = tz;
                 this.timezoneDropdownOpen = false;
                 this.timezoneSearch = '';
+            },
+
+            selectGpsValidation(option) {
+                this.selectedGpsValidation = option;
+                this.gpsDropdownOpen = false;
+            },
+
+            selectQrExpiration(option) {
+                this.selectedQrExpiration = option;
+                this.qrDropdownOpen = false;
+            },
+
+            selectAutoLogout(option) {
+                this.selectedAutoLogout = option;
+                this.autoLogoutDropdownOpen = false;
             },
 
             getFlagUrl(code) {
@@ -797,9 +996,15 @@
                 // Set initial values from settings
                 const currentLang = '{{ old("app_language", $settings["general"]["app_language"] ?? "id") }}';
                 const currentTimezone = '{{ old("app_timezone", $settings["general"]["app_timezone"] ?? "Asia/Jakarta") }}';
+                const currentGpsValidation = '{{ old("gps_validation_status", $settings["attendance"]["gps_validation_status"] ?? "on") }}';
+                const currentQrExpiration = '{{ old("qr_expiration", $settings["attendance"]["qr_expiration"] ?? "30") }}';
+                const currentAutoLogout = '{{ old("auto_logout", $settings["attendance"]["auto_logout"] ?? "off") }}';
                 
                 this.selectedLanguage = this.languages.find(l => l.code === currentLang) || this.languages[0];
                 this.selectedTimezone = this.timezones.find(t => t.value === currentTimezone) || this.timezones[0];
+                this.selectedGpsValidation = this.gpsValidationOptions.some(opt => opt.value === currentGpsValidation) ? currentGpsValidation : 'on';
+                this.selectedQrExpiration = this.qrExpirationOptions.some(opt => String(opt.value) === String(currentQrExpiration)) ? currentQrExpiration : '30';
+                this.selectedAutoLogout = this.autoLogoutOptions.some(opt => String(opt.value) === String(currentAutoLogout)) ? currentAutoLogout : 'off';
             }
         }));
     });
