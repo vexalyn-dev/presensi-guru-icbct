@@ -144,13 +144,13 @@
                         </div>
                     </div>
 
-                    <!-- QR Code Container -->
-                    <div class="flex flex-col items-center justify-center p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-slate-200 dark:border-slate-700">
-                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
+                    <!-- QR Code Container (responsive square) -->
+                    <div class="flex flex-col items-center justify-center p-4 sm:p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-slate-200 dark:border-slate-700">
+                        <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
                             @if($qrCodeUrl)
-                                <img src="{{ $qrCodeUrl }}" id="qr-code-img" alt="QR Code Presensi" class="w-64 h-64 mx-auto">
+                                <img src="{{ $qrCodeUrl }}" id="qr-code-img" alt="QR Code Presensi" class="w-full h-full object-contain">
                             @else
-                                <div class="w-64 h-64 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
+                                <div class="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
                                     <p class="text-sm text-slate-500 dark:text-slate-400">QR Code tidak tersedia</p>
                                 </div>
                             @endif

@@ -49,8 +49,8 @@ class SettingController extends Controller
     {
         $validated = $request->validate([
             'app_name' => 'required|string|max:255',
-            'app_timezone' => 'required|in:Asia/Jakarta,Asia/Makassar,Asia/Jayapura',
-            'app_language' => 'required|in:id,en',
+            'app_timezone' => 'required|string|max:100',
+            'app_language' => 'required|string|max:50',
             'admin_email' => 'nullable|email',
         ]);
 
@@ -137,10 +137,12 @@ class SettingController extends Controller
         $validated = $request->validate([
             'school_latitude' => 'required|numeric|between:-90,90',
             'school_longitude' => 'required|numeric|between:-180,180',
+            'location_radius' => 'nullable|integer|min:10|max:1000',
         ]);
 
         Setting::set('school_latitude', $validated['school_latitude'], 'number');
         Setting::set('school_longitude', $validated['school_longitude'], 'number');
+        Setting::set('location_radius', $validated['location_radius'] ?? 50, 'number');
 
         return back()->with('success', 'Lokasi sekolah berhasil diperbarui!');
     }

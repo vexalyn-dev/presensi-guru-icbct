@@ -133,14 +133,14 @@
                             </button>
 
                             <div x-show="timezoneDropdownOpen"
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                                 x-transition:enter="transition ease-out duration-220"
+                                 x-transition:enter-start="opacity-0 translate-y-3 scale-95"
                                  x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                 x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                 class="absolute z-50 w-full bottom-full mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
-                                 style="max-height: 320px;">
+                                 x-transition:leave="transition ease-in duration-180"
+                                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                 x-transition:leave-end="opacity-0 translate-y-3 scale-95"
+                                 class="absolute z-[60] left-0 right-0 bottom-full mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-[0_20px_60px_-15px_rgba(15,23,42,0.35)] overflow-hidden"
+                                 style="max-height: 320px; min-width: 100%;">
 
                                 <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
                                     <div class="relative">
@@ -199,14 +199,14 @@
                             </button>
 
                             <div x-show="languageDropdownOpen"
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                                 x-transition:enter="transition ease-out duration-220"
+                                 x-transition:enter-start="opacity-0 translate-y-3 scale-95"
                                  x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                 x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                 class="absolute z-50 w-full bottom-full mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
-                                 style="max-height: 320px;">
+                                 x-transition:leave="transition ease-in duration-180"
+                                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                 x-transition:leave-end="opacity-0 translate-y-3 scale-95"
+                                 class="absolute z-[60] left-0 right-0 bottom-full mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-[0_20px_60px_-15px_rgba(15,23,42,0.35)] overflow-hidden"
+                                 style="max-height: 320px; min-width: 100%;">
 
                                 <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
                                     <div class="relative">
