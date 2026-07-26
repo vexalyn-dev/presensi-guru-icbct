@@ -112,6 +112,7 @@
                     </div>
                 </div>
 
+                @if($schedule['is_today'])
                 <!-- Real-time Progress Bar -->
                 <div class="mb-3">
                     <div class="flex items-center justify-between mb-2">
@@ -148,6 +149,7 @@
                         <span x-text="progressPercent >= 100 ? 'Selesai' : (progressPercent > 0 ? 'Sedang Berjalan' : 'Belum Dimulai')"></span>
                     </span>
                 </div>
+                @endif
             </div>
             @endforeach
         </div>
