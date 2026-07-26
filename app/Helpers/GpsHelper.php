@@ -34,6 +34,16 @@ class GpsHelper
      */
     public static function validateLocation(?float $userLat, ?float $userLng): array
     {
+        $gpsStatus = Setting::get('gps_validation_status', 'on');
+        if ($gpsStatus === 'off') {
+            return [
+                'valid' => true,
+                'distance' => null,
+                'radius' => 0,
+                'message' => 'Validasi GPS dinonaktifkan oleh admin.',
+            ];
+        }
+
         // Ambil koordinat sekolah dari database
         $schoolLat = (float) Setting::get('school_latitude', -6.2087634);
         $schoolLng = (float) Setting::get('school_longitude', 106.8455994);

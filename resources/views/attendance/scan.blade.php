@@ -899,11 +899,15 @@
                 // Try to get GPS coordinates first
                 if (!navigator.geolocation) {
                     // No geolocation available, submit without coords
+                    const latInput = document.getElementById('latitude-input') || document.getElementById('hardware-latitude');
+                    const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
+                    if (latInput) latInput.value = '';
+                    if (lngInput) lngInput.value = '';
                     attendanceForm.submit();
                     return;
                 }
 
-                const geoOptions = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+                const geoOptions = { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 };
 
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -918,30 +922,29 @@
                         attendanceForm.submit();
                     },
                     (error) => {
-                        // On error, show toast and still submit (server will validate)
-                        let message = 'Gagal mendapatkan lokasi GPS. ';
+                        let message = 'GPS gagal. Mencoba tanpa GPS... ';
                         switch(error.code) {
                             case error.PERMISSION_DENIED:
                                 message += 'Izin GPS ditolak.';
                                 break;
                             case error.POSITION_UNAVAILABLE:
-                                message += 'Informasi lokasi tidak tersedia.';
+                                message += 'Lokasi tidak tersedia.';
                                 break;
                             case error.TIMEOUT:
-                                message += 'Request GPS timeout.';
+                                message += 'GPS timeout.';
                                 break;
                             default:
                                 message += 'Coba lagi.';
                         }
 
-                        showToast(message, 'error');
+                        showToast(message, 'success');
 
-                        // remove submitting state so user can retry
-                        if (submitBtn) {
-                            submitBtn.removeAttribute('data-submitting');
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = document.getElementById('btn-confirm-text')?.textContent || 'Konfirmasi';
-                        }
+                        const latInput = document.getElementById('latitude-input') || document.getElementById('hardware-latitude');
+                        const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
+                        if (latInput) latInput.value = '';
+                        if (lngInput) lngInput.value = '';
+
+                        attendanceForm.submit();
                     },
                     geoOptions
                 );
