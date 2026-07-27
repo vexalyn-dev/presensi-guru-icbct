@@ -160,22 +160,16 @@
                                     data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
                                 </div>
 
-                                <!-- NIP -->
                                 <div>
-                                    <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">NIP 
-                                        <span class="text-xs text-slate-400 font-normal">(Nomor Induk Pegawai - 18 digit)</span></label>
+                                    <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Kode
+                                        Guru <span class="text-red-500">*</span></label>
                                     <div class="relative">
-                                        <i data-lucide="id-card"
+                                        <i data-lucide="hash"
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                        <input type="text" name="nip" value="{{ old('nip', $teacher->nip) }}" 
-                                            placeholder="Masukkan 18 digit NIP..."
-                                            maxlength="18"
-                                            pattern="[0-9]{18}"
-                                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 18)"
-                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('nip') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                        <input type="text" name="teacher_code" value="{{ old('teacher_code', $teacher->teacher_code) }}" required
+                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('teacher_code') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                                     </div>
-                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">NIP harus 18 digit angka</p>
-                                    @error('nip')<p class="mt-1 text-xs text-red-500 flex items-center gap-1"><i
+                                    @error('teacher_code')<p class="mt-1 text-xs text-red-500 flex items-center gap-1"><i
                                     data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
                                 </div>
 

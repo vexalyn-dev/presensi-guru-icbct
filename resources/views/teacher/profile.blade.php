@@ -39,15 +39,6 @@
 
                 <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 space-y-3 text-left">
                     @if($teacher)
-                    @if($teacher->nip)
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="id-card" class="w-4 h-4 text-slate-400"></i>
-                        <div class="flex-1">
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400">NIP</p>
-                            <p class="text-sm font-semibold text-navy-800 dark:text-white">{{ $teacher->nip }}</p>
-                        </div>
-                    </div>
-                    @endif
                     @if($teacher->education)
                     <div class="flex items-center gap-3">
                         <i data-lucide="graduation-cap" class="w-4 h-4 text-slate-400"></i>

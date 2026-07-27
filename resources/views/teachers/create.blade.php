@@ -127,6 +127,25 @@
                             @enderror
                         </div>
 
+                        <!-- Kode Guru -->
+                        <div>
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
+                                Kode Guru <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative group">
+                                <i data-lucide="hash"
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
+                                <input type="text" name="teacher_code" value="{{ old('teacher_code') }}" required
+                                    class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600"
+                                    placeholder="Contoh: TSM-01, RPL-02, ING-01">
+                            </div>
+                            @error('teacher_code')
+                                <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                                    <i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
                         <!-- Email -->
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">

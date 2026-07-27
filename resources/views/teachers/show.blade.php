@@ -31,7 +31,9 @@
                     <img src="{{ $teacher->photo_url }}" class="w-28 h-28 rounded-2xl object-cover border-4 border-slate-200 dark:border-slate-700 shadow-lg flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <h2 class="text-2xl font-bold text-navy-800 dark:text-white mb-1 truncate">{{ $teacher->name }}</h2>
-                        <p class="text-slate-500 dark:text-slate-400 mb-4 truncate">{{ $teacher->email }}</p>
+                        <p class="text-slate-500 dark:text-slate-400 mb-2 truncate">{{ $teacher->email }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Kode Guru</p>
+                        <p class="text-sm font-bold text-navy-800 dark:text-white font-mono mb-4">{{ $teacher->teacher_code ?? '-' }}</p>
                         
                         <!-- Badges -->
                         <div class="flex flex-wrap items-center gap-2 mb-4">

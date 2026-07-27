@@ -389,7 +389,7 @@
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Guru</th>
-                        <th class="px-6 py-4 text-center text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">NIP</th>
+                        <th class="px-6 py-4 text-center text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tanggal & Hari</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jam Masuk</th>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jam Keluar</th>
@@ -413,13 +413,9 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                @if($att->user->nip)
-                                <span class="inline-flex items-center px-2.5 py-1 bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300 rounded-lg text-sm font-semibold tracking-wide">
-                                    {{ $att->user->nip }}
+                                <span class="inline-flex items-center px-2.5 py-1 bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300 rounded-lg text-sm font-semibold tracking-wide truncate max-w-[160px]">
+                                    {{ $att->user->email ?? '-' }}
                                 </span>
-                                @else
-                                <span class="text-xs text-slate-400 italic">-</span>
-                                @endif
                             </td>
                             <td class="px-6 py-4">
                                 <div>

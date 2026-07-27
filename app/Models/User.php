@@ -59,7 +59,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'nip',
+        'id_guru',
+        'teacher_code',
         'phone',
         'address',
         'bio',
@@ -120,12 +121,29 @@ class User extends Authenticatable
     {
         parent::boot();
         
-        // Auto-generate QR token when creating new teacher
+        // Auto-generate QR token and teacher ID when creating new teacher
         static::creating(function (User $user) {
-            if ($user->role === 'guru' && empty($user->qr_token)) {
-                $user->qr_token = Str::uuid()->toString();
+            if ($user->role === 'guru') {
+                if (empty($user->qr_token)) {
+                    $user->qr_token = Str::uuid()->toString();
+                }
+                if (empty($user->id_guru)) {
+                    $user->id_guru = static::generateGuruId();
+                }
             }
         });
+    }
+
+    public static function generateGuruId(): string
+    {
+        $prefix = 'GURU-';
+
+        do {
+            $randomNumber = str_pad(random_int(1, 99999), 5, '0', STR_PAD_LEFT);
+            $code = $prefix . $randomNumber;
+        } while (static::where('id_guru', $code)->exists());
+
+        return $code;
     }
 
     // ==========================================
@@ -311,9 +329,15 @@ class User extends Authenticatable
      */
     public function getPhotoUrlAttribute(): string
     {
-        return $this->photo 
-            ? asset('storage/' . $this->photo) 
-            : asset('images/default-teacher.png');
+        if ($this->photo) {
+            return asset('storage/' . $this->photo);
+        }
+
+        if ($this->teacher && $this->teacher->photo) {
+            return asset('storage/' . $this->teacher->photo);
+        }
+
+        return asset('images/default-teacher.png');
     }
 
     /**

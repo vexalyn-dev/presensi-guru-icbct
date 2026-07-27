@@ -42,18 +42,7 @@ class SubjectController extends Controller
 
         // Return JSON for AJAX requests
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'data'         => $subjects->items(),
-                'links'        => [
-                    'first' => $subjects->url(1),
-                    'last'  => $subjects->url($subjects->lastPage()),
-                    'prev'  => $subjects->previousPageUrl(),
-                    'next'  => $subjects->nextPageUrl(),
-                ],
-                'current_page' => $subjects->currentPage(),
-                'last_page'    => $subjects->lastPage(),
-                'total'        => $subjects->total(),
-            ]);
+            return response()->json($subjects->toArray());
         }
 
         return view('subjects.index', compact('subjects'));

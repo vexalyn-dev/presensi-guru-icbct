@@ -190,32 +190,16 @@
         <!-- Pagination -->
         <div x-show="pagination && pagination.links && pagination.links.length > 3" class="flex justify-center" x-cloak>
             <nav class="flex items-center gap-1">
-                <!-- Previous -->
-                <template x-if="pagination.prev_page_url">
-                    <button @click="loadPage(pagination.prev_page_url)" 
-                            class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                        ←
-                    </button>
-                </template>
-
-                <!-- Page Numbers -->
-                <template x-for="link in pagination.links" :key="link.label">
-                    <template x-if="link.url">
-                        <button @click="loadPage(link.url)"
-                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                                :class="link.active 
-                                    ? 'bg-navy-800 text-white dark:bg-gold-500 dark:text-navy-900' 
-                                    : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'"
-                                x-text="link.label"></button>
-                    </template>
-                </template>
-
-                <!-- Next -->
-                <template x-if="pagination.next_page_url">
-                    <button @click="loadPage(pagination.next_page_url)" 
-                            class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                        →
-                    </button>
+                <template x-for="link in pagination.links" :key="link.label + (link.url || '')">
+                    <button type="button"
+                            @click="link.url && loadPage(link.url)"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            :class="link.active 
+                                ? 'bg-navy-800 text-white dark:bg-gold-500 dark:text-navy-900' 
+                                : link.url 
+                                    ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' 
+                                    : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'")"
+                            x-html="link.label"></button>
                 </template>
             </nav>
         </div>
@@ -298,7 +282,9 @@
                 toast: { show: false, message: '', type: 'success' },
 
                 init() {
-                    if (window.lucide) lucide.createIcons();
+                    this.$nextTick(() => {
+                        if (window.lucide) lucide.createIcons();
+                    });
                 },
 
                 getStatusText() {
@@ -334,7 +320,9 @@
                         this.showToast('Gagal memuat data', 'error');
                     } finally {
                         this.loading = false;
-                        if (window.lucide) lucide.createIcons();
+                        this.$nextTick(() => {
+                            if (window.lucide) lucide.createIcons();
+                        });
                     }
                 },
 
@@ -356,7 +344,9 @@
                         this.showToast('Gagal memuat halaman', 'error');
                     } finally {
                         this.loading = false;
-                        if (window.lucide) lucide.createIcons();
+                        this.$nextTick(() => {
+                            if (window.lucide) lucide.createIcons();
+                        });
                     }
                 },
 

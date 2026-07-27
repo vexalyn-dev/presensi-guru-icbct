@@ -87,6 +87,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
     Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teachers.create');
     Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
+    Route::post('/teachers/import', [TeacherController::class, 'importExcel'])->name('teachers.import');
+    Route::get('/teachers/template', [TeacherController::class, 'downloadTemplate'])->name('teachers.template');
     
     // --- Route Import, Export & Bulk Actions ---
 
