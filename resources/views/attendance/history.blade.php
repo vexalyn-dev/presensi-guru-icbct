@@ -595,7 +595,15 @@
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
+
+    .profile-avatar {
+        width: 2rem;      /* 32px */
+        height: 2rem;
+        border-radius: 9999px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
     [x-cloak] { display: none !important; }
 </style>
 @endsection
