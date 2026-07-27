@@ -23,8 +23,8 @@ class ClassAttendance extends Model
 
     protected $casts = [
         'date' => 'date',
-        'check_in_time' => 'datetime',
-        'check_out_time' => 'datetime',
+        'check_in_time' => 'string',
+        'check_out_time' => 'string',
     ];
 
     public function user(): BelongsTo

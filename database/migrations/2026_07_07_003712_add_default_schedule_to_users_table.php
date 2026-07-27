@@ -2,15 +2,14 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class AddDefaultScheduleToUsersTable extends Migration
 {
     public function up(): void
     {
-        $hasCheckIn = count(DB::select("SHOW COLUMNS FROM users LIKE 'default_check_in'")) > 0;
-        $hasCheckOut = count(DB::select("SHOW COLUMNS FROM users LIKE 'default_check_out'")) > 0;
+        $hasCheckIn = Schema::hasColumn('users', 'default_check_in');
+        $hasCheckOut = Schema::hasColumn('users', 'default_check_out');
 
         if (! $hasCheckIn || ! $hasCheckOut) {
             Schema::table('users', function (Blueprint $table) use ($hasCheckIn, $hasCheckOut): void {
@@ -28,11 +27,11 @@ class AddDefaultScheduleToUsersTable extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (count(DB::select("SHOW COLUMNS FROM users LIKE 'default_check_in'")) > 0) {
+            if (Schema::hasColumn('users', 'default_check_in')) {
                 $table->dropColumn('default_check_in');
             }
 
-            if (count(DB::select("SHOW COLUMNS FROM users LIKE 'default_check_out'")) > 0) {
+            if (Schema::hasColumn('users', 'default_check_out')) {
                 $table->dropColumn('default_check_out');
             }
         });

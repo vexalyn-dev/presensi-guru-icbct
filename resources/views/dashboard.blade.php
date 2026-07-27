@@ -891,29 +891,32 @@
             return;
         }
 
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 15000
+        const fetchPosition = (highAccuracy, timeoutMs) => {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude, accuracy } = position.coords;
+                    const locationData = await reverseGeocode(latitude, longitude);
+                    updateLocationDisplay(latitude, longitude, accuracy, locationData);
+                },
+                (error) => {
+                    if (highAccuracy && (error.code === 2 || error.code === 3)) {
+                        // Fallback ke low accuracy (network/Wi-Fi location) jika hardware GPS timeout/unavailable
+                        fetchPosition(false, 15000);
+                        return;
+                    }
+                    let msg = 'Izin lokasi ditolak';
+                    if (error.code === 2) msg = 'Lokasi tidak tersedia';
+                    if (error.code === 3) msg = 'Waktu habis';
+                    updateLocationDisplay(-6.2, 106.8, 0, { name: 'Gagal', address: msg });
+                },
+                { enableHighAccuracy: highAccuracy, timeout: timeoutMs, maximumAge: 30000 }
+            );
         };
 
-        // Initial Get
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude, accuracy } = position.coords;
-                const locationData = await reverseGeocode(latitude, longitude);
-                updateLocationDisplay(latitude, longitude, accuracy, locationData);
-            },
-            (error) => {
-                let msg = 'Izin lokasi ditolak';
-                if (error.code === 2) msg = 'Lokasi tidak tersedia';
-                if (error.code === 3) msg = 'Waktu habis';
-                updateLocationDisplay(-6.2, 106.8, 0, { name: 'Gagal', address: msg });
-            },
-            options
-        );
+        // Initial Get with fallback
+        fetchPosition(true, 7000);
 
-        // Watch Position (Real-time)
+        // Watch Position (Real-time dengan enableHighAccuracy: false agar hemat batere & tidak timeout)
         watchId = navigator.geolocation.watchPosition(
             async (position) => {
                 const { latitude, longitude, accuracy } = position.coords;
@@ -923,7 +926,7 @@
             () => {
                 // Silent fail on watch, keep last known
             },
-            options
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
         );
     }
 

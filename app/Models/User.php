@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -75,6 +76,12 @@ class User extends Authenticatable
         'end_time',
         'default_check_in',
         'default_check_out',
+        'nip',
+        'photo_path',
+        'qr_code_path',
+        'last_check_in',
+        'last_check_out',
+        'status_absensi_hari_ini',
     ];
 
     /**
@@ -107,6 +114,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'last_check_in' => 'datetime',
+            'last_check_out' => 'datetime',
         ];
     }
 
@@ -147,6 +156,32 @@ class User extends Authenticatable
     }
 
     // ==========================================
+    // STATUS CONSTANTS
+    // ==========================================
+
+    public const STATUS_HADIR = 'Hadir';
+    public const STATUS_TERLAMBAT = 'Terlambat';
+    public const STATUS_TEPAT_WAKTU = 'Tepat Waktu';
+    public const STATUS_ALPHA = 'Alpha';
+    public const STATUS_SAKIT = 'Sakit';
+    public const STATUS_IZIN = 'Izin';
+    public const STATUS_CUTI = 'Cuti';
+    public const STATUS_UNKNOWN = 'Tidak Diketahui';
+
+    public static function getStatusOptions(): array
+    {
+        return [
+            self::STATUS_HADIR,
+            self::STATUS_TERLAMBAT,
+            self::STATUS_TEPAT_WAKTU,
+            self::STATUS_ALPHA,
+            self::STATUS_SAKIT,
+            self::STATUS_IZIN,
+            self::STATUS_CUTI,
+        ];
+    }
+
+    // ==========================================
     // ROLE CHECK METHODS
     // ==========================================
     
@@ -184,7 +219,7 @@ class User extends Authenticatable
      */
     public function scopeTeachers(Builder $query): Builder
     {
-        return $query->where('role', 'guru');
+        return $query->whereIn('role', ['guru', 'teacher']);
     }
 
     /**
@@ -241,6 +276,38 @@ class User extends Authenticatable
     public function teachingSchedules()
     {
         return $this->hasMany(TeachingSchedule::class);
+    }
+
+    public function classAttendancesAsTeacher(): HasMany
+    {
+        return $this->hasMany(ClassAttendance::class, 'teacher_id');
+    }
+
+    public function leaves(): HasMany
+    {
+        return $this->hasMany(Leave::class, 'user_id');
+    }
+
+    public function activeSubjects(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Subject::class,
+            'subject_teacher',
+            'teacher_id',
+            'subject_id'
+        )
+            ->withPivot('hours_per_week', 'is_active')
+            ->wherePivot('is_active', true);
+    }
+
+    public function allSubjects(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Subject::class,
+            'subject_teacher',
+            'teacher_id',
+            'subject_id'
+        )->withPivot('hours_per_week', 'is_active');
     }
 
     /**
@@ -329,12 +396,14 @@ class User extends Authenticatable
      */
     public function getPhotoUrlAttribute(): string
     {
-        if ($this->photo) {
-            return asset('storage/' . $this->photo);
+        $photoPath = $this->photo_path ?: $this->photo;
+
+        if ($photoPath) {
+            return asset('storage/' . $photoPath);
         }
 
-        if ($this->teacher && $this->teacher->photo) {
-            return asset('storage/' . $this->teacher->photo);
+        if ($this->teacher && ($this->teacher->photo_path ?: $this->teacher->photo)) {
+            return asset('storage/' . ($this->teacher->photo_path ?: $this->teacher->photo));
         }
 
         return asset('images/default-teacher.png');
@@ -345,9 +414,18 @@ class User extends Authenticatable
      */
     public function getQrCodeUrlAttribute(): string
     {
-        return $this->qr_code 
-            ? asset('storage/' . $this->qr_code) 
+        $qrPath = $this->qr_code_path ?: $this->qr_code;
+
+        return $qrPath
+            ? asset('storage/' . $qrPath)
             : '';
+    }
+
+    public function getQrCodeDataAttribute(): string
+    {
+        $data = 'USER:' . $this->id . ':' . ($this->nip ?? 'N/A') . ':' . time();
+
+        return base64_encode($data);
     }
 
     /**
@@ -443,7 +521,10 @@ class User extends Authenticatable
         Storage::disk('public')->put($path, $qrCode);
         
         // Update user record with new QR path
-        $this->update(['qr_code' => $path]);
+        $this->update([
+            'qr_code' => $path,
+            'qr_code_path' => $path,
+        ]);
 
         return $path;
     }
@@ -470,6 +551,20 @@ class User extends Authenticatable
     // UTILITY METHODS
     // ==========================================
     
+    public function isActiveToday(): bool
+    {
+        return $this->attendances()
+            ->whereDate('date', today())
+            ->exists();
+    }
+
+    public function todayAttendance()
+    {
+        return $this->attendances()
+            ->whereDate('date', today())
+            ->first();
+    }
+
     /**
      * Cek apakah guru ini dijadwalkan hari ini
      */

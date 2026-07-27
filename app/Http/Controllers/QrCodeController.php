@@ -33,8 +33,8 @@ class QrCodeController extends Controller
             // Validate request
             $validated = $request->validate([
                 'qr_data' => 'required|string',
-                'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric',
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric',
             ]);
 
             // Decode QR data - Handle both JSON and plain ID
@@ -82,6 +82,15 @@ class QrCodeController extends Controller
                 ], 403);
             }
 
+            // GPS Validation
+            $gpsValidation = \App\Helpers\GpsHelper::validateLocation($validated['latitude'] ?? null, $validated['longitude'] ?? null);
+            if (!$gpsValidation['valid']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $gpsValidation['message']
+                ], 422);
+            }
+
             // Check if already attended today
             $today = Carbon::today();
             $existingAttendance = Attendance::where('user_id', $teacher->id)
@@ -95,15 +104,16 @@ class QrCodeController extends Controller
                 ], 400);
             }
 
-            // Determine status
+            // Determine status based on configured start time + late grace period
             $now = Carbon::now();
-            $status = 'Hadir';
+            $startTimeStr = Setting::get('attendance_start_time', '06:30');
+            $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
 
-            $appSettings = AppSetting::getInstance();
-            $endTime = $appSettings->attendance_end_time;
-
-            if ($now->format('H:i') >= $endTime) {
-                $status = 'Terlambat';
+            try {
+                $lateThreshold = Carbon::createFromFormat('H:i', $startTimeStr)->addMinutes($graceMinutes);
+                $status = ($now->format('H:i') > $lateThreshold->format('H:i')) ? 'Terlambat' : 'Hadir';
+            } catch (\Exception $e) {
+                $status = 'Hadir';
             }
 
             // Create attendance record

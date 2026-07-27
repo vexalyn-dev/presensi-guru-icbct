@@ -7,7 +7,15 @@
     <title>{{ config('app.name', 'ICB CT') }}</title>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+
+    {{-- Define Alpine component functions BEFORE Alpine loads (deferred) --}}
+    <script>
+        window.notificationDropdownAdmin = function() {
+            return { open: false, markRead() {}, init() {} };
+        };
+        window.notificationDropdown = window.notificationDropdownAdmin;
+    </script>
+
     <script src="https://unpkg.com/lucide@1.7.0/dist/umd/lucide.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -426,7 +434,7 @@
                 <div class="relative" x-data="notificationDropdownAdmin()"
                      @click.outside="open = false"
                      x-init="init()">
-                    <button @click="open = !open" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 relative icon-click">
+                    <button @click.stop="open = !open" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 relative icon-click">
                         <i data-lucide="bell" class="w-5 h-5 text-slate-600 dark:text-slate-300"></i>
                         @if(Auth::user()->unreadNotifications->count() > 0)
                         <span class="notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
@@ -502,7 +510,7 @@
 
                 <!-- Profile Dropdown (With Photo) -->
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                    <button @click="open = !open" class="flex items-center gap-2.5 p-1.5 pr-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all hover:scale-105 icon-click">
+                    <button @click.stop="open = !open" class="flex items-center gap-2.5 p-1.5 pr-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all hover:scale-105 icon-click">
                         <div class="relative">
                             <img src="{{ Auth::user()->photo_url }}" 
                                  class="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shadow-sm">
@@ -632,37 +640,10 @@
         updateClock();
         setInterval(updateClock, 1000);
 
-        // Notification Dropdown Functions
-        function notificationDropdownAdmin() {
-            return {
-                open: false,
-                markRead() {
-                    if (this.open) {
-                        // Badge hanya dihapus manual via tombol "Tandai Dibaca"
-                        // Tidak auto-remove saat buka dropdown
-                    }
-                },
-                init() {
-                    this.$watch('open', value => this.markRead());
-                }
-            };
-        }
-
         // Initialize on DOM ready (after deferred lucide.min.js)
         document.addEventListener('DOMContentLoaded', function() {
             initIcons();
             requestAnimationFrame(function() { initIcons(); });
-            
-            // Add click animation to all icon buttons
-            const iconButtons = document.querySelectorAll('.icon-click');
-            iconButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.style.transform = 'scale(0.92)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 150);
-                });
-            });
         });
 
         // Reinitialize icons after Alpine
@@ -670,85 +651,35 @@
             initIcons();
         });
 
-        // Mark single notification as read
-        function markNotifRead(btn, id, type) {
-            const url = type === 'admin'
-                ? `/notifications/${id}/read`
-                : `/teacher/notifications/${id}/read`;
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(res => {
-                if (res.ok) {
-                    // Ganti tombol check jadi check-check (sudah dibaca)
-                    const wrapper = btn.closest('.group');
-                    if (wrapper) {
-                        // Hapus blue dot
-                        const blueDot = wrapper.querySelector('.bg-blue-500.rounded-full');
-                        if (blueDot) blueDot.remove();
-
-                        // Hilangkan bold dari teks
-                        const boldText = wrapper.querySelector('.font-bold');
-                        if (boldText) boldText.classList.remove('font-bold');
-
-                        // Ganti tombol jadi icon check-circle hijau
-                        btn.outerHTML = `<div class="shrink-0 self-center mr-3 p-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-400"></i></div>`;
-                        initIcons();
-
-                        // Update badge count di bell icon
-                        const badge = document.querySelector('.notification-badge');
-                        if (badge) {
-                            const count = parseInt(badge.textContent) - 1;
-                            if (count <= 0) badge.remove();
-                            else badge.textContent = count;
-                        }
-                    }
-                }
-            });
-        }
-
-        // Mark ALL notifications as read
-        function markAllNotifRead(type) {
-            const url = type === 'teacher'
-                ? '/teacher/notifications/read-all'
-                : '/notifications/mark-all-read';
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(res => {
-                if (res.ok) {
-                    // Semua single check → double check hijau
-                    document.querySelectorAll('.notif-check-wrap').forEach(wrap => {
-                        const single = wrap.querySelector('.notif-check-single');
-                        const double = wrap.querySelector('.notif-check-double');
-                        if (single) single.classList.add('hidden');
-                        if (double) double.classList.remove('hidden');
-                    });
-
-                    // Semua teks bold → normal
-                    document.querySelectorAll('.notif-text').forEach(el => {
-                        el.classList.remove('font-bold', 'font-semibold');
-                        el.classList.add('font-medium', 'opacity-60');
-                    });
-
-                    // Hapus tombol "Tandai Dibaca"
-                    const btn = document.querySelector('[onclick*="markAllNotifRead"]');
-                    if (btn) btn.remove();
-
-                    // Hapus badge notifikasi
-                    document.querySelectorAll('.notification-badge, [data-notif-count]').forEach(b => b.remove());
-                }
-            });
-        }
     </script>
+    @php
+        $autoLogoutVal = \App\Models\Setting::get('auto_logout', 'off');
+        $autoLogoutMinutes = ($autoLogoutVal !== 'off' && is_numeric($autoLogoutVal)) ? (int) $autoLogoutVal : 0;
+    @endphp
+    @if($autoLogoutMinutes > 0)
+    <script>
+        (function() {
+            const timeoutMs = {{ $autoLogoutMinutes }} * 60 * 1000;
+            let logoutTimer;
+            function resetLogoutTimer() {
+                clearTimeout(logoutTimer);
+                logoutTimer = setTimeout(() => {
+                    alert('Sesi Anda telah berakhir karena tidak ada aktivitas selama {{ $autoLogoutMinutes }} menit.');
+                    const logoutForm = document.querySelector('form[action*="logout"]');
+                    if (logoutForm) {
+                        logoutForm.submit();
+                    } else {
+                        window.location.href = "{{ route('login') }}";
+                    }
+                }, timeoutMs);
+            }
+            ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+                window.addEventListener(evt, resetLogoutTimer, { passive: true });
+            });
+            resetLogoutTimer();
+        })();
+    </script>
+    @endif
 
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
 </body>

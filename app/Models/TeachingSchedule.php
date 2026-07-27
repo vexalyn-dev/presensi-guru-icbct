@@ -51,7 +51,13 @@ class TeachingSchedule extends Model
         return $this->hasMany(ClassAttendance::class);
     }
 
-    public static function getDayName($dayOfWeek)
+    /**
+     * Get day name from day of week index
+     * 
+     * @param int $dayOfWeek
+     * @return string
+     */
+    public static function getDayName(int $dayOfWeek): string
     {
         $days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         return $days[$dayOfWeek] ?? 'Unknown';
@@ -59,8 +65,11 @@ class TeachingSchedule extends Model
 
     /**
      * Ambil jadwal mengajar hari ini untuk guru
+     * 
+     * @param int $userId
+     * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function getTodaySchedules($userId)
+    public static function getTodaySchedules(int $userId)
     {
         $today = Carbon::now()->dayOfWeek;
 
@@ -74,8 +83,13 @@ class TeachingSchedule extends Model
 
     /**
      * Cari jadwal yang cocok untuk scan saat ini
+     * 
+     * @param int $userId
+     * @param int $classroomId
+     * @param int|null $period
+     * @return self|null
      */
-    public static function findMatchingSchedule($userId, $classroomId, $period = null)
+    public static function findMatchingSchedule(int $userId, int $classroomId, ?int $period = null)
     {
         $now = Carbon::now();
         $currentTime = $now->format('H:i:s');
@@ -90,14 +104,15 @@ class TeachingSchedule extends Model
             $query->where('period', $period);
         }
 
-        // Cari jadwal yang waktunya mencakup saat ini (toleransi 15 menit)
+        // Cari jadwal yang waktunya mencakup saat ini atau toleransi 15 menit sebelum jadwal mulai
         return $query->where(function ($q) use ($currentTime) {
-            $q->where('start_time', '<=', $currentTime)
-                ->where('end_time', '>=', $currentTime);
-        })->orWhere(function ($q) use ($currentTime) {
-            // Toleransi 15 menit sebelum jadwal
-            $q->whereRaw('TIME_SUB(start_time, INTERVAL 15 MINUTE) <= ?', [$currentTime])
-                ->where('start_time', '>=', $currentTime);
+            $q->where(function ($inner) use ($currentTime) {
+                $inner->where('start_time', '<=', $currentTime)
+                    ->where('end_time', '>=', $currentTime);
+            })->orWhere(function ($inner) use ($currentTime) {
+                $inner->whereRaw('TIME_SUB(start_time, INTERVAL 15 MINUTE) <= ?', [$currentTime])
+                    ->where('start_time', '>=', $currentTime);
+            });
         })->first();
     }
 }

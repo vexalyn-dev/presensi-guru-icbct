@@ -689,7 +689,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Radius (Meter)</label>
                             <input type="number" id="school_radius" name="location_radius" 
-                                   value="{{ old('location_radius', $settings['attendance']['location_radius'] ?? 50) }}" 
+                                   value="{{ old('location_radius', $settings['maps']['location_radius'] ?? 50) }}" 
                                    min="10" max="1000" step="10"
                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono">
                             <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ubah untuk update lingkaran di peta</p>
@@ -1143,7 +1143,7 @@
                     }
                 },
                 (error) => {
-                    if (error.code === error.TIMEOUT && highAccuracy) {
+                    if (highAccuracy && (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE)) {
                         requestLocation(false, 20000);
                         return;
                     }

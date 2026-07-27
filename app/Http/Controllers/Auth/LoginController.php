@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    private function redirectByRole($user)
+    private function redirectByRole(\App\Models\User $user)
     {
         if ($user->isTeacher()) {
             return redirect()->route('teacher.dashboard')
@@ -64,6 +64,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect('/login')->with('success', 'Anda berhasil logout.');
+        return redirect('/')->with('success', 'Anda berhasil logout.');
     }
 }

@@ -105,19 +105,23 @@
         });
     };
 
-    // Alpine x-data helper
-    window.notificationDropdown = function() {
-        return {
-            open: false,
-            markRead() {
-                // deliberate no-op: keep manual behavior for badge
-            },
-            init() {
-                this.$watch('open', value => this.markRead());
-            }
+    // Alpine x-data helper — only define if not already defined by inline script
+    if (typeof window.notificationDropdown !== 'function') {
+        window.notificationDropdown = function() {
+            return {
+                open: false,
+                markRead() {
+                    // deliberate no-op: keep manual behavior for badge
+                },
+                init() {
+                    this.$watch('open', value => this.markRead());
+                }
+            };
         };
-    };
-    window.notificationDropdownAdmin = window.notificationDropdown;
+    }
+    if (typeof window.notificationDropdownAdmin !== 'function') {
+        window.notificationDropdownAdmin = window.notificationDropdown;
+    }
 
     function refreshLeaveRequestCards() {
         const list = document.getElementById('leave-requests-list');
@@ -204,6 +208,33 @@
         }, 6000);
     }
 
+    /**
+     * Check if the notification dropdown is currently open.
+     * We check both the Alpine x-data state and the DOM visibility.
+     */
+    function isDropdownOpen() {
+        const dropdownRoot = document.querySelector('[x-data*="notificationDropdown"]');
+        if (!dropdownRoot) return false;
+
+        // Check Alpine state via __x.$data
+        if (dropdownRoot.__x && dropdownRoot.__x.$data) {
+            return dropdownRoot.__x.$data.open;
+        }
+        // Alpine v3: _x_dataStack
+        if (dropdownRoot._x_dataStack) {
+            for (const data of dropdownRoot._x_dataStack) {
+                if (typeof data.open !== 'undefined') return data.open;
+            }
+        }
+
+        // Fallback: check if the dropdown panel is visible in the DOM
+        const panel = dropdownRoot.querySelector('[x-show]');
+        if (panel) {
+            return panel.style.display !== 'none' && !panel.hasAttribute('x-cloak');
+        }
+        return false;
+    }
+
     async function checkNotifications() {
         try {
             const response = await fetch(UNREAD_URL, {
@@ -242,16 +273,35 @@
                 notifBadge.style.display = 'none';
             }
 
-            const dropdown = document.querySelector('[x-data*="notificationDropdown"]');
-            const notifsList = dropdown ? dropdown.querySelector('.divide-y') : null;
-
             // First poll: seed known ids to avoid toasting existing notifications
             if (!notificationsSeeded) {
                 (data.notifications || []).forEach(n => lastNotificationIds.add(n.id));
                 notificationsSeeded = true;
             }
 
-            // Re-render dropdown list entirely so UI always matches backend
+            // Check for new notifications (toast + sound) regardless of dropdown state
+            if (data.notifications) {
+                data.notifications.forEach(notification => {
+                    if (!lastNotificationIds.has(notification.id)) {
+                        lastNotificationIds.add(notification.id);
+                        playNotificationSound();
+                        showNotificationToast(notification);
+                        refreshLeaveRequestCards();
+                        window.dispatchEvent(new CustomEvent('notifications:new', { detail: notification }));
+                    }
+                });
+            }
+
+            // CRITICAL: Do NOT replace dropdown innerHTML while it is open.
+            // Replacing innerHTML while open causes Alpine to lose track of the
+            // component's DOM, which breaks the toggle (can't close via bell click).
+            if (isDropdownOpen()) {
+                return; // skip DOM update, user is interacting
+            }
+
+            const notifsList = dropdownRoot ? dropdownRoot.querySelector('.divide-y') : null;
+
+            // Re-render dropdown list so UI matches backend (only when closed)
             if (notifsList) {
                 // Clear existing items
                 notifsList.innerHTML = '';
@@ -267,15 +317,6 @@
                 } else {
                     // Build list from latest notifications
                     data.notifications.forEach(notification => {
-                        // Show toast only for newly added notifications
-                        if (!lastNotificationIds.has(notification.id)) {
-                            lastNotificationIds.add(notification.id);
-                            playNotificationSound();
-                            showNotificationToast(notification);
-                            refreshLeaveRequestCards();
-                            window.dispatchEvent(new CustomEvent('notifications:new', { detail: notification }));
-                        }
-
                         const item = document.createElement('div');
                         item.className = 'flex items-start hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors notif-item';
                         const isRead = !!notification.is_read;

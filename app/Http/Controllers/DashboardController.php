@@ -19,19 +19,31 @@ class DashboardController extends Controller
         $totalGuru = User::where('role', 'guru')->count();
         
         $hadirHariIni = Attendance::whereDate('date', $today)
-            ->whereIn('status', ['Hadir', 'Terlambat', 'Tepat Waktu'])
+            ->whereIn('status', [
+                User::STATUS_HADIR,
+                User::STATUS_TERLAMBAT,
+                User::STATUS_TEPAT_WAKTU,
+            ])
             ->count();
 
         $terlambat = Attendance::whereDate('date', $today)
-            ->where('status', 'Terlambat')
+            ->where('status', User::STATUS_TERLAMBAT)
             ->count();
 
         $tidakHadir = Attendance::whereDate('date', $today)
-            ->whereIn('status', ['Izin', 'Alpha', 'Sakit'])
+            ->whereIn('status', [
+                User::STATUS_IZIN,
+                User::STATUS_ALPHA,
+                User::STATUS_SAKIT,
+            ])
             ->count();
 
         $izinCuti = Attendance::whereDate('date', $today)
-            ->whereIn('status', ['Izin', 'Sakit', 'Cuti'])
+            ->whereIn('status', [
+                User::STATUS_IZIN,
+                User::STATUS_SAKIT,
+                User::STATUS_CUTI,
+            ])
             ->count();
 
         $recentAttendances = Attendance::with('user')
@@ -49,16 +61,16 @@ class DashboardController extends Controller
             $date = Carbon::today()->subDays($i);
             
             $chartHadirData[] = Attendance::whereDate('date', $date)
-                ->whereIn('status', ['Hadir', 'Tepat Waktu'])->count();
+                ->whereIn('status', [User::STATUS_HADIR, User::STATUS_TEPAT_WAKTU])->count();
             
             $chartTerlambatData[] = Attendance::whereDate('date', $date)
-                ->where('status', 'Terlambat')->count();
+                ->where('status', User::STATUS_TERLAMBAT)->count();
             
             $chartTidakHadirData[] = Attendance::whereDate('date', $date)
-                ->where('status', 'Alpha')->count();
+                ->where('status', User::STATUS_ALPHA)->count();
             
             $chartIzinData[] = Attendance::whereDate('date', $date)
-                ->whereIn('status', ['Izin', 'Sakit', 'Cuti'])->count();
+                ->whereIn('status', [User::STATUS_IZIN, User::STATUS_SAKIT, User::STATUS_CUTI])->count();
         }
 
         $appSettings = AppSetting::getInstance();

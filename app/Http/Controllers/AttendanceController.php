@@ -87,6 +87,14 @@ class AttendanceController extends Controller
                 : back()->with('error', 'Jadwal hari ini tidak ditemukan.');
         }
 
+        // Validasi GPS lokasi jika diaktifkan
+        $gpsValidation = \App\Helpers\GpsHelper::validateLocation($validated['latitude'] ?? null, $validated['longitude'] ?? null);
+        if (!$gpsValidation['valid']) {
+            return $ajaxRequest
+                ? response()->json(['success' => false, 'message' => $gpsValidation['message']], 422)
+                : back()->with('error', $gpsValidation['message']);
+        }
+
         $attendance = Attendance::where('user_id', $teacher->id)
             ->where('date', today())
             ->first();
@@ -266,7 +274,7 @@ class AttendanceController extends Controller
     /**
      * Kirim pesan WhatsApp via Fonnte
      */
-    private function sendWA(string $phone, string $message)
+    private function sendWA(?string $phone, string $message)
     {
         if (!$phone) return;
         $phone = preg_replace('/^08/', '628', $phone);

@@ -383,17 +383,25 @@
         };
 
         if (navigator.geolocation) {
-            const geoOptions = { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 };
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    sendRequest({ qr_data: qrData, latitude: pos.coords.latitude, longitude: pos.coords.longitude });
-                },
-                (err) => {
-                    // proceed anyway without coordinates
-                    sendRequest({ qr_data: qrData });
-                },
-                geoOptions
-            );
+            const obtainPosition = (highAccuracy, timeoutMs) => {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        sendRequest({ qr_data: qrData, latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+                    },
+                    (err) => {
+                        if (highAccuracy && (err.code === err.TIMEOUT || err.code === err.POSITION_UNAVAILABLE)) {
+                            // Fallback ke low accuracy (network/Wi-Fi positioning)
+                            obtainPosition(false, 15000);
+                            return;
+                        }
+                        // proceed anyway without coordinates if fallback fails or permission denied
+                        sendRequest({ qr_data: qrData });
+                    },
+                    { enableHighAccuracy: highAccuracy, timeout: timeoutMs, maximumAge: 30000 }
+                );
+            };
+
+            obtainPosition(true, 7000);
         } else {
             sendRequest({ qr_data: qrData });
         }

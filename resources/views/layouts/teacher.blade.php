@@ -8,6 +8,15 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    {{-- Define Alpine component functions BEFORE Alpine loads (deferred) --}}
+    <script>
+        window.notificationDropdown = function() {
+            return { open: false, markRead() {}, init() {} };
+        };
+        window.notificationDropdownAdmin = window.notificationDropdown;
+    </script>
+
     <style>
         * { font-family: 'Inter', sans-serif; }
         [x-cloak] { display: none !important; }
@@ -84,7 +93,7 @@
                         </div>
                     @endif
                     <div>
-                        <h1 class="text-sm font-bold text-navy-800 dark:text-white">ICB CINTA TEKNIKA</h1>
+                        <h1 class="text-sm font-bold text-navy-800 dark:text-white">{{ $appSettings->app_name ?? 'ICB CINTA TEKNIKA' }}</h1>
                         <p class="text-[10px] text-slate-500 dark:text-slate-400">Portal Guru</p>
                     </div>
                 </div>
@@ -192,7 +201,7 @@
                         @click.outside="open = false"
                         x-init="init()">
                             
-                            <button @click="open = !open" class="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600">
+                            <button @click.stop="open = !open" class="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600">
                                 <i data-lucide="bell" class="w-5 h-5"></i>
                                 @if(auth()->user()->unreadCount() > 0)
                                 <span class="notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
@@ -272,7 +281,7 @@
                         
                         <!-- Profile Dropdown -->
                         <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                            <button @click="open = !open" class="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-1.5 pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
+                            <button @click.stop="open = !open" class="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-1.5 pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
                                 <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}" 
                                      class="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600">
                                 <div class="hidden sm:block text-left">
@@ -346,8 +355,36 @@
         <!-- Mobile Overlay (tidak digunakan lagi karena sidebar hidden di mobile) -->
     </div>
 
+    @php
+        $autoLogoutVal = \App\Models\Setting::get('auto_logout', 'off');
+        $autoLogoutMinutes = ($autoLogoutVal !== 'off' && is_numeric($autoLogoutVal)) ? (int) $autoLogoutVal : 0;
+    @endphp
+    @if($autoLogoutMinutes > 0)
+    <script>
+        (function() {
+            const timeoutMs = {{ $autoLogoutMinutes }} * 60 * 1000;
+            let logoutTimer;
+            function resetLogoutTimer() {
+                clearTimeout(logoutTimer);
+                logoutTimer = setTimeout(() => {
+                    alert('Sesi Anda telah berakhir karena tidak ada aktivitas selama {{ $autoLogoutMinutes }} menit.');
+                    const logoutForm = document.querySelector('form[action*="logout"]');
+                    if (logoutForm) {
+                        logoutForm.submit();
+                    } else {
+                        window.location.href = "{{ route('login') }}";
+                    }
+                }, timeoutMs);
+            }
+            ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+                window.addEventListener(evt, resetLogoutTimer, { passive: true });
+            });
+            resetLogoutTimer();
+        })();
+    </script>
+    @endif
+
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     @stack('scripts')
 </body>

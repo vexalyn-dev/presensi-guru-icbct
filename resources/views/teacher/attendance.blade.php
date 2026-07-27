@@ -284,9 +284,10 @@
             const setTimerColor = (value) => {
                 if (!timerElement) return;
                 timerElement.classList.remove('timer-green','timer-yellow','timer-red');
+
                 if (value <= 10) {
                     timerElement.classList.add('timer-red');
-                } else if (value <= 30) {
+                } else if (value < 30) {
                     timerElement.classList.add('timer-yellow');
                 } else {
                     timerElement.classList.add('timer-green');

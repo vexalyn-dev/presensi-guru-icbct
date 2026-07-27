@@ -153,9 +153,18 @@ class AttendanceController extends Controller
             }
 
             if ($scheduleStart) {
-                $isLate = $now->format('H:i:s') > $scheduleStart->format('H:i:s');
+                $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
+                $lateThreshold = (clone $scheduleStart)->addMinutes($graceMinutes);
+                $isLate = $now->format('H:i:s') > $lateThreshold->format('H:i:s');
             } else {
-                $isLate = false;
+                $startTimeStr = Setting::get('attendance_start_time', '06:30');
+                $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
+                try {
+                    $lateThreshold = Carbon::parse($startTimeStr)->addMinutes($graceMinutes);
+                    $isLate = $now->format('H:i:s') > $lateThreshold->format('H:i:s');
+                } catch (\Exception $e) {
+                    $isLate = false;
+                }
             }
             $attendance->update([
                 'check_in' => $now->format('H:i:s'),

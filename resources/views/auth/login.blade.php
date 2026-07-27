@@ -1278,8 +1278,15 @@
         <!-- Mobile Header Panel -->
         <div class="mobile-header" id="mobileHeader" style="display: none;">
             <div class="mobile-logo-container">
-                @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
-                @if($appSettings->app_logo)
+                @php
+                    $appSettings = null;
+                    try {
+                        $appSettings = \App\Models\AppSetting::getInstance();
+                    } catch (\Throwable $e) {
+                        $appSettings = null;
+                    }
+                @endphp
+                @if($appSettings && $appSettings->app_logo)
                     <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo">
                 @else
                     <svg fill="currentColor" viewBox="0 0 24 24">
@@ -1294,8 +1301,15 @@
         <!-- Sliding Panel (KIRI) -->
         <div class="auth-panel login" id="authPanel">
             <div class="logo-container">
-                @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
-                @if($appSettings->app_logo)
+                @php
+                    $appSettings = null;
+                    try {
+                        $appSettings = \App\Models\AppSetting::getInstance();
+                    } catch (\Throwable $e) {
+                        $appSettings = null;
+                    }
+                @endphp
+                @if($appSettings && $appSettings->app_logo)
                     <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo">
                 @else
                     <svg fill="currentColor" viewBox="0 0 24 24">

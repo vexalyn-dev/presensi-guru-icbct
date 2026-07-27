@@ -4,11 +4,40 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
+    private function syncToAppSetting(): void
+    {
+        try {
+            $appSetting = AppSetting::getInstance();
+            $appSetting->update([
+                'app_name' => Setting::get('app_name', 'ICB CT - Absensi Guru'),
+                'app_timezone' => Setting::get('app_timezone', 'Asia/Jakarta'),
+                'app_language' => Setting::get('app_language', 'id'),
+                'admin_email' => Setting::get('admin_email', ''),
+                'attendance_start_time' => Setting::get('attendance_start_time', '06:30'),
+                'attendance_end_time' => Setting::get('attendance_end_time', '16:00'),
+                'attendance_late_grace_period' => (int) Setting::get('attendance_late_grace_period', 5),
+                'location_required' => Setting::get('gps_validation_status', 'on') === 'on',
+                'location_latitude' => (float) Setting::get('school_latitude', -6.9142403),
+                'location_longitude' => (float) Setting::get('school_longitude', 107.6458618),
+                'location_radius' => (int) Setting::get('location_radius', 50),
+                'email_notification' => (bool) Setting::get('email_notification', true),
+                'late_notification' => (bool) Setting::get('late_notification', true),
+                'primary_color' => Setting::get('primary_color', '#0F172A'),
+                'accent_color' => Setting::get('accent_color', '#FACC15'),
+                'app_logo' => Setting::get('app_logo', ''),
+                'app_favicon' => Setting::get('app_favicon', ''),
+            ]);
+        } catch (\Exception $e) {
+            // Ignore error if app_settings table sync fails
+        }
+    }
+
     public function index()
     {
         // Load semua settings ke array
@@ -39,8 +68,9 @@ class SettingController extends Controller
                 'alert_email' => Setting::get('alert_email', ''),
             ],
             'maps' => [
-                'school_latitude' => Setting::get('school_latitude', -6.2087634),
-                'school_longitude' => Setting::get('school_longitude', 106.8455994),
+                'school_latitude' => Setting::get('school_latitude', -6.9142403),
+                'school_longitude' => Setting::get('school_longitude', 107.6458618),
+                'location_radius' => Setting::get('location_radius', 50),
             ],
         ];
 
@@ -60,6 +90,8 @@ class SettingController extends Controller
         Setting::set('app_timezone', $validated['app_timezone']);
         Setting::set('app_language', $validated['app_language']);
         Setting::set('admin_email', $validated['admin_email'] ?? '');
+
+        $this->syncToAppSetting();
 
         return back()->with('success', 'Pengaturan umum berhasil disimpan!');
     }
@@ -82,6 +114,8 @@ class SettingController extends Controller
         Setting::set('qr_expiration', $validated['qr_expiration'], 'number');
         Setting::set('auto_logout', $validated['auto_logout'], 'string');
 
+        $this->syncToAppSetting();
+
         return back()->with('success', 'Aturan presensi berhasil disimpan!');
     }
 
@@ -96,13 +130,12 @@ class SettingController extends Controller
 
         // Handle logo upload
         if ($request->hasFile('app_logo')) {
-            // Hapus logo lama
             $oldLogo = Setting::get('app_logo', '');
             if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
                 Storage::disk('public')->delete($oldLogo);
             }
             
-            $path = $request->file('app_logo')->store('settings');
+            $path = $request->file('app_logo')->store('settings', 'public');
             Setting::set('app_logo', $path);
         }
 
@@ -113,12 +146,14 @@ class SettingController extends Controller
                 Storage::disk('public')->delete($oldFavicon);
             }
             
-            $path = $request->file('app_favicon')->store('settings');
+            $path = $request->file('app_favicon')->store('settings', 'public');
             Setting::set('app_favicon', $path);
         }
 
         Setting::set('primary_color', $validated['primary_color']);
         Setting::set('accent_color', $validated['accent_color']);
+
+        $this->syncToAppSetting();
 
         return back()->with('success', 'Tampilan berhasil diperbarui!');
     }
@@ -135,6 +170,8 @@ class SettingController extends Controller
         Setting::set('late_notification', $request->has('late_notification'), 'boolean');
         Setting::set('alert_email', $validated['alert_email'] ?? '');
 
+        $this->syncToAppSetting();
+
         return back()->with('success', 'Pengaturan notifikasi berhasil disimpan!');
     }
 
@@ -149,6 +186,8 @@ class SettingController extends Controller
         Setting::set('school_latitude', $validated['school_latitude'], 'number');
         Setting::set('school_longitude', $validated['school_longitude'], 'number');
         Setting::set('location_radius', $validated['location_radius'] ?? 50, 'number');
+
+        $this->syncToAppSetting();
 
         return back()->with('success', 'Lokasi sekolah berhasil diperbarui!');
     }
@@ -172,8 +211,9 @@ class SettingController extends Controller
             'email_notification' => ['value' => '1', 'type' => 'boolean'],
             'late_notification' => ['value' => '1', 'type' => 'boolean'],
             'alert_email' => ['value' => '', 'type' => 'string'],
-            'school_latitude' => ['value' => '-6.2087634', 'type' => 'number'],
-            'school_longitude' => ['value' => '106.8455994', 'type' => 'number'],
+            'school_latitude' => ['value' => '-6.9142403', 'type' => 'number'],
+            'school_longitude' => ['value' => '107.6458618', 'type' => 'number'],
+            'location_radius' => ['value' => '50', 'type' => 'number'],
         ];
 
         foreach ($defaults as $key => $data) {
@@ -182,6 +222,8 @@ class SettingController extends Controller
                 $data
             );
         }
+
+        $this->syncToAppSetting();
 
         return back()->with('success', 'Semua pengaturan berhasil direset ke default!');
     }

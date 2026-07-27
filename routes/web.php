@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\LeaveApprovalController;
 use App\Http\Controllers\Admin\ManualClassAttendanceController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 /*
@@ -41,9 +42,17 @@ use Illuminate\Http\Request;
 |--------------------------------------------------------------------------
 */
 
-// Redirect welcome page to login
+// Landing page
 Route::get('/', function () {
-    return redirect()->route('login');
+    if (Auth::check()) {
+        $user = Auth::user();
+
+        return $user->isTeacher()
+            ? redirect()->route('teacher.dashboard')
+            : redirect()->route('dashboard');
+    }
+
+    return view('auth.login');
 });
 
 // Auth Routes

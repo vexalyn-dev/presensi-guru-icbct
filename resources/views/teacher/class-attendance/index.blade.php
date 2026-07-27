@@ -1127,26 +1127,33 @@
                     this.scannedQrData = qrData;
 
                     if (!navigator.geolocation) {
-                        alert('GPS tidak tersedia. Pastikan lokasi diaktifkan untuk presensi.');
                         this.sendScan(qrData);
                         return;
                     }
 
-                    navigator.geolocation.getCurrentPosition(
-                        position => {
-                            this.userLatitude = position.coords.latitude;
-                            this.userLongitude = position.coords.longitude;
-                            this.sendScan(qrData, this.userLatitude, this.userLongitude);
-                        },
-                        error => {
-                            console.error('Gagal mendapatkan lokasi:', error);
-                            alert('GPS tidak tersedia. Pastikan lokasi diaktifkan untuk presensi.');
-                            this.userLatitude = null;
-                            this.userLongitude = null;
-                            this.sendScan(qrData);
-                        },
-                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                    );
+                    const obtainPosition = (highAccuracy, timeoutMs) => {
+                        navigator.geolocation.getCurrentPosition(
+                            position => {
+                                this.userLatitude = position.coords.latitude;
+                                this.userLongitude = position.coords.longitude;
+                                this.sendScan(qrData, this.userLatitude, this.userLongitude);
+                            },
+                            error => {
+                                console.warn('Gagal lokasi (highAccuracy=' + highAccuracy + '):', error);
+                                if (highAccuracy && (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE)) {
+                                    // Fallback ke low accuracy (network/Wi-Fi positioning)
+                                    obtainPosition(false, 15000);
+                                    return;
+                                }
+                                this.userLatitude = null;
+                                this.userLongitude = null;
+                                this.sendScan(qrData);
+                            },
+                            { enableHighAccuracy: highAccuracy, timeout: timeoutMs, maximumAge: 30000 }
+                        );
+                    };
+
+                    obtainPosition(true, 7000);
                 },
 
                 sendScan(qrData, latitude = null, longitude = null) {

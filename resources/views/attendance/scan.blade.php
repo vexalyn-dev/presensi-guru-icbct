@@ -907,47 +907,55 @@
                     return;
                 }
 
-                const geoOptions = { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 };
+                const getPositionWithFallback = (highAccuracy, timeoutMs) => {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            const latInput = document.getElementById('latitude-input') || document.getElementById('hardware-latitude');
+                            const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
 
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        const latInput = document.getElementById('latitude-input') || document.getElementById('hardware-latitude');
-                        const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
+                            if (latInput) latInput.value = lat;
+                            if (lngInput) lngInput.value = lng;
 
-                        if (latInput) latInput.value = lat;
-                        if (lngInput) lngInput.value = lng;
+                            attendanceForm.submit();
+                        },
+                        (error) => {
+                            if (highAccuracy && (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE)) {
+                                // Fallback ke low accuracy (network/Wi-Fi positioning)
+                                getPositionWithFallback(false, 15000);
+                                return;
+                            }
 
-                        attendanceForm.submit();
-                    },
-                    (error) => {
-                        let message = 'GPS gagal. Mencoba tanpa GPS... ';
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                message += 'Izin GPS ditolak.';
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                message += 'Lokasi tidak tersedia.';
-                                break;
-                            case error.TIMEOUT:
-                                message += 'GPS timeout.';
-                                break;
-                            default:
-                                message += 'Coba lagi.';
-                        }
+                            let message = 'GPS gagal. Mencoba tanpa GPS... ';
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    message += 'Izin GPS ditolak.';
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    message += 'Lokasi tidak tersedia.';
+                                    break;
+                                case error.TIMEOUT:
+                                    message += 'GPS timeout.';
+                                    break;
+                                default:
+                                    message += 'Coba lagi.';
+                            }
 
-                        showToast(message, 'warning');
+                            showToast(message, 'warning');
 
-                        const latInput = document.getElementById('latitude-input') || document.getElementById('hardware-latitude');
-                        const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
-                        if (latInput) latInput.value = '';
-                        if (lngInput) lngInput.value = '';
+                            const latInput = document.getElementById('latitude-input') || document.getElementById('hardware-latitude');
+                            const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
+                            if (latInput) latInput.value = '';
+                            if (lngInput) lngInput.value = '';
 
-                        attendanceForm.submit();
-                    },
-                    geoOptions
-                );
+                            attendanceForm.submit();
+                        },
+                        { enableHighAccuracy: highAccuracy, timeout: timeoutMs, maximumAge: 30000 }
+                    );
+                };
+
+                getPositionWithFallback(true, 7000);
             });
         }
 
