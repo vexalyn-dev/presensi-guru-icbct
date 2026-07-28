@@ -1150,7 +1150,7 @@
                                 this.sendScan(qrData);
                             },
                             { enableHighAccuracy: highAccuracy, timeout: timeoutMs, maximumAge: 30000 }
-                        );
+                        ); 
                     };
 
                     obtainPosition(true, 7000);

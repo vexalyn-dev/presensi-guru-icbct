@@ -65,10 +65,20 @@
                             </div>
                         </div>
                         @if($todayAttendance)
-                            <span class="px-4 py-2 rounded-full text-sm font-bold {{ $todayAttendance->status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }}">
-                                {{ $todayAttendance->status }}
-                            </span>
-                        @endif
+            @php
+                $statusBadgeClass = match($todayAttendance->status) {
+                    'Hadir', 'Tepat Waktu' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                    'Terlambat'            => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                    'Alpha'                => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                    'Izin', 'Sakit'        => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                    default                => 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400',
+                };
+                $statusLabel = $todayAttendance->status === 'Tepat Waktu' ? 'Hadir' : $todayAttendance->status;
+            @endphp
+            <span class="px-4 py-2 rounded-full text-sm font-bold {{ $statusBadgeClass }}">
+                {{ $statusLabel }}
+            </span>
+        @endif
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -202,12 +212,18 @@
                                             <p class="text-sm font-bold text-navy-800 dark:text-white">{{ \Carbon\Carbon::parse($att->date)->format('d M Y') }}</p>
                                             <p class="text-xs text-slate-500 dark:text-slate-400">{{ \Carbon\Carbon::parse($att->date)->locale('id')->isoFormat('dddd') }}</p>
                                         </div>
-                                        <span class="px-2 py-1 rounded-full text-[10px] font-bold
-                                            {{ $att->status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : '' }}
-                                            {{ $att->status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : '' }}
-                                            {{ $att->status === 'Izin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : '' }}
-                                            {{ $att->status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : '' }}">
-                                            {{ $att->status }}
+                                        @php
+                                            $histBadge = match($att->status) {
+                                                'Hadir', 'Tepat Waktu' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                                'Terlambat'            => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                                                'Alpha'                => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                                'Izin', 'Sakit'        => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                                default                => 'bg-slate-100 text-slate-600',
+                                            };
+                                            $histLabel = $att->status === 'Tepat Waktu' ? 'Hadir' : $att->status;
+                                        @endphp
+                                        <span class="px-2 py-1 rounded-full text-[10px] font-bold {{ $histBadge }}">
+                                            {{ $histLabel }}
                                         </span>
                                     </div>
                                     <div class="flex items-center justify-between text-xs">
@@ -243,32 +259,67 @@
             animation: fadeIn 0.3s ease-out forwards;
         }
 
-        /* QR timer color transitions (enhanced) */
+        /* QR timer color transitions + bounce animation */
         #qr-timer {
             display: inline-block;
-            transition: color 0.7s cubic-bezier(.2,.9,.2,1),
-                        transform 0.35s cubic-bezier(.2,.9,.2,1),
-                        text-shadow 0.7s ease, opacity 0.35s ease;
+            transition: color 0.5s ease, text-shadow 0.5s ease;
             font-variant-numeric: tabular-nums;
+            font-weight: 800;
             will-change: color, transform, text-shadow;
         }
 
         .timer-green {
-            color: #10b981; /* emerald-500 */
-            text-shadow: 0 10px 30px rgba(16,185,129,0.12);
-            transform: scale(1.03);
+            color: #10b981;
+            text-shadow: 0 0 12px rgba(16,185,129,0.25);
         }
 
         .timer-yellow {
-            color: #f59e0b; /* amber-500 */
-            text-shadow: 0 8px 26px rgba(245,158,11,0.10);
-            transform: scale(1.015);
+            color: #f59e0b;
+            text-shadow: 0 0 12px rgba(245,158,11,0.25);
         }
 
         .timer-red {
-            color: #ef4444; /* red-500 */
-            text-shadow: 0 12px 36px rgba(239,68,68,0.12);
-            transform: scale(1.05);
+            color: #ef4444;
+            text-shadow: 0 0 16px rgba(239,68,68,0.35);
+        }
+
+        /* Deg-deg bounce saat ≤10 */
+        @keyframes timerBounce {
+            0%, 100% { transform: scale(1);    }
+            30%       { transform: scale(1.25); }
+            60%       { transform: scale(0.92); }
+        }
+
+        @keyframes timerShake {
+            0%, 100% { transform: translateX(0) scale(1.08); }
+            20%       { transform: translateX(-3px) scale(1.08); }
+            40%       { transform: translateX(3px) scale(1.08); }
+            60%       { transform: translateX(-2px) scale(1.08); }
+            80%       { transform: translateX(2px) scale(1.08); }
+        }
+
+        .timer-bounce {
+            animation: timerBounce 0.45s cubic-bezier(.36,.07,.19,.97);
+        }
+
+        .timer-shake {
+            animation: timerShake 0.5s cubic-bezier(.36,.07,.19,.97);
+        }
+
+        .timer-pulse-ring::after {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ef4444;
+            margin-left: 4px;
+            vertical-align: middle;
+            animation: ping 0.8s cubic-bezier(0,0,0.2,1) infinite;
+        }
+
+        @keyframes ping {
+            75%, 100% { transform: scale(2); opacity: 0; }
         }
     </style>
 
@@ -277,54 +328,74 @@
             if (window.lucide) lucide.createIcons();
 
             const timerElement = document.getElementById('qr-timer');
-            const qrCodeImage = document.getElementById('qr-code-img');
+            const qrCodeImage  = document.getElementById('qr-code-img');
             const qrExpiration = Number(timerElement?.dataset.expiration ?? 30);
             let countdown = qrExpiration;
+            let lastZone  = '';   // 'green' | 'yellow' | 'red'
+
+            const getZone = (v) => {
+                if (v <= 10) return 'red';
+                if (v <= 20) return 'yellow';
+                return 'green';
+            };
+
+            const triggerBounce = () => {
+                if (!timerElement) return;
+                const cls = countdown <= 5 ? 'timer-shake' : 'timer-bounce';
+                timerElement.classList.remove('timer-bounce', 'timer-shake');
+                // force reflow so animation restarts
+                void timerElement.offsetWidth;
+                timerElement.classList.add(cls);
+                setTimeout(() => timerElement.classList.remove('timer-bounce', 'timer-shake'), 520);
+            };
 
             const setTimerColor = (value) => {
                 if (!timerElement) return;
-                timerElement.classList.remove('timer-green','timer-yellow','timer-red');
+                const zone = getZone(value);
 
-                if (value <= 10) {
-                    timerElement.classList.add('timer-red');
-                } else if (value < 30) {
-                    timerElement.classList.add('timer-yellow');
-                } else {
-                    timerElement.classList.add('timer-green');
+                // Update colour class
+                timerElement.classList.remove('timer-green', 'timer-yellow', 'timer-red');
+                timerElement.classList.add('timer-' + zone);
+
+                // Pulse ring only in red zone
+                timerElement.classList.toggle('timer-pulse-ring', zone === 'red');
+
+                // Bounce on zone change
+                if (zone !== lastZone) {
+                    lastZone = zone;
+                    triggerBounce();
                 }
             };
 
             const updateTimer = () => {
-                if (timerElement) {
-                    timerElement.textContent = countdown;
-                    setTimerColor(countdown);
+                if (!timerElement) return;
+                timerElement.textContent = countdown;
+                setTimerColor(countdown);
+                // Always bounce every tick when ≤10
+                if (countdown <= 10 && countdown > 0) {
+                    triggerBounce();
                 }
             };
 
             const refreshQrCode = () => {
                 if (!qrCodeImage) return;
-
                 fetch('{{ route("teacher.attendance.refresh-qr") }}')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.qrCodeUrl) {
-                            qrCodeImage.src = data.qrCodeUrl;
-                        }
-                    })
+                    .then(r => r.json())
+                    .then(data => { if (data.qrCodeUrl) qrCodeImage.src = data.qrCodeUrl; })
                     .catch(() => {});
 
                 countdown = qrExpiration;
+                lastZone  = '';
                 updateTimer();
             };
 
+            // Init
             updateTimer();
+
             setInterval(() => {
                 countdown = Math.max(0, countdown - 1);
                 updateTimer();
-
-                if (countdown <= 0) {
-                    refreshQrCode();
-                }
+                if (countdown <= 0) refreshQrCode();
             }, 1000);
         });
     </script>
