@@ -330,6 +330,7 @@
             if (window.lucide) lucide.createIcons();
 
             const timerElement = document.getElementById('qr-timer');
+            const dotEl        = document.getElementById('qr-status-dot');
             const qrCodeImage  = document.getElementById('qr-code-img');
             const qrExpiration = Number(timerElement?.dataset.expiration ?? 30);
             let countdown = qrExpiration;
@@ -355,9 +356,15 @@
                 if (!timerElement) return;
                 const zone = getZone(value);
 
-                // Update colour class
+                // Update timer colour
                 timerElement.classList.remove('timer-green', 'timer-yellow', 'timer-red');
                 timerElement.classList.add('timer-' + zone);
+
+                // Update dot colour — ikut zona, animasi sesuai kecepatan zona
+                if (dotEl) {
+                    dotEl.classList.remove('dot-green', 'dot-yellow', 'dot-red');
+                    dotEl.classList.add('dot-' + zone);
+                }
 
                 // Bounce on zone change
                 if (zone !== lastZone) {
@@ -385,10 +392,16 @@
 
                 countdown = qrExpiration;
                 lastZone  = '';
+                // Reset dot ke hijau saat QR refresh
+                if (dotEl) {
+                    dotEl.classList.remove('dot-green', 'dot-yellow', 'dot-red');
+                    dotEl.classList.add('dot-green');
+                }
                 updateTimer();
             };
 
             // Init
+            if (dotEl) dotEl.classList.add('dot-green');
             updateTimer();
 
             setInterval(() => {
