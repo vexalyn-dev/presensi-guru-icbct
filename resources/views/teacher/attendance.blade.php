@@ -165,7 +165,7 @@
                             @endif
                         </div>
                         <div class="mt-4 flex items-center justify-center gap-2">
-                            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <div id="qr-status-dot" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 QR Code berlaku <span id="qr-timer" data-expiration="{{ $qrExpiration ?? 30 }}">{{ $qrExpiration ?? 30 }}</span> detik
                             </p>
@@ -306,20 +306,22 @@
             animation: timerShake 0.5s cubic-bezier(.36,.07,.19,.97);
         }
 
-        .timer-pulse-ring::after {
-            content: '';
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #ef4444;
-            margin-left: 4px;
-            vertical-align: middle;
-            animation: ping 0.8s cubic-bezier(0,0,0.2,1) infinite;
+        /* QR status dot */
+        #qr-status-dot {
+            transition: background-color 0.4s ease;
         }
+        .dot-green  { background-color: #10b981; animation: pulse-slow 2s ease-in-out infinite; }
+        .dot-yellow { background-color: #f59e0b; animation: pulse-slow 1.2s ease-in-out infinite; }
+        /* Merah: berkedip sesuai detikan (1x per detik) */
+        .dot-red    { background-color: #ef4444; animation: pulse-tick 1s steps(1, end) infinite; }
 
-        @keyframes ping {
-            75%, 100% { transform: scale(2); opacity: 0; }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1;    transform: scale(1); }
+            50%       { opacity: 0.45; transform: scale(0.85); }
+        }
+        @keyframes pulse-tick {
+            0%, 49% { opacity: 1; transform: scale(1.2); }
+            50%, 100%{ opacity: 0.2; transform: scale(0.8); }
         }
     </style>
 
@@ -356,9 +358,6 @@
                 // Update colour class
                 timerElement.classList.remove('timer-green', 'timer-yellow', 'timer-red');
                 timerElement.classList.add('timer-' + zone);
-
-                // Pulse ring only in red zone
-                timerElement.classList.toggle('timer-pulse-ring', zone === 'red');
 
                 // Bounce on zone change
                 if (zone !== lastZone) {
