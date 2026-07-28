@@ -96,11 +96,23 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Tanggal Mulai</p>
                         <p class="text-base font-bold text-navy-800 dark:text-white group-hover:scale-105 transition-transform">{{ $leave->start_date->locale('id')->isoFormat('dddd') }}</p>
                         <p class="text-sm text-slate-600 dark:text-slate-300">{{ $leave->start_date->locale('id')->isoFormat('D MMMM YYYY') }}</p>
+                        @if($leave->start_time)
+                            <p class="text-xs text-navy-600 dark:text-gold-400 mt-1 font-semibold">
+                                <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
+                                Mulai pukul {{ \Carbon\Carbon::parse($leave->start_time)->format('H:i') }} WIB
+                            </p>
+                        @endif
                     </div>
                     <div class="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group hover:shadow-md">
                         <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Tanggal Selesai</p>
                         <p class="text-base font-bold text-navy-800 dark:text-white group-hover:scale-105 transition-transform">{{ $leave->end_date->locale('id')->isoFormat('dddd') }}</p>
                         <p class="text-sm text-slate-600 dark:text-slate-300">{{ $leave->end_date->locale('id')->isoFormat('D MMMM YYYY') }}</p>
+                        @if($leave->end_time)
+                            <p class="text-xs text-navy-600 dark:text-gold-400 mt-1 font-semibold">
+                                <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
+                                Sampai pukul {{ \Carbon\Carbon::parse($leave->end_time)->format('H:i') }} WIB
+                            </p>
+                        @endif
                     </div>
                 </div>
 

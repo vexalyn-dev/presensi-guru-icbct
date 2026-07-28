@@ -28,20 +28,24 @@ class LeaveController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'required|in:izin,sakit',
+            'type'       => 'required|in:izin,sakit',
             'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'required|string|min:10',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+            'end_time'   => 'nullable|date_format:H:i',
+            'reason'     => 'required|string|min:10',
             'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx,ppt,pptx|max:2048',
         ]);
 
         $data = [
-            'user_id' => auth()->id(),
-            'type' => $validated['type'],
+            'user_id'    => auth()->id(),
+            'type'       => $validated['type'],
             'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
-            'reason' => $validated['reason'],
-            'status' => 'pending',
+            'start_time' => $validated['start_time'] ?? null,
+            'end_date'   => $validated['end_date'],
+            'end_time'   => $validated['end_time'] ?? null,
+            'reason'     => $validated['reason'],
+            'status'     => 'pending',
         ];
 
         // Handle attachment

@@ -243,6 +243,52 @@
                                 <span x-text="getDurationText()"></span>
                             </p>
                         </div>
+
+                        <!-- Jam Izin -->
+                        <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+                                <p class="text-sm font-semibold text-navy-800 dark:text-white">Jam Izin
+                                    <span class="text-xs font-normal text-slate-400 ml-1">(Opsional)</span>
+                                </p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                                        Dari Jam
+                                    </label>
+                                    <div class="relative group">
+                                        <i data-lucide="clock-3" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
+                                        <input type="time"
+                                               name="start_time"
+                                               value="{{ old('start_time') }}"
+                                               class="w-full pl-9 pr-3 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
+                                    </div>
+                                    @error('start_time')
+                                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                                        Sampai Jam
+                                    </label>
+                                    <div class="relative group">
+                                        <i data-lucide="clock-8" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
+                                        <input type="time"
+                                               name="end_time"
+                                               value="{{ old('end_time') }}"
+                                               class="w-full pl-9 pr-3 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
+                                    </div>
+                                    @error('end_time')
+                                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                            <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                                <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>
+                                Isi jika izin hanya sebagian hari (misal izin 2 jam saja)
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -11,7 +11,9 @@ class LeaveRequest extends Model
         'user_id',
         'type',
         'start_date',
+        'start_time',
         'end_date',
+        'end_time',
         'reason',
         'attachment',
         'status',
@@ -21,8 +23,8 @@ class LeaveRequest extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_date'  => 'date',
+        'end_date'    => 'date',
         'approved_at' => 'datetime',
     ];
 

@@ -222,12 +222,24 @@
                         <p class="text-sm font-bold text-navy-800 dark:text-white">
                             {{ $leaveRequest->start_date->locale('id')->isoFormat('dddd, D MMMM Y') }}
                         </p>
+                        @if($leaveRequest->start_time)
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
+                                Mulai pukul {{ \Carbon\Carbon::parse($leaveRequest->start_time)->format('H:i') }} WIB
+                            </p>
+                        @endif
                     </div>
                     <div class="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-xl">
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Tanggal Selesai</p>
                         <p class="text-sm font-bold text-navy-800 dark:text-white">
                             {{ $leaveRequest->end_date->locale('id')->isoFormat('dddd, D MMMM Y') }}
                         </p>
+                        @if($leaveRequest->end_time)
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
+                                Sampai pukul {{ \Carbon\Carbon::parse($leaveRequest->end_time)->format('H:i') }} WIB
+                            </p>
+                        @endif
                     </div>
                 </div>
 
