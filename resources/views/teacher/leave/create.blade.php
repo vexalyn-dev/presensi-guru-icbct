@@ -262,6 +262,8 @@
                                         <input type="time"
                                                name="start_time"
                                                value="{{ old('start_time') }}"
+                                               x-model="startTime"
+                                               @change="$dispatch('time-changed')"
                                                class="w-full pl-9 pr-3 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
                                     </div>
                                     @error('start_time')
@@ -277,6 +279,8 @@
                                         <input type="time"
                                                name="end_time"
                                                value="{{ old('end_time') }}"
+                                               x-model="endTime"
+                                               @change="$dispatch('time-changed')"
                                                class="w-full pl-9 pr-3 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
                                     </div>
                                     @error('end_time')
@@ -502,8 +506,8 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('leaveForm', () => ({
-            startDate: '',
-            endDate: '',
+            startDate: '{{ old('start_date', now()->format('Y-m-d')) }}',
+            endDate: '{{ old('end_date', now()->format('Y-m-d')) }}',
             reason: '',
             fileName: '',
             filePreview: '',
@@ -511,6 +515,8 @@
             fileSize: '',
             selectedType: '',
             open: false,
+            startTime: '{{ old('start_time', '') }}',
+            endTime: '{{ old('end_time', '') }}',
 
             getIcon(type) {
                 const icons = {
@@ -543,10 +549,25 @@
 
             getDurationText() {
                 if (!this.startDate || !this.endDate) return '';
-                const start = new Date(this.startDate);
-                const end = new Date(this.endDate);
-                const diffTime = Math.abs(end - start);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+                // Jika kedua jam diisi DAN tanggal sama → hitung durasi jam
+                if (this.startTime && this.endTime && this.startDate === this.endDate) {
+                    const [sh, sm] = this.startTime.split(':').map(Number);
+                    const [eh, em] = this.endTime.split(':').map(Number);
+                    const totalMins = (eh * 60 + em) - (sh * 60 + sm);
+                    if (totalMins > 0) {
+                        const hours = Math.floor(totalMins / 60);
+                        const mins  = totalMins % 60;
+                        if (hours > 0 && mins > 0) return `Durasi izin: ${hours} jam ${mins} menit`;
+                        if (hours > 0) return `Durasi izin: ${hours} jam`;
+                        return `Durasi izin: ${mins} menit`;
+                    }
+                }
+
+                // Default: hitung hari
+                const start    = new Date(this.startDate);
+                const end      = new Date(this.endDate);
+                const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
                 return diffDays === 1 ? '1 hari' : `${diffDays} hari`;
             },
 
