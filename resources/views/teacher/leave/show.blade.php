@@ -212,7 +212,22 @@
                     </div>
                     <div class="p-3 bg-slate-50 dark:bg-slate-700/30 rounded-xl">
                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Durasi</p>
-                        <p class="text-sm font-bold text-navy-800 dark:text-white">{{ $leaveRequest->duration }} hari</p>
+                        @php
+                            $durasi = $leaveRequest->duration . ' hari';
+                            if ($leaveRequest->start_time && $leaveRequest->end_time
+                                && $leaveRequest->start_date->eq($leaveRequest->end_date)) {
+                                $totalMins = \Carbon\Carbon::parse($leaveRequest->end_time)->diffInMinutes(
+                                    \Carbon\Carbon::parse($leaveRequest->start_time), false
+                                ) * -1;
+                                if ($totalMins > 0) {
+                                    $h = intdiv($totalMins, 60);
+                                    $m = $totalMins % 60;
+                                    $durasi = $h > 0 && $m > 0 ? "{$h} jam {$m} menit"
+                                            : ($h > 0 ? "{$h} jam" : "{$m} menit");
+                                }
+                            }
+                        @endphp
+                        <p class="text-sm font-bold text-navy-800 dark:text-white">{{ $durasi }}</p>
                     </div>
                 </div>
 

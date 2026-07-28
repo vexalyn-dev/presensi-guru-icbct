@@ -118,7 +118,22 @@
 
                 <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl flex items-center justify-between">
                     <span class="text-xs text-slate-500 dark:text-slate-400">Durasi</span>
-                    <span class="text-sm font-bold text-navy-800 dark:text-white">{{ $leave->duration }} hari</span>
+                    @php
+                        $durasiAdmin = $leave->duration . ' hari';
+                        if ($leave->start_time && $leave->end_time
+                            && $leave->start_date->eq($leave->end_date)) {
+                            $totalMins = \Carbon\Carbon::parse($leave->end_time)->diffInMinutes(
+                                \Carbon\Carbon::parse($leave->start_time), false
+                            ) * -1;
+                            if ($totalMins > 0) {
+                                $h = intdiv($totalMins, 60);
+                                $m = $totalMins % 60;
+                                $durasiAdmin = $h > 0 && $m > 0 ? "{$h} jam {$m} menit"
+                                             : ($h > 0 ? "{$h} jam" : "{$m} menit");
+                            }
+                        }
+                    @endphp
+                    <span class="text-sm font-bold text-navy-800 dark:text-white">{{ $durasiAdmin }}</span>
                 </div>
             </div>
         </div>
