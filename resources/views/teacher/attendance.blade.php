@@ -169,12 +169,12 @@
 
                             <!-- Foto profil guru di tengah QR — CSS overlay, QR tetap bisa di-scan -->
                             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-[3px] border-white shadow-lg overflow-hidden bg-white"
-                                     style="box-shadow: 0 0 0 2px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.18);">
+                                <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-[3px] border-white shadow-lg overflow-hidden bg-white"
+                                     style="box-shadow: 0 0 0 2px rgba(0,0,0,0.08), 0 3px 10px rgba(0,0,0,0.22);">
                                     <img src="{{ auth()->user()->photo_url }}"
                                          alt="{{ auth()->user()->name }}"
                                          class="w-full h-full object-cover"
-                                         onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff&size=64'">
+                                         onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff&size=80'">
                                 </div>
                             </div>
                         </div>
