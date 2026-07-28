@@ -270,9 +270,9 @@
                         <i data-lucide="info" class="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"></i>
                         <div class="text-xs text-blue-700 dark:text-blue-300">
                             <p class="font-semibold mb-1">Informasi:</p>
-                            <p>Diajukan pada {{ $leaveRequest->created_at->locale('id')->isoFormat('D MMMM Y [pukul] H.i') }}</p>
+                            <p>Diajukan pada {{ $leaveRequest->created_at->locale('id')->isoFormat('D MMMM Y') }} pukul {{ $leaveRequest->created_at->format('H:i') }}</p>
                             @if($leaveRequest->status !== 'pending' && $leaveRequest->approved_at)
-                            <p>Diproses pada {{ $leaveRequest->approved_at->locale('id')->isoFormat('D MMMM Y [pukul] H.i') }}</p>
+                            <p>Diproses pada {{ $leaveRequest->approved_at->locale('id')->isoFormat('D MMMM Y') }} pukul {{ $leaveRequest->approved_at->format('H:i') }}</p>
                             @endif
                         </div>
                     </div>
