@@ -342,7 +342,7 @@
                             @if($att && $att->check_in_time)
                                 <span class="inline-flex items-center gap-1 text-sm font-semibold text-green-600 dark:text-green-400">
                                     <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
-                                    {{ $att->check_in_time->format('H:i') }}
+                                    {{ \Carbon\Carbon::parse($att->check_in_time)->format('H:i') }}
                                 </span>
                             @else
                                 <span class="text-sm text-slate-400">-</span>
@@ -352,7 +352,7 @@
                             @if($att && $att->check_out_time)
                                 <span class="inline-flex items-center gap-1 text-sm font-semibold text-red-600 dark:text-red-400">
                                     <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                                    {{ $att->check_out_time->format('H:i') }}
+                                    {{ \Carbon\Carbon::parse($att->check_out_time)->format('H:i') }}
                                 </span>
                             @else
                                 <span class="text-sm text-slate-400">-</span>
