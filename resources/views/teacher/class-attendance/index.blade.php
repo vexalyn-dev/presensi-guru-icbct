@@ -1125,35 +1125,21 @@
 
                 processScan(qrData) {
                     this.scannedQrData = qrData;
+                    // Langsung kirim scan — GPS berjalan di background jika tersedia
+                    // Tidak perlu tunggu GPS karena kelas tidak wajib punya koordinat
+                    this.sendScan(qrData, this.userLatitude, this.userLongitude);
 
-                    if (!navigator.geolocation) {
-                        this.sendScan(qrData);
-                        return;
-                    }
-
-                    const obtainPosition = (highAccuracy, timeoutMs) => {
+                    // Update GPS di background untuk scan berikutnya
+                    if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
-                            position => {
-                                this.userLatitude = position.coords.latitude;
-                                this.userLongitude = position.coords.longitude;
-                                this.sendScan(qrData, this.userLatitude, this.userLongitude);
+                            pos => {
+                                this.userLatitude  = pos.coords.latitude;
+                                this.userLongitude = pos.coords.longitude;
                             },
-                            error => {
-                                console.warn('Gagal lokasi (highAccuracy=' + highAccuracy + '):', error);
-                                if (highAccuracy && (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE)) {
-                                    // Fallback ke low accuracy (network/Wi-Fi positioning)
-                                    obtainPosition(false, 15000);
-                                    return;
-                                }
-                                this.userLatitude = null;
-                                this.userLongitude = null;
-                                this.sendScan(qrData);
-                            },
-                            { enableHighAccuracy: highAccuracy, timeout: timeoutMs, maximumAge: 30000 }
-                        ); 
-                    };
-
-                    obtainPosition(true, 7000);
+                            () => {},
+                            { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+                        );
+                    }
                 },
 
                 sendScan(qrData, latitude = null, longitude = null) {
