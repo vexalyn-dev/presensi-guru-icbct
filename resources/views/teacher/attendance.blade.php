@@ -171,14 +171,10 @@
                             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-[3px] border-white shadow-lg overflow-hidden bg-white"
                                      style="box-shadow: 0 0 0 2px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.18);">
-                                    @php
-                                        $photoUrl = auth()->user()->photo
-                                            ? asset('storage/' . auth()->user()->photo)
-                                            : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff&size=64';
-                                    @endphp
-                                    <img src="{{ $photoUrl }}"
+                                    <img src="{{ auth()->user()->photo_url }}"
                                          alt="{{ auth()->user()->name }}"
-                                         class="w-full h-full object-cover">
+                                         class="w-full h-full object-cover"
+                                         onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff&size=64'">
                                 </div>
                             </div>
                         </div>
