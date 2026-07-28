@@ -155,14 +155,32 @@
 
                     <!-- QR Code Container (responsive square) -->
                     <div class="flex flex-col items-center justify-center p-4 sm:p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-slate-200 dark:border-slate-700">
-                        <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
+                        <!-- QR + foto overlay wrapper -->
+                        <div class="relative bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center">
                             @if($qrCodeUrl)
-                                <img src="{{ $qrCodeUrl }}" id="qr-code-img" alt="QR Code Presensi" class="w-full h-full object-contain">
+                                <img src="{{ $qrCodeUrl }}" id="qr-code-img"
+                                     alt="QR Code Presensi"
+                                     class="w-full h-full object-contain">
                             @else
                                 <div class="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
                                     <p class="text-sm text-slate-500 dark:text-slate-400">QR Code tidak tersedia</p>
                                 </div>
                             @endif
+
+                            <!-- Foto profil guru di tengah QR — CSS overlay, QR tetap bisa di-scan -->
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-[3px] border-white shadow-lg overflow-hidden bg-white"
+                                     style="box-shadow: 0 0 0 2px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.18);">
+                                    @php
+                                        $photoUrl = auth()->user()->photo
+                                            ? asset('storage/' . auth()->user()->photo)
+                                            : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff&size=64';
+                                    @endphp
+                                    <img src="{{ $photoUrl }}"
+                                         alt="{{ auth()->user()->name }}"
+                                         class="w-full h-full object-cover">
+                                </div>
+                            </div>
                         </div>
                         <div class="mt-4 flex items-center justify-center gap-2">
                             <div id="qr-status-dot" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
