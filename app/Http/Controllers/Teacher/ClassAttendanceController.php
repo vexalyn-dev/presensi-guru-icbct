@@ -213,12 +213,12 @@ class ClassAttendanceController extends Controller
             ]);
         }
 
-        // Single jadwal — coba auto-match waktu (±15 menit)
+        // Single jadwal — coba auto-match waktu (±15 menit, +2 menit toleransi keluar)
         $single        = $schedules->first();
         $activeSchedule = $schedules->first(function ($s) use ($now) {
             return $now->between(
                 Carbon::parse($s->start_time)->subMinutes(15),
-                Carbon::parse($s->end_time)->addMinutes(15)
+                Carbon::parse($s->end_time)->addMinutes(17)  // +2 menit toleransi agar guru sempat scan keluar
             );
         });
 
@@ -559,7 +559,7 @@ class ClassAttendanceController extends Controller
                 'classroom' => $selectedClassroom?->name ?? '-',
                 'subject'   => $subject?->name ?? '-',
                 'duration'  => $duration . ' menit',
-                'check_in'  => $attendance->check_in_time->format('H:i'),
+                'check_in'  => Carbon::parse($attendance->check_in_time)->format('H:i'),
                 'check_out' => $now->format('H:i'),
             ],
         ]);
@@ -688,7 +688,7 @@ class ClassAttendanceController extends Controller
                     'classroom' => $scheduleClassroomName,
                     'subject'   => $schedule->subject->name ?? '-',
                     'duration'  => $duration . ' menit',
-                    'check_in'  => $attendance->check_in_time->format('H:i'),
+                    'check_in'  => Carbon::parse($attendance->check_in_time)->format('H:i'),
                     'check_out' => $now->format('H:i'),
                     'status'    => $attendance->status,
                 ],
