@@ -24,14 +24,15 @@ class SettingsController extends Controller
                 'admin_email' => $appSettings->admin_email,
             ],
             'attendance' => [
-                'attendance_start_time' => $appSettings->attendance_start_time,
-                'attendance_end_time' => $appSettings->attendance_end_time,
+                'attendance_start_time'        => $appSettings->attendance_start_time,
+                'attendance_end_time'          => $appSettings->attendance_end_time,
                 'attendance_late_grace_period' => $appSettings->attendance_late_grace_period,
-                'location_required' => $appSettings->location_required,
-                'photo_required' => $appSettings->photo_required,
-                'location_latitude' => $appSettings->location_latitude,
-                'location_longitude' => $appSettings->location_longitude,
-                'location_radius' => $appSettings->location_radius,
+                'class_switch_grace_period'    => $appSettings->class_switch_grace_period ?? 5,
+                'location_required'            => $appSettings->location_required,
+                'photo_required'               => $appSettings->photo_required,
+                'location_latitude'            => $appSettings->location_latitude,
+                'location_longitude'           => $appSettings->location_longitude,
+                'location_radius'              => $appSettings->location_radius,
             ],
             'notification' => [
                 'email_notification' => $appSettings->email_notification,
@@ -92,32 +93,35 @@ class SettingsController extends Controller
     public function updateAttendance(Request $request)
     {
         $validated = $request->validate([
-            'attendance_start_time' => 'required',
-            'attendance_end_time' => 'required',
+            'attendance_start_time'        => 'required',
+            'attendance_end_time'          => 'required',
             'attendance_late_grace_period' => 'required|integer|min:0|max:120',
-            'location_latitude' => 'nullable|numeric|between:-90,90',
+            'class_switch_grace_period'    => 'required|integer|min:0|max:30',
+            'location_latitude'  => 'nullable|numeric|between:-90,90',
             'location_longitude' => 'nullable|numeric|between:-180,180',
-            'location_radius' => 'required|integer|min:10|max:5000',
+            'location_radius'    => 'required|integer|min:10|max:5000',
         ]);
 
         $appSettings = AppSetting::getInstance();
-        $appSettings->attendance_start_time = $validated['attendance_start_time'];
-        $appSettings->attendance_end_time = $validated['attendance_end_time'];
+        $appSettings->attendance_start_time        = $validated['attendance_start_time'];
+        $appSettings->attendance_end_time          = $validated['attendance_end_time'];
         $appSettings->attendance_late_grace_period = $validated['attendance_late_grace_period'];
-        $appSettings->location_latitude = $validated['location_latitude'] ?? $appSettings->location_latitude;
+        $appSettings->class_switch_grace_period    = $validated['class_switch_grace_period'];
+        $appSettings->location_latitude  = $validated['location_latitude'] ?? $appSettings->location_latitude;
         $appSettings->location_longitude = $validated['location_longitude'] ?? $appSettings->location_longitude;
-        $appSettings->location_radius = $validated['location_radius'];
-        
+        $appSettings->location_radius    = $validated['location_radius'];
+
         // Handle booleans from checkbox
         $appSettings->location_required = $request->has('location_required');
-        $appSettings->photo_required = $request->has('photo_required');
-        
+        $appSettings->photo_required    = $request->has('photo_required');
+
         $appSettings->save();
 
         // Sync to settings table
-        Setting::set('attendance_start_time', $validated['attendance_start_time'], 'string', 'attendance');
-        Setting::set('attendance_end_time', $validated['attendance_end_time'], 'string', 'attendance');
+        Setting::set('attendance_start_time',        $validated['attendance_start_time'],        'string',  'attendance');
+        Setting::set('attendance_end_time',          $validated['attendance_end_time'],          'string',  'attendance');
         Setting::set('attendance_late_grace_period', $validated['attendance_late_grace_period'], 'integer', 'attendance');
+        Setting::set('class_switch_grace_period',    $validated['class_switch_grace_period'],    'number',  'attendance');
 
         Artisan::call('config:clear');
 

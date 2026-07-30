@@ -19,12 +19,14 @@ class ClassAttendance extends Model
         'status',
         'scan_method',
         'notes',
+        'is_short_class',
     ];
 
     protected $casts = [
-        'date' => 'date',
-        'check_in_time' => 'string',
+        'date'           => 'date',
+        'check_in_time'  => 'string',
         'check_out_time' => 'string',
+        'is_short_class' => 'boolean',
     ];
 
     public function user(): BelongsTo

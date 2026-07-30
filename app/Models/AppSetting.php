@@ -19,6 +19,7 @@ class AppSetting extends Model
         'attendance_start_time',
         'attendance_end_time',
         'attendance_late_grace_period',
+        'class_switch_grace_period',
         'location_required',
         'photo_required',
         'location_latitude',
@@ -37,7 +38,8 @@ class AppSetting extends Model
         'email_notification' => 'boolean',
         'late_notification' => 'boolean',
         'attendance_late_grace_period' => 'integer',
-        'location_radius' => 'integer',
+        'class_switch_grace_period'    => 'integer',
+        'location_radius'              => 'integer',
     ];
 
     public function getLogoUrlAttribute()

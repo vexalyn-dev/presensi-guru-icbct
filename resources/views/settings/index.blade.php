@@ -322,6 +322,71 @@
                             </div>
                         </div>
 
+                        <!-- Grace Period Antar Kelas -->
+                        @php $currentGrace = old('class_switch_grace_period', $settings['attendance']['class_switch_grace_period'] ?? 5); @endphp
+                        <div x-data="{
+                            openGrace: false,
+                            selectedGracePeriod: '{{ $currentGrace }}',
+                            gracePeriodOptions: [
+                                { value: '0',  name: 'Tidak ada (langsung bisa scan)' },
+                                { value: '2',  name: '2 menit' },
+                                { value: '3',  name: '3 menit' },
+                                { value: '5',  name: '5 menit (recommended)' },
+                                { value: '10', name: '10 menit' },
+                                { value: '15', name: '15 menit' },
+                                { value: '30', name: '30 menit' },
+                            ]
+                        }" @click.outside="openGrace = false">
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
+                                Grace Period Antar Kelas (Menit)
+                            </label>
+                            <div class="relative">
+                                <button type="button" @click="openGrace = !openGrace"
+                                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 flex items-center justify-between hover:border-navy-300 dark:hover:border-gold-600 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-6 h-6 rounded-lg flex items-center justify-center bg-orange-100 dark:bg-orange-900/30">
+                                            <i data-lucide="timer" class="w-4 h-4 text-orange-600 dark:text-orange-400"></i>
+                                        </div>
+                                        <span class="text-slate-700 dark:text-slate-300 font-medium"
+                                              x-text="(gracePeriodOptions.find(o => o.value == selectedGracePeriod)?.name) || selectedGracePeriod + ' menit'"></span>
+                                    </div>
+                                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{'rotate-180': openGrace}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+
+                                <div x-show="openGrace"
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+                                     class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                     x-cloak>
+                                    <div class="overflow-y-auto" style="max-height: 240px;">
+                                        <template x-for="option in gracePeriodOptions" :key="option.value">
+                                            <button type="button"
+                                                    @click="selectedGracePeriod = option.value; openGrace = false"
+                                                    class="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 last:border-0"
+                                                    :class="selectedGracePeriod == option.value ? 'bg-navy-50 dark:bg-navy-900/30' : ''">
+                                                <div class="w-6 h-6 rounded-lg flex items-center justify-center bg-orange-100 dark:bg-orange-900/30">
+                                                    <i data-lucide="timer" class="w-4 h-4 text-orange-600 dark:text-orange-400"></i>
+                                                </div>
+                                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300 flex-1" x-text="option.name"></span>
+                                                <svg x-show="selectedGracePeriod == option.value" class="w-4 h-4 text-navy-800 dark:text-gold-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="class_switch_grace_period" :value="selectedGracePeriod">
+                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Waktu minimal antara scan OUT dan IN kelas berikutnya</p>
+                            </div>
+                        </div>
+
                         <!-- ✅ Validasi GPS (DIPINDAH KE SINI) -->
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Validasi GPS</label>

@@ -44,7 +44,7 @@ class ClassAttendanceController extends Controller
 
         return view('teacher.class-attendance.index', compact(
             'schedules', 'totalClasses', 'completedClasses', 'inProgressClasses'
-        ));
+        ) + ['gracePeriodSetting' => (int) \App\Models\Setting::get('class_switch_grace_period', 5)]);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -269,6 +269,37 @@ class ClassAttendanceController extends Controller
             // tapi flow ini datang dari submitSharedSpaceAttendance() di JS, bukan scan() langsung
             // Jika sampai sini, berarti ada payload lengkap → proses in
             return $this->handleSharedSpaceCheckIn($classroom, $user, $now, $today, $request);
+        }
+
+        // ── Grace period antar kelas (hanya untuk mode IN) ───────────────────
+        if ($mode === 'in') {
+            $gracePeriod = (int) \App\Models\Setting::get('class_switch_grace_period', 5);
+
+            if ($gracePeriod > 0) {
+                $lastAttendance = ClassAttendance::where('user_id', $user->id)
+                    ->whereDate('date', $today)
+                    ->whereNotNull('check_out_time')
+                    ->orderBy('check_out_time', 'desc')
+                    ->first();
+
+                if ($lastAttendance) {
+                    $minutesSinceOut = (int) \Carbon\Carbon::parse($lastAttendance->check_out_time)->diffInMinutes($now);
+
+                    if ($minutesSinceOut < $gracePeriod) {
+                        $remaining = $gracePeriod - $minutesSinceOut;
+                        $this->logScan($user, $classroom, $mode, 'failed',
+                            "Grace period: baru {$minutesSinceOut} menit sejak keluar kelas terakhir", $request);
+
+                        return response()->json([
+                            'success'          => false,
+                            'warning'          => true,
+                            'message'          => "Tunggu {$gracePeriod} menit antar kelas. Sisa waktu: {$remaining} menit",
+                            'remaining_seconds' => $remaining * 60,
+                            'grace_period'     => $gracePeriod,
+                        ], 429);
+                    }
+                }
+            }
         }
 
         // ── Cari jadwal hari ini ─────────────────────────────────────────────
@@ -782,6 +813,13 @@ class ClassAttendanceController extends Controller
             }
 
             $attendance->check_out_time = $now;
+            // Tandai kelas sangat singkat (< 10 menit)
+            if ($duration < 10) {
+                $attendance->is_short_class = true;
+                if (!$attendance->notes) {
+                    $attendance->notes = "Kelas singkat: {$duration} menit";
+                }
+            }
             $attendance->save();
 
             $this->logScan($user, $scannedClassroom, 'out', 'success',
