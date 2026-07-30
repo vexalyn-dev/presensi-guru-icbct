@@ -299,36 +299,47 @@
                         </div>
                         
                         <!-- Profile Dropdown -->
-                        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                            <button @click.stop="open = !open" class="flex items-center gap-1.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-1 sm:p-1.5 pr-1.5 sm:pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click.stop="open = !open"
+                                    class="flex items-center gap-1.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-1 sm:p-1.5 pr-1.5 sm:pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
                                 <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}" 
                                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
                                      onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
                                 <div class="hidden sm:block text-left">
-                                    <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[150px]">{{ auth()->user()->name }}</p>
-                                    <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                    <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[120px]">{{ auth()->user()->name }}</p>
+                                    <div class="flex items-center gap-1.5 mt-0.5">
                                         <span class="text-[10px] text-slate-500 dark:text-slate-400">Guru</span>
                                         @if($teacherSubject)
                                         <span class="px-1.5 py-0.5 bg-gold-100 dark:bg-gold-900/30 text-gold-700 dark:text-gold-400 rounded text-[9px] font-bold">
-                                            {{ $teacherSubject }}
+                                            {{ Str::limit($teacherSubject, 10) }}
                                         </span>
                                         @endif
                                     </div>
                                 </div>
-                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 hidden sm:block"></i>
+                                <svg class="w-4 h-4 text-slate-400 hidden sm:block transition-transform duration-200"
+                                     :class="open ? 'rotate-180' : ''"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/>
+                                </svg>
                             </button>
-                            
+
+                            <!-- Backdrop untuk tutup dropdown (klik di luar) -->
+                            <div x-show="open"
+                                 @click.stop="open = false"
+                                 class="fixed inset-0 z-[195]"
+                                 style="display:none;"></div>
+
                             <!-- Dropdown Menu -->
                             <div x-show="open"
                                  x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                                 x-transition:enter-start="opacity-0 translate-y-2 scale-95"
                                  x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                                 x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-                                 style="display:none;"
+                                 x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                                 @click.stop
                                  class="absolute right-0 mt-3 w-64 origin-top-right rounded-2xl border border-slate-200/60 bg-white shadow-[0_24px_48px_-8px_rgba(15,23,42,0.28),0_0_0_1px_rgba(15,23,42,0.04)] overflow-hidden z-[200] dark:border-slate-700/80 dark:bg-slate-800"
-                                 @click.stop>
+                                 style="display:none;">
                                 
                                 <div class="border-b border-slate-100 dark:border-slate-700/80 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-slate-700 dark:to-slate-800 p-4">
                                     <div class="flex items-center gap-3">
