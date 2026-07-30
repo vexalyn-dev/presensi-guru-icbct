@@ -472,17 +472,16 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
     });
 </script>
+@endpush
 
+@push('styles')
 <style>
-    /* Pengaman tambahan: cegah scroll horizontal di seluruh halaman.
-       CATATAN: perbaikan utama tetap harus dilakukan di <head> layout utama
-       dengan menambahkan <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       jika belum ada. */
     html, body {
         overflow-x: hidden;
         max-width: 100%;
@@ -502,24 +501,6 @@
             transform: translateY(0);
         }
     }
-
-    .marquee-container {
-        mask-image: linear-gradient(to right, transparent, black 1rem, black calc(100% - 1rem), transparent);
-        -webkit-mask-image: linear-gradient(to right, transparent, black 1rem, black calc(100% - 1rem), transparent);
-    }
-    
-    .marquee-track {
-        display: inline-flex;
-        animation: marquee-dashboard 25s linear infinite;
-    }
-    
-    .marquee-track:hover {
-        animation-play-state: paused;
-    }
-    
-    @keyframes marquee-dashboard {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
-    }
 </style>
+@endpush
 @endsection
