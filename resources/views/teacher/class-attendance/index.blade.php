@@ -2,30 +2,7 @@
 
 @section('page-title', 'Presensi Kelas')
 
-@section('topbar-reminder')
-    @php
-        $user = auth()->user();
-        $msgs = [];
-        foreach ($schedules as $s) {
-            $att = $s->classAttendances->first();
-            $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
-            if (!$att || !$att->check_in_time) {
-                $msgs[] = "Anda belum scan masuk kelas {$cn}";
-            } elseif ($att->check_in_time && !$att->check_out_time) {
-                $msgs[] = "Anda belum scan keluar kelas {$cn}";
-            }
-        }
-    @endphp
-    @if(!empty($msgs))
-        <div class="overflow-hidden max-w-[180px] sm:max-w-sm mt-0.5" id="reminder-bar">
-            <div class="marquee-track" id="reminder-marquee">
-                <span class="text-[10px] sm:text-[11px] font-medium text-amber-600 dark:text-amber-400" id="reminder-text">
-                    ⚠️ {{ implode('  •  ', $msgs) }}
-                </span>
-            </div>
-        </div>
-    @endif
-@endsection
+
 
 @section('content')
     <div class="fade-in space-y-6" x-data="classAttendance()">

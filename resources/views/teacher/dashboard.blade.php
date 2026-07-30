@@ -20,6 +20,39 @@
         </div>
     </div>
 
+    @php
+        $reminderMsgs = [];
+        foreach ($todaySchedules as $s) {
+            $att = $s->classAttendances->first();
+            $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
+            if (!$att || !$att->check_in_time) {
+                $reminderMsgs[] = "Anda belum scan masuk kelas {$cn}";
+            } elseif ($att->check_in_time && !$att->check_out_time) {
+                $reminderMsgs[] = "Anda belum scan keluar kelas {$cn}";
+            }
+        }
+    @endphp
+
+    @if(!empty($reminderMsgs))
+        <!-- Modern Premium Marquee Card -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-400/10 dark:via-amber-400/5 dark:to-transparent border border-amber-500/20 dark:border-amber-400/20 p-3 sm:p-3.5 flex items-center gap-3 shadow-sm hover:shadow-md transition-all duration-300">
+            <!-- Left glowing icon -->
+            <div class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500 dark:bg-gold-400 text-white dark:text-navy-900 flex-shrink-0 shadow-md shadow-amber-500/20 dark:shadow-gold-400/20 relative">
+                <span class="absolute inline-flex h-full w-full rounded-xl bg-amber-500 dark:bg-gold-400 opacity-75 animate-ping"></span>
+                <i data-lucide="bell" class="w-4 h-4 sm:w-4.5 sm:h-4.5 relative z-10 animate-bounce"></i>
+            </div>
+            
+            <!-- Marquee container with fade edges -->
+            <div class="relative flex-1 min-w-0 overflow-hidden py-0.5 marquee-container">
+                <div class="marquee-track flex gap-8 whitespace-nowrap text-xs sm:text-sm font-bold text-amber-800 dark:text-gold-400 tracking-wide uppercase">
+                    <!-- Duplicate text to ensure continuous scrolling -->
+                    <span>{{ implode('  •  ', $reminderMsgs) }}</span>
+                    <span>{{ implode('  •  ', $reminderMsgs) }}</span>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Statistics Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all">
@@ -389,6 +422,26 @@
             opacity: 1;
             transform: translateY(0);
         }
+    }
+
+    /* Premium continuous marquee styling */
+    .marquee-container {
+        mask-image: linear-gradient(to right, transparent, black 1.5rem, black calc(100% - 1.5rem), transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 1.5rem, black calc(100% - 1.5rem), transparent);
+    }
+    
+    .marquee-track {
+        display: inline-flex;
+        animation: marquee-dashboard 30s linear infinite;
+    }
+    
+    .marquee-track:hover {
+        animation-play-state: paused;
+    }
+    
+    @keyframes marquee-dashboard {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
     }
 </style>
 @endsection
