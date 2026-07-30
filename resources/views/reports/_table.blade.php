@@ -90,11 +90,14 @@
                 @endif
                 @foreach($dates as $date)
                 @php
-                    $dateStr = $date->toDateString();
-                    $dayData = $report['days'][$dateStr] ?? ['code' => '-', 'status' => 'libur'];
-                    $code = $dayData['code'];
-                    $label = $dayData['label'] ?? '';
-                    
+                    $dateStr    = $date->toDateString();
+                    $dayData    = $report['days'][$dateStr] ?? ['code' => '-', 'status' => 'libur'];
+                    $code       = $dayData['code'];
+                    $label      = $dayData['label'] ?? '';
+                    $startTime  = $dayData['start_time'] ?? null;
+                    $endTime    = $dayData['end_time'] ?? null;
+                    $isPerjam   = in_array($code, ['I', 'S']) && ($startTime || $endTime);
+
                     $badgeClass = match($code) {
                         'H' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
                         'T' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
@@ -113,6 +116,26 @@
                         <span class="inline-flex items-center justify-center w-7 h-7 rounded {{ $badgeClass }}">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </span>
+                    @elseif(in_array($code, ['I', 'S']))
+                        <span class="relative inline-flex items-center justify-center w-7 h-7 rounded text-xs font-bold {{ $badgeClass }}">
+                            {{ $code }}
+                            @if($isPerjam)
+                                <span class="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full flex items-center justify-center" title="Izin Perjam">
+                                    <i data-lucide="clock" class="w-2 h-2 text-white"></i>
+                                </span>
+                            @endif
+                        </span>
+                        @if($isPerjam)
+                            {{-- Tooltip izin perjam --}}
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-50 pointer-events-none">
+                                <div class="bg-slate-800 text-white text-[10px] font-medium rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-xl">
+                                    <div class="font-semibold mb-0.5 text-amber-300">Izin Perjam</div>
+                                    @if($startTime) <div>Mulai: {{ \Carbon\Carbon::parse($startTime)->format('H:i') }}</div> @endif
+                                    @if($endTime) <div>Selesai: {{ \Carbon\Carbon::parse($endTime)->format('H:i') }}</div> @endif
+                                </div>
+                                <div class="border-4 border-transparent border-t-slate-800"></div>
+                            </div>
+                        @endif
                     @else
                         <span class="inline-flex items-center justify-center w-7 h-7 rounded text-xs font-bold {{ $badgeClass }}">
                             {{ $code }}

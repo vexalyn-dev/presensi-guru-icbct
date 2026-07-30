@@ -626,17 +626,31 @@ class ReportController extends Controller
                     $isHoliday = in_array($dateStr, $holidays);
                     $isFuture  = $date->gt($today);
 
-                    // Cek izin/sakit yang disetujui untuk hari ini
-                    $onLeave = $leaves->first(fn($l) => $l->user_id === $teacher->id
-                        && $l->start_date->toDateString() <= $dateStr
-                        && $l->end_date->toDateString() >= $dateStr);
+                    // Cek apakah ada scan presensi kelas untuk hari ini (scheduled OR shared-space)
+                    $hasAnyClassAttendance = $classAttendances->some(
+                        fn($att) => $att->user_id === $teacher->id && $att->date->toDateString() === $dateStr
+                    );
 
-                    if ($onLeave) {
-                        $code = $onLeave->type === 'sakit' ? 'S' : 'I';
-                        $teacherData['days'][$dateStr] = ['status' => $onLeave->type, 'code' => $code, 'label' => $code, 'classes' => []];
-                        $teacherData['summary'][$code]++;
-                        $totalStats[$onLeave->type === 'sakit' ? 'sakit' : 'izin']++;
-                        continue;
+                    // Cek izin/sakit — hanya berlaku jika guru tidak ada scan sama sekali hari ini
+                    if (!$hasAnyClassAttendance) {
+                        $onLeave = $leaves->first(fn($l) => $l->user_id === $teacher->id
+                            && $l->start_date->toDateString() <= $dateStr
+                            && $l->end_date->toDateString() >= $dateStr);
+
+                        if ($onLeave && ($schedules->isNotEmpty() || !$sharedSpaceForDay->isEmpty())) {
+                            $code = $onLeave->type === 'sakit' ? 'S' : 'I';
+                            $teacherData['days'][$dateStr] = [
+                                'status'     => $onLeave->type,
+                                'code'       => $code,
+                                'label'      => $code,
+                                'classes'    => [],
+                                'start_time' => $onLeave->start_time,
+                                'end_time'   => $onLeave->end_time,
+                            ];
+                            $teacherData['summary'][$code]++;
+                            $totalStats[$onLeave->type === 'sakit' ? 'sakit' : 'izin']++;
+                            continue;
+                        }
                     }
 
                     if ($isWeekend || $isHoliday || $isFuture || ($schedules->isEmpty() && $sharedSpaceForDay->isEmpty())) {
