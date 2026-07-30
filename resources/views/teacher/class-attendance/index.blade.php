@@ -2,6 +2,29 @@
 
 @section('page-title', 'Presensi Kelas')
 
+@section('topbar-reminder')
+    <div class="overflow-hidden max-w-[260px] sm:max-w-sm mt-0.5" id="reminder-bar">
+        <div class="marquee-track" id="reminder-marquee">
+            <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400" id="reminder-text">
+                @php
+                    $user = auth()->user();
+                    $dailyAtt = \App\Models\Attendance::where('user_id', $user->id)->whereDate('date', today())->first();
+                    $msgs = [];
+                    if (!$dailyAtt) $msgs[] = '⚠️ Belum scan presensi harian!';
+                    foreach ($schedules as $s) {
+                        $att = $s->classAttendances->first();
+                        $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
+                        if (!$att || !$att->check_in_time) $msgs[] = "📋 Belum scan masuk {$cn}";
+                        elseif ($att->check_in_time && !$att->check_out_time) $msgs[] = "🔔 Scan keluar {$cn}!";
+                    }
+                    if (empty($msgs)) $msgs[] = '✅ Presensi lengkap!';
+                @endphp
+                {{ implode('   •   ', $msgs) }}
+            </span>
+        </div>
+    </div>
+@endsection
+
 @section('content')
     <div class="fade-in space-y-6" x-data="classAttendance()">
 
@@ -19,35 +42,6 @@
                 <h1 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white truncate">Presensi Kelas</h1>
                 <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">
                     {{ now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
-            </div>
-        </div>
-
-        <!-- Running Text Reminder -->
-        <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-navy-800 to-navy-900 dark:from-slate-800 dark:to-slate-900 px-4 py-2.5 shadow-lg" id="reminder-bar">
-            <div class="flex items-center gap-3">
-                <span class="flex-shrink-0 w-6 h-6 bg-gold-400 dark:bg-gold-500 rounded-full flex items-center justify-center">
-                    <i data-lucide="bell" class="w-3.5 h-3.5 text-navy-900"></i>
-                </span>
-                <div class="overflow-hidden flex-1">
-                    <div class="marquee-track" id="reminder-marquee">
-                        <span class="marquee-text text-xs font-medium text-white/90" id="reminder-text">
-                            @php
-                                $user = auth()->user();
-                                $dailyAtt = \App\Models\Attendance::where('user_id', $user->id)->whereDate('date', today())->first();
-                                $msgs = [];
-                                if (!$dailyAtt) $msgs[] = '⚠️ Anda belum scan presensi harian hari ini!';
-                                foreach ($schedules as $s) {
-                                    $att = $s->classAttendances->first();
-                                    $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
-                                    if (!$att || !$att->check_in_time) $msgs[] = "📋 Belum scan masuk kelas {$cn} (Jam ke-{$s->period})";
-                                    elseif ($att->check_in_time && !$att->check_out_time) $msgs[] = "🔔 Jangan lupa scan keluar kelas {$cn}!";
-                                }
-                                if (empty($msgs)) $msgs[] = '✅ Semua presensi hari ini sudah lengkap. Terima kasih!';
-                            @endphp
-                            {{ implode('     •     ', $msgs) }}
-                        </span>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -1422,20 +1416,5 @@
             display: none !important;
         }
 
-        /* Marquee animation */
-        .marquee-track {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 25s linear infinite;
-        }
-
-        .marquee-track:hover {
-            animation-play-state: paused;
-        }
-
-        @keyframes marquee {
-            0%   { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
     </style>
 @endsection

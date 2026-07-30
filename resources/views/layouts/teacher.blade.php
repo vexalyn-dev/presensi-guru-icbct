@@ -45,6 +45,20 @@
         @media (max-width: 640px) {
             .profile-avatar { width: 48px; height: 48px; }
         }
+
+        /* Marquee animation for topbar reminders */
+        .marquee-track {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+        }
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+        @keyframes marquee {
+            0%   { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
     </style>
     @stack('styles')
 </head>
@@ -186,6 +200,7 @@
                         <div>
                             <h2 class="text-lg font-bold text-navy-800 dark:text-white">@yield('page-title', 'Dashboard')</h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }} pukul {{ now()->format('H.i') }}</p>
+                            @yield('topbar-reminder')
                         </div>
                     </div>
                     
