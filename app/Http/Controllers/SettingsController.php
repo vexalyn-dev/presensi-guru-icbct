@@ -28,6 +28,7 @@ class SettingsController extends Controller
                 'attendance_end_time'          => $appSettings->attendance_end_time,
                 'attendance_late_grace_period' => $appSettings->attendance_late_grace_period,
                 'class_switch_grace_period'    => $appSettings->class_switch_grace_period ?? 5,
+                'scan_before_start'            => \App\Models\Setting::get('scan_before_start', 15),
                 'location_required'            => $appSettings->location_required,
                 'photo_required'               => $appSettings->photo_required,
                 'location_latitude'            => $appSettings->location_latitude,
@@ -97,6 +98,7 @@ class SettingsController extends Controller
             'attendance_end_time'          => 'required',
             'attendance_late_grace_period' => 'required|integer|min:0|max:120',
             'class_switch_grace_period'    => 'required|integer|min:0|max:30',
+            'scan_before_start'            => 'required|integer|min:0|max:60',
             'location_latitude'  => 'nullable|numeric|between:-90,90',
             'location_longitude' => 'nullable|numeric|between:-180,180',
             'location_radius'    => 'required|integer|min:10|max:5000',
@@ -122,6 +124,7 @@ class SettingsController extends Controller
         Setting::set('attendance_end_time',          $validated['attendance_end_time'],          'string',  'attendance');
         Setting::set('attendance_late_grace_period', $validated['attendance_late_grace_period'], 'integer', 'attendance');
         Setting::set('class_switch_grace_period',    $validated['class_switch_grace_period'],    'number',  'attendance');
+        Setting::set('scan_before_start',            $validated['scan_before_start'],            'number',  'attendance');
 
         Artisan::call('config:clear');
 

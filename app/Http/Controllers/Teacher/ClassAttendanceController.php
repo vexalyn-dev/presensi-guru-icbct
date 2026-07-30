@@ -44,7 +44,10 @@ class ClassAttendanceController extends Controller
 
         return view('teacher.class-attendance.index', compact(
             'schedules', 'totalClasses', 'completedClasses', 'inProgressClasses'
-        ) + ['gracePeriodSetting' => (int) \App\Models\Setting::get('class_switch_grace_period', 5)]);
+        ) + [
+            'gracePeriodSetting' => (int) \App\Models\Setting::get('class_switch_grace_period', 5),
+            'scanBeforeStart'    => (int) \App\Models\Setting::get('scan_before_start', 15),
+        ]);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -345,12 +348,14 @@ class ClassAttendanceController extends Controller
             ]);
         }
 
-        // Single jadwal — coba auto-match waktu (±15 menit, +2 menit toleransi keluar)
-        $single        = $schedules->first();
-        $activeSchedule = $schedules->first(function ($s) use ($now) {
+        // Single jadwal — coba auto-match waktu berdasarkan scan_before_start setting
+        $single         = $schedules->first();
+        $scanBeforeMin  = (int) \App\Models\Setting::get('scan_before_start', 15);
+
+        $activeSchedule = $schedules->first(function ($s) use ($now, $scanBeforeMin) {
             return $now->between(
-                Carbon::parse($s->start_time)->subMinutes(15),
-                Carbon::parse($s->end_time)->addMinutes(17)  // +2 menit toleransi agar guru sempat scan keluar
+                Carbon::parse($s->start_time)->subMinutes($scanBeforeMin),
+                Carbon::parse($s->end_time)->addMinutes(17)  // +2 menit toleransi keluar
             );
         });
 
@@ -361,8 +366,8 @@ class ClassAttendanceController extends Controller
             $scheduleStart = Carbon::parse($nearest->start_time);
             $scheduleEnd   = Carbon::parse($nearest->end_time);
 
-            if ($now->lt($scheduleStart->copy()->subMinutes(15))) {
-                $message = "Terlalu cepat! Jadwal {$nearest->classroom->name} mulai pukul {$scheduleStart->format('H:i')}";
+            if ($now->lt($scheduleStart->copy()->subMinutes($scanBeforeMin))) {
+                $message = "Terlalu cepat! Jadwal {$nearest->classroom->name} mulai pukul {$scheduleStart->format('H:i')}. Bisa scan {$scanBeforeMin} menit sebelumnya.";
             } else {
                 $message = "Waktu scan sudah lewat. Jadwal {$nearest->classroom->name} berakhir pukul {$scheduleEnd->format('H:i')}";
             }
@@ -377,7 +382,16 @@ class ClassAttendanceController extends Controller
             }
 
             $this->logScan($user, $classroom, $mode, 'failed', $message, $request);
-            return response()->json(['success' => false, 'message' => $message], 422);
+            return response()->json([
+                'success'    => false,
+                'message'    => $message,
+                'error_type' => $now->lt($scheduleStart->copy()->subMinutes($scanBeforeMin)) ? 'too_early' : 'class_ended',
+                'data'       => [
+                    'can_scan_at'   => $scheduleStart->copy()->subMinutes($scanBeforeMin)->format('H:i'),
+                    'class_start'   => $scheduleStart->format('H:i'),
+                    'class_end'     => $scheduleEnd->format('H:i'),
+                ],
+            ], 422);
         }
 
         $res = $this->processAttendanceForSchedule($activeSchedule, $user, $now, $mode, $classroom, $request);

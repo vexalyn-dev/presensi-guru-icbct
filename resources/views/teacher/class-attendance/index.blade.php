@@ -80,6 +80,42 @@
             </div>
         </div>
 
+        <!-- Early Scan Warning Banner (purple) -->
+        <div x-show="showWarning && remainingSeconds > 0 && warningMessage === 'Tunggu hingga waktu scan tiba...'"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-4"
+             class="card p-4 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-300 dark:border-purple-700">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-purple-800 dark:text-purple-300 text-sm">Terlalu Awal</p>
+                    <p class="text-xs text-purple-700 dark:text-purple-400 mt-0.5" x-text="resultMessage"></p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-purple-200 dark:bg-purple-900/40 rounded-full overflow-hidden">
+                            <div class="h-full bg-purple-500 transition-all duration-1000 rounded-full"
+                                 :style="`width: ${Math.max(0, (remainingSeconds / (scanBeforeStart * 60)) * 100)}%`"></div>
+                        </div>
+                        <span class="text-xs font-bold text-purple-700 dark:text-purple-400 tabular-nums flex-shrink-0"
+                              x-text="formatTime(remainingSeconds)"></span>
+                    </div>
+                </div>
+                <button @click="showWarning=false; if(warningTimer) clearInterval(warningTimer)"
+                        class="p-1 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex-shrink-0">
+                    <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
         <!-- Mode Toggle -->
         <div class="card p-4 sm:p-6">
             <h3 class="text-base font-bold text-navy-800 dark:text-white mb-3 sm:mb-4">Mode Scan</h3>
@@ -135,6 +171,25 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Aturan Scan Info -->
+            @if(($scanBeforeStart ?? 0) > 0)
+            <div class="mt-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <div class="flex items-start gap-2">
+                    <svg class="w-3.5 h-3.5 mt-0.5 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div class="text-xs text-blue-700 dark:text-blue-300">
+                        <p class="font-bold mb-1">Aturan Scan:</p>
+                        <ul class="space-y-0.5 list-disc list-inside">
+                            <li>Hanya bisa scan untuk jadwal hari ini</li>
+                            <li>Bisa scan <strong>{{ $scanBeforeStart ?? 15 }} menit</strong> sebelum jam mulai</li>
+                            <li>Tidak bisa scan jika jam sudah lewat</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- QR Scanner -->
@@ -1136,6 +1191,7 @@
                 warningTimer: null,
                 remainingSeconds: 0,
                 gracePeriod: {{ $gracePeriodSetting ?? 5 }},
+                scanBeforeStart: {{ $scanBeforeStart ?? 15 }},
 
                 // Shared space state
                 showSharedSpaceModal: false,
@@ -1206,6 +1262,11 @@
                             // ── Handle grace period (429) ──────────────────
                             if (status === 429 && data.warning) {
                                 this.startGracePeriodCountdown(data);
+                                return;
+                            }
+                            // ── Handle batch scan errors (too_early, class_ended, etc.) ──
+                            if (!data.success && data.error_type) {
+                                this.handleBatchScanError(status, data);
                                 return;
                             }
                             if (data.is_shared_space) {
@@ -1290,6 +1351,36 @@
                             this.showSharedSpaceModal = false;
                             this.handleScanResponse(status, data);
                         });
+                },
+
+                // Batch scan prevention error handler
+                handleBatchScanError(status, data) {
+                    this.showResult  = true;
+                    this.resultSuccess = false;
+                    this.resultMessage = data.message || 'Tidak dapat memproses scan.';
+                    this.resultData  = data.data || null;
+
+                    if (data.error_type === 'too_early' && data.data?.minutes_wait > 0) {
+                        this.startCountdown(data.data.minutes_wait * 60);
+                    }
+
+                    setTimeout(() => { this.showResult = false; }, 6000);
+                },
+
+                // Countdown untuk "terlalu awal"
+                startCountdown(seconds) {
+                    if (this.warningTimer) clearInterval(this.warningTimer);
+                    this.remainingSeconds = seconds;
+                    this.showWarning      = true;
+                    this.warningMessage   = 'Tunggu hingga waktu scan tiba...';
+
+                    this.warningTimer = setInterval(() => {
+                        this.remainingSeconds--;
+                        if (this.remainingSeconds <= 0) {
+                            clearInterval(this.warningTimer);
+                            this.showWarning = false;
+                        }
+                    }, 1000);
                 },
 
                 // Grace period countdown

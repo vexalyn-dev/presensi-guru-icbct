@@ -288,27 +288,19 @@
                         });
 
                         $startTime = \Carbon\Carbon::parse($schedule->start_time);
-                        $endTime = \Carbon\Carbon::parse($schedule->end_time);
-                        $graceEnd = $endTime->copy()->addMinutes(3);
-                        $isEnded = $now->greaterThan($graceEnd);
+                        $endTime   = \Carbon\Carbon::parse($schedule->end_time);
 
-                        if ($att && $att->check_in_time) {
-                            if ($att->status === 'Terlambat') {
-                                $badgeText = 'Terlambat';
-                                $theme = 'yellow';
-                            } else {
-                                $badgeText = 'Hadir';
-                                $theme = 'green';
-                            }
-                        } elseif ($isEnded) {
-                            $badgeText = 'Berakhir';
-                            $theme = 'red';
-                        } elseif ($now->greaterThanOrEqualTo($startTime)) {
-                            $badgeText = 'Berlangsung';
-                            $theme = 'blue';
+                        // ── Status: HANYA Selesai / Belum Selesai ──────────────────────
+                        // Selesai = sudah scan MASUK + scan KELUAR
+                        // Belum Selesai = semua kondisi lainnya
+                        $isSelesai = $att && $att->check_in_time && $att->check_out_time;
+
+                        if ($isSelesai) {
+                            $badgeText = 'Selesai';
+                            $theme     = 'green';
                         } else {
-                            $badgeText = 'Belum';
-                            $theme = 'slate';
+                            $badgeText = 'Belum Selesai';
+                            $theme     = 'red';
                         }
                     @endphp
 
@@ -546,5 +538,149 @@
         0% { transform: translateX(0); }
         100% { transform: translateX(-50%); }
     }
+
+    /* Loading Screen */
+    #teacher-loading-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1.25rem;
+        background: var(--ls-bg, #f8fafc);
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .dark #teacher-loading-screen { --ls-bg: #0f172a; }
+    #teacher-loading-screen.fade-out {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+    #teacher-loading-screen .ls-spinner {
+        width: 56px; height: 56px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #1e3a5f;
+        border-radius: 50%;
+        animation: ls-spin 0.75s linear infinite;
+    }
+    .dark #teacher-loading-screen .ls-spinner {
+        border-color: #334155;
+        border-top-color: #facc15;
+    }
+    @keyframes ls-spin { to { transform: rotate(360deg); } }
+
+    /* Modal Welcome */
+    #welcome-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        background: rgba(15,23,42,0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #welcome-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    #welcome-modal-box {
+        background: #fff;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 25px 60px -12px rgba(15,23,42,0.35);
+        transform: translateY(24px) scale(0.96);
+        transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+        text-align: center;
+    }
+    .dark #welcome-modal-box { background: #1e293b; }
+    #welcome-modal-overlay.active #welcome-modal-box {
+        transform: translateY(0) scale(1);
+    }
 </style>
+
+@if(session('show_welcome'))
+{{-- Loading Screen --}}
+<div id="teacher-loading-screen">
+    <div class="ls-spinner"></div>
+    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 tracking-wide">Memuat Dashboard...</p>
+</div>
+
+{{-- Welcome Modal --}}
+<div id="welcome-modal-overlay">
+    <div id="welcome-modal-box">
+        {{-- Emoji + Judul --}}
+        <div class="w-16 h-16 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span class="text-3xl">👋</span>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-extrabold text-navy-800 dark:text-white mb-2">
+            Selamat Datang!
+        </h2>
+        <p class="text-sm text-slate-600 dark:text-slate-300 mb-1 font-semibold">
+            Halo, {{ auth()->user()->name }}
+        </p>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+            Semoga aktivitas mengajar hari ini berjalan lancar dan penuh semangat.<br><br>
+            Jangan lupa melakukan <strong class="text-navy-800 dark:text-gold-400">Scan Masuk</strong> sebelum memulai pembelajaran dan
+            <strong class="text-navy-800 dark:text-gold-400">Scan Keluar</strong> setelah seluruh kegiatan selesai.<br><br>
+            Terima kasih atas dedikasi Anda. 🙏
+        </p>
+        <button id="welcome-close-btn"
+                class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 hover:opacity-90 text-white dark:text-navy-900 font-bold rounded-xl text-sm transition-all active:scale-95 shadow-lg">
+            Mulai Mengajar →
+        </button>
+    </div>
+</div>
+
+<script>
+(function () {
+    const loadingEl = document.getElementById('teacher-loading-screen');
+    const modalOverlay = document.getElementById('welcome-modal-overlay');
+    const closeBtn = document.getElementById('welcome-close-btn');
+
+    // Cek dark mode untuk loading screen
+    if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.style.setProperty('--ls-bg', '#0f172a');
+    }
+
+    // Step 1: setelah 1.8 detik → sembunyikan loading screen
+    setTimeout(() => {
+        if (loadingEl) {
+            loadingEl.classList.add('fade-out');
+        }
+        // Step 2: setelah loading hilang → tampilkan modal welcome
+        setTimeout(() => {
+            if (modalOverlay) {
+                modalOverlay.classList.add('active');
+            }
+        }, 500);
+    }, 1800);
+
+    // Tutup modal saat tombol diklik
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+        });
+    }
+
+    // Tutup modal saat klik backdrop
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
+            }
+        });
+    }
+})();
+</script>
+@endif
+
 @endsection

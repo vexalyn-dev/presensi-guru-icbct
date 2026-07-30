@@ -13,6 +13,7 @@ class LoginController extends Controller
     {
         if ($user->isTeacher()) {
             return redirect()->route('teacher.dashboard')
+                ->with('show_welcome', true)
                 ->with('success', 'Selamat datang, ' . $user->name . '!');
         }
 
