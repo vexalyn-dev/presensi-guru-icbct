@@ -256,8 +256,7 @@
                     <p class="text-[10px] sm:text-xs font-bold text-navy-800 dark:text-white">{{ round($progress) }}%</p>
                 </div>
                 <div class="w-full h-2.5 sm:h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-400 rounded-full transition-all duration-500" 
-                          style="width: {{ $progress }}%"></div>
+                    <div id="teacher-progress-bar" class="h-full bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-400 rounded-full transition-all duration-500" data-progress="{{ round($progress) }}"></div>
                 </div>
                 <div class="flex items-center justify-between mt-2 text-[10px] sm:text-xs">
                     <span class="text-green-600 dark:text-green-400 font-semibold flex items-center gap-1">
