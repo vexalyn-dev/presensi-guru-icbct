@@ -192,7 +192,7 @@
            <!-- Main Content -->
         <main class="flex-1 lg:ml-64 min-h-screen overflow-x-hidden min-w-0">
             <!-- Top Bar -->
-            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 overflow-x-hidden">
+            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
                 <div class="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <!-- Hamburger Menu (Mobile Only) -->
