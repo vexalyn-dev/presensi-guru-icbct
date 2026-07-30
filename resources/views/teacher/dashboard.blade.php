@@ -50,16 +50,16 @@
 
     @if(!empty($reminderMsgs))
         <!-- Modern Premium Marquee Card -->
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-400/10 dark:via-amber-400/5 dark:to-transparent border border-amber-500/20 dark:border-amber-400/20 p-2 sm:p-2.5 flex items-center gap-2.5 shadow-sm hover:shadow-md transition-all duration-300">
+        <div class="relative overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 p-1 sm:p-1.5 flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-300">
             <!-- Left glowing icon (Navy themed background) -->
-            <div class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 flex-shrink-0 shadow-md shadow-navy-800/20 dark:shadow-gold-400/20 relative">
-                <span class="absolute inline-flex h-full w-full rounded-xl bg-navy-800 dark:bg-gold-400 opacity-75 animate-ping"></span>
-                <i data-lucide="bell" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10 animate-bounce"></i>
+            <div class="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-navy-800 text-white flex-shrink-0 relative">
+                <span class="absolute inline-flex h-full w-full rounded-lg bg-navy-800 opacity-20 animate-ping"></span>
+                <i data-lucide="bell" class="w-3 h-3 sm:w-3.5 sm:h-3.5 relative z-10 text-white"></i>
             </div>
             
             <!-- Marquee container with fade edges -->
             <div class="relative flex-1 min-w-0 overflow-hidden py-0.5 marquee-container">
-                <div class="marquee-track flex gap-8 whitespace-nowrap text-[10px] sm:text-xs font-bold text-slate-900 dark:text-slate-100 tracking-wide uppercase">
+                <div class="marquee-track flex gap-8 whitespace-nowrap text-[9px] sm:text-[10px] font-bold text-black dark:text-white tracking-wide uppercase">
                     <!-- Duplicate text to ensure continuous scrolling -->
                     <span>{!! implode(' &nbsp; &nbsp; • &nbsp; &nbsp; ', $reminderMsgs) !!}</span>
                     <span>{!! implode(' &nbsp; &nbsp; • &nbsp; &nbsp; ', $reminderMsgs) !!}</span>
@@ -173,19 +173,25 @@
                 <!-- Check Out -->
                 <div class="p-4 rounded-2xl border-2
                     {{ $todayAttendance->check_out
-                        ? 'bg-navy-50 dark:bg-navy-900/20 border-navy-200 dark:border-navy-800'
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                         : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
                     <div class="flex items-center gap-2 mb-2">
-                        <div class="w-7 h-7 rounded-lg {{ $todayAttendance->check_out ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center">
-                            <i data-lucide="log-out" class="w-3.5 h-3.5 text-white dark:text-navy-900"></i>
+                        <div class="w-7 h-7 rounded-lg {{ $todayAttendance->check_out ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5 text-white"></i>
                         </div>
                         <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Jam Pulang</p>
                     </div>
-                    <p class="text-xl font-bold {{ $todayAttendance->check_out ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400' }}">
+                    <p class="text-xl font-bold {{ $todayAttendance->check_out ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}">
                         {{ $todayAttendance->check_out ? \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') : '--:--' }}
                     </p>
                     @if($todayAttendance->check_out_status)
-                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                    @php
+                        $checkoutBadge = match($todayAttendance->check_out_status) {
+                            'Tepat Waktu' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                            default       => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                        };
+                    @endphp
+                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold {{ $checkoutBadge }}">
                         {{ $todayAttendance->check_out_status === 'Tepat Waktu' ? 'Tepat Waktu' : ucfirst($todayAttendance->check_out_status) }}
                     </span>
                     @endif
@@ -225,9 +231,35 @@
         @if($todaySchedules->count() > 0)
             @php
                 $totalClasses = $todaySchedules->count();
-                $completedClasses = $todaySchedules->filter(function($schedule) {
-                    return $schedule->classAttendances->where('user_id', auth()->id())->whereNotNull('check_out_time')->count() > 0;
-                })->count();
+                $completedClasses = 0;
+                $inProgressClasses = 0;
+                $endedClasses = 0;
+                
+                $now = now();
+                
+                foreach ($todaySchedules as $s) {
+                    // Find matching attendance record (either direct or shared space)
+                    $att = $todayClassAttendances->first(function ($att) use ($s) {
+                        if ($att->teaching_schedule_id == $s->id) {
+                            return true;
+                        }
+                        $classMatch = ($att->classroom_id == $s->classroom_id) || ($att->selected_classroom_id == $s->classroom_id);
+                        return $classMatch && ($att->subject_id == $s->subject_id) && ($att->period == $s->period);
+                    });
+                    
+                    $endTime = \Carbon\Carbon::parse($s->end_time);
+                    $graceEnd = $endTime->copy()->addMinutes(3);
+                    $isEnded = $now->greaterThan($graceEnd);
+                    
+                    if ($att && $att->check_in_time && $att->check_out_time) {
+                        $completedClasses++;
+                    } elseif ($att && $att->check_in_time && !$att->check_out_time && !$isEnded) {
+                        $inProgressClasses++;
+                    } elseif ($isEnded && (!$att || !$att->check_out_time)) {
+                        $endedClasses++;
+                    }
+                }
+                
                 $progress = $totalClasses > 0 ? ($completedClasses / $totalClasses) * 100 : 0;
             @endphp
             
@@ -239,15 +271,15 @@
                 </div>
                 <div class="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div class="h-full bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-400 rounded-full transition-all duration-500" 
-                         style="width: {{ $progress }}%"></div>
+                          style="width: {{ $progress }}%"></div>
                 </div>
                 <div class="flex items-center justify-between mt-2 text-xs">
-                    <span class="text-green-600 dark:text-green-400 font-semibold">
-                        <i data-lucide="check-circle" class="w-3 h-3 inline mr-1"></i>
+                    <span class="text-green-600 dark:text-green-400 font-semibold flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" /></svg>
                         {{ $completedClasses }} Selesai
                     </span>
-                    <span class="text-orange-600 dark:text-orange-400 font-semibold">
-                        <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
+                    <span class="text-slate-600 dark:text-slate-400 font-semibold flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5" /></svg>
                         {{ $totalClasses - $completedClasses }} Belum
                     </span>
                 </div>
@@ -257,61 +289,92 @@
             <div class="space-y-3">
                 @foreach($todaySchedules as $schedule)
                     @php
-                        $attendance = $schedule->classAttendances->where('user_id', auth()->id())->first();
-                        $isCompleted = $attendance && $attendance->check_out_time;
-                        $isInProgress = $attendance && $attendance->check_in_time && !$attendance->check_out_time;
+                        // Robust matching to find attendance
+                        $att = $todayClassAttendances->first(function ($att) use ($schedule) {
+                            if ($att->teaching_schedule_id == $schedule->id) {
+                                return true;
+                            }
+                            $classMatch = ($att->classroom_id == $schedule->classroom_id) || ($att->selected_classroom_id == $schedule->classroom_id);
+                            return $classMatch && ($att->subject_id == $schedule->subject_id) && ($att->period == $schedule->period);
+                        });
+
+                        $startTime = \Carbon\Carbon::parse($schedule->start_time);
+                        $endTime = \Carbon\Carbon::parse($schedule->end_time);
+
+                        // Status Badge logic (3 minutes grace period)
+                        $graceEnd = $endTime->copy()->addMinutes(3);
+                        $isEnded = $now->greaterThan($graceEnd);
+
+                        if ($isEnded) {
+                            $badgeText = 'Berakhir';
+                            $theme = 'red'; // Merah
+                        } elseif ($att && $att->check_in_time) {
+                            if ($att->status === 'Terlambat') {
+                                $badgeText = 'Terlambat';
+                                $theme = 'yellow'; // Kuning
+                            } else {
+                                $badgeText = 'Hadir';
+                                $theme = 'green'; // Hijau
+                            }
+                        } elseif ($now->greaterThanOrEqualTo($startTime)) {
+                            $badgeText = 'Berlangsung';
+                            $theme = 'blue'; // Biru
+                        } else {
+                            $badgeText = 'Belum';
+                            $theme = 'slate'; // Abu-abu
+                        }
                     @endphp
-                    <div class="p-4 rounded-xl border-2 transition-all
-                        {{ $isCompleted 
-                            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-                            : ($isInProgress 
-                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' 
-                                : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700') }}">
+
+                    <div class="p-3.5 sm:p-4 rounded-xl border-2 transition-all
+                        {{ $theme === 'red' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : '' }}
+                        {{ $theme === 'green' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : '' }}
+                        {{ $theme === 'yellow' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : '' }}
+                        {{ $theme === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : '' }}
+                        {{ $theme === 'slate' ? 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' : '' }}">
                         
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex items-start gap-3 flex-1">
+                        <div class="flex items-center justify-between gap-2.5">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
                                 <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
-                                    {{ $isCompleted 
-                                        ? 'bg-green-100 dark:bg-green-900/30' 
-                                        : ($isInProgress 
-                                            ? 'bg-blue-100 dark:bg-blue-900/30' 
-                                            : 'bg-slate-200 dark:bg-slate-600') }}">
-                                    @if($isCompleted)
-                                        <i data-lucide="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
-                                    @elseif($isInProgress)
-                                        <i data-lucide="clock" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                                    {{ $theme === 'red' ? 'bg-red-100 dark:bg-red-900/30' : '' }}
+                                    {{ $theme === 'green' ? 'bg-green-100 dark:bg-green-900/30' : '' }}
+                                    {{ $theme === 'yellow' ? 'bg-yellow-100 dark:bg-yellow-900/30' : '' }}
+                                    {{ $theme === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}
+                                    {{ $theme === 'slate' ? 'bg-slate-200 dark:bg-slate-600' : '' }}">
+                                    @if($theme === 'red')
+                                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    @elseif($theme === 'green')
+                                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" /></svg>
+                                    @elseif($theme === 'yellow')
+                                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0Z" /></svg>
+                                    @elseif($theme === 'blue')
+                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0Z" /></svg>
                                     @else
-                                        <i data-lucide="circle" class="w-5 h-5 text-slate-500 dark:text-slate-400"></i>
+                                        <svg class="w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /></svg>
                                     @endif
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-bold text-navy-800 dark:text-white">
-                                        {{ $schedule->classroom->name ?? '-' }}
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-bold text-navy-800 dark:text-white truncate">
+                                        {{ $schedule->classroom->code
+                                            ? strtoupper(str_replace('-', ' ', $schedule->classroom->code))
+                                            : ($schedule->classroom->name ?? '-') }}
                                     </p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
                                         {{ $schedule->subject->name ?? '-' }} • Jam ke-{{ $schedule->period }}
                                     </p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                        {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                        {{ $startTime->format('H:i') }} - {{ $endTime->format('H:i') }}
                                     </p>
                                 </div>
                             </div>
                             
-                            <div class="flex-shrink-0">
-                                @if($isCompleted)
-                                    <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-bold">
-                                        Selesai
-                                    </span>
-                                @elseif($isInProgress)
-                                    <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-bold">
-                                        Berlangsung
-                                    </span>
-                                @else
-                                    <span class="px-2.5 py-1 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-400 rounded-full text-xs font-bold">
-                                        Belum
-                                    </span>
-                                @endif
-                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold flex-shrink-0 text-center
+                                {{ $theme === 'red' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : '' }}
+                                {{ $theme === 'green' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : '' }}
+                                {{ $theme === 'yellow' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' : '' }}
+                                {{ $theme === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : '' }}
+                                {{ $theme === 'slate' ? 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-400' : '' }}">
+                                {{ $badgeText }}
+                            </span>
                         </div>
                     </div>
                 @endforeach

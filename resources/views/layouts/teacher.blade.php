@@ -62,7 +62,7 @@
     </style>
     @stack('styles')
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 m-0 p-0">
+<body class="bg-slate-50 dark:bg-slate-900 m-0 p-0 overflow-x-hidden">
     @php
         // Get teacher data for current user with error handling
         $teacherData = null;
@@ -76,7 +76,7 @@
             $teacherSubject = null;
         }
     @endphp
-    <div class="flex min-h-screen m-0 p-0" x-data="{ sidebarOpen: false }">
+    <div class="flex min-h-screen m-0 p-0 overflow-x-hidden" x-data="{ sidebarOpen: false }">
         
         <!-- Sidebar Overlay (Mobile) -->
         <div x-show="sidebarOpen" 
@@ -189,8 +189,8 @@
         <main class="flex-1 lg:ml-64 min-h-screen">
             <!-- Top Bar -->
             <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
-                <div class="px-3 sm:px-6 py-3 sm:py-4 flex items-start justify-between gap-2">
-                    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pt-0.5">
+                <div class="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <!-- Hamburger Menu (Mobile Only) -->
                         <button @click="sidebarOpen = true" 
                                 class="lg:hidden p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0">
@@ -204,7 +204,7 @@
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0 pt-0.5">
+                    <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
                         <!-- Dark/Light Mode Toggle -->
                         <button onclick="toggleDarkMode()" class="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Toggle Dark Mode">
                             <i data-lucide="sun" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400 hidden dark:block"></i>
@@ -298,7 +298,7 @@
                         <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                             <button @click.stop="open = !open" class="flex items-center gap-1.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-1 sm:p-1.5 pr-1.5 sm:pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
                                 <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}" 
-                                     class="w-7 h-7 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
+                                     class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
                                      onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
                                 <div class="hidden sm:block text-left">
                                     <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[150px]">{{ auth()->user()->name }}</p>
