@@ -505,7 +505,7 @@ class ReportController extends Controller
             }
         } else {
             // Presensi Kelas
-            $classAttendances = ClassAttendance::with(['classroom', 'teachingSchedule.subject'])
+            $classAttendances = ClassAttendance::with(['classroom', 'selectedClassroom', 'subject', 'teachingSchedule.subject'])
                 ->whereBetween('date', [$startDate, $endDate])->get();
 
             foreach ($teachers as $teacher) {
@@ -526,7 +526,14 @@ class ReportController extends Controller
                         ->where('day_of_week', $dayOfWeek)->where('is_active', true)
                         ->with(['classroom', 'subject'])->orderBy('start_time')->get();
 
-                    if ($isWeekend || $schedules->isEmpty()) {
+                    // Shared-space records for this teacher+date (scan_method = qr_shared_space)
+                    $sharedSpaceForDay = $classAttendances->filter(function ($att) use ($teacher, $dateStr) {
+                        return $att->user_id === $teacher->id
+                            && $att->date->toDateString() === $dateStr
+                            && $att->scan_method === 'qr_shared_space';
+                    });
+
+                    if ($isWeekend || ($schedules->isEmpty() && $sharedSpaceForDay->isEmpty())) {
                         $teacherData['days'][$dateStr] = ['status' => 'libur', 'code' => '-', 'label' => '-', 'classes' => []];
                         continue;
                     }
@@ -577,6 +584,45 @@ class ReportController extends Controller
                         }
 
                         $classDetails[] = $classInfo;
+                    }
+
+                    // ── Shared-space sessions (on-demand, no TeachingSchedule) ──────────
+                    foreach ($sharedSpaceForDay as $ssAtt) {
+                        // Skip if this record's location+period already matched a scheduled class above
+                        $alreadyCounted = $schedules->contains(function ($sch) use ($ssAtt) {
+                            return $sch->classroom_id === $ssAtt->classroom_id && $sch->period === $ssAtt->period;
+                        });
+                        if ($alreadyCounted) continue;
+
+                        $totalClasses++;
+
+                        $ssClassInfo = [
+                            'classroom' => $ssAtt->selectedClassroom->name ?? ($ssAtt->classroom->name ?? '-'),
+                            'subject'   => $ssAtt->subject->name ?? '-',
+                            'period'    => $ssAtt->period,
+                            'status'    => 'A',
+                        ];
+
+                        if ($ssAtt->check_in_time && $ssAtt->check_out_time) {
+                            $ssDateStr  = $ssAtt->date ? Carbon::parse($ssAtt->date)->toDateString() : $dateStr;
+                            $ssCheckIn  = Carbon::parse("{$ssDateStr} " . Carbon::parse($ssAtt->check_in_time)->format('H:i:s'));
+                            $ssCheckOut = Carbon::parse("{$ssDateStr} " . Carbon::parse($ssAtt->check_out_time)->format('H:i:s'));
+                            $ssDuration = (int) max(0, round($ssCheckIn->diffInMinutes($ssCheckOut)));
+
+                            if ($ssDuration >= 30) {
+                                $attendedCount++;
+                                $ssClassInfo['status'] = 'H';
+                            }
+                        } elseif ($ssAtt->check_in_time && !$ssAtt->check_out_time) {
+                            $ssClassInfo['status'] = 'NL';
+                        }
+
+                        $classDetails[] = $ssClassInfo;
+                    }
+
+                    if ($totalClasses === 0) {
+                        $teacherData['days'][$dateStr] = ['status' => 'libur', 'code' => '-', 'label' => '-', 'classes' => []];
+                        continue;
                     }
 
                     if ($attendedCount === $totalClasses) {

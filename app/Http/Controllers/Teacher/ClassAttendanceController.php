@@ -11,6 +11,7 @@ use App\Models\Subject;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Helpers\NotificationHelper;
 use Illuminate\Support\Facades\Log;
 
 class ClassAttendanceController extends Controller
@@ -467,6 +468,16 @@ class ClassAttendanceController extends Controller
         $this->logScan($user, $classroom, 'in', 'success',
             "Scan masuk di {$classroom->name} untuk kelas {$selectedClassroom->name} jam ke-{$request->period}", $request);
 
+        NotificationHelper::send(
+            $user,
+            'class_attendance',
+            '✅ Presensi Kelas Masuk',
+            "Berhasil scan masuk di {$classroom->name} — Kelas: {$selectedClassroom->name}, Mapel: {$subject->name}, Jam ke-{$request->period} ({$now->format('H:i')} WIB)",
+            route('teacher.class-attendance'),
+            'log-in',
+            'bg-emerald-100 text-emerald-600'
+        );
+
         return response()->json([
             'success' => true,
             'message' => "✅ Presensi masuk berhasil!\nLokasi: {$classroom->name}\nKelas: {$selectedClassroom->name}\nMapel: {$subject->name}\nJam ke-{$request->period} • {$now->format('H:i')} WIB",
@@ -550,6 +561,16 @@ class ClassAttendanceController extends Controller
 
         $this->logScan($user, $classroom, 'out', 'success',
             "Scan keluar di {$classroom->name} untuk kelas " . ($selectedClassroom?->name ?? '-') . ", durasi {$duration} menit", $request);
+
+        NotificationHelper::send(
+            $user,
+            'class_attendance',
+            '✅ Presensi Kelas Selesai',
+            "Berhasil scan keluar dari {$classroom->name} — Kelas: " . ($selectedClassroom?->name ?? '-') . ", Mapel: " . ($subject?->name ?? '-') . ". Durasi mengajar: {$duration} menit.",
+            route('teacher.class-attendance'),
+            'log-out',
+            'bg-blue-100 text-blue-600'
+        );
 
         return response()->json([
             'success' => true,
