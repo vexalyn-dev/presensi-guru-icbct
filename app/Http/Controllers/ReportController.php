@@ -525,7 +525,7 @@ class ReportController extends Controller
                 ];
 
                 // Kumpulkan semua kelas unik dari jadwal mengajar aktif guru
-                $allClassrooms = TeachingSchedule::where('user_id', $teacher->id)
+                $classroomsArray = TeachingSchedule::where('user_id', $teacher->id)
                     ->where('is_active', true)
                     ->with('classroom')
                     ->get()
@@ -535,8 +535,10 @@ class ReportController extends Controller
                     ->filter()
                     ->unique()
                     ->values()
-                    ->implode(' / ');
-                $teacherData['all_classrooms'] = $allClassrooms ?: '-';
+                    ->toArray();
+
+                $teacherData['classrooms_list'] = $classroomsArray;
+                $teacherData['all_classrooms']  = implode(' / ', $classroomsArray) ?: '-';
 
                 foreach ($dates as $date) {
                     $dateStr   = $date->toDateString();

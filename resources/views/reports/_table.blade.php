@@ -41,9 +41,42 @@
                 </td>
                 @if($reportType === 'class')
                 <td class="px-2 py-3 border-r border-slate-200 dark:border-slate-700">
-                    <p class="text-xs text-slate-700 dark:text-slate-300">
-                    {{ $report['all_classrooms'] ?? '-' }}
-                    </p>
+                    @php
+                        $classList = $report['classrooms_list'] ?? [];
+                    @endphp
+                    @if(count($classList) === 0)
+                        <span class="text-xs text-slate-400">-</span>
+                    @elseif(count($classList) === 1)
+                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                            {{ $classList[0] }}
+                        </span>
+                    @else
+                        <div class="relative inline-block text-left" x-data="{ open: false }">
+                            <button @click="open = !open" type="button" 
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none transition-all shadow-sm cursor-pointer">
+                                <span>{{ $classList[0] }}</span>
+                                <span class="flex items-center justify-center bg-navy-500 text-white dark:bg-gold-500 dark:text-navy-950 text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-sm">+{{ count($classList) - 1 }}</span>
+                                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{'rotate-180': open}"></i>
+                            </button>
+                            
+                            <div x-show="open" 
+                                 @click.outside="open = false" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute left-0 mt-1 w-44 rounded-lg bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700/80 p-1 divide-y divide-slate-100 dark:divide-slate-700/50 z-50" 
+                                 x-cloak>
+                                @foreach($classList as $c)
+                                    <div class="px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded transition-colors">
+                                        {{ $c }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </td>
                 @endif
                 @foreach($dates as $date)
