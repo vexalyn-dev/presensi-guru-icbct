@@ -462,6 +462,7 @@ class ReportController extends Controller
                     $dateStr     = $date->toDateString();
                     $isWeekend   = in_array($dayOfWeek, [0, 6]);
                     $isHoliday   = in_array($dateStr, $holidays);
+                    $isFuture    = Carbon::parse($dateStr)->gt(Carbon::today());
                     $hasSchedule = TeacherSchedule::where('user_id', $teacher->id)
                         ->where('day_of_week', $dayOfWeek)->where('is_active', true)->exists();
 
@@ -486,25 +487,40 @@ class ReportController extends Controller
                         continue;
                     }
 
-                    // Tidak ada record absensi — tentukan libur atau alpha
+                    // Tanggal yang akan datang → jangan dianggap alpha
+                    if ($isFuture) {
+                        $teacherData['days'][$dateStr] = ['status' => 'libur', 'code' => '-'];
+                        continue;
+                    }
+
+                    // Cek izin/sakit yang disetujui (termasuk izin perjam: start_time/end_time)
+                    $onLeave = $leaves->first(fn($l) => $l->user_id === $teacher->id
+                        && $l->start_date->toDateString() <= $dateStr
+                        && $l->end_date->toDateString() >= $dateStr);
+
+                    if ($onLeave) {
+                        $code = $onLeave->type === 'sakit' ? 'S' : 'I';
+                        $teacherData['days'][$dateStr] = [
+                            'status'     => $onLeave->type,
+                            'code'       => $code,
+                            'start_time' => $onLeave->start_time,
+                            'end_time'   => $onLeave->end_time,
+                        ];
+                        $teacherData['summary'][$code]++;
+                        $totalStats[$onLeave->type === 'sakit' ? 'sakit' : 'izin']++;
+                        continue;
+                    }
+
+                    // Weekend / hari libur / tidak ada jadwal kerja → libur
                     if ($isWeekend || $isHoliday || !$hasSchedule) {
                         $teacherData['days'][$dateStr] = ['status' => 'libur', 'code' => '-'];
                         continue;
                     }
 
-                    $onLeave = $leaves->first(fn($l) => $l->user_id === $teacher->id
-                        && $l->start_date->toDateString() <= $dateStr && $l->end_date->toDateString() >= $dateStr);
-
-                    if ($onLeave) {
-                        $code = $onLeave->type === 'sakit' ? 'S' : 'I';
-                        $teacherData['days'][$dateStr] = ['status' => $onLeave->type, 'code' => $code];
-                        $teacherData['summary'][$code]++;
-                        $totalStats[$onLeave->type === 'sakit' ? 'sakit' : 'izin']++;
-                    } else {
-                        $teacherData['days'][$dateStr] = ['status' => 'alpha', 'code' => 'A'];
-                        $teacherData['summary']['A']++;
-                        $totalStats['alpha']++;
-                    }
+                    // Hari kerja, ada jadwal, tidak hadir, tidak izin → Alpha
+                    $teacherData['days'][$dateStr] = ['status' => 'alpha', 'code' => 'A'];
+                    $teacherData['summary']['A']++;
+                    $totalStats['alpha']++;
                 }
 
                 $reportData[] = $teacherData;
@@ -513,6 +529,11 @@ class ReportController extends Controller
             // Presensi Kelas
             $classAttendances = ClassAttendance::with(['classroom', 'selectedClassroom', 'subject', 'teachingSchedule.subject'])
                 ->whereBetween('date', [$startDate, $endDate])->get();
+
+            $leaves   = LeaveRequest::where('status', 'approved')
+                ->where('end_date', '>=', $startDate)->where('start_date', '<=', $endDate)->get();
+            $holidays = Holiday::whereBetween('date', [$startDate, $endDate])->pluck('date')->toArray();
+            $today    = Carbon::today();
 
             foreach ($teachers as $teacher) {
                 $teacherData = [
@@ -602,7 +623,23 @@ class ReportController extends Controller
                             && $att->scan_method === 'qr_shared_space';
                     });
 
-                    if ($isWeekend || ($schedules->isEmpty() && $sharedSpaceForDay->isEmpty())) {
+                    $isHoliday = in_array($dateStr, $holidays);
+                    $isFuture  = $date->gt($today);
+
+                    // Cek izin/sakit yang disetujui untuk hari ini
+                    $onLeave = $leaves->first(fn($l) => $l->user_id === $teacher->id
+                        && $l->start_date->toDateString() <= $dateStr
+                        && $l->end_date->toDateString() >= $dateStr);
+
+                    if ($onLeave) {
+                        $code = $onLeave->type === 'sakit' ? 'S' : 'I';
+                        $teacherData['days'][$dateStr] = ['status' => $onLeave->type, 'code' => $code, 'label' => $code, 'classes' => []];
+                        $teacherData['summary'][$code]++;
+                        $totalStats[$onLeave->type === 'sakit' ? 'sakit' : 'izin']++;
+                        continue;
+                    }
+
+                    if ($isWeekend || $isHoliday || $isFuture || ($schedules->isEmpty() && $sharedSpaceForDay->isEmpty())) {
                         $teacherData['days'][$dateStr] = ['status' => 'libur', 'code' => '-', 'label' => '-', 'classes' => []];
                         continue;
                     }
