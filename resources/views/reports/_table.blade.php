@@ -47,14 +47,20 @@
                     @if(count($classList) === 0)
                         <span class="text-xs text-slate-400">-</span>
                     @elseif(count($classList) === 1)
-                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                            {{ $classList[0] }}
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                            {{ $classList[0]['name'] }}
+                            @if($classList[0]['attended'])
+                                <i data-lucide="check" class="w-3.5 h-3.5 text-green-500 stroke-[3]"></i>
+                            @endif
                         </span>
                     @else
                         <div class="relative inline-block text-left" x-data="{ open: false }">
                             <button @click="open = !open" type="button" 
                                     class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none transition-all shadow-sm cursor-pointer">
-                                <span>{{ $classList[0] }}</span>
+                                <span>{{ $classList[0]['name'] }}</span>
+                                @if($classList[0]['attended'])
+                                    <i data-lucide="check" class="w-3.5 h-3.5 text-green-500 stroke-[3]"></i>
+                                @endif
                                 <span class="flex items-center justify-center bg-navy-500 text-white dark:bg-gold-500 dark:text-navy-950 text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-sm">+{{ count($classList) - 1 }}</span>
                                 <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{'rotate-180': open}"></i>
                             </button>
@@ -67,11 +73,14 @@
                                  x-transition:leave="transition ease-in duration-75"
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute left-0 mt-1 w-44 rounded-lg bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700/80 p-1 divide-y divide-slate-100 dark:divide-slate-700/50 z-50" 
+                                 class="absolute left-0 mt-1 w-48 rounded-lg bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700/80 p-1 divide-y divide-slate-100 dark:divide-slate-700/50 z-50" 
                                  x-cloak>
                                 @foreach($classList as $c)
-                                    <div class="px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded transition-colors">
-                                        {{ $c }}
+                                    <div class="px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded transition-colors flex items-center justify-between gap-2">
+                                        <span>{{ $c['name'] }}</span>
+                                        @if($c['attended'])
+                                            <i data-lucide="check" class="w-3.5 h-3.5 text-green-500 stroke-[3]"></i>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>

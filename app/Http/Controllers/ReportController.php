@@ -524,21 +524,49 @@ class ReportController extends Controller
                     'all_classrooms' => '',
                 ];
 
-                // Kumpulkan semua kelas unik dari jadwal mengajar aktif guru
-                $classroomsArray = TeachingSchedule::where('user_id', $teacher->id)
+                // Kumpulkan semua kelas unik dari jadwal mengajar aktif guru + kelas yang pernah di-scan
+                $scheduledClassrooms = TeachingSchedule::where('user_id', $teacher->id)
                     ->where('is_active', true)
                     ->with('classroom')
                     ->get()
-                    ->map(fn($s) => $s->classroom?->code
-                        ? strtoupper(str_replace('-', ' ', $s->classroom->code))
-                        : ($s->classroom?->name ?? null))
-                    ->filter()
-                    ->unique()
-                    ->values()
-                    ->toArray();
+                    ->map(fn($s) => $s->classroom);
 
-                $teacherData['classrooms_list'] = $classroomsArray;
-                $teacherData['all_classrooms']  = implode(' / ', $classroomsArray) ?: '-';
+                $attendedClassrooms = $classAttendances->filter(function ($att) use ($teacher) {
+                    return $att->user_id === $teacher->id && $att->check_in_time !== null;
+                })->map(function ($att) {
+                    return $att->selectedClassroom ?? $att->classroom;
+                });
+
+                $mergedClassrooms = collect()
+                    ->concat($scheduledClassrooms)
+                    ->concat($attendedClassrooms)
+                    ->filter()
+                    ->unique('id')
+                    ->values();
+
+                $classroomsList = [];
+                $attendedClassroomIds = $classAttendances->filter(function ($att) use ($teacher) {
+                    return $att->user_id === $teacher->id && $att->check_in_time !== null;
+                })->map(fn($att) => $att->selected_classroom_id ?? $att->classroom_id)
+                  ->filter()->unique()->toArray();
+
+                foreach ($mergedClassrooms as $cls) {
+                    $name = $cls->code
+                        ? strtoupper(str_replace('-', ' ', $cls->code))
+                        : ($cls->name ?? '-');
+                    
+                    $classroomsList[] = [
+                        'id'       => $cls->id,
+                        'name'     => $name,
+                        'attended' => in_array($cls->id, $attendedClassroomIds),
+                    ];
+                }
+                
+                // Urutkan alfabetis
+                usort($classroomsList, fn($a, $b) => strcmp($a['name'], $b['name']));
+
+                $teacherData['classrooms_list'] = $classroomsList;
+                $teacherData['all_classrooms']  = implode(' / ', array_column($classroomsList, 'name')) ?: '-';
 
                 foreach ($dates as $date) {
                     $dateStr   = $date->toDateString();
