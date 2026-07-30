@@ -300,7 +300,7 @@
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm font-bold text-navy-800 dark:text-white truncate">
-                                        {{ $schedule->classroom->name ?? '-' }}
+                                        {{ trim(($schedule->classroom->level ? $schedule->classroom->level . ' ' : '') . ($schedule->classroom->name ?? '-')) }}
                                     </p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
                                         {{ $schedule->subject->name ?? '-' }} • Jam ke-{{ $schedule->period }}
