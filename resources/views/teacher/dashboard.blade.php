@@ -64,58 +64,60 @@
     @endif
 
     <!-- Statistics Cards - 2 columns on mobile, 4 on desktop -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 w-full">
-        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0 overflow-hidden">
-            <div class="flex items-center gap-2 sm:gap-4">
-                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="calendar-check" class="w-3.5 h-3.5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400"></i>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+
+        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all overflow-hidden">
+            <div class="flex flex-col gap-2">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center">
+                    <i data-lucide="calendar-check" class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400"></i>
                 </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Hadir Bulan Ini</p>
-                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['hadir'] }}</h3>
-                    <p class="text-[9px] text-blue-500 leading-tight truncate">Bulan ini</p>
+                <div>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Hadir Bulan Ini</p>
+                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['hadir'] }}</h3>
+                    <p class="text-[9px] text-blue-500 leading-tight mt-0.5">Bulan ini</p>
                 </div>
             </div>
         </div>
 
-        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0 overflow-hidden">
-            <div class="flex items-center gap-2 sm:gap-4">
-                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="clock" class="w-3.5 h-3.5 sm:w-6 sm:h-6 text-yellow-600 dark:text-yellow-400"></i>
+        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all overflow-hidden">
+            <div class="flex flex-col gap-2">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl flex items-center justify-center">
+                    <i data-lucide="clock" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 dark:text-yellow-400"></i>
                 </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Terlambat</p>
-                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['terlambat'] }}</h3>
-                    <p class="text-[9px] text-yellow-600 leading-tight truncate">Perlu perbaikan</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0 overflow-hidden">
-            <div class="flex items-center gap-2 sm:gap-4">
-                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="file-text" class="w-3.5 h-3.5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400"></i>
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Izin/Sakit</p>
-                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['izin'] }}</h3>
-                    <p class="text-[9px] text-green-500 leading-tight truncate">Disetujui</p>
+                <div>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Terlambat</p>
+                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['terlambat'] }}</h3>
+                    <p class="text-[9px] text-yellow-600 leading-tight mt-0.5">Perlu perbaikan</p>
                 </div>
             </div>
         </div>
 
-        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0 overflow-hidden">
-            <div class="flex items-center gap-2 sm:gap-4">
-                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="x-circle" class="w-3.5 h-3.5 sm:w-6 sm:h-6 text-red-600 dark:text-red-400"></i>
+        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all overflow-hidden">
+            <div class="flex flex-col gap-2">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center">
+                    <i data-lucide="file-text" class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400"></i>
                 </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Alpha</p>
-                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['alpha'] }}</h3>
-                    <p class="text-[9px] text-red-500 leading-tight truncate">Tanpa keterangan</p>
+                <div>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Izin/Sakit</p>
+                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['izin'] }}</h3>
+                    <p class="text-[9px] text-green-500 leading-tight mt-0.5">Disetujui</p>
                 </div>
             </div>
         </div>
+
+        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all overflow-hidden">
+            <div class="flex flex-col gap-2">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center">
+                    <i data-lucide="x-circle" class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Alpha</p>
+                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['alpha'] }}</h3>
+                    <p class="text-[9px] text-red-500 leading-tight mt-0.5">Tanpa keterangan</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Presensi Harian -->
@@ -134,19 +136,20 @@
         </div>
 
         @if($todayAttendance)
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {{-- Selalu 2 kolom (kiri-kanan) baik mobile maupun desktop --}}
+            <div class="grid grid-cols-2 gap-2 sm:gap-3">
                 <!-- Check In -->
-                <div class="p-3 sm:p-4 rounded-2xl border-2 min-w-0
+                <div class="p-3 rounded-2xl border-2 overflow-hidden
                     {{ $todayAttendance->check_in
                         ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                         : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
-                    <div class="flex items-center gap-2 mb-2">
-                        <div class="w-7 h-7 rounded-lg {{ $todayAttendance->check_in ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="log-in" class="w-3.5 h-3.5 text-white"></i>
+                    <div class="flex items-center gap-1.5 mb-2">
+                        <div class="w-6 h-6 rounded-lg {{ $todayAttendance->check_in ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="log-in" class="w-3 h-3 text-white"></i>
                         </div>
-                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Jam Masuk</p>
+                        <p class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 truncate">Jam Masuk</p>
                     </div>
-                    <p class="text-lg sm:text-xl font-bold {{ $todayAttendance->check_in ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}">
+                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_in ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}">
                         {{ $todayAttendance->check_in ? \Carbon\Carbon::parse($todayAttendance->check_in)->format('H:i') : '--:--' }}
                     </p>
                     @if($todayAttendance->status)
@@ -160,34 +163,36 @@
                         };
                         $statusLabel = $todayAttendance->status === 'Tepat Waktu' ? 'Hadir' : $todayAttendance->status;
                     @endphp
-                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold {{ $statusBadge }}">
+                    <span class="inline-block mt-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold {{ $statusBadge }}">
                         {{ $statusLabel }}
                     </span>
                     @endif
                 </div>
+
                 <!-- Check Out -->
-                <div class="p-3 sm:p-4 rounded-2xl border-2 min-w-0
+                <div class="p-3 rounded-2xl border-2 overflow-hidden
                     {{ $todayAttendance->check_out
-                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                        ? 'bg-navy-50 dark:bg-navy-900/20 border-navy-200 dark:border-navy-800'
                         : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
-                    <div class="flex items-center gap-2 mb-2">
-                        <div class="w-7 h-7 rounded-lg {{ $todayAttendance->check_out ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="log-out" class="w-3.5 h-3.5 text-white"></i>
+                    <div class="flex items-center gap-1.5 mb-2">
+                        <div class="w-6 h-6 rounded-lg {{ $todayAttendance->check_out ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="log-out" class="w-3 h-3 text-white dark:text-navy-900"></i>
                         </div>
-                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">Jam Pulang</p>
+                        <p class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 truncate">Jam Pulang</p>
                     </div>
-                    <p class="text-lg sm:text-xl font-bold {{ $todayAttendance->check_out ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}">
+                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_out ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400' }}">
                         {{ $todayAttendance->check_out ? \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') : '--:--' }}
                     </p>
                     @if($todayAttendance->check_out_status)
                     @php
                         $checkoutBadge = match($todayAttendance->check_out_status) {
                             'Tepat Waktu' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                            'Pulang Cepat'=> 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
                             default       => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
                         };
                     @endphp
-                    <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold {{ $checkoutBadge }}">
-                        {{ $todayAttendance->check_out_status === 'Tepat Waktu' ? 'Tepat Waktu' : ucfirst($todayAttendance->check_out_status) }}
+                    <span class="inline-block mt-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold {{ $checkoutBadge }}">
+                        {{ $todayAttendance->check_out_status === 'Tepat Waktu' ? 'Tepat Waktu' : ucfirst($todayAttendance->check_out_status ?? '') }}
                     </span>
                     @endif
                 </div>
