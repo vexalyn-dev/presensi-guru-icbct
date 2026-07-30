@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="fade-in space-y-3 sm:space-y-6 w-full max-w-full overflow-x-hidden">
+<div class="fade-in space-y-3 sm:space-y-6">
     
     <!-- Welcome Card -->
     <div class="card p-4 sm:p-6 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:to-gold-400 text-white overflow-hidden">
@@ -48,16 +48,16 @@
 
     @if(!empty($reminderMsgs))
         <!-- Marquee Card - Mobile Optimized -->
-        <div class="relative overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 p-1.5 sm:p-2 flex items-center gap-2 shadow-sm max-w-full">
-            <div class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-navy-800 text-white flex-shrink-0 relative">
+        <div class="overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 p-1.5 flex items-center gap-2 shadow-sm">
+            <div class="flex items-center justify-center w-7 h-7 rounded-lg bg-navy-800 text-white flex-shrink-0 relative">
                 <span class="absolute inline-flex h-full w-full rounded-lg bg-navy-800 opacity-20 animate-ping"></span>
-                <i data-lucide="bell" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10 text-white"></i>
+                <i data-lucide="bell" class="w-3.5 h-3.5 relative z-10 text-white"></i>
             </div>
-            
-            <div class="relative flex-1 min-w-0 max-w-full overflow-hidden py-0.5 marquee-container">
-                <div class="marquee-track flex gap-6 sm:gap-8 whitespace-nowrap text-[10px] sm:text-xs font-bold text-black dark:text-white tracking-wide uppercase">
-                    <span>{!! implode(' &nbsp; • &nbsp; ', $reminderMsgs) !!}</span>
-                    <span>{!! implode(' &nbsp; • &nbsp; ', $reminderMsgs) !!}</span>
+            <div class="flex-1 overflow-hidden py-0.5 marquee-container" style="min-width:0;">
+                <div class="marquee-track whitespace-nowrap text-[10px] font-bold text-black dark:text-white tracking-wide uppercase">
+                    <span>{!! implode(' &nbsp;•&nbsp; ', $reminderMsgs) !!}</span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span>{!! implode(' &nbsp;•&nbsp; ', $reminderMsgs) !!}</span>
                 </div>
             </div>
         </div>
@@ -172,15 +172,15 @@
                 <!-- Check Out -->
                 <div class="p-3 rounded-2xl border-2 overflow-hidden
                     {{ $todayAttendance->check_out
-                        ? 'bg-navy-50 dark:bg-navy-900/20 border-navy-200 dark:border-navy-800'
+                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
                         : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
                     <div class="flex items-center gap-1.5 mb-2">
-                        <div class="w-6 h-6 rounded-lg {{ $todayAttendance->check_out ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="log-out" class="w-3 h-3 text-white dark:text-navy-900"></i>
+                        <div class="w-6 h-6 rounded-lg {{ $todayAttendance->check_out ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="log-out" class="w-3 h-3 text-white"></i>
                         </div>
                         <p class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 truncate">Jam Pulang</p>
                     </div>
-                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_out ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400' }}">
+                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_out ? 'text-blue-700 dark:text-blue-400' : 'text-slate-400' }}">
                         {{ $todayAttendance->check_out ? \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') : '--:--' }}
                     </p>
                     @if($todayAttendance->check_out_status)
