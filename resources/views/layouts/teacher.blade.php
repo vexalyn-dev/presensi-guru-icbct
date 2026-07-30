@@ -189,8 +189,8 @@
         <main class="flex-1 lg:ml-64 min-h-screen">
             <!-- Top Bar -->
             <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
-                <div class="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div class="px-3 sm:px-6 py-3 sm:py-4 flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pt-0.5">
                         <!-- Hamburger Menu (Mobile Only) -->
                         <button @click="sidebarOpen = true" 
                                 class="lg:hidden p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0">
@@ -204,7 +204,7 @@
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+                    <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0 pt-0.5">
                         <!-- Dark/Light Mode Toggle -->
                         <button onclick="toggleDarkMode()" class="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Toggle Dark Mode">
                             <i data-lucide="sun" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400 hidden dark:block"></i>
