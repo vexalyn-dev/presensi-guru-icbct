@@ -300,7 +300,14 @@
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm font-bold text-navy-800 dark:text-white truncate">
-                                        {{ trim(($schedule->classroom->level ? $schedule->classroom->level . ' ' : '') . ($schedule->classroom->name ?? '-')) }}
+                                        @php
+                                            $cls = $schedule->classroom;
+                                            $lvl = $cls->level;
+                                            if (!$lvl && $cls->code && preg_match('/^(XII|XI|X)-/i', $cls->code, $m)) {
+                                                $lvl = strtoupper($m[1]);
+                                            }
+                                            echo trim(($lvl ? $lvl . ' ' : '') . ($cls->name ?? '-'));
+                                        @endphp
                                     </p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
                                         {{ $schedule->subject->name ?? '-' }} • Jam ke-{{ $schedule->period }}
