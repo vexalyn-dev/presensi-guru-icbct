@@ -472,18 +472,40 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
     });
-</script>
-@endpush
 
-@push('styles')
+    // Failsafe: pastikan meta viewport selalu benar, apapun isi <head> di layout.
+    // Ini yang paling sering jadi penyebab tampilan "kepotong" di HP walau CSS-nya sudah responsive.
+    (function () {
+        let viewport = document.querySelector('meta[name="viewport"]');
+        if (!viewport) {
+            viewport = document.createElement('meta');
+            viewport.setAttribute('name', 'viewport');
+            document.head.appendChild(viewport);
+        }
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    })();
+</script>
+
 <style>
+    /* ===== FAILSAFE ANTI-OVERFLOW ===== */
+    /* 1. Paksa box-sizing border-box untuk semua elemen di halaman ini.
+          Kalau Tailwind preflight tidak aktif di layout, padding (p-4, p-6, dst)
+          akan menambah lebar elemen dan menyebabkan overflow horizontal. */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    /* 2. Cegah scroll horizontal di level html/body sebagai jaring pengaman terakhir. */
     html, body {
-        overflow-x: hidden;
+        overflow-x: hidden !important;
+        max-width: 100vw;
+    }
+
+    img, svg, table {
         max-width: 100%;
     }
 
@@ -501,6 +523,24 @@
             transform: translateY(0);
         }
     }
+
+    .marquee-container {
+        mask-image: linear-gradient(to right, transparent, black 1rem, black calc(100% - 1rem), transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 1rem, black calc(100% - 1rem), transparent);
+    }
+    
+    .marquee-track {
+        display: inline-flex;
+        animation: marquee-dashboard 25s linear infinite;
+    }
+    
+    .marquee-track:hover {
+        animation-play-state: paused;
+    }
+    
+    @keyframes marquee-dashboard {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
 </style>
-@endpush
 @endsection
