@@ -129,7 +129,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="stats-container">
+    <div class="grid grid-cols-2 {{ $reportType === 'class' ? 'md:grid-cols-3' : 'md:grid-cols-4' }} gap-4" id="stats-container">
         <div class="card p-4 group hover:shadow-lg transition-all">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -156,7 +156,7 @@
             </div>
         </div>
 
-        <div class="card p-4 group hover:shadow-lg transition-all">
+        <div class="card p-4 group hover:shadow-lg transition-all" id="card-terlambat" style="{{ $reportType === 'class' ? 'display: none;' : '' }}">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <i data-lucide="clock" class="w-5 h-5 text-yellow-600 dark:text-yellow-400"></i>
@@ -191,7 +191,7 @@
             </span>
             <span class="text-xs text-slate-600 dark:text-slate-400">Hadir</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2" id="legend-telat" style="{{ $reportType === 'class' ? 'display: none;' : '' }}">
             <span class="w-6 h-6 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 flex items-center justify-center text-xs font-bold">T</span>
             <span class="text-xs text-slate-600 dark:text-slate-400">Telat</span>
         </div>
@@ -316,6 +316,26 @@
                     document.getElementById('stat-alpha').textContent = data.stats.alpha + data.stats.izin + data.stats.sakit;
                 }
                 if (data.kehadiranRate !== undefined) document.getElementById('stat-rate').textContent = data.kehadiranRate + '% tingkat kehadiran';
+
+                // Dynamic UI adjustments based on report type
+                const statsContainer = document.getElementById('stats-container');
+                const cardTerlambat = document.getElementById('card-terlambat');
+                const legendTelat = document.getElementById('legend-telat');
+                if (reportType === 'class') {
+                    if (cardTerlambat) cardTerlambat.style.display = 'none';
+                    if (legendTelat) legendTelat.style.display = 'none';
+                    if (statsContainer) {
+                        statsContainer.classList.remove('md:grid-cols-4');
+                        statsContainer.classList.add('md:grid-cols-3');
+                    }
+                } else {
+                    if (cardTerlambat) cardTerlambat.style.display = 'block';
+                    if (legendTelat) legendTelat.style.display = 'flex';
+                    if (statsContainer) {
+                        statsContainer.classList.remove('md:grid-cols-3');
+                        statsContainer.classList.add('md:grid-cols-4');
+                    }
+                }
 
                 if (window.lucide) lucide.createIcons();
             }
