@@ -17,9 +17,9 @@
         }
     @endphp
     @if(!empty($msgs))
-        <div class="overflow-hidden max-w-[260px] sm:max-w-sm mt-0.5" id="reminder-bar">
+        <div class="overflow-hidden max-w-[180px] sm:max-w-sm mt-0.5" id="reminder-bar">
             <div class="marquee-track" id="reminder-marquee">
-                <span class="text-[11px] font-medium text-amber-600 dark:text-amber-400" id="reminder-text">
+                <span class="text-[10px] sm:text-[11px] font-medium text-amber-600 dark:text-amber-400" id="reminder-text">
                     ⚠️ {{ implode('  •  ', $msgs) }}
                 </span>
             </div>

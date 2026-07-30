@@ -189,26 +189,26 @@
         <main class="flex-1 lg:ml-64 min-h-screen">
             <!-- Top Bar -->
             <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
-                <div class="px-4 sm:px-6 py-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
+                <div class="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <!-- Hamburger Menu (Mobile Only) -->
                         <button @click="sidebarOpen = true" 
-                                class="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                                class="lg:hidden p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0">
                             <i data-lucide="menu" class="w-5 h-5 text-slate-600 dark:text-slate-400"></i>
                         </button>
                         
-                        <div>
-                            <h2 class="text-lg font-bold text-navy-800 dark:text-white">@yield('page-title', 'Dashboard')</h2>
+                        <div class="min-w-0">
+                            <h2 class="text-base sm:text-lg font-bold text-navy-800 dark:text-white truncate">@yield('page-title', 'Dashboard')</h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }} pukul {{ now()->format('H.i') }}</p>
                             @yield('topbar-reminder')
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
                         <!-- Dark/Light Mode Toggle -->
-                        <button onclick="toggleDarkMode()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Toggle Dark Mode">
-                            <i data-lucide="sun" class="w-5 h-5 text-slate-600 dark:text-slate-400 hidden dark:block"></i>
-                            <i data-lucide="moon" class="w-5 h-5 text-slate-600 dark:text-slate-400 block dark:hidden"></i>
+                        <button onclick="toggleDarkMode()" class="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Toggle Dark Mode">
+                            <i data-lucide="sun" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400 hidden dark:block"></i>
+                            <i data-lucide="moon" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400 block dark:hidden"></i>
                         </button>
 
                         <!-- Notifikasi Dropdown -->
@@ -216,10 +216,10 @@
                         @click.outside="open = false"
                         x-init="init()">
                             
-                            <button @click.stop="open = !open" class="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600">
-                                <i data-lucide="bell" class="w-5 h-5"></i>
+                            <button @click.stop="open = !open" class="relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600">
+                                <i data-lucide="bell" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                                 @if(auth()->user()->unreadCount() > 0)
-                                <span class="notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                                <span class="notification-badge absolute top-1 right-1 sm:top-1.5 sm:right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                                 @endif
                             </button>
                             
@@ -296,9 +296,10 @@
                         
                         <!-- Profile Dropdown -->
                         <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                            <button @click.stop="open = !open" class="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-1.5 pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
+                            <button @click.stop="open = !open" class="flex items-center gap-1.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-1 sm:p-1.5 pr-1.5 sm:pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
                                 <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}" 
-                                     class="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600">
+                                     class="w-7 h-7 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
+                                     onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
                                 <div class="hidden sm:block text-left">
                                     <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[150px]">{{ auth()->user()->name }}</p>
                                     <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
