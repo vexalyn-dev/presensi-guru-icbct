@@ -26,7 +26,7 @@
             <div class="relative z-10 flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium opacity-90 mb-2">Total Jam Kerja Mingguan</p>
-                    <h2 class="text-4xl font-bold mb-2">{{ number_format($totalWeeklyHours, 1) }} Jam</h2>
+                    <h2 class="text-4xl font-bold mb-2">{{ (floor($totalWeeklyHours) == $totalWeeklyHours) ? number_format($totalWeeklyHours, 0) : number_format($totalWeeklyHours, 1) }} Jam</h2>
                     <p class="text-sm opacity-75 flex items-center gap-2">
                         <i data-lucide="calendar-days" class="w-4 h-4"></i>
                         {{ $workDays }} hari kerja per minggu
@@ -81,7 +81,7 @@
                             ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900' 
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400' }}">
                         <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
-                        {{ number_format($schedule['duration_minutes'] / 60, 1) }} Jam
+                        {{ (floor($schedule['duration_minutes'] / 60) == $schedule['duration_minutes'] / 60) ? number_format($schedule['duration_minutes'] / 60, 0) : number_format($schedule['duration_minutes'] / 60, 1) }} Jam
                     </div>
                 </div>
 

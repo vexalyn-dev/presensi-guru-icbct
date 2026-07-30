@@ -25,29 +25,33 @@
         foreach ($todaySchedules as $s) {
             $att = $s->classAttendances->first();
             $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
+            
+            // Clean inline SVG warning icon
+            $warningIcon = '<svg class="w-3.5 h-3.5 text-amber-600 dark:text-gold-400 inline-block mr-1 flex-shrink-0 align-text-bottom" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+            
             if (!$att || !$att->check_in_time) {
-                $reminderMsgs[] = "Anda belum scan masuk kelas {$cn}";
+                $reminderMsgs[] = '<span class="inline-flex items-center">' . $warningIcon . 'Anda belum scan masuk kelas ' . e($cn) . '</span>';
             } elseif ($att->check_in_time && !$att->check_out_time) {
-                $reminderMsgs[] = "Anda belum scan keluar kelas {$cn}";
+                $reminderMsgs[] = '<span class="inline-flex items-center">' . $warningIcon . 'Anda belum scan keluar kelas ' . e($cn) . '</span>';
             }
         }
     @endphp
 
     @if(!empty($reminderMsgs))
         <!-- Modern Premium Marquee Card -->
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-400/10 dark:via-amber-400/5 dark:to-transparent border border-amber-500/20 dark:border-amber-400/20 p-3 sm:p-3.5 flex items-center gap-3 shadow-sm hover:shadow-md transition-all duration-300">
-            <!-- Left glowing icon -->
-            <div class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500 dark:bg-gold-400 text-white dark:text-navy-900 flex-shrink-0 shadow-md shadow-amber-500/20 dark:shadow-gold-400/20 relative">
-                <span class="absolute inline-flex h-full w-full rounded-xl bg-amber-500 dark:bg-gold-400 opacity-75 animate-ping"></span>
-                <i data-lucide="bell" class="w-4 h-4 sm:w-4.5 sm:h-4.5 relative z-10 animate-bounce"></i>
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent dark:from-amber-400/10 dark:via-amber-400/5 dark:to-transparent border border-amber-500/20 dark:border-amber-400/20 p-2 sm:p-2.5 flex items-center gap-2.5 shadow-sm hover:shadow-md transition-all duration-300">
+            <!-- Left glowing icon (Navy themed background) -->
+            <div class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 flex-shrink-0 shadow-md shadow-navy-800/20 dark:shadow-gold-400/20 relative">
+                <span class="absolute inline-flex h-full w-full rounded-xl bg-navy-800 dark:bg-gold-400 opacity-75 animate-ping"></span>
+                <i data-lucide="bell" class="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-10 animate-bounce"></i>
             </div>
             
             <!-- Marquee container with fade edges -->
             <div class="relative flex-1 min-w-0 overflow-hidden py-0.5 marquee-container">
-                <div class="marquee-track flex gap-8 whitespace-nowrap text-xs sm:text-sm font-bold text-amber-800 dark:text-gold-400 tracking-wide uppercase">
+                <div class="marquee-track flex gap-8 whitespace-nowrap text-[10px] sm:text-xs font-bold text-slate-900 dark:text-slate-100 tracking-wide uppercase">
                     <!-- Duplicate text to ensure continuous scrolling -->
-                    <span>{{ implode('  •  ', $reminderMsgs) }}</span>
-                    <span>{{ implode('  •  ', $reminderMsgs) }}</span>
+                    <span>{!! implode(' &nbsp; &nbsp; • &nbsp; &nbsp; ', $reminderMsgs) !!}</span>
+                    <span>{!! implode(' &nbsp; &nbsp; • &nbsp; &nbsp; ', $reminderMsgs) !!}</span>
                 </div>
             </div>
         </div>
@@ -364,8 +368,13 @@
                         </div>
                         
                         <div class="text-right">
+                            @php
+                                $dayMinutes = \Carbon\Carbon::parse($work->start_time)->diffInMinutes(\Carbon\Carbon::parse($work->end_time));
+                                $dayHours = $dayMinutes / 60;
+                                $dayHoursDisplay = (floor($dayHours) == $dayHours) ? number_format($dayHours, 0) : number_format($dayHours, 1);
+                            @endphp
                             <p class="text-xs font-semibold text-navy-800 dark:text-white">
-                                {{ \Carbon\Carbon::parse($work->start_time)->diffInHours(\Carbon\Carbon::parse($work->end_time)) }} Jam
+                                {{ $dayHoursDisplay }} Jam
                             </p>
                             <p class="text-[10px] text-slate-500 dark:text-slate-400">
                                 Total kerja
@@ -381,7 +390,12 @@
                         <div>
                             <p class="text-xs text-purple-600 dark:text-purple-400 font-semibold">Total Jam Kerja Mingguan</p>
                             <p class="text-2xl font-bold text-purple-800 dark:text-purple-300">
-                                {{ $workSchedule->sum(fn($w) => \Carbon\Carbon::parse($w->start_time)->diffInHours(\Carbon\Carbon::parse($w->end_time))) }} Jam
+                                @php
+                                    $totalMinutes = $workSchedule->sum(fn($w) => \Carbon\Carbon::parse($w->start_time)->diffInMinutes(\Carbon\Carbon::parse($w->end_time)));
+                                    $totalWeeklyHoursClean = $totalMinutes / 60;
+                                    $totalWeeklyHoursDisplay = (floor($totalWeeklyHoursClean) == $totalWeeklyHoursClean) ? number_format($totalWeeklyHoursClean, 0) : number_format($totalWeeklyHoursClean, 1);
+                                @endphp
+                                {{ $totalWeeklyHoursDisplay }} Jam
                             </p>
                         </div>
                         <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
