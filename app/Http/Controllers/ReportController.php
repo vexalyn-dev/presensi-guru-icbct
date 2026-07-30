@@ -196,8 +196,10 @@ class ReportController extends Controller
         $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Sakit (S)');
         $col++;
         $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Alpha (A)');
-        $col++;
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Terlambat (T)');
+        if ($reportType !== 'class') {
+            $col++;
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col) . $headerRow, 'Terlambat (T)');
+        }
         $lastCol = $col;
 
         // Base Table Header Style (Dark Slate)
@@ -239,8 +241,7 @@ class ReportController extends Controller
             $sheet->setCellValue('C' . $row, $data['teacher']?->major_specialty ?? '-');
 
             if ($reportType === 'class') {
-                $firstClass = collect($data['days'])->first(fn($day) => !empty($day['classes']));
-                $classroom  = $firstClass && !empty($firstClass['classes']) ? $firstClass['classes'][0]['classroom'] : '-';
+                $classroom = $data['all_classrooms'] ?? '-';
                 $sheet->setCellValue('D' . $row, $classroom);
             }
 
@@ -303,8 +304,10 @@ class ReportController extends Controller
             $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['S']);
             $dateCol++;
             $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['A']);
-            $dateCol++;
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['T']);
+            if ($reportType !== 'class') {
+                $dateCol++;
+                $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateCol) . $row, $summary['T']);
+            }
 
             // Row style
             $rowRange = 'A' . $row . ':' . $lastColLetter . $row;
@@ -363,7 +366,9 @@ class ReportController extends Controller
         $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 1) . "{$endDataRow})");
         $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 2) . "{$endDataRow})");
         $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 3) . "{$endDataRow})");
-        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . "{$endDataRow})");
+        if ($reportType !== 'class') {
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . $totalRow, "=SUM(" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . "{$startDataRow}:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($summaryStartCol + 4) . "{$endDataRow})");
+        }
 
         $totalRange = 'A' . $totalRow . ':' . $lastColLetter . $totalRow;
         $sheet->getStyle($totalRange)->applyFromArray([
@@ -511,12 +516,27 @@ class ReportController extends Controller
 
             foreach ($teachers as $teacher) {
                 $teacherData = [
-                    'user'          => $teacher,
-                    'teacher'       => $teacher->teacher,
-                    'days'          => [],
-                    'summary'       => ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0, 'T' => 0],
-                    'class_details' => [],
+                    'user'           => $teacher,
+                    'teacher'        => $teacher->teacher,
+                    'days'           => [],
+                    'summary'        => ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0, 'T' => 0],
+                    'class_details'  => [],
+                    'all_classrooms' => '',
                 ];
+
+                // Kumpulkan semua kelas unik dari jadwal mengajar aktif guru
+                $allClassrooms = TeachingSchedule::where('user_id', $teacher->id)
+                    ->where('is_active', true)
+                    ->with('classroom')
+                    ->get()
+                    ->map(fn($s) => $s->classroom?->code
+                        ? strtoupper(str_replace('-', ' ', $s->classroom->code))
+                        : ($s->classroom?->name ?? null))
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->implode(' / ');
+                $teacherData['all_classrooms'] = $allClassrooms ?: '-';
 
                 foreach ($dates as $date) {
                     $dateStr   = $date->toDateString();
@@ -640,9 +660,10 @@ class ReportController extends Controller
                         $teacherData['summary']['H']++;
                         $totalStats['hadir']++;
                     } elseif ($attendedCount > 0) {
-                        $teacherData['days'][$dateStr] = ['status' => 'terlambat', 'code' => 'T', 'label' => "{$attendedCount}/{$totalClasses}", 'classes' => $classDetails];
-                        $teacherData['summary']['T']++;
-                        $totalStats['terlambat']++;
+                        // Partial attendance — tetap dianggap Hadir (tidak ada status T di laporan kelas)
+                        $teacherData['days'][$dateStr] = ['status' => 'hadir', 'code' => 'H', 'label' => "{$attendedCount}/{$totalClasses}", 'classes' => $classDetails];
+                        $teacherData['summary']['H']++;
+                        $totalStats['hadir']++;
                     } else {
                         $teacherData['days'][$dateStr] = ['status' => 'alpha', 'code' => 'A', 'label' => "0/{$totalClasses}", 'classes' => $classDetails];
                         $teacherData['summary']['A']++;

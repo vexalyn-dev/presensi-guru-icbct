@@ -17,7 +17,9 @@
                 <th class="px-3 py-3 text-center text-xs font-semibold text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-700 bg-blue-50/50 dark:bg-blue-900/10">I</th>
                 <th class="px-3 py-3 text-center text-xs font-semibold text-cyan-600 dark:text-cyan-400 border-b border-slate-200 dark:border-slate-700 bg-cyan-50/50 dark:bg-cyan-900/10">S</th>
                 <th class="px-3 py-3 text-center text-xs font-semibold text-red-600 dark:text-red-400 border-b border-slate-200 dark:border-slate-700 bg-red-50/50 dark:bg-red-900/10">✕</th>
+                @if($reportType !== 'class')
                 <th class="px-3 py-3 text-center text-xs font-semibold text-yellow-600 dark:text-yellow-400 border-b border-slate-200 dark:border-slate-700 bg-yellow-50/50 dark:bg-yellow-900/10">T</th>
+                @endif
             </tr>
         </thead>
         <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
@@ -40,9 +42,7 @@
                 @if($reportType === 'class')
                 <td class="px-2 py-3 border-r border-slate-200 dark:border-slate-700">
                     <p class="text-xs text-slate-700 dark:text-slate-300">
-                        @php $firstClass = collect($report['days'])->first(fn($day) => !empty($day['classes'])); @endphp
-                        @php $classroom = $firstClass && !empty($firstClass['classes']) ? $firstClass['classes'][0]['classroom'] : '-'; @endphp
-                        {{ $classroom }}
+                    {{ $report['all_classrooms'] ?? '-' }}
                     </p>
                 </td>
                 @endif
@@ -85,11 +85,13 @@
                 <td class="px-3 py-3 text-center font-bold text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10">{{ $report['summary']['I'] }}</td>
                 <td class="px-3 py-3 text-center font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50/30 dark:bg-cyan-900/10">{{ $report['summary']['S'] }}</td>
                 <td class="px-3 py-3 text-center font-bold text-red-600 dark:text-red-400 bg-red-50/30 dark:bg-red-900/10">{{ $report['summary']['A'] }}</td>
+                @if($reportType !== 'class')
                 <td class="px-3 py-3 text-center font-bold text-yellow-600 dark:text-yellow-400 bg-yellow-50/30 dark:bg-yellow-900/10">{{ $report['summary']['T'] }}</td>
+                @endif
             </tr>
             @empty
             <tr>
-                <td colspan="{{ 2 + ($reportType === 'class' ? 1 : 0) + count($dates) + 5 }}" class="px-6 py-12 text-center">
+                <td colspan="{{ 2 + ($reportType === 'class' ? 1 : 0) + count($dates) + ($reportType === 'class' ? 4 : 5) }}" class="px-6 py-12 text-center">
                     <i data-lucide="inbox" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i>
                     <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada data guru</p>
                 </td>
