@@ -319,41 +319,63 @@
                             </button>
                             
                             <!-- Dropdown Menu -->
-                            <div x-show="open" 
+                            <div x-show="open"
                                  x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                                 x-transition:enter-start="opacity-0 translate-y-1 scale-95"
                                  x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                                  x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                 class="absolute right-0 mt-3 w-56 origin-top-right rounded-2xl border border-slate-200/80 bg-white/95 shadow-[0_20px_45px_-12px_rgba(15,23,42,0.35)] backdrop-blur-xl overflow-hidden z-50 dark:border-slate-700 dark:bg-slate-800/95"
-                                 x-cloak>
+                                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                 x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                                 style="display:none;"
+                                 class="absolute right-0 mt-3 w-64 origin-top-right rounded-2xl border border-slate-200/60 bg-white shadow-[0_24px_48px_-8px_rgba(15,23,42,0.28),0_0_0_1px_rgba(15,23,42,0.04)] overflow-hidden z-[200] dark:border-slate-700/80 dark:bg-slate-800"
+                                 @click.stop>
                                 
-                                <div class="border-b border-slate-200/80 bg-gradient-to-r from-slate-50 to-white p-4 dark:border-slate-700 dark:from-slate-700/50 dark:to-slate-800/70">
-                                    <p class="text-sm font-bold text-navy-800 dark:text-white truncate">{{ auth()->user()->name }}</p>
-                                    <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-                                        <span class="text-xs text-slate-500 dark:text-slate-400">Guru</span>
-                                        @if($teacherSubject)
-                                        <span class="px-2 py-0.5 bg-gold-100 dark:bg-gold-900/30 text-gold-700 dark:text-gold-400 rounded text-[10px] font-bold">
-                                            {{ $teacherSubject }}
-                                        </span>
-                                        @endif
+                                <div class="border-b border-slate-100 dark:border-slate-700/80 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-slate-700 dark:to-slate-800 p-4">
+                                    <div class="flex items-center gap-3">
+                                        <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}"
+                                             class="w-10 h-10 rounded-full object-cover border-2 border-white/30 flex-shrink-0"
+                                             onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-bold text-white truncate">{{ auth()->user()->name }}</p>
+                                            <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                                <span class="text-[10px] text-white/70">Guru</span>
+                                                @if($teacherSubject)
+                                                <span class="px-1.5 py-0.5 bg-white/20 text-white rounded text-[9px] font-bold">
+                                                    {{ $teacherSubject }}
+                                                </span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div class="py-1">
-                                    <a href="{{ route('teacher.profile') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-navy-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
-                                        <i data-lucide="user" class="w-4 h-4"></i>
-                                        <span>Profil Saya</span>
+
+                                <div class="p-1.5">
+                                    <a href="{{ route('teacher.profile') }}"
+                                       class="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 rounded-xl transition-all duration-150 hover:bg-navy-800 hover:text-white dark:hover:bg-gold-400/20 dark:hover:text-gold-400 group">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 dark:group-hover:bg-gold-400/20 transition-colors">
+                                            <i data-lucide="user" class="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-white dark:group-hover:text-gold-400"></i>
+                                        </div>
+                                        <span class="font-medium">Profil Saya</span>
+                                    </a>
+
+                                    <a href="{{ route('teacher.attendance') }}"
+                                       class="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 rounded-xl transition-all duration-150 hover:bg-navy-800 hover:text-white dark:hover:bg-gold-400/20 dark:hover:text-gold-400 group">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 dark:group-hover:bg-gold-400/20 transition-colors">
+                                            <i data-lucide="scan-line" class="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-white dark:group-hover:text-gold-400"></i>
+                                        </div>
+                                        <span class="font-medium">Presensi Harian</span>
                                     </a>
                                 </div>
-                                
-                                <div class="border-t border-slate-200 dark:border-slate-700 py-1">
+
+                                <div class="border-t border-slate-100 dark:border-slate-700/80 p-1.5">
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
-                                            <i data-lucide="log-out" class="w-4 h-4"></i>
-                                            <span>Logout</span>
+                                        <button type="submit"
+                                                class="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-red-600 dark:text-red-400 rounded-xl transition-all duration-150 hover:bg-red-50 dark:hover:bg-red-900/20 group">
+                                            <div class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
+                                                <i data-lucide="log-out" class="w-4 h-4 text-red-500 dark:text-red-400"></i>
+                                            </div>
+                                            <span class="font-medium">Logout</span>
                                         </button>
                                     </form>
                                 </div>
