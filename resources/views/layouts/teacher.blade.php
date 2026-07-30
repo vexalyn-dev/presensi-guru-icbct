@@ -190,7 +190,7 @@
                data-user-id="{{ auth()->id() ?? '' }}"></div>
 
            <!-- Main Content -->
-        <main class="flex-1 lg:ml-64 min-h-screen overflow-x-hidden min-w-0">
+        <main class="flex-1 lg:ml-64 min-h-screen min-w-0">
             <!-- Top Bar -->
             <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
                 <div class="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
