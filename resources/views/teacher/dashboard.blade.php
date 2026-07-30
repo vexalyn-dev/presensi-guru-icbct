@@ -23,7 +23,18 @@
     @php
         $reminderMsgs = [];
         foreach ($todaySchedules as $s) {
-            $att = $s->classAttendances->first();
+            // Robust matching: find if there is an attendance record today matching this schedule.
+            // A match is either:
+            // 1. teaching_schedule_id matches $s->id
+            // 2. OR (classroom_id/selected_classroom_id matches $s->classroom_id AND subject_id matches $s->subject_id AND period matches $s->period)
+            $att = $todayClassAttendances->first(function ($att) use ($s) {
+                if ($att->teaching_schedule_id == $s->id) {
+                    return true;
+                }
+                $classMatch = ($att->classroom_id == $s->classroom_id) || ($att->selected_classroom_id == $s->classroom_id);
+                return $classMatch && ($att->subject_id == $s->subject_id) && ($att->period == $s->period);
+            });
+
             $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
             
             // Clean inline SVG warning icon
