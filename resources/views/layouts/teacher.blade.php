@@ -46,18 +46,22 @@
             .profile-avatar { width: 48px; height: 48px; }
         }
 
-        /* Marquee animation for topbar reminders */
+        /* Marquee animation for dashboard reminders */
+        .marquee-container {
+            mask-image: linear-gradient(to right, transparent, black 4px, black calc(100% - 4px), transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 4px, black calc(100% - 4px), transparent);
+        }
         .marquee-track {
-            display: inline-block;
+            display: inline-flex;
             white-space: nowrap;
-            animation: marquee 25s linear infinite;
+            animation: marquee-scroll 28s linear infinite;
         }
         .marquee-track:hover {
             animation-play-state: paused;
         }
-        @keyframes marquee {
-            0%   { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+        @keyframes marquee-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
     </style>
     @stack('styles')
@@ -360,7 +364,7 @@
             </header>
 
             <!-- Page Content -->
-            <div class="p-4 sm:p-6">
+            <div class="p-3 sm:p-6 w-full max-w-full overflow-x-hidden">
                 @yield('content')
                 
                 <!-- Spacer for Bottom Nav (Mobile Only) -->

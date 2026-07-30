@@ -234,10 +234,9 @@
                         $graceEnd = $endTime->copy()->addMinutes(3);
                         $isEnded = $now->greaterThan($graceEnd);
 
-                        if ($isEnded) {
-                            $badgeText = 'Berakhir';
-                            $theme = 'red'; // Merah
-                        } elseif ($att && $att->check_in_time) {
+                        // Prioritas: jika guru sudah scan masuk, tampilkan Hadir/Terlambat
+                        // bukan Berakhir, meski waktu kelas sudah lewat
+                        if ($att && $att->check_in_time) {
                             if ($att->status === 'Terlambat') {
                                 $badgeText = 'Terlambat';
                                 $theme = 'yellow'; // Kuning
@@ -245,6 +244,9 @@
                                 $badgeText = 'Hadir';
                                 $theme = 'green'; // Hijau
                             }
+                        } elseif ($isEnded) {
+                            $badgeText = 'Berakhir';
+                            $theme = 'red'; // Merah - hanya jika belum scan masuk
                         } elseif ($now->greaterThanOrEqualTo($startTime)) {
                             $badgeText = 'Berlangsung';
                             $theme = 'blue'; // Biru
