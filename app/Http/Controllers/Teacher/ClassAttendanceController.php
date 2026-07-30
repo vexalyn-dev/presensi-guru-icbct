@@ -48,6 +48,117 @@ class ClassAttendanceController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────────────────
+    // refreshData — AJAX endpoint for live schedule + stats refresh
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function refreshData()
+    {
+        $user      = auth()->user();
+        $today     = Carbon::today();
+        $now       = Carbon::now();
+        $dayOfWeek = $today->dayOfWeek;
+
+        $schedules = TeachingSchedule::where('user_id', $user->id)
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_active', true)
+            ->with(['classroom', 'subject', 'classAttendances' => function ($q) use ($user, $today) {
+                $q->where('user_id', $user->id)
+                  ->whereDate('date', $today);
+            }])
+            ->orderBy('start_time')
+            ->get();
+
+        $totalClasses      = $schedules->count();
+        $completedClasses  = $schedules->filter(fn ($s) => $s->classAttendances->first()?->isComplete())->count();
+        $inProgressClasses = $schedules->filter(
+            fn ($s) => $s->classAttendances->first()?->check_in_time && !$s->classAttendances->first()?->check_out_time
+        )->count();
+
+        // Build schedule items with status
+        $items = $schedules->map(function ($schedule) use ($now) {
+            $startTime = Carbon::parse($schedule->start_time);
+            $endTime   = Carbon::parse($schedule->end_time);
+            $att       = $schedule->classAttendances->first();
+            $graceEnd  = $endTime->copy()->addMinutes(3);
+
+            if ($now->greaterThan($graceEnd)) {
+                $badge = 'Berakhir'; $theme = 'red';
+            } elseif ($att && $att->check_in_time) {
+                if ($att->check_out_time) {
+                    $badge = 'Selesai'; $theme = 'green';
+                } elseif ($att->status === 'Terlambat') {
+                    $badge = 'Terlambat'; $theme = 'yellow';
+                } else {
+                    $badge = 'Hadir'; $theme = 'green';
+                }
+            } elseif ($now->greaterThanOrEqualTo($startTime)) {
+                $badge = 'Berlangsung'; $theme = 'blue';
+            } else {
+                $badge = 'Belum'; $theme = 'slate';
+            }
+
+            return [
+                'id'        => $schedule->id,
+                'classroom' => $schedule->classroom->code
+                    ? strtoupper(str_replace('-', ' ', $schedule->classroom->code))
+                    : ($schedule->classroom->name ?? '-'),
+                'subject'   => $schedule->subject->name ?? '-',
+                'period'    => $schedule->period,
+                'start'     => $startTime->format('H:i'),
+                'end'       => $endTime->format('H:i'),
+                'badge'     => $badge,
+                'theme'     => $theme,
+                'hasCheckIn'  => (bool) $att?->check_in_time,
+                'hasCheckOut' => (bool) $att?->check_out_time,
+            ];
+        });
+
+        // Build reminders
+        $reminders = [];
+
+        // Check daily attendance
+        $dailyAtt = \App\Models\Attendance::where('user_id', $user->id)
+            ->whereDate('date', $today)->first();
+        if (!$dailyAtt) {
+            $reminders[] = '⚠️ Anda belum scan presensi harian hari ini!';
+        }
+
+        // Check class scans
+        $unscannedClasses = $schedules->filter(fn ($s) => !$s->classAttendances->first()?->check_in_time);
+        foreach ($unscannedClasses as $s) {
+            $className = $s->classroom->code
+                ? strtoupper(str_replace('-', ' ', $s->classroom->code))
+                : ($s->classroom->name ?? '-');
+            $reminders[] = "📋 Belum scan masuk kelas {$className} (Jam ke-{$s->period})";
+        }
+
+        // Check pending check-outs
+        $pendingOuts = $schedules->filter(
+            fn ($s) => $s->classAttendances->first()?->check_in_time && !$s->classAttendances->first()?->check_out_time
+        );
+        foreach ($pendingOuts as $s) {
+            $className = $s->classroom->code
+                ? strtoupper(str_replace('-', ' ', $s->classroom->code))
+                : ($s->classroom->name ?? '-');
+            $reminders[] = "🔔 Jangan lupa scan keluar kelas {$className}!";
+        }
+
+        if (empty($reminders)) {
+            $reminders[] = '✅ Semua presensi hari ini sudah lengkap. Terima kasih!';
+        }
+
+        return response()->json([
+            'stats' => [
+                'total'      => $totalClasses,
+                'completed'  => $completedClasses,
+                'inProgress' => $inProgressClasses,
+            ],
+            'schedules' => $items,
+            'reminders' => $reminders,
+        ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
     // scan — entry point utama dari view teacher
     // ──────────────────────────────────────────────────────────────────────────
 

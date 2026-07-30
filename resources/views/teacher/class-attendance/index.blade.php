@@ -22,20 +22,49 @@
             </div>
         </div>
 
+        <!-- Running Text Reminder -->
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-navy-800 to-navy-900 dark:from-slate-800 dark:to-slate-900 px-4 py-2.5 shadow-lg" id="reminder-bar">
+            <div class="flex items-center gap-3">
+                <span class="flex-shrink-0 w-6 h-6 bg-gold-400 dark:bg-gold-500 rounded-full flex items-center justify-center">
+                    <i data-lucide="bell" class="w-3.5 h-3.5 text-navy-900"></i>
+                </span>
+                <div class="overflow-hidden flex-1">
+                    <div class="marquee-track" id="reminder-marquee">
+                        <span class="marquee-text text-xs font-medium text-white/90" id="reminder-text">
+                            @php
+                                $user = auth()->user();
+                                $dailyAtt = \App\Models\Attendance::where('user_id', $user->id)->whereDate('date', today())->first();
+                                $msgs = [];
+                                if (!$dailyAtt) $msgs[] = '⚠️ Anda belum scan presensi harian hari ini!';
+                                foreach ($schedules as $s) {
+                                    $att = $s->classAttendances->first();
+                                    $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
+                                    if (!$att || !$att->check_in_time) $msgs[] = "📋 Belum scan masuk kelas {$cn} (Jam ke-{$s->period})";
+                                    elseif ($att->check_in_time && !$att->check_out_time) $msgs[] = "🔔 Jangan lupa scan keluar kelas {$cn}!";
+                                }
+                                if (empty($msgs)) $msgs[] = '✅ Semua presensi hari ini sudah lengkap. Terima kasih!';
+                            @endphp
+                            {{ implode('     •     ', $msgs) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Progress Stats -->
         <div class="grid grid-cols-3 gap-2 sm:gap-4">
             <div class="card p-3 sm:p-4">
                 <p class="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Total Kelas</p>
-                <p class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white mt-0.5">{{ $totalClasses }}</p>
+                <p class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white mt-0.5" id="stat-total-classes">{{ $totalClasses }}</p>
             </div>
             <div class="card p-3 sm:p-4">
                 <p class="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Berlangsung</p>
-                <p class="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400 mt-0.5">{{ $inProgressClasses }}
+                <p class="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400 mt-0.5" id="stat-in-progress">{{ $inProgressClasses }}
                 </p>
             </div>
             <div class="card p-3 sm:p-4">
                 <p class="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 truncate">Selesai</p>
-                <p class="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-0.5">{{ $completedClasses }}
+                <p class="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-0.5" id="stat-completed">{{ $completedClasses }}
                 </p>
             </div>
         </div>
@@ -220,7 +249,7 @@
         <!-- Jadwal Hari Ini (UPDATED LOGIC) -->
         <div class="card p-4 sm:p-6">
             <h3 class="text-base font-bold text-navy-800 dark:text-white mb-4">Jadwal Hari Ini</h3>
-            <div class="space-y-3">
+            <div class="space-y-3" id="schedule-container">
                 @foreach($schedules as $schedule)
                     @php
                         $now = now();
@@ -228,8 +257,9 @@
                         $endTime = \Carbon\Carbon::parse($schedule->end_time);
                         $att = $schedule->classAttendances->first();
 
-                        // Logika Status Badge
-                        $isEnded = $now->greaterThan($endTime);
+                        // Logika Status Badge (3 menit grace period)
+                        $graceEnd = $endTime->copy()->addMinutes(3);
+                        $isEnded = $now->greaterThan($graceEnd);
 
                         if ($isEnded) {
                             $badgeText = 'Berakhir';
@@ -1287,8 +1317,64 @@
                     this.resultData = data?.data || data || null;
 
                     if (this.resultSuccess) {
-                        setTimeout(() => window.location.reload(), 2500);
+                        // AJAX refresh instead of full page reload
+                        setTimeout(() => this.refreshScheduleData(), 1500);
                     }
+                },
+
+                refreshScheduleData() {
+                    fetch('{{ route("teacher.class-attendance.refresh") }}', {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        // Update stats cards
+                        const statTotal = document.getElementById('stat-total-classes');
+                        const statProgress = document.getElementById('stat-in-progress');
+                        const statComplete = document.getElementById('stat-completed');
+                        if (statTotal) statTotal.textContent = data.stats.total;
+                        if (statProgress) statProgress.textContent = data.stats.inProgress;
+                        if (statComplete) statComplete.textContent = data.stats.completed;
+
+                        // Update schedule cards
+                        const container = document.getElementById('schedule-container');
+                        if (container && data.schedules) {
+                            const themeClasses = {
+                                red:    { bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', iconBg: 'bg-red-100 dark:bg-red-900/30', badgeBg: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' },
+                                green:  { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-800', iconBg: 'bg-green-100 dark:bg-green-900/30', badgeBg: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' },
+                                yellow: { bg: 'bg-yellow-50 dark:bg-yellow-900/20', border: 'border-yellow-200 dark:border-yellow-800', iconBg: 'bg-yellow-100 dark:bg-yellow-900/30', badgeBg: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' },
+                                blue:   { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', iconBg: 'bg-blue-100 dark:bg-blue-900/30', badgeBg: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' },
+                                slate:  { bg: 'bg-slate-50 dark:bg-slate-700/30', border: 'border-slate-200 dark:border-slate-700', iconBg: 'bg-slate-200 dark:bg-slate-600', badgeBg: 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-400' },
+                            };
+                            container.innerHTML = data.schedules.map(s => {
+                                const tc = themeClasses[s.theme] || themeClasses.slate;
+                                return `<div class="p-3.5 sm:p-4 rounded-xl border-2 transition-all ${tc.bg} ${tc.border}">
+                                    <div class="flex items-center justify-between gap-2.5">
+                                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                                            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${tc.iconBg}">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0Z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-sm font-bold text-navy-800 dark:text-white truncate">${s.classroom}</p>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400 truncate">${s.subject} • Jam ke-${s.period}</p>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400 truncate">${s.start} - ${s.end}</p>
+                                            </div>
+                                        </div>
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold flex-shrink-0 ${tc.badgeBg}">${s.badge}</span>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        }
+
+                        // Update reminder marquee
+                        const reminderText = document.getElementById('reminder-text');
+                        if (reminderText && data.reminders) {
+                            reminderText.textContent = data.reminders.join('     •     ');
+                        }
+                    })
+                    .catch(err => console.error('Refresh error:', err));
                 }
             }
         }
@@ -1334,6 +1420,22 @@
 
         [x-cloak] {
             display: none !important;
+        }
+
+        /* Marquee animation */
+        .marquee-track {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+        }
+
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes marquee {
+            0%   { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
     </style>
 @endsection
