@@ -129,7 +129,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 {{ $reportType === 'class' ? 'md:grid-cols-3' : 'md:grid-cols-4' }} gap-4" id="stats-container">
+    <div class="grid grid-cols-2 {{ $reportType === 'class' ? 'md:grid-cols-4' : 'md:grid-cols-5' }} gap-4" id="stats-container">
         <div class="card p-4 group hover:shadow-lg transition-all">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -171,13 +171,26 @@
 
         <div class="card p-4 group hover:shadow-lg transition-all">
             <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i data-lucide="info" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Izin/Sakit</p>
+                    <h3 class="text-xl font-bold text-navy-800 dark:text-white" id="stat-izin">{{ $totalStats['izin'] + $totalStats['sakit'] }}</h3>
+                    <p class="text-[10px] text-indigo-500">Izin & Sakit Guru</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 group hover:shadow-lg transition-all">
+            <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <i data-lucide="x-circle" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Alpha/Izin</p>
-                    <h3 class="text-xl font-bold text-navy-800 dark:text-white" id="stat-alpha">{{ $totalStats['alpha'] + $totalStats['izin'] + $totalStats['sakit'] }}</h3>
-                    <p class="text-[10px] text-red-500">Ketidakhadiran guru</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Alfa</p>
+                    <h3 class="text-xl font-bold text-navy-800 dark:text-white" id="stat-alpha">{{ $totalStats['alpha'] }}</h3>
+                    <p class="text-[10px] text-red-500">Ketidakhadiran tanpa keterangan</p>
                 </div>
             </div>
         </div>
@@ -313,7 +326,8 @@
                 if (data.stats) {
                     document.getElementById('stat-hadir').textContent = data.stats.hadir;
                     document.getElementById('stat-terlambat').textContent = data.stats.terlambat;
-                    document.getElementById('stat-alpha').textContent = data.stats.alpha + data.stats.izin + data.stats.sakit;
+                    document.getElementById('stat-izin').textContent = data.stats.izin + data.stats.sakit;
+                    document.getElementById('stat-alpha').textContent = data.stats.alpha;
                 }
                 if (data.kehadiranRate !== undefined) document.getElementById('stat-rate').textContent = data.kehadiranRate + '% tingkat kehadiran';
 
@@ -325,15 +339,15 @@
                     if (cardTerlambat) cardTerlambat.style.display = 'none';
                     if (legendTelat) legendTelat.style.display = 'none';
                     if (statsContainer) {
-                        statsContainer.classList.remove('md:grid-cols-4');
-                        statsContainer.classList.add('md:grid-cols-3');
+                        statsContainer.classList.remove('md:grid-cols-5');
+                        statsContainer.classList.add('md:grid-cols-4');
                     }
                 } else {
                     if (cardTerlambat) cardTerlambat.style.display = 'block';
                     if (legendTelat) legendTelat.style.display = 'flex';
                     if (statsContainer) {
-                        statsContainer.classList.remove('md:grid-cols-3');
-                        statsContainer.classList.add('md:grid-cols-4');
+                        statsContainer.classList.remove('md:grid-cols-4');
+                        statsContainer.classList.add('md:grid-cols-5');
                     }
                 }
 
