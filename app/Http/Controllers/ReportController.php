@@ -460,14 +460,10 @@ class ReportController extends Controller
                     $hasSchedule = TeacherSchedule::where('user_id', $teacher->id)
                         ->where('day_of_week', $dayOfWeek)->where('is_active', true)->exists();
 
-                    if ($isWeekend || $isHoliday || !$hasSchedule) {
-                        $teacherData['days'][$dateStr] = ['status' => 'libur', 'code' => '-'];
-                        continue;
-                    }
-
                     $attKey     = $teacher->id . '_' . $dateStr;
                     $attendance = $attendances->get($attKey)?->first();
 
+                    // Jika ada record absensi, tampilkan langsung (tanpa syarat jadwal kerja)
                     if ($attendance) {
                         $code = match($attendance->status) {
                             'Hadir', 'Tepat Waktu' => 'H',
@@ -480,24 +476,29 @@ class ReportController extends Controller
                         $teacherData['days'][$dateStr] = ['status' => strtolower($attendance->status), 'code' => $code];
                         $teacherData['summary'][$code]++;
                         $statusKey = strtolower($attendance->status);
-                        if ($statusKey === 'tepat waktu') {
-                            $statusKey = 'hadir';
-                        }
+                        if ($statusKey === 'tepat waktu') $statusKey = 'hadir';
                         if (isset($totalStats[$statusKey])) $totalStats[$statusKey]++;
-                    } else {
-                        $onLeave = $leaves->first(fn($l) => $l->user_id === $teacher->id 
-                            && $l->start_date->toDateString() <= $dateStr && $l->end_date->toDateString() >= $dateStr);
+                        continue;
+                    }
 
-                        if ($onLeave) {
-                            $code = $onLeave->type === 'sakit' ? 'S' : 'I';
-                            $teacherData['days'][$dateStr] = ['status' => $onLeave->type, 'code' => $code];
-                            $teacherData['summary'][$code]++;
-                            $totalStats[$onLeave->type === 'sakit' ? 'sakit' : 'izin']++;
-                        } else {
-                            $teacherData['days'][$dateStr] = ['status' => 'alpha', 'code' => 'A'];
-                            $teacherData['summary']['A']++;
-                            $totalStats['alpha']++;
-                        }
+                    // Tidak ada record absensi — tentukan libur atau alpha
+                    if ($isWeekend || $isHoliday || !$hasSchedule) {
+                        $teacherData['days'][$dateStr] = ['status' => 'libur', 'code' => '-'];
+                        continue;
+                    }
+
+                    $onLeave = $leaves->first(fn($l) => $l->user_id === $teacher->id
+                        && $l->start_date->toDateString() <= $dateStr && $l->end_date->toDateString() >= $dateStr);
+
+                    if ($onLeave) {
+                        $code = $onLeave->type === 'sakit' ? 'S' : 'I';
+                        $teacherData['days'][$dateStr] = ['status' => $onLeave->type, 'code' => $code];
+                        $teacherData['summary'][$code]++;
+                        $totalStats[$onLeave->type === 'sakit' ? 'sakit' : 'izin']++;
+                    } else {
+                        $teacherData['days'][$dateStr] = ['status' => 'alpha', 'code' => 'A'];
+                        $teacherData['summary']['A']++;
+                        $totalStats['alpha']++;
                     }
                 }
 
@@ -552,7 +553,9 @@ class ReportController extends Controller
                         });
 
                         $classInfo = [
-                            'classroom' => $schedule->classroom->name ?? '-',
+                            'classroom' => $schedule->classroom->code
+                                ? strtoupper(str_replace('-', ' ', $schedule->classroom->code))
+                                : ($schedule->classroom->name ?? '-'),
                             'subject'   => $schedule->subject->name ?? '-',
                             'period'    => $schedule->period,
                             'status'    => 'A',
@@ -596,8 +599,11 @@ class ReportController extends Controller
 
                         $totalClasses++;
 
+                        $ssClassRoom = $ssAtt->selectedClassroom ?? $ssAtt->classroom;
                         $ssClassInfo = [
-                            'classroom' => $ssAtt->selectedClassroom->name ?? ($ssAtt->classroom->name ?? '-'),
+                            'classroom' => $ssClassRoom?->code
+                                ? strtoupper(str_replace('-', ' ', $ssClassRoom->code))
+                                : ($ssClassRoom?->name ?? '-'),
                             'subject'   => $ssAtt->subject->name ?? '-',
                             'period'    => $ssAtt->period,
                             'status'    => 'A',
