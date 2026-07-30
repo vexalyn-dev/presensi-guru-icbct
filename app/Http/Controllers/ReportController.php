@@ -569,20 +569,22 @@ class ReportController extends Controller
                                 $checkIn        = Carbon::parse("{$checkInDateStr} {$checkInStr}");
                                 $checkOut       = Carbon::parse("{$checkInDateStr} {$checkOutStr}");
                                 $duration       = (int) max(0, round($checkIn->diffInMinutes($checkOut)));
-                                
+
                                 if ($duration >= 30) {
-                                    if (in_array($attendance->status, ['Hadir', 'Tepat Waktu', 'Selesai'])) { 
-                                        $attendedCount++; 
-                                        $classInfo['status'] = 'H'; 
-                                    } elseif ($attendance->status === 'Terlambat') { 
-                                        $lateCount++; 
-                                        $classInfo['status'] = 'T'; 
+                                    $attendedCount++;
+                                    if ($attendance->status === 'Terlambat') {
+                                        $lateCount++;
+                                        $classInfo['status'] = 'T';
+                                    } else {
+                                        $classInfo['status'] = 'H';
                                     }
                                 } else {
                                     $classInfo['status'] = 'A';
                                 }
                             } elseif ($attendance->check_in_time && !$attendance->check_out_time) {
-                                $classInfo['status'] = 'NL';
+                                // Masih di kelas (belum scan keluar) — tetap hitung hadir
+                                $attendedCount++;
+                                $classInfo['status'] = 'H';
                             }
                         }
 
@@ -620,7 +622,9 @@ class ReportController extends Controller
                                 $ssClassInfo['status'] = 'H';
                             }
                         } elseif ($ssAtt->check_in_time && !$ssAtt->check_out_time) {
-                            $ssClassInfo['status'] = 'NL';
+                            // Masih di kelas — hitung hadir
+                            $attendedCount++;
+                            $ssClassInfo['status'] = 'H';
                         }
 
                         $classDetails[] = $ssClassInfo;
