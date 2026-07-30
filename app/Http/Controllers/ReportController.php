@@ -524,49 +524,67 @@ class ReportController extends Controller
                     'all_classrooms' => '',
                 ];
 
-                // Kumpulkan semua kelas unik dari jadwal mengajar aktif guru + kelas yang pernah di-scan
-                $scheduledClassrooms = TeachingSchedule::where('user_id', $teacher->id)
+                // Kelas hari ini saja (untuk dropdown) — filter by today's day_of_week
+                $todayDayOfWeek = Carbon::now()->dayOfWeek;
+                $todayStr       = Carbon::today()->toDateString();
+
+                $todayScheduledClassrooms = TeachingSchedule::where('user_id', $teacher->id)
                     ->where('is_active', true)
+                    ->where('day_of_week', $todayDayOfWeek)
                     ->with('classroom')
                     ->get()
                     ->map(fn($s) => $s->classroom);
 
-                $attendedClassrooms = $classAttendances->filter(function ($att) use ($teacher) {
-                    return $att->user_id === $teacher->id && $att->check_in_time !== null;
-                })->map(function ($att) {
-                    return $att->selectedClassroom ?? $att->classroom;
-                });
+                // Kelas shared-space yang di-scan hari ini
+                $todayAttendedClassrooms = $classAttendances->filter(function ($att) use ($teacher, $todayStr) {
+                    return $att->user_id === $teacher->id
+                        && $att->check_in_time !== null
+                        && $att->date->toDateString() === $todayStr;
+                })->map(fn($att) => $att->selectedClassroom ?? $att->classroom);
 
-                $mergedClassrooms = collect()
-                    ->concat($scheduledClassrooms)
-                    ->concat($attendedClassrooms)
+                $todayMergedClassrooms = collect()
+                    ->concat($todayScheduledClassrooms)
+                    ->concat($todayAttendedClassrooms)
                     ->filter()
                     ->unique('id')
                     ->values();
 
-                $classroomsList = [];
-                $attendedClassroomIds = $classAttendances->filter(function ($att) use ($teacher) {
-                    return $att->user_id === $teacher->id && $att->check_in_time !== null;
+                // Classroom IDs yang sudah di-scan hari ini
+                $todayAttendedIds = $classAttendances->filter(function ($att) use ($teacher, $todayStr) {
+                    return $att->user_id === $teacher->id
+                        && $att->check_in_time !== null
+                        && $att->date->toDateString() === $todayStr;
                 })->map(fn($att) => $att->selected_classroom_id ?? $att->classroom_id)
                   ->filter()->unique()->toArray();
 
-                foreach ($mergedClassrooms as $cls) {
+                $classroomsList = [];
+                foreach ($todayMergedClassrooms as $cls) {
                     $name = $cls->code
                         ? strtoupper(str_replace('-', ' ', $cls->code))
                         : ($cls->name ?? '-');
-                    
+
                     $classroomsList[] = [
                         'id'       => $cls->id,
                         'name'     => $name,
-                        'attended' => in_array($cls->id, $attendedClassroomIds),
+                        'attended' => in_array($cls->id, $todayAttendedIds),
                     ];
                 }
-                
+
                 // Urutkan alfabetis
                 usort($classroomsList, fn($a, $b) => strcmp($a['name'], $b['name']));
 
+                // all_classrooms (semua jadwal aktif) — untuk kolom summary & Excel
+                $allScheduledNames = TeachingSchedule::where('user_id', $teacher->id)
+                    ->where('is_active', true)
+                    ->with('classroom')
+                    ->get()
+                    ->map(fn($s) => $s->classroom?->code
+                        ? strtoupper(str_replace('-', ' ', $s->classroom->code))
+                        : ($s->classroom?->name ?? null))
+                    ->filter()->unique()->sort()->values()->implode(' / ');
+
                 $teacherData['classrooms_list'] = $classroomsList;
-                $teacherData['all_classrooms']  = implode(' / ', array_column($classroomsList, 'name')) ?: '-';
+                $teacherData['all_classrooms']  = $allScheduledNames ?: '-';
 
                 foreach ($dates as $date) {
                     $dateStr   = $date->toDateString();
