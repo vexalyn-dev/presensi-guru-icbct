@@ -116,20 +116,13 @@ class ClassAttendanceController extends Controller
         // Build reminders
         $reminders = [];
 
-        // Check daily attendance
-        $dailyAtt = \App\Models\Attendance::where('user_id', $user->id)
-            ->whereDate('date', $today)->first();
-        if (!$dailyAtt) {
-            $reminders[] = '⚠️ Anda belum scan presensi harian hari ini!';
-        }
-
         // Check class scans
         $unscannedClasses = $schedules->filter(fn ($s) => !$s->classAttendances->first()?->check_in_time);
         foreach ($unscannedClasses as $s) {
             $className = $s->classroom->code
                 ? strtoupper(str_replace('-', ' ', $s->classroom->code))
                 : ($s->classroom->name ?? '-');
-            $reminders[] = "📋 Belum scan masuk kelas {$className} (Jam ke-{$s->period})";
+            $reminders[] = "Anda belum scan masuk kelas {$className}";
         }
 
         // Check pending check-outs
@@ -140,11 +133,7 @@ class ClassAttendanceController extends Controller
             $className = $s->classroom->code
                 ? strtoupper(str_replace('-', ' ', $s->classroom->code))
                 : ($s->classroom->name ?? '-');
-            $reminders[] = "🔔 Jangan lupa scan keluar kelas {$className}!";
-        }
-
-        if (empty($reminders)) {
-            $reminders[] = '✅ Semua presensi hari ini sudah lengkap. Terima kasih!';
+            $reminders[] = "Anda belum scan keluar kelas {$className}";
         }
 
         return response()->json([

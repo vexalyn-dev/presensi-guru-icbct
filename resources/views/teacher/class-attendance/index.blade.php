@@ -3,26 +3,28 @@
 @section('page-title', 'Presensi Kelas')
 
 @section('topbar-reminder')
-    <div class="overflow-hidden max-w-[260px] sm:max-w-sm mt-0.5" id="reminder-bar">
-        <div class="marquee-track" id="reminder-marquee">
-            <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400" id="reminder-text">
-                @php
-                    $user = auth()->user();
-                    $dailyAtt = \App\Models\Attendance::where('user_id', $user->id)->whereDate('date', today())->first();
-                    $msgs = [];
-                    if (!$dailyAtt) $msgs[] = '⚠️ Belum scan presensi harian!';
-                    foreach ($schedules as $s) {
-                        $att = $s->classAttendances->first();
-                        $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
-                        if (!$att || !$att->check_in_time) $msgs[] = "📋 Belum scan masuk {$cn}";
-                        elseif ($att->check_in_time && !$att->check_out_time) $msgs[] = "🔔 Scan keluar {$cn}!";
-                    }
-                    if (empty($msgs)) $msgs[] = '✅ Presensi lengkap!';
-                @endphp
-                {{ implode('   •   ', $msgs) }}
-            </span>
+    @php
+        $user = auth()->user();
+        $msgs = [];
+        foreach ($schedules as $s) {
+            $att = $s->classAttendances->first();
+            $cn = $s->classroom->code ? strtoupper(str_replace('-', ' ', $s->classroom->code)) : ($s->classroom->name ?? '-');
+            if (!$att || !$att->check_in_time) {
+                $msgs[] = "Anda belum scan masuk kelas {$cn}";
+            } elseif ($att->check_in_time && !$att->check_out_time) {
+                $msgs[] = "Anda belum scan keluar kelas {$cn}";
+            }
+        }
+    @endphp
+    @if(!empty($msgs))
+        <div class="overflow-hidden max-w-[260px] sm:max-w-sm mt-0.5" id="reminder-bar">
+            <div class="marquee-track" id="reminder-marquee">
+                <span class="text-[11px] font-medium text-amber-600 dark:text-amber-400" id="reminder-text">
+                    ⚠️ {{ implode('  •  ', $msgs) }}
+                </span>
+            </div>
         </div>
-    </div>
+    @endif
 @endsection
 
 @section('content')
@@ -1363,9 +1365,17 @@
                         }
 
                         // Update reminder marquee
+                        const reminderBar = document.getElementById('reminder-bar');
                         const reminderText = document.getElementById('reminder-text');
-                        if (reminderText && data.reminders) {
-                            reminderText.textContent = data.reminders.join('     •     ');
+                        if (data.reminders) {
+                            // Only keep class-specific scan reminders
+                            const classReminders = data.reminders.filter(r => r.includes('belum scan') || r.includes('scan keluar'));
+                            if (classReminders.length > 0 && reminderText) {
+                                reminderText.textContent = '⚠️ ' + classReminders.join('  •  ');
+                                if (reminderBar) reminderBar.style.display = '';
+                            } else if (reminderBar) {
+                                reminderBar.style.display = 'none';
+                            }
                         }
                     })
                     .catch(err => console.error('Refresh error:', err));
