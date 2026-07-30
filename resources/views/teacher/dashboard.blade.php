@@ -548,7 +548,7 @@
         align-items: center;
         justify-content: center;
         flex-direction: column;
-        gap: 1.25rem;
+        gap: 1rem;
         background: var(--ls-bg, #f8fafc);
         transition: opacity 0.5s ease, visibility 0.5s ease;
     }
@@ -558,18 +558,20 @@
         visibility: hidden;
         pointer-events: none;
     }
-    #teacher-loading-screen .ls-spinner {
-        width: 56px; height: 56px;
-        border: 4px solid #e2e8f0;
-        border-top-color: #1e3a5f;
-        border-radius: 50%;
-        animation: ls-spin 0.75s linear infinite;
+    /* GIF loading image — responsif */
+    #teacher-loading-screen .ls-gif {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
     }
-    .dark #teacher-loading-screen .ls-spinner {
-        border-color: #334155;
-        border-top-color: #facc15;
+    @media (max-width: 480px) {
+        #teacher-loading-screen .ls-gif {
+            width: 90px;
+            height: 90px;
+        }
     }
-    @keyframes ls-spin { to { transform: rotate(360deg); } }
+    /* Fallback spinner (jika GIF tidak ditemukan) */
+    @keyframes ls-spin-fb { to { transform: rotate(360deg); } }
 
     /* Modal Welcome */
     #welcome-modal-overlay {
@@ -608,9 +610,23 @@
 </style>
 
 @if(session('show_welcome'))
-{{-- Loading Screen --}}
+{{-- ═══════════════════════════════════════════════════════════
+     LOADING SCREEN
+     ─────────────────────────────────────────────────────────
+     Untuk mengganti GIF:
+       1. Upload file GIF ke folder: public/images/
+       2. Ubah src pada tag <img> di bawah ini menjadi path GIF kamu
+          Contoh: src="{{ asset('images/nama-file-kamu.gif') }}"
+     ═══════════════════════════════════════════════════════════ --}}
 <div id="teacher-loading-screen">
-    <div class="ls-spinner"></div>
+    {{-- ↓↓↓ GANTI SRC INI DENGAN PATH GIF KAMU ↓↓↓ --}}
+    <img src="{{ asset('images/loading.gif') }}"
+         alt="Loading..."
+         class="ls-gif"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+    {{-- Fallback spinner jika GIF tidak ditemukan --}}
+    <div style="display:none; width:56px; height:56px; border:4px solid #e2e8f0; border-top-color:#1e3a5f; border-radius:50%; animation: ls-spin-fb 0.75s linear infinite;"></div>
+    {{-- ↑↑↑ SAMPAI SINI ↑↑↑ --}}
     <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 tracking-wide">Memuat Dashboard...</p>
 </div>
 
