@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="fade-in space-y-3 sm:space-y-6 w-full max-w-full overflow-x-hidden px-3 sm:px-0">
+<div class="fade-in space-y-3 sm:space-y-6 w-full max-w-full overflow-x-hidden">
     
     <!-- Welcome Card -->
     <div class="card p-4 sm:p-6 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:to-gold-400 text-white overflow-hidden">
@@ -65,54 +65,54 @@
 
     <!-- Statistics Cards - 2 columns on mobile, 4 on desktop -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 w-full">
-        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0">
+        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0 overflow-hidden">
             <div class="flex items-center gap-2 sm:gap-4">
-                <div class="w-9 h-9 sm:w-12 sm:h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="calendar-check" class="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400"></i>
+                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <i data-lucide="calendar-check" class="w-3.5 h-3.5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400"></i>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Hadir Bulan Ini</p>
-                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white">{{ $stats['hadir'] }}</h3>
-                    <p class="text-[10px] sm:text-[10px] text-blue-500 leading-tight">Bulan ini</p>
+                    <p class="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Hadir Bulan Ini</p>
+                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['hadir'] }}</h3>
+                    <p class="text-[9px] text-blue-500 leading-tight truncate">Bulan ini</p>
                 </div>
             </div>
         </div>
 
-        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0">
+        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0 overflow-hidden">
             <div class="flex items-center gap-2 sm:gap-4">
-                <div class="w-9 h-9 sm:w-12 sm:h-12 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="clock" class="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600 dark:text-yellow-400"></i>
+                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 sm:w-6 sm:h-6 text-yellow-600 dark:text-yellow-400"></i>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Terlambat</p>
-                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white">{{ $stats['terlambat'] }}</h3>
-                    <p class="text-[10px] sm:text-[10px] text-yellow-600 leading-tight">Perlu perbaikan</p>
+                    <p class="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Terlambat</p>
+                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['terlambat'] }}</h3>
+                    <p class="text-[9px] text-yellow-600 leading-tight truncate">Perlu perbaikan</p>
                 </div>
             </div>
         </div>
 
-        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0">
+        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0 overflow-hidden">
             <div class="flex items-center gap-2 sm:gap-4">
-                <div class="w-9 h-9 sm:w-12 sm:h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="file-text" class="w-4 h-4 sm:w-6 sm:h-6 text-green-600 dark:text-green-400"></i>
+                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400"></i>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Izin/Sakit</p>
-                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white">{{ $stats['izin'] }}</h3>
-                    <p class="text-[10px] sm:text-[10px] text-green-500 leading-tight">Disetujui</p>
+                    <p class="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Izin/Sakit</p>
+                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['izin'] }}</h3>
+                    <p class="text-[9px] text-green-500 leading-tight truncate">Disetujui</p>
                 </div>
             </div>
         </div>
 
-        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0">
+        <div class="card p-3 sm:p-5 group hover:shadow-lg transition-all min-w-0 overflow-hidden">
             <div class="flex items-center gap-2 sm:gap-4">
-                <div class="w-9 h-9 sm:w-12 sm:h-12 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-                    <i data-lucide="x-circle" class="w-4 h-4 sm:w-6 sm:h-6 text-red-600 dark:text-red-400"></i>
+                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <i data-lucide="x-circle" class="w-3.5 h-3.5 sm:w-6 sm:h-6 text-red-600 dark:text-red-400"></i>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Alpha</p>
-                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white">{{ $stats['alpha'] }}</h3>
-                    <p class="text-[10px] sm:text-[10px] text-red-500 leading-tight">Tanpa keterangan</p>
+                    <p class="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate leading-tight">Alpha</p>
+                    <h3 class="text-base sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['alpha'] }}</h3>
+                    <p class="text-[9px] text-red-500 leading-tight truncate">Tanpa keterangan</p>
                 </div>
             </div>
         </div>
