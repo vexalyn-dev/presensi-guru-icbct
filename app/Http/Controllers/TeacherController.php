@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Teacher;
 use App\Notifications\SystemNotification;
+use App\Services\ActivityLogService;
 // use App\Models\ClassRoom;
 // use App\Models\TeacherSubject;
 use Illuminate\Http\Request;
@@ -126,6 +127,8 @@ class TeacherController extends Controller
                 route('teachers.index')
             ));
         }
+
+        try { ActivityLogService::teacherCreated(auth()->user(), $user); } catch (\Exception $e) {}
 
         return redirect()->route('teachers.index')->with('success', "Guru berhasil ditambahkan dengan ID: {$employeeCode}!");
     }
@@ -449,6 +452,8 @@ class TeacherController extends Controller
                 'warning'
             ));
         }
+
+        try { ActivityLogService::teacherDeleted(auth()->user(), $teacher); } catch (\Exception $e) {}
 
         return redirect()->route('teachers.index')->with('success', 'Guru berhasil dihapus!');
     }

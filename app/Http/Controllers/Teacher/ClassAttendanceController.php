@@ -12,6 +12,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Helpers\NotificationHelper;
+use App\Services\ActivityLogService;
 use Illuminate\Support\Facades\Log;
 
 class ClassAttendanceController extends Controller
@@ -776,6 +777,14 @@ class ClassAttendanceController extends Controller
             $this->logScan($user, $scannedClassroom, 'in', 'success',
                 "Scan masuk berhasil di kelas {$scheduleClassroomName} ({$attendance->status}) via {$scannedName}", $request);
 
+            // ActivityLog
+            try {
+                ActivityLogService::scanIn($user, $scannedClassroom ?? $schedule->classroom, $schedule, [
+                    'latitude'  => $request->input('latitude'),
+                    'longitude' => $request->input('longitude'),
+                ]);
+            } catch (\Exception $e) { Log::warning('ActivityLog scanIn failed: ' . $e->getMessage()); }
+
             return [
                 'success' => true,
                 'message' => "✅ Scan masuk berhasil di kelas {$scheduleClassroomName}",
@@ -838,6 +847,14 @@ class ClassAttendanceController extends Controller
 
             $this->logScan($user, $scannedClassroom, 'out', 'success',
                 "Scan keluar berhasil di kelas {$scheduleClassroomName}, durasi {$duration} menit via {$scannedName}", $request);
+
+            // ActivityLog
+            try {
+                ActivityLogService::scanOut($user, $scannedClassroom ?? $schedule->classroom, $schedule, [
+                    'latitude'  => $request->input('latitude'),
+                    'longitude' => $request->input('longitude'),
+                ]);
+            } catch (\Exception $e) { Log::warning('ActivityLog scanOut failed: ' . $e->getMessage()); }
 
             // Kirim notifikasi in-app
             try {

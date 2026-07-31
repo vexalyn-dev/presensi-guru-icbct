@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -47,7 +48,10 @@ class LoginController extends Controller
             
             /** @var \App\Models\User $user */
             $user = Auth::user();
-            
+
+            // Log aktivitas login
+            try { ActivityLogService::login($user); } catch (\Exception $e) {}
+
             return $this->redirectByRole($user);
         }
 

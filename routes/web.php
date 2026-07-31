@@ -31,6 +31,7 @@ use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardControll
 use App\Http\Controllers\Teacher\NotificationController as TeacherNotificationController;
 use App\Http\Controllers\Admin\LeaveApprovalController;
 use App\Http\Controllers\Admin\ManualClassAttendanceController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -199,6 +200,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/holidays/{holiday}', [HolidayController::class, 'update'])->name('holidays.update');
     Route::delete('/holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
     Route::post('/holidays/fetch-national', [HolidayController::class, 'fetchNationalHolidays'])->name('holidays.fetch-national');
+
+    // Activity Logs
+    Route::prefix('activity-logs')->name('activity-logs.')->group(function () {
+        Route::get('/', [ActivityLogController::class, 'index'])->name('index');
+        Route::get('/{log}', [ActivityLogController::class, 'show'])->name('show');
+        Route::post('/cleanup', [ActivityLogController::class, 'destroyOld'])->name('cleanup');
+        Route::get('/export/csv', [ActivityLogController::class, 'export'])->name('export');
+    });
 
     // Manual Class Attendance - dipindah ke grup admin dengan prefix
 });

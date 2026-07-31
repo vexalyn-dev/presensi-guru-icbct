@@ -610,30 +610,33 @@
 </style>
 
 @if(session('show_welcome'))
+{{-- PHP flash berhasil sampai — set flag di sessionStorage agar JS bisa baca --}}
+<script>sessionStorage.setItem('show_welcome_{{ auth()->id() }}', '1');</script>
+@endif
+
 {{-- ═══════════════════════════════════════════════════════════
      LOADING SCREEN
      ─────────────────────────────────────────────────────────
      Untuk mengganti GIF:
        1. Upload file GIF ke folder: public/images/
-       2. Ubah src pada tag <img> di bawah ini menjadi path GIF kamu
-          Contoh: src="{{ asset('images/nama-file-kamu.gif') }}"
+       2. Ubah src pada <img> di bawah menjadi path GIF kamu
+          Contoh: asset('images/nama-file-kamu.gif')
      ═══════════════════════════════════════════════════════════ --}}
-<div id="teacher-loading-screen">
+<div id="teacher-loading-screen" style="display:none;">
     {{-- ↓↓↓ GANTI SRC INI DENGAN PATH GIF KAMU ↓↓↓ --}}
     <img src="{{ asset('images/loading.gif') }}"
          alt="Loading..."
          class="ls-gif"
          onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
     {{-- Fallback spinner jika GIF tidak ditemukan --}}
-    <div style="display:none; width:56px; height:56px; border:4px solid #e2e8f0; border-top-color:#1e3a5f; border-radius:50%; animation: ls-spin-fb 0.75s linear infinite;"></div>
+    <div style="display:none; width:64px; height:64px; border:4px solid #e2e8f0; border-top-color:#1e3a5f; border-radius:50%; animation: ls-spin-fb 0.75s linear infinite;"></div>
     {{-- ↑↑↑ SAMPAI SINI ↑↑↑ --}}
-    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 tracking-wide">Memuat Dashboard...</p>
+    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 tracking-wide mt-2">Memuat Dashboard...</p>
 </div>
 
 {{-- Welcome Modal --}}
-<div id="welcome-modal-overlay">
+<div id="welcome-modal-overlay" style="display:none;">
     <div id="welcome-modal-box">
-        {{-- Emoji + Judul --}}
         <div class="w-16 h-16 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <span class="text-3xl">👋</span>
         </div>
@@ -658,45 +661,57 @@
 
 <script>
 (function () {
-    const loadingEl = document.getElementById('teacher-loading-screen');
-    const modalOverlay = document.getElementById('welcome-modal-overlay');
-    const closeBtn = document.getElementById('welcome-close-btn');
+    var WELCOME_KEY = 'show_welcome_{{ auth()->id() }}';
+    var shouldShow  = sessionStorage.getItem(WELCOME_KEY) === '1';
 
-    // Cek dark mode untuk loading screen
-    if (document.documentElement.classList.contains('dark')) {
-        document.documentElement.style.setProperty('--ls-bg', '#0f172a');
+    // Jika tidak ada flag → tidak tampil apapun
+    if (!shouldShow) return;
+
+    // Hapus flag sekarang agar refresh tidak munculkan lagi
+    sessionStorage.removeItem(WELCOME_KEY);
+
+    var loadingEl    = document.getElementById('teacher-loading-screen');
+    var modalOverlay = document.getElementById('welcome-modal-overlay');
+    var closeBtn     = document.getElementById('welcome-close-btn');
+
+    function closeModal() {
+        if (!modalOverlay) return;
+        modalOverlay.classList.remove('active');
+        setTimeout(function () { modalOverlay.style.display = 'none'; }, 400);
     }
 
-    // Step 1: setelah 1.8 detik → sembunyikan loading screen
-    setTimeout(() => {
-        if (loadingEl) {
-            loadingEl.classList.add('fade-out');
+    // Tampilkan loading screen
+    if (loadingEl) {
+        loadingEl.style.display = 'flex';
+        if (document.documentElement.classList.contains('dark')) {
+            loadingEl.style.background = '#0f172a';
         }
-        // Step 2: setelah loading hilang → tampilkan modal welcome
-        setTimeout(() => {
+    }
+
+    // Setelah 1.8 detik → fade-out loading
+    setTimeout(function () {
+        if (loadingEl) loadingEl.classList.add('fade-out');
+
+        // Setelah loading hilang → tampilkan modal
+        setTimeout(function () {
             if (modalOverlay) {
-                modalOverlay.classList.add('active');
+                modalOverlay.style.display = 'flex';
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        modalOverlay.classList.add('active');
+                    });
+                });
             }
         }, 500);
     }, 1800);
 
-    // Tutup modal saat tombol diklik
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('active');
-        });
-    }
-
-    // Tutup modal saat klik backdrop
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (modalOverlay) {
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('active');
-            }
+        modalOverlay.addEventListener('click', function (e) {
+            if (e.target === modalOverlay) closeModal();
         });
     }
 })();
 </script>
-@endif
 
 @endsection
