@@ -449,7 +449,7 @@ async function showLogDetail(id) {
 
         const userBlock = d.user ? `
         <div class="grid grid-cols-3 gap-3">
-            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col items-center justify-center gap-1.5">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col items-center justify-center gap-1.5">
                 ${d.user.photo_url && !d.user.photo_url.includes('default-teacher')
                     ? `<img src="${d.user.photo_url}" class="w-11 h-11 rounded-full object-cover ring-2 ring-white dark:ring-slate-800 shadow-md">`
                     : `<div class="w-11 h-11 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-extrabold text-base ring-2 ring-white dark:ring-slate-800 shadow-md">${d.user.name.charAt(0).toUpperCase()}</div>`
@@ -457,21 +457,21 @@ async function showLogDetail(id) {
                 <p class="text-xs font-bold text-navy-800 dark:text-white text-center leading-tight">${d.user.name}</p>
                 <p class="text-[10px] text-slate-400 text-center truncate w-full px-1">${d.user.teacher_code || d.user.email}</p>
             </div>
-            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col justify-center">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col justify-center">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Tanggal</p>
                 <p class="text-sm font-bold text-navy-800 dark:text-white">${datePart}</p>
             </div>
-            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col justify-center">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col justify-center">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Pukul</p>
                 <p class="text-2xl font-extrabold text-navy-800 dark:text-white tabular-nums tracking-tight">${timePart}</p>
             </div>
         </div>` : `
         <div class="grid grid-cols-2 gap-3">
-            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Tanggal</p>
                 <p class="text-sm font-bold text-navy-800 dark:text-white">${datePart}</p>
             </div>
-            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Pukul</p>
                 <p class="text-2xl font-extrabold text-navy-800 dark:text-white tabular-nums">${timePart}</p>
             </div>
@@ -479,7 +479,7 @@ async function showLogDetail(id) {
 
         const gpsBlock = loc.map_url ? `
         <a href="${loc.map_url}" target="_blank"
-           class="flex items-center gap-3 p-3.5 rounded-2xl bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900/40 hover:bg-green-100 dark:hover:bg-green-950/50 transition-colors group">
+           class="flex items-center gap-3 p-3.5 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900/40 hover:bg-green-100 dark:hover:bg-green-950/50 transition-colors group">
             <div class="w-9 h-9 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform">
                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </div>
@@ -491,7 +491,7 @@ async function showLogDetail(id) {
         </a>` : '';
 
         const classBlock = props.classroom_name ? `
-        <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40">
+        <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40">
             <p class="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2.5">Detail Kelas</p>
             <div class="grid grid-cols-2 gap-2 text-xs">
                 <div><span class="text-slate-500">Kelas:</span> <span class="font-bold text-navy-800 dark:text-white ml-1">${props.classroom_name}</span></div>
@@ -503,22 +503,22 @@ async function showLogDetail(id) {
 
         content.innerHTML = `
         <div class="space-y-3">
-            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">Keterangan</p>
                 <p class="text-sm font-semibold text-navy-800 dark:text-white leading-snug">${d.description}</p>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
+                <div class="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1">Kategori</p>
                     <p class="text-sm font-bold text-blue-700 dark:text-blue-300">${d.category}</p>
                 </div>
-                <div class="p-3.5 rounded-2xl bg-violet-50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/40">
+                <div class="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/40">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-violet-400 mb-1">Jenis Aktivitas</p>
                     <p class="text-sm font-bold text-violet-700 dark:text-violet-300">${d.type}</p>
                 </div>
             </div>
             ${userBlock}
-            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Informasi Perangkat</p>
                 <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
                     <div><p class="text-[10px] text-slate-400 mb-0.5">IP Address</p><p class="font-bold text-navy-800 dark:text-white font-mono">${d.ip_address||'-'}</p></div>

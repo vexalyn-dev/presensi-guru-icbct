@@ -245,6 +245,8 @@ class TeacherController extends Controller
         try { ActivityLogService::teacherUpdated(auth()->user(), $teacher, array_keys($updateData)); } catch (\Exception $e) {}
 
         // Update teacher record (sync major_specialty with subject)
+
+        // Update teacher record (sync major_specialty with subject)
         if ($teacher->teacher) {
             $oldMajorSpecialty = $teacher->teacher->major_specialty;
             $newMajorSpecialty = $validated['subject'] ?? null;
@@ -280,8 +282,8 @@ class TeacherController extends Controller
             }
         }
 
-        return redirect()->route('teachers.index')
-            ->with('success', 'Data guru berhasil diperbarui');
+        return redirect()->route('teachers.edit', $teacher)
+            ->with('success', 'Data guru berhasil diperbarui' . ($request->hasFile('photo') ? ' (termasuk foto profil)' : ''));
     }
 
     public function importExcel(Request $request)

@@ -141,7 +141,7 @@
                                                     Ubah Foto Profil
                                                 </label>
                                             </div>
-                                            <p class="text-[10px] text-slate-400 mt-2 font-medium italic">Disarankan ukuran 1:1, Maksimal 2MB</p>
+                                            <p id="photo-filename" class="text-[10px] text-slate-400 mt-2 font-medium italic">Disarankan ukuran 1:1, Maksimal 2MB</p>
                                         </div>
                                     </div>
                                 </div>
@@ -546,17 +546,24 @@
             // Preview Image
             function previewImage(input) {
                 if (input.files && input.files[0]) {
+                    const file = input.files[0];
                     const reader = new FileReader();
                     reader.onload = function (e) {
-                        // Coba kedua ID — photo-preview-main atau photo-preview
+                        // Update preview foto
                         const preview = document.getElementById('photo-preview-main') 
                                      || document.getElementById('photo-preview');
                         if (preview) {
                             preview.src = e.target.result;
                             preview.classList.remove('hidden');
                         }
+                        // Tampilkan nama file terpilih
+                        const filenameEl = document.getElementById('photo-filename');
+                        if (filenameEl) {
+                            filenameEl.textContent = '✓ ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB) — klik Simpan untuk menyimpan';
+                            filenameEl.style.color = '#16a34a';
+                        }
                     }
-                    reader.readAsDataURL(input.files[0]);
+                    reader.readAsDataURL(file);
                 }
             }
 
