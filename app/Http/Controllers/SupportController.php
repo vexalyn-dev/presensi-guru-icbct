@@ -11,15 +11,23 @@ use Carbon\Carbon;
 
 class SupportController extends Controller
 {
-    public function __construct(private VexalynService $vexalyn) {}
+    private ?VexalynService $vexalyn = null;
+
+    private function vexalyn(): VexalynService
+    {
+        if (!$this->vexalyn) {
+            $this->vexalyn = new VexalynService();
+        }
+        return $this->vexalyn;
+    }
 
     /** Halaman utama Pusat Bantuan */
     public function index(Request $request)
     {
         $type = $request->get('type', 'bug');
         return view('support.index', [
-            'activeType'  => $type,
-            'typeLabels'  => SupportTicket::typeLabels(),
+            'activeType' => $type,
+            'typeLabels' => SupportTicket::typeLabels(),
         ]);
     }
 
@@ -119,22 +127,28 @@ class SupportController extends Controller
             'ip_address'  => $request->ip(),
         ];
 
-        // Simpan ke database lokal
-        $ticket = SupportTicket::create([
-            'user_id'     => auth()->id(),
-            'type'        => $type,
-            'title'       => $validated['title'],
-            'description' => $validated['description'],
-            'category'    => $validated['category'] ?? null,
-            'priority'    => $validated['priority'],
-            'status'      => 'new',
-            'metadata'    => $metadata,
-            'attachments' => $uploadedFiles,
-            'extra_fields'=> $extraFields,
-        ]);
+        // Simpan ke database lokal (wrapped try-catch jika tabel belum ada)
+        try {
+            $ticket = SupportTicket::create([
+                'user_id'     => auth()->id(),
+                'type'        => $type,
+                'title'       => $validated['title'],
+                'description' => $validated['description'],
+                'category'    => $validated['category'] ?? null,
+                'priority'    => $validated['priority'],
+                'status'      => 'new',
+                'metadata'    => $metadata,
+                'attachments' => $uploadedFiles,
+                'extra_fields'=> $extraFields,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('SupportTicket create failed: ' . $e->getMessage());
+            return redirect()->route('teacher.support')
+                ->with('warning', '⚠️ Laporan gagal disimpan. Hubungi admin untuk menjalankan migrasi database.');
+        }
 
         // Kirim ke Vexalyn
-        $result = $this->vexalyn->sendTicket($ticket);
+        $result = $this->vexalyn()->sendTicket($ticket);
 
         if ($result['success']) {
             $ticket->update([
@@ -157,14 +171,19 @@ class SupportController extends Controller
     /** Riwayat tiket */
     public function history(Request $request)
     {
-        $tickets = SupportTicket::where('user_id', auth()->id())
-            ->orderByDesc('created_at')
-            ->paginate(15);
+        try {
+            $tickets = SupportTicket::where('user_id', auth()->id())
+                ->orderByDesc('created_at')
+                ->paginate(15);
+        } catch (\Exception $e) {
+            // Tabel belum ada — tampilkan empty state
+            $tickets = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
+        }
 
         return view('support.history', [
-            'tickets'      => $tickets,
-            'typeLabels'   => SupportTicket::typeLabels(),
-            'statusLabels' => SupportTicket::statusLabels(),
+            'tickets'        => $tickets,
+            'typeLabels'     => SupportTicket::typeLabels(),
+            'statusLabels'   => SupportTicket::statusLabels(),
             'priorityLabels' => SupportTicket::priorityLabels(),
         ]);
     }
@@ -176,7 +195,7 @@ class SupportController extends Controller
 
         $vexalynData = null;
         if ($ticket->ticket_id) {
-            $result = $this->vexalyn->getTicket($ticket->ticket_id);
+            $result = $this->vexalyn()->getTicket($ticket->ticket_id);
             if ($result['success']) $vexalynData = $result['data'];
         }
 
