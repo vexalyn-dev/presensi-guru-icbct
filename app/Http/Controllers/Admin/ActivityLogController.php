@@ -74,24 +74,44 @@ class ActivityLogController extends Controller
 
     public function show(ActivityLog $log)
     {
+        $categoryLabels = [
+            'attendance' => 'Presensi',
+            'auth'       => 'Autentikasi',
+            'settings'   => 'Pengaturan Sistem',
+            'teacher'    => 'Data Guru',
+            'classroom'  => 'Data Kelas',
+            'system'     => 'Sistem',
+        ];
+        $typeLabels = [
+            'scan_in_daily'   => 'Scan Masuk Harian',
+            'scan_out_daily'  => 'Scan Keluar Harian',
+            'scan_in'         => 'Scan Masuk Kelas',
+            'scan_out'        => 'Scan Keluar Kelas',
+            'login'           => 'Login ke Sistem',
+            'logout'          => 'Logout dari Sistem',
+            'teacher_created' => 'Tambah Data Guru',
+            'teacher_updated' => 'Ubah Data Guru',
+            'teacher_deleted' => 'Hapus Data Guru',
+            'settings_change' => 'Ubah Pengaturan',
+        ];
+
         return response()->json([
             'success' => true,
             'data' => [
                 'id' => $log->id,
                 'user' => $log->user ? [
-                    'name' => $log->user->name,
-                    'email' => $log->user->email,
+                    'name'         => $log->user->name,
+                    'email'        => $log->user->email,
                     'teacher_code' => $log->user->teacher_code,
-                    'photo_url' => $log->user->photo_url,
                 ] : null,
-                'type' => $log->type,
-                'category' => $log->category,
+                'type'        => $typeLabels[$log->type] ?? ucfirst(str_replace('_', ' ', $log->type)),
+                'category'    => $categoryLabels[$log->category] ?? ucfirst($log->category),
                 'description' => $log->description,
-                'ip_address' => $log->ip_address,
-                'user_agent' => $log->user_agent,
+                'ip_address'  => $log->ip_address,
+                'user_agent'  => $log->user_agent,
                 'device_info' => $log->device,
-                'properties' => $log->properties,
-                'created_at' => $log->created_at->format('d M Y H:i:s'),
+                'properties'  => $log->properties,
+                'created_at'  => $log->created_at->format('d M Y H:i:s'),
             ],
         ]);
     }
@@ -132,32 +152,50 @@ class ActivityLogController extends Controller
         ];
 
         $callback = function() use ($logs) {
-            $file = fopen('php://output', 'w');
-            
-            // BOM untuk Excel baca UTF-8
-            fwrite($file, "\xEF\xBB\xBF");
-            
-            // Header
-            fputcsv($file, [
-                'ID', 'Tanggal', 'User', 'Kategori', 'Tipe', 'Deskripsi',
-                'IP Address', 'Device', 'Browser', 'OS'
-            ], ',');
+            $categoryLabels = [
+                'attendance' => 'Presensi',
+                'auth'       => 'Autentikasi',
+                'settings'   => 'Pengaturan Sistem',
+                'teacher'    => 'Data Guru',
+                'classroom'  => 'Data Kelas',
+                'system'     => 'Sistem',
+            ];
+            $typeLabels = [
+                'scan_in_daily'   => 'Scan Masuk Harian',
+                'scan_out_daily'  => 'Scan Keluar Harian',
+                'scan_in'         => 'Scan Masuk Kelas',
+                'scan_out'        => 'Scan Keluar Kelas',
+                'login'           => 'Login ke Sistem',
+                'logout'          => 'Logout dari Sistem',
+                'teacher_created' => 'Tambah Data Guru',
+                'teacher_updated' => 'Ubah Data Guru',
+                'teacher_deleted' => 'Hapus Data Guru',
+                'settings_change' => 'Ubah Pengaturan',
+            ];
 
-            // Data
-            foreach ($logs as $log) {
-                $device = $log->device;
+            $file = fopen('php://output', 'w');
+            // BOM agar Excel baca UTF-8 dengan benar
+            fwrite($file, "\xEF\xBB\xBF");
+
+            fputcsv($file, [
+                'No', 'Tanggal & Waktu', 'Nama Guru', 'Kategori', 'Jenis Aktivitas',
+                'Keterangan', 'Alamat IP', 'Perangkat', 'Browser', 'Sistem Operasi'
+            ], ';'); // pakai semicolon agar Excel baca kolom terpisah
+
+            foreach ($logs as $i => $log) {
+                $device = $log->device ?? [];
                 fputcsv($file, [
-                    $log->id,
+                    $i + 1,
                     $log->created_at->format('d/m/Y H:i:s'),
                     $log->user?->name ?? 'Sistem',
-                    $this->getCategoryLabel($log->category),
-                    $this->getTypeLabel($log->type),
+                    $categoryLabels[$log->category] ?? ucfirst($log->category),
+                    $typeLabels[$log->type] ?? ucfirst(str_replace('_', ' ', $log->type)),
                     $log->description,
                     $log->ip_address ?? '-',
                     $device['device'] ?? '-',
                     $device['browser'] ?? '-',
                     $device['os'] ?? '-',
-                ], ',');
+                ], ';');
             }
 
             fclose($file);

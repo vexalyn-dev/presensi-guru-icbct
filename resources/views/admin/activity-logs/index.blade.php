@@ -85,7 +85,8 @@
 
     {{-- Filter Bar --}}
     <div class="card p-4">
-        <form method="GET" action="{{ route('activity-logs.index') }}" class="flex flex-wrap gap-3">
+        <form method="GET" action="{{ route('activity-logs.index') }}" id="filter-form" class="flex flex-wrap gap-3">
+            {{-- Search --}}
             <div class="relative flex-1 min-w-[200px]">
                 <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                 <input type="text" name="search" value="{{ request('search') }}"
@@ -93,33 +94,90 @@
                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
 
-            <select name="category" class="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                <option value="">-- Semua Kategori --</option>
-                @foreach($categories as $key => $cat)
-                    <option value="{{ $key }}" {{ request('category') === $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
-                @endforeach
-            </select>
+            {{-- Dropdown Kategori --}}
+            <div x-data="{
+                    open: false,
+                    selected: '{{ request('category') }}',
+                    selectedLabel: '{{ request('category') ? ($categories[request('category')]['label'] ?? 'Semua Kategori') : 'Semua Kategori' }}',
+                    choose(val, label) { this.selected = val; this.selectedLabel = label; this.open = false; document.getElementById('cat-input').value = val; }
+                 }" class="relative">
+                <input type="hidden" name="category" id="cat-input" value="{{ request('category') }}">
+                <button type="button" @click="open = !open"
+                        class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all min-w-[170px] justify-between">
+                    <span x-text="selectedLabel"></span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="open" @click.outside="open = false" x-transition
+                     class="absolute top-full left-0 mt-1 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-50 overflow-hidden">
+                    <button type="button" @click="choose('', 'Semua Kategori')"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                            :class="selected === '' ? 'font-semibold text-navy-800 dark:text-gold-400' : 'text-slate-600 dark:text-slate-300'">
+                        <i data-lucide="layers" class="w-4 h-4 opacity-60"></i> Semua Kategori
+                    </button>
+                    @foreach($categories as $key => $cat)
+                    <button type="button" @click="choose('{{ $key }}', '{{ $cat['label'] }}')"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                            :class="selected === '{{ $key }}' ? 'font-semibold text-navy-800 dark:text-gold-400' : 'text-slate-600 dark:text-slate-300'">
+                        <i data-lucide="{{ $cat['icon'] }}" class="w-4 h-4 opacity-60"></i> {{ $cat['label'] }}
+                    </button>
+                    @endforeach
+                </div>
+            </div>
 
-            <select name="user_id" class="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                <option value="">-- Semua User --</option>
-                @foreach($teachers as $teacher)
-                    <option value="{{ $teacher->id }}" {{ request('user_id') == $teacher->id ? 'selected' : '' }}>{{ $teacher->name }}</option>
-                @endforeach
-            </select>
+            {{-- Dropdown User --}}
+            <div x-data="{
+                    open: false,
+                    selected: '{{ request('user_id') }}',
+                    selectedLabel: '{{ request('user_id') ? ($teachers->firstWhere('id', request('user_id'))?->name ?? 'Semua Guru') : 'Semua Guru' }}',
+                    choose(val, label) { this.selected = val; this.selectedLabel = label; this.open = false; document.getElementById('user-input').value = val; }
+                 }" class="relative">
+                <input type="hidden" name="user_id" id="user-input" value="{{ request('user_id') }}">
+                <button type="button" @click="open = !open"
+                        class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all min-w-[170px] justify-between">
+                    <span x-text="selectedLabel" class="truncate max-w-[120px]"></span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="open" @click.outside="open = false" x-transition
+                     class="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-50 overflow-hidden max-h-60 overflow-y-auto">
+                    <button type="button" @click="choose('', 'Semua Guru')"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                            :class="selected === '' ? 'font-semibold text-navy-800 dark:text-gold-400' : 'text-slate-600 dark:text-slate-300'">
+                        <i data-lucide="users" class="w-4 h-4 opacity-60"></i> Semua Guru
+                    </button>
+                    @foreach($teachers as $teacher)
+                    <button type="button" @click="choose('{{ $teacher->id }}', '{{ addslashes($teacher->name) }}')"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                            :class="selected === '{{ $teacher->id }}' ? 'font-semibold text-navy-800 dark:text-gold-400' : 'text-slate-600 dark:text-slate-300'">
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-[10px] flex-shrink-0">
+                            {{ strtoupper(substr($teacher->name, 0, 1)) }}
+                        </div>
+                        <span class="truncate">{{ $teacher->name }}</span>
+                    </button>
+                    @endforeach
+                </div>
+            </div>
 
-            <input type="date" name="date_from" value="{{ request('date_from') }}"
-                   class="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+            {{-- Tanggal --}}
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                    <input type="date" name="date_from" value="{{ request('date_from') }}"
+                           class="pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                </div>
+                <span class="text-slate-400 text-sm">—</span>
+                <div class="relative">
+                    <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                    <input type="date" name="date_to" value="{{ request('date_to') }}"
+                           class="pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                </div>
+            </div>
 
-            <input type="date" name="date_to" value="{{ request('date_to') }}"
-                   class="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
-
-            <button type="submit" class="px-5 py-2.5 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
-                Filter
+            <button type="submit" class="px-5 py-2.5 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+                <i data-lucide="search" class="w-4 h-4"></i> Filter
             </button>
-
             @if(request()->hasAny(['search', 'category', 'user_id', 'date_from', 'date_to']))
-                <a href="{{ route('activity-logs.index') }}" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
-                    Reset
+                <a href="{{ route('activity-logs.index') }}" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center gap-2">
+                    <i data-lucide="x" class="w-4 h-4"></i> Reset
                 </a>
             @endif
         </form>
