@@ -305,7 +305,7 @@ async function showLogDetail(id) {
     content.innerHTML = '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-800 dark:border-gold-400"></div></div>';
 
     try {
-        const res  = await fetch(`{{ route('activity-logs.show', '') }}${id}`, {
+        const res  = await fetch(`/activity-logs/${id}`, {
             headers: {
                 'Accept': 'application/json',
             }
