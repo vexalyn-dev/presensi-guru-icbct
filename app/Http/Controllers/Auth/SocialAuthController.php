@@ -21,7 +21,9 @@ class SocialAuthController extends Controller
             : 'Login berhasil melalui ' . ucfirst($provider);
 
         if ($user->isTeacher()) {
-            return redirect()->route('teacher.dashboard')->with('success', $message);
+            return redirect()->route('teacher.dashboard')
+                ->with('success', $message)
+                ->with('show_welcome', true);
         }
 
         if ($user->isAdmin()) {
@@ -29,9 +31,7 @@ class SocialAuthController extends Controller
         }
 
         Auth::logout();
-
-        return redirect()->route('login')
-            ->with('error', 'Role akun tidak dikenali. Hubungi admin.');
+        return redirect()->route('login')->with('error', 'Role akun tidak dikenali. Hubungi admin.');
     }
 
     /**

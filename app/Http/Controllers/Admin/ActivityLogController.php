@@ -167,7 +167,7 @@ class ActivityLogController extends Controller
 
         // ── JUDUL ──────────────────────────────────────────────
         $sheet->mergeCells('A1:J1');
-        $sheet->setCellValue('A1', 'LOG AKTIVITAS SISTEM — ' . strtoupper(\App\Models\AppSetting::get('school_name', 'SMK ICB CT')));
+        $sheet->setCellValue('A1', 'LOG AKTIVITAS SISTEM — ' . strtoupper(\App\Models\AppSetting::getInstance()->app_name ?? 'SMK ICB CT'));
         $sheet->getStyle('A1')->applyFromArray([
             'font'      => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']],
             'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => '1E3A5F']],

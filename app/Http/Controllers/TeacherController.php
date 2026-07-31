@@ -228,10 +228,21 @@ class TeacherController extends Controller
             if ($teacher->photo) {
                 Storage::disk('public')->delete($teacher->photo);
             }
-            $updateData['photo'] = $request->file('photo')->store('profiles', 'public');
+            $photoPath = $request->file('photo')->store('profiles', 'public');
+            $updateData['photo'] = $photoPath;
+            
+            // Pastikan file tersimpan
+            \Illuminate\Support\Facades\Log::info('Teacher photo updated', [
+                'teacher_id' => $teacher->id,
+                'path' => $photoPath,
+                'exists' => Storage::disk('public')->exists($photoPath),
+            ]);
         }
 
         $teacher->update($updateData);
+
+        // ActivityLog
+        try { ActivityLogService::teacherUpdated(auth()->user(), $teacher, array_keys($updateData)); } catch (\Exception $e) {}
 
         // Update teacher record (sync major_specialty with subject)
         if ($teacher->teacher) {
