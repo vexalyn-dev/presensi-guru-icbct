@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -38,30 +39,42 @@ class AttendanceController extends Controller
         try {
             $qrData = json_decode($validated['qr_data'], true);
             
-            if (!isset($qrData['teacher_id'], $qrData['token'])) {
+            // Support both full JSON dan plain ID
+            if (!$qrData || !is_array($qrData)) {
+                $qrData = ['teacher_id' => $validated['qr_data']];
+            }
+            
+            if (!isset($qrData['teacher_id'])) {
                 return $ajaxRequest
-                    ? response()->json(['success' => false, 'message' => 'QR code tidak valid.'], 422)
-                    : back()->with('error', 'QR code tidak valid.');
+                    ? response()->json(['success' => false, 'message' => 'QR code tidak valid - Teacher ID tidak ditemukan'], 422)
+                    : back()->with('error', 'QR code tidak valid - Teacher ID tidak ditemukan');
             }
             
             $teacher = User::find($qrData['teacher_id']);
             
-            if (!$teacher || $teacher->role !== 'guru' || $teacher->qr_token !== $qrData['token']) {
+            // Jika ada token, validasi token. Jika tidak ada, hanya check teacher_id
+            if (!$teacher || $teacher->role !== 'guru') {
                 return $ajaxRequest
-                    ? response()->json(['success' => false, 'message' => 'QR code tidak valid atau sudah kadaluarsa.'], 422)
-                    : back()->with('error', 'QR code tidak valid atau sudah kadaluarsa.');
+                    ? response()->json(['success' => false, 'message' => 'Guru tidak ditemukan atau role tidak valid'], 422)
+                    : back()->with('error', 'Guru tidak ditemukan atau role tidak valid');
+            }
+
+            if (isset($qrData['token']) && $teacher->qr_token !== $qrData['token']) {
+                return $ajaxRequest
+                    ? response()->json(['success' => false, 'message' => 'QR code sudah kadaluarsa'], 422)
+                    : back()->with('error', 'QR code sudah kadaluarsa');
             }
             
             if (!$teacher->is_active) {
                 return $ajaxRequest
-                    ? response()->json(['success' => false, 'message' => 'Guru ini tidak aktif.'], 422)
-                    : back()->with('error', 'Guru ini tidak aktif.');
+                    ? response()->json(['success' => false, 'message' => 'Guru ini tidak aktif'], 422)
+                    : back()->with('error', 'Guru ini tidak aktif');
             }
             
         } catch (\Exception $e) {
             return $ajaxRequest
-                ? response()->json(['success' => false, 'message' => 'Gagal memproses QR code.'], 422)
-                : back()->with('error', 'Gagal memproses QR code.');
+                ? response()->json(['success' => false, 'message' => 'Gagal memproses QR code: ' . $e->getMessage()], 422)
+                : back()->with('error', 'Gagal memproses QR code: ' . $e->getMessage());
         }
 
         if (\App\Models\Holiday::isHoliday(today())) {
