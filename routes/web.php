@@ -279,3 +279,9 @@ Route::get('/run-migrate-secret', function (Request $request) {
     Artisan::call('migrate', ['--force' => true]);
     return '<pre>' . Artisan::output() . '</pre>';
 });
+
+Route::get('/sapu-jagat', function () {
+    Artisan::call('optimize:clear');
+    
+    return 'Optimize clear sukses! Semua cache udah ludes.';
+});
