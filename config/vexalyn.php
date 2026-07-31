@@ -14,4 +14,13 @@ return [
     'project_id'     => env('VEXALYN_PROJECT_ID',      'icb-ct-absensi-guru'),
     'project_name'   => env('VEXALYN_PROJECT_NAME',    'ICB CT - Absensi Guru'),
     'webhook_secret' => env('VEXALYN_WEBHOOK_SECRET',  ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Feature Toggle
+    |--------------------------------------------------------------------------
+    | true  = fully enabled (laporan dikirim ke Vexalyn)
+    | false = UI tampil, tapi tombol kirim menampilkan modal "dalam pengembangan"
+    */
+    'enabled' => env('SUPPORT_CENTER_ENABLED', false),
 ];

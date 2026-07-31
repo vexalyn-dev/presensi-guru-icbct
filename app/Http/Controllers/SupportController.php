@@ -34,6 +34,14 @@ class SupportController extends Controller
     /** Simpan laporan baru */
     public function store(Request $request)
     {
+        // Cek feature flag
+        if (!config('vexalyn.enabled', false)) {
+            return response()->json([
+                'disabled' => true,
+                'message'  => 'Fitur ini masih dalam tahap pengembangan.',
+            ], 200);
+        }
+
         $type = $request->input('type', 'bug');
 
         $baseRules = [

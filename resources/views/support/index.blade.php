@@ -256,7 +256,7 @@
                     <i data-lucide="shield" class="w-3.5 h-3.5 text-green-500"></i>
                     Dikirim aman ke Vexalyn Dev Center via HTTPS
                 </p>
-                <button type="submit"
+                <button type="button" onclick="handleSubmit()"
                         :disabled="submitting"
                         class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
                     <span x-show="!submitting" class="flex items-center gap-2">
@@ -304,8 +304,67 @@
     </div>
 </div>
 
+{{-- Modal: Dalam Pengembangan --}}
+<div id="dev-modal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div id="dev-modal-box"
+             class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60"
+             style="transform:translateY(30px) scale(0.96);opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                    <i data-lucide="construction" class="w-8 h-8 text-amber-600 dark:text-amber-400"></i>
+                </div>
+                <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">Fitur Dalam Pengembangan</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+                    Pusat Bantuan sedang dalam proses pengembangan dan akan segera hadir.<br>
+                    <span class="font-semibold text-navy-800 dark:text-slate-300">Terima kasih atas kesabaran Anda! 🙏</span>
+                </p>
+                <button onclick="closeDevModal()"
+                        class="w-full py-3 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-lg">
+                    Oke, Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-function supportCenter() {
+var SUPPORT_ENABLED = {{ config('vexalyn.enabled') ? 'true' : 'false' }};
+
+function handleSubmit() {
+    if (!SUPPORT_ENABLED) {
+        openDevModal();
+        return;
+    }
+    // Kalau enabled — submit form biasa
+    document.getElementById('support-form').submit();
+}
+
+function openDevModal() {
+    var modal = document.getElementById('dev-modal');
+    var box   = document.getElementById('dev-modal-box');
+    modal.classList.remove('hidden');
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            box.style.transform = 'translateY(0) scale(1)';
+            box.style.opacity   = '1';
+        });
+    });
+    if (window.lucide) lucide.createIcons();
+}
+
+function closeDevModal() {
+    var modal = document.getElementById('dev-modal');
+    var box   = document.getElementById('dev-modal-box');
+    box.style.transform = 'translateY(30px) scale(0.96)';
+    box.style.opacity   = '0';
+    setTimeout(function() { modal.classList.add('hidden'); }, 300);
+}
+
+document.getElementById('dev-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDevModal();
+});
+</script>
     return {
         activeType: '{{ $activeType }}',
         submitting: false,
