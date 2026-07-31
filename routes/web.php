@@ -218,6 +218,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/class-attendance/manual', [ManualClassAttendanceController::class, 'index'])->name('class-attendance.manual');
     Route::post('/class-attendance/manual', [ManualClassAttendanceController::class, 'store'])->name('class-attendance.manual.store');
     Route::delete('/class-attendance/manual/{id}', [ManualClassAttendanceController::class, 'destroy'])->name('class-attendance.manual.destroy');
+
+    // Pusat Bantuan untuk Admin
+    Route::get('/support',          [SupportController::class, 'index'])  ->name('support');
+    Route::post('/support',         [SupportController::class, 'store'])  ->name('support.store');
+    Route::get('/support/history',  [SupportController::class, 'history'])->name('support.history');
+    Route::get('/support/{ticket}', [SupportController::class, 'show'])   ->name('support.show');
 });
 
 // Teacher Routes

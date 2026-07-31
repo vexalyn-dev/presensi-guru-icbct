@@ -1,4 +1,4 @@
-@extends('layouts.teacher')
+@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
 @section('page-title', 'Detail Tiket')
 @section('content')
 <div class="space-y-6 fade-in">
