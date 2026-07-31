@@ -208,12 +208,17 @@
                      onclick="showLogDetail({{ $log->id }})">
                     <div class="flex items-center gap-4">
 
-                        {{-- Kiri: Avatar user (posisi dimana icon scan dulu) --}}
+                        {{-- Kiri: Avatar user --}}
                         @if($log->user)
-                            @if($log->user->photo_url && !str_contains($log->user->photo_url, 'default-teacher'))
-                                <img src="{{ $log->user->photo_url }}"
+                            @php $photoUrl = $log->user->photo ? asset('storage/' . $log->user->photo) : null; @endphp
+                            @if($photoUrl)
+                                <img src="{{ $photoUrl }}"
                                      alt="{{ $log->user->name }}"
-                                     class="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-white dark:ring-slate-800">
+                                     class="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-white dark:ring-slate-800"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0 ring-2 ring-white dark:ring-slate-800 hidden">
+                                    {{ strtoupper(substr($log->user->name, 0, 1)) }}
+                                </div>
                             @else
                                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0 ring-2 ring-white dark:ring-slate-800">
                                     {{ strtoupper(substr($log->user->name, 0, 1)) }}
