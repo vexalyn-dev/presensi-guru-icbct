@@ -12,7 +12,7 @@ class ActivityLogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ActivityLog::with(['user:id,name,email,teacher_code']);
+        $query = ActivityLog::with(['user:id,name,email,teacher_code,photo,photo_path']);
 
         // Filter kategori
         if ($request->filled('category')) {
@@ -103,6 +103,7 @@ class ActivityLogController extends Controller
                     'name'         => $log->user->name,
                     'email'        => $log->user->email,
                     'teacher_code' => $log->user->teacher_code,
+                    'photo_url'    => $log->user->photo_url,
                 ] : null,
                 'type'        => $typeLabels[$log->type] ?? ucfirst(str_replace('_', ' ', $log->type)),
                 'category'    => $categoryLabels[$log->category] ?? ucfirst($log->category),

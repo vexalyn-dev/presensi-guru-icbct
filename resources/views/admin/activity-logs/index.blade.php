@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('page-title', 'Log Aktivitas')
 @section('content')
 <div class="space-y-6 fade-in">
@@ -164,7 +164,7 @@
                     <input type="date" name="date_from" value="{{ request('date_from') }}"
                            class="pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                 </div>
-                <span class="text-slate-400 text-sm">—</span>
+                <span class="text-slate-400 text-sm">â€”</span>
                 <div class="relative">
                     <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
                     <input type="date" name="date_to" value="{{ request('date_to') }}"
@@ -206,89 +206,76 @@
             @forelse($logs as $log)
                 <div class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
                      onclick="showLogDetail({{ $log->id }})">
-                    <div class="flex items-start gap-4">
-                        {{-- Icon --}}
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
-                            {{ $log->color === 'green'  ? 'bg-green-100 dark:bg-green-900/30' : '' }}
-                            {{ $log->color === 'blue'   ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}
-                            {{ $log->color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/30' : '' }}
-                            {{ $log->color === 'indigo' ? 'bg-indigo-100 dark:bg-indigo-900/30' : '' }}
-                            {{ $log->color === 'amber'  ? 'bg-amber-100 dark:bg-amber-900/30' : '' }}
-                            {{ $log->color === 'slate'  ? 'bg-slate-100 dark:bg-slate-800' : '' }}">
-                            <i data-lucide="{{ $log->icon }}" class="w-5 h-5
-                                {{ $log->color === 'green'  ? 'text-green-600 dark:text-green-400' : '' }}
-                                {{ $log->color === 'blue'   ? 'text-blue-600 dark:text-blue-400' : '' }}
-                                {{ $log->color === 'purple' ? 'text-purple-600 dark:text-purple-400' : '' }}
-                                {{ $log->color === 'indigo' ? 'text-indigo-600 dark:text-indigo-400' : '' }}
-                                {{ $log->color === 'amber'  ? 'text-amber-600 dark:text-amber-400' : '' }}
-                                {{ $log->color === 'slate'  ? 'text-slate-600 dark:text-slate-400' : '' }}">
-                            </i>
-                        </div>
+                    <div class="flex items-center gap-4">
+
+                        {{-- Kiri: Avatar user (posisi dimana icon scan dulu) --}}
+                        @if($log->user)
+                            @if($log->user->photo_url && !str_contains($log->user->photo_url, 'default-teacher'))
+                                <img src="{{ $log->user->photo_url }}"
+                                     alt="{{ $log->user->name }}"
+                                     class="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-white dark:ring-slate-800">
+                            @else
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0 ring-2 ring-white dark:ring-slate-800">
+                                    {{ strtoupper(substr($log->user->name, 0, 1)) }}
+                                </div>
+                            @endif
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
+                            </div>
+                        @endif
+
                         {{-- Content --}}
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm text-slate-700 dark:text-slate-300 leading-snug">{{ $log->description }}</p>
-                                    <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                        <span class="inline-flex items-center gap-1">
-                                            <i data-lucide="clock" class="w-3 h-3"></i>
-                                            @php
-                                                $now = \Carbon\Carbon::now();
-                                                $diff = $log->created_at->diff($now);
-                                                
-                                                if ($diff->days > 0) {
-                                                    echo $diff->days . ' hari ' . $diff->h . ' jam lalu';
-                                                } elseif ($diff->h > 0) {
-                                                    echo $diff->h . ' jam ' . $diff->i . ' menit lalu';
-                                                } elseif ($diff->i > 0) {
-                                                    echo $diff->i . ' menit lalu';
-                                                } else {
-                                                    echo 'Baru saja';
-                                                }
-                                            @endphp
-                                        </span>
-                                        @if($log->ip_address)
-                                        <span class="inline-flex items-center gap-1">
-                                            <i data-lucide="globe" class="w-3 h-3"></i>
-                                            {{ $log->ip_address }}
-                                        </span>
-                                        @endif
-                                        @if($log->device['device'] ?? null)
-                                        <span class="inline-flex items-center gap-1">
-                                            <i data-lucide="smartphone" class="w-3 h-3"></i>
-                                            {{ $log->device['device'] }}
-                                        </span>
-                                        @endif
-                                        @if($log->device['browser'] ?? null)
-                                        <span class="inline-flex items-center gap-1">
-                                            <i data-lucide="compass" class="w-3 h-3"></i>
-                                            {{ $log->device['browser'] }}
-                                        </span>
-                                        @endif
-                                        @if(isset(($log->properties ?? [])['location']['latitude']))
-                                        <span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
-                                            <i data-lucide="map-pin" class="w-3 h-3"></i>
-                                            {{ $log->properties['location']['latitude'] }}, {{ $log->properties['location']['longitude'] }}
-                                        </span>
-                                        @endif
-                                    </div>
-                                </div>
-                                @if($log->user)
-                                <div class="flex items-center gap-2 flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-xs">
-                                        {{ strtoupper(substr($log->user->name, 0, 1)) }}
-                                    </div>
-                                    <div class="hidden sm:block">
-                                        <p class="text-xs font-semibold text-navy-800 dark:text-white">{{ $log->user->name }}</p>
-                                        <p class="text-[10px] text-slate-400">{{ $log->user->teacher_code ?? $log->user->email }}</p>
-                                    </div>
-                                </div>
+                            <p class="text-sm text-slate-700 dark:text-slate-300 leading-snug">{{ $log->description }}</p>
+                            <div class="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                <span class="inline-flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                    @php
+                                        $diff = $log->created_at->diff(\Carbon\Carbon::now());
+                                        if ($diff->days > 0) echo $diff->days . ' hari lalu';
+                                        elseif ($diff->h > 0) echo $diff->h . ' jam ' . $diff->i . ' menit lalu';
+                                        elseif ($diff->i > 0) echo $diff->i . ' menit lalu';
+                                        else echo 'Baru saja';
+                                    @endphp
+                                </span>
+                                @if($log->ip_address)
+                                <span class="inline-flex items-center gap-1">
+                                    <i data-lucide="globe" class="w-3 h-3"></i>{{ $log->ip_address }}
+                                </span>
+                                @endif
+                                @if($log->device['device'] ?? null)
+                                <span class="inline-flex items-center gap-1">
+                                    <i data-lucide="monitor" class="w-3 h-3"></i>{{ $log->device['device'] }}
+                                </span>
+                                @endif
+                                @if($log->device['browser'] ?? null)
+                                <span class="inline-flex items-center gap-1">
+                                    <i data-lucide="compass" class="w-3 h-3"></i>{{ $log->device['browser'] }}
+                                </span>
                                 @endif
                             </div>
                         </div>
-                        <button class="p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-200 dark:hover:bg-slate-700 flex-shrink-0">
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
-                        </button>
+
+                        {{-- Kanan: Icon kategori (posisi dimana avatar user dulu) --}}
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center
+                                {{ $log->color === 'green'  ? 'bg-green-100 dark:bg-green-900/30' : '' }}
+                                {{ $log->color === 'blue'   ? 'bg-blue-100 dark:bg-blue-900/30' : '' }}
+                                {{ $log->color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/30' : '' }}
+                                {{ $log->color === 'indigo' ? 'bg-indigo-100 dark:bg-indigo-900/30' : '' }}
+                                {{ $log->color === 'amber'  ? 'bg-amber-100 dark:bg-amber-900/30' : '' }}
+                                {{ $log->color === 'slate'  ? 'bg-slate-100 dark:bg-slate-800' : '' }}">
+                                <i data-lucide="{{ $log->icon }}" class="w-4 h-4
+                                    {{ $log->color === 'green'  ? 'text-green-600 dark:text-green-400' : '' }}
+                                    {{ $log->color === 'blue'   ? 'text-blue-600 dark:text-blue-400' : '' }}
+                                    {{ $log->color === 'purple' ? 'text-purple-600 dark:text-purple-400' : '' }}
+                                    {{ $log->color === 'indigo' ? 'text-indigo-600 dark:text-indigo-400' : '' }}
+                                    {{ $log->color === 'amber'  ? 'text-amber-600 dark:text-amber-400' : '' }}
+                                    {{ $log->color === 'slate'  ? 'text-slate-600 dark:text-slate-400' : '' }}"></i>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400 transition-colors"></i>
+                        </div>
                     </div>
                 </div>
             @empty
@@ -306,21 +293,36 @@
     </div>
 </div>
 
-{{-- Detail Modal --}}
-<div id="logDetailModal" class="fixed inset-0 z-50 hidden" style="background: rgba(15,23,42,0.6); backdrop-filter: blur(8px);">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden" style="animation: modalSlideIn 0.3s ease-out;">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-white dark:text-navy-900">Detail Aktivitas</h3>
-                    <button onclick="document.getElementById('logDetailModal').classList.add('hidden')" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                        <i data-lucide="x" class="w-5 h-5 text-white dark:text-navy-900"></i>
-                    </button>
+
+{{-- Detail Modal — tanpa backdrop, modern & premium --}}
+<div id="logDetailModal" class="fixed inset-0 z-50 hidden pointer-events-none">
+    <div class="min-h-screen flex items-end sm:items-center justify-center sm:p-4 pointer-events-none">
+        <div id="logDetailBox"
+             class="pointer-events-auto bg-white dark:bg-slate-900 w-full sm:max-w-lg sm:rounded-2xl shadow-[0_25px_60px_-10px_rgba(0,0,0,0.22)] dark:shadow-[0_25px_60px_-10px_rgba(0,0,0,0.6)] overflow-hidden border border-slate-200/60 dark:border-slate-700/60"
+             style="transform:translateY(40px) scale(0.97);opacity:0;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);">
+
+            {{-- Header --}}
+            <div class="px-5 pt-5 pb-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="modalIconWrap" class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        <i data-lucide="scan-line" id="modalIcon" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-navy-800 dark:text-white leading-tight">Detail Aktivitas</h3>
+                        <p id="modalCategoryBadge" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">—</p>
+                    </div>
                 </div>
+                <button onclick="closeLogDetail()"
+                        class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-all hover:rotate-90 duration-300">
+                    <i data-lucide="x" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                </button>
             </div>
-            <div id="logDetailContent" class="p-6">
-                <div class="flex items-center justify-center py-8">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-800 dark:border-gold-400"></div>
+
+            {{-- Content --}}
+            <div id="logDetailContent" class="px-5 pb-5">
+                <div class="flex items-center justify-center py-10 gap-3">
+                    <div class="w-5 h-5 border-2 border-navy-800/20 border-t-navy-800 dark:border-gold-400/20 dark:border-t-gold-400 rounded-full animate-spin"></div>
+                    <span class="text-sm text-slate-400">Memuat data...</span>
                 </div>
             </div>
         </div>
@@ -328,7 +330,7 @@
 </div>
 
 {{-- Cleanup Modal --}}
-<div id="cleanupModal" class="fixed inset-0 z-50 hidden" style="background: rgba(15,23,42,0.6); backdrop-filter: blur(8px);">
+<div id="cleanupModal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);">
     <div class="min-h-screen flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div class="flex items-center gap-3 mb-4">
@@ -368,117 +370,150 @@
 </div>
 
 <style>
-@keyframes modalSlideIn {
-    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+#logDetailBox.modal-open {
+    transform: translateY(0) scale(1) !important;
+    opacity: 1 !important;
 }
 </style>
 
 <script>
-async function showLogDetail(id) {
-    const modal   = document.getElementById('logDetailModal');
-    const content = document.getElementById('logDetailContent');
+function openLogDetail() {
+    const modal = document.getElementById('logDetailModal');
+    const box   = document.getElementById('logDetailBox');
     modal.classList.remove('hidden');
-    content.innerHTML = '<div class="flex items-center justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-800 dark:border-gold-400"></div></div>';
+    requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('modal-open')));
+}
 
-    try {
-        const res  = await fetch(`/activity-logs/${id}`, {
-            headers: {
-                'Accept': 'application/json',
-            }
-        });
-        const data = await res.json();
-
-        if (data.success) {
-            const d       = data.data;
-            const device  = d.device_info || {};
-            const props   = d.properties  || {};
-            const location = props.location || {};
-
-            content.innerHTML = `
-                <div class="space-y-4">
-                    <div class="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Deskripsi</p>
-                        <p class="text-sm font-semibold text-navy-800 dark:text-white">${d.description}</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                            <p class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase">Kategori</p>
-                            <p class="text-sm font-semibold text-navy-800 dark:text-white capitalize">${d.category}</p>
-                        </div>
-                        <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-                            <p class="text-[10px] text-purple-600 dark:text-purple-400 font-bold uppercase">Tipe</p>
-                            <p class="text-sm font-semibold text-navy-800 dark:text-white">${d.type}</p>
-                        </div>
-                    </div>
-                    ${d.user ? `
-                    <div class="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">User</p>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 flex items-center justify-center text-white font-bold text-sm">
-                                ${d.user.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <p class="text-sm font-bold text-navy-800 dark:text-white">${d.user.name}</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">${d.user.email}</p>
-                                ${d.user.teacher_code ? `<p class="text-xs text-slate-400 font-mono">${d.user.teacher_code}</p>` : ''}
-                            </div>
-                        </div>
-                    </div>` : ''}
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">IP Address</p>
-                            <p class="text-sm font-mono font-semibold text-navy-800 dark:text-white">${d.ip_address || '-'}</p>
-                        </div>
-                        <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Waktu</p>
-                            <p class="text-sm font-semibold text-navy-800 dark:text-white">${d.created_at}</p>
-                        </div>
-                    </div>
-                    <div class="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Device Info</p>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div><p class="text-[10px] text-slate-400">OS</p><p class="text-xs font-semibold text-navy-800 dark:text-white">${device.os || '-'}</p></div>
-                            <div><p class="text-[10px] text-slate-400">Browser</p><p class="text-xs font-semibold text-navy-800 dark:text-white">${device.browser || '-'}</p></div>
-                            <div><p class="text-[10px] text-slate-400">Device</p><p class="text-xs font-semibold text-navy-800 dark:text-white">${device.device || '-'}</p></div>
-                        </div>
-                    </div>
-                    ${location.map_url ? `
-                    <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                        <p class="text-xs text-green-600 dark:text-green-400 font-bold mb-2">📍 Lokasi GPS</p>
-                        <p class="text-xs font-mono text-slate-700 dark:text-slate-300 mb-2">Lat: ${location.latitude} | Lng: ${location.longitude}</p>
-                        <a href="${location.map_url}" target="_blank" class="inline-flex items-center gap-1 text-xs font-semibold text-green-700 dark:text-green-400 hover:underline">
-                            🗺️ Buka di Google Maps
-                        </a>
-                    </div>` : ''}
-                    ${props.classroom_name ? `
-                    <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
-                        <p class="text-xs text-amber-600 dark:text-amber-400 font-bold mb-2">🏫 Detail Kelas</p>
-                        <div class="grid grid-cols-2 gap-2 text-xs">
-                            <div><span class="text-slate-500">Kelas:</span> <span class="font-semibold">${props.classroom_name}</span></div>
-                            <div><span class="text-slate-500">Kode:</span> <span class="font-mono">${props.classroom_code || '-'}</span></div>
-                            <div><span class="text-slate-500">Jam ke:</span> <span class="font-semibold">${props.period || '-'}</span></div>
-                            <div><span class="text-slate-500">Mapel:</span> <span class="font-semibold">${props.subject || '-'}</span></div>
-                        </div>
-                    </div>` : ''}
-                </div>`;
-
-            setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 100);
-        }
-    } catch (e) {
-        content.innerHTML = '<p class="text-center text-sm text-red-500 py-4">Gagal memuat detail</p>';
-    }
+function closeLogDetail() {
+    const box = document.getElementById('logDetailBox');
+    box.classList.remove('modal-open');
+    setTimeout(() => document.getElementById('logDetailModal').classList.add('hidden'), 350);
 }
 
 document.getElementById('logDetailModal').addEventListener('click', function(e) {
-    if (e.target === this) this.classList.add('hidden');
+    if (e.target === this) closeLogDetail();
 });
 document.getElementById('cleanupModal').addEventListener('click', function(e) {
     if (e.target === this) this.classList.add('hidden');
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.lucide) lucide.createIcons();
-});
+async function showLogDetail(id) {
+    const content   = document.getElementById('logDetailContent');
+    const catBadge  = document.getElementById('modalCategoryBadge');
+    catBadge.textContent = '—';
+    content.innerHTML = `<div class="flex items-center justify-center py-10 gap-3">
+        <div class="w-5 h-5 border-2 border-navy-800/20 border-t-navy-800 dark:border-gold-400/20 dark:border-t-gold-400 rounded-full animate-spin"></div>
+        <span class="text-sm text-slate-400">Memuat data...</span></div>`;
+    openLogDetail();
+
+    try {
+        const res  = await fetch(`/activity-logs/${id}`, { headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        if (!data.success) throw new Error();
+
+        const d      = data.data;
+        const device = d.device_info || {};
+        const props  = d.properties  || {};
+        const loc    = props.location || {};
+
+        catBadge.textContent = d.category;
+
+        // Parse tanggal & jam dari "31 Jul 2026 13:37:52"
+        const parts    = (d.created_at || '').split(' ');
+        const timePart = (parts[3] || '').substring(0, 5);          // "13:37"
+        const datePart = parts.slice(0, 3).join(' ');                // "31 Jul 2026"
+
+        const userBlock = d.user ? `
+        <div class="grid grid-cols-3 gap-3">
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col items-center justify-center gap-1.5">
+                ${d.user.photo_url && !d.user.photo_url.includes('default-teacher')
+                    ? `<img src="${d.user.photo_url}" class="w-11 h-11 rounded-full object-cover ring-2 ring-white dark:ring-slate-800 shadow-md">`
+                    : `<div class="w-11 h-11 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-extrabold text-base ring-2 ring-white dark:ring-slate-800 shadow-md">${d.user.name.charAt(0).toUpperCase()}</div>`
+                }
+                <p class="text-xs font-bold text-navy-800 dark:text-white text-center leading-tight">${d.user.name}</p>
+                <p class="text-[10px] text-slate-400 text-center truncate w-full px-1">${d.user.teacher_code || d.user.email}</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col justify-center">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Tanggal</p>
+                <p class="text-sm font-bold text-navy-800 dark:text-white">${datePart}</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col justify-center">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Pukul</p>
+                <p class="text-2xl font-extrabold text-navy-800 dark:text-white tabular-nums tracking-tight">${timePart}</p>
+            </div>
+        </div>` : `
+        <div class="grid grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Tanggal</p>
+                <p class="text-sm font-bold text-navy-800 dark:text-white">${datePart}</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Pukul</p>
+                <p class="text-2xl font-extrabold text-navy-800 dark:text-white tabular-nums">${timePart}</p>
+            </div>
+        </div>`;
+
+        const gpsBlock = loc.map_url ? `
+        <a href="${loc.map_url}" target="_blank"
+           class="flex items-center gap-3 p-3.5 rounded-2xl bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900/40 hover:bg-green-100 dark:hover:bg-green-950/50 transition-colors group">
+            <div class="w-9 h-9 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-xs font-bold text-green-700 dark:text-green-400">Lokasi GPS Terdeteksi</p>
+                <p class="text-[10px] text-green-600 dark:text-green-500 font-mono">${loc.latitude}, ${loc.longitude}</p>
+            </div>
+            <svg class="w-4 h-4 text-green-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>` : '';
+
+        const classBlock = props.classroom_name ? `
+        <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2.5">Detail Kelas</p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div><span class="text-slate-500">Kelas:</span> <span class="font-bold text-navy-800 dark:text-white ml-1">${props.classroom_name}</span></div>
+                <div><span class="text-slate-500">Kode:</span> <span class="font-mono font-bold text-navy-800 dark:text-white ml-1">${props.classroom_code||'-'}</span></div>
+                <div><span class="text-slate-500">Jam ke:</span> <span class="font-bold text-navy-800 dark:text-white ml-1">${props.period||'-'}</span></div>
+                <div><span class="text-slate-500">Mapel:</span> <span class="font-bold text-navy-800 dark:text-white ml-1">${props.subject||'-'}</span></div>
+            </div>
+        </div>` : '';
+
+        content.innerHTML = `
+        <div class="space-y-3">
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">Keterangan</p>
+                <p class="text-sm font-semibold text-navy-800 dark:text-white leading-snug">${d.description}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1">Kategori</p>
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">${d.category}</p>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-violet-50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/40">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-violet-400 mb-1">Jenis Aktivitas</p>
+                    <p class="text-sm font-bold text-violet-700 dark:text-violet-300">${d.type}</p>
+                </div>
+            </div>
+            ${userBlock}
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Informasi Perangkat</p>
+                <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
+                    <div><p class="text-[10px] text-slate-400 mb-0.5">IP Address</p><p class="font-bold text-navy-800 dark:text-white font-mono">${d.ip_address||'-'}</p></div>
+                    <div><p class="text-[10px] text-slate-400 mb-0.5">Perangkat</p><p class="font-bold text-navy-800 dark:text-white">${device.device||'-'}</p></div>
+                    <div><p class="text-[10px] text-slate-400 mb-0.5">Browser</p><p class="font-bold text-navy-800 dark:text-white">${device.browser||'-'}</p></div>
+                    <div><p class="text-[10px] text-slate-400 mb-0.5">Sistem Operasi</p><p class="font-bold text-navy-800 dark:text-white">${device.os||'-'}</p></div>
+                </div>
+            </div>
+            ${gpsBlock}
+            ${classBlock}
+        </div>`;
+
+        if (window.lucide) lucide.createIcons();
+    } catch(e) {
+        document.getElementById('logDetailContent').innerHTML =
+            '<p class="text-center text-sm text-red-500 py-8">Gagal memuat detail aktivitas</p>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.lucide) lucide.createIcons(); });
 </script>
 @endsection
