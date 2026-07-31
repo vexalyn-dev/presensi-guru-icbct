@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\AppSetting;
 use App\Notifications\SystemNotification;
 use App\Models\Setting;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -127,6 +128,23 @@ class QrCodeController extends Controller
                     'longitude' => $request->longitude,
                     'scan_method' => 'qr_code',
                 ]);
+
+                // ActivityLog
+                try {
+                    ActivityLogService::log(
+                        'scan_in_daily',
+                        'attendance',
+                        "{$teacher->name} scan presensi MASUK ({$status})",
+                        null,
+                        [
+                            'teacher_code' => $teacher->teacher_code,
+                            'status' => $status,
+                            'latitude' => $request->latitude,
+                            'longitude' => $request->longitude,
+                        ],
+                        $teacher
+                    );
+                } catch (\Exception $e) { Log::warning('ActivityLog scan_in failed: ' . $e->getMessage()); }
             });
 
             // Send notification to admins

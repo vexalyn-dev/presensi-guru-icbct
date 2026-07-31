@@ -180,6 +180,23 @@ class AttendanceController extends Controller
             'scan_method' => 'qr_code',
         ]);
 
+        // ActivityLog
+        try {
+            ActivityLogService::log(
+                'scan_in_daily',
+                'attendance',
+                "{$teacher->name} scan presensi MASUK ({$status})",
+                null,
+                [
+                    'teacher_code' => $teacher->teacher_code,
+                    'status' => $status,
+                    'latitude' => $validated['latitude'] ?? null,
+                    'longitude' => $validated['longitude'] ?? null,
+                ],
+                $teacher
+            );
+        } catch (\Exception $e) { Log::warning('ActivityLog daily scan_in failed: ' . $e->getMessage()); }
+
         if ($status === 'Tepat Waktu') {
             $msg = "Assalamualaikum Warahmatullahi Wabarakatuh.\n\n"
                 . "Yth. Bapak/Ibu {$teacher->name},\n\n"
@@ -232,6 +249,24 @@ class AttendanceController extends Controller
             'check_out' => $now->format('H:i:s'),
             'check_out_status' => $statusOut,
         ]);
+
+        // ActivityLog
+        try {
+            ActivityLogService::log(
+                'scan_out_daily',
+                'attendance',
+                "{$teacher->name} scan presensi KELUAR ({$statusOut})",
+                null,
+                [
+                    'teacher_code' => $teacher->teacher_code,
+                    'status' => $statusOut,
+                    'duration_hours' => $workDuration,
+                    'latitude' => $validated['latitude'] ?? null,
+                    'longitude' => $validated['longitude'] ?? null,
+                ],
+                $teacher
+            );
+        } catch (\Exception $e) { Log::warning('ActivityLog daily scan_out failed: ' . $e->getMessage()); }
 
         if ($statusOut === 'Tepat Waktu') {
             $msg = "Assalamualaikum Warahmatullahi Wabarakatuh.\n\n"
