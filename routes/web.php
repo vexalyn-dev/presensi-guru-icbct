@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\AttendanceHistoryController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\SettingController;
@@ -255,6 +256,12 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::post('/leave', [TeacherLeaveController::class, 'store'])->name('leave.store');
         Route::get('/leave/{leaveRequest}', [TeacherLeaveController::class, 'show'])->name('leave.show');
         Route::delete('/leave/{leaveRequest}', [TeacherLeaveController::class, 'destroy'])->name('leave.destroy');
+
+        // Pusat Bantuan (Support Center)
+        Route::get('/support',          [SupportController::class, 'index'])  ->name('support');
+        Route::post('/support',         [SupportController::class, 'store'])  ->name('support.store');
+        Route::get('/support/history',  [SupportController::class, 'history'])->name('support.history');
+        Route::get('/support/{ticket}', [SupportController::class, 'show'])   ->name('support.show');
 });
 
 Route::get('/run-migrate-secret', function (Request $request) {

@@ -1,0 +1,129 @@
+@extends('layouts.teacher')
+@section('page-title', 'Detail Tiket')
+@section('content')
+<div class="space-y-6 fade-in">
+
+    <div class="flex items-center gap-4">
+        <a href="{{ route('support.history') }}"
+           class="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm group">
+            <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform"></i>
+        </a>
+        <div>
+            <h1 class="text-xl font-bold text-navy-800 dark:text-white">Detail Tiket</h1>
+            @if($ticket->ticket_id)
+            <p class="text-xs font-mono text-slate-400 mt-0.5">{{ $ticket->ticket_id }}</p>
+            @endif
+        </div>
+    </div>
+
+    @php
+    $statusColors = [
+        'new'=>'bg-blue-100 text-blue-700','review'=>'bg-amber-100 text-amber-700',
+        'in_progress'=>'bg-indigo-100 text-indigo-700','testing'=>'bg-purple-100 text-purple-700',
+        'completed'=>'bg-green-100 text-green-700','rejected'=>'bg-red-100 text-red-700','on_hold'=>'bg-slate-100 text-slate-600',
+    ];
+    $priorityColors=['low'=>'bg-green-100 text-green-700','medium'=>'bg-amber-100 text-amber-700','high'=>'bg-orange-100 text-orange-700','critical'=>'bg-red-100 text-red-700'];
+    @endphp
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {{-- Info utama --}}
+        <div class="lg:col-span-2 space-y-5">
+            <div class="card p-6">
+                <div class="flex items-start justify-between gap-4 mb-4">
+                    <h2 class="text-lg font-bold text-navy-800 dark:text-white leading-snug">{{ $ticket->title }}</h2>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ $statusColors[$ticket->status] ?? '' }}">
+                            {{ $statusLabels[$ticket->status]['label'] ?? ucfirst($ticket->status) }}
+                        </span>
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ $priorityColors[$ticket->priority] ?? '' }}">
+                            {{ $priorityLabels[$ticket->priority]['label'] ?? '' }}
+                        </span>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{{ $ticket->description }}</p>
+            </div>
+
+            @if($ticket->extra_fields && array_filter($ticket->extra_fields))
+            <div class="card p-6 space-y-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Detail Tambahan</p>
+                @foreach($ticket->extra_fields as $key => $val)
+                @if($val)
+                <div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">{{ str_replace('_', ' ', $key) }}</p>
+                    <p class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">{{ $val }}</p>
+                </div>
+                @endif
+                @endforeach
+            </div>
+            @endif
+
+            @if($ticket->attachments && count($ticket->attachments))
+            <div class="card p-6">
+                <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Lampiran</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    @foreach($ticket->attachments as $att)
+                    <a href="{{ $att['url'] }}" target="_blank"
+                       class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group">
+                        <i data-lucide="paperclip" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold text-navy-800 dark:text-white truncate">{{ $att['name'] }}</p>
+                            <p class="text-[10px] text-slate-400">{{ number_format($att['size']/1024, 0) }} KB</p>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+
+        {{-- Sidebar info --}}
+        <div class="space-y-5">
+            <div class="card p-5 space-y-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Informasi Tiket</p>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between"><span class="text-slate-500">Jenis</span><span class="font-semibold text-navy-800 dark:text-white">{{ $typeLabels[$ticket->type]['label'] ?? '' }}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Kategori</span><span class="font-semibold text-navy-800 dark:text-white">{{ $ticket->category ?? '—' }}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Dibuat</span><span class="font-semibold text-navy-800 dark:text-white">{{ $ticket->created_at->format('d M Y H:i') }}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Diperbarui</span><span class="font-semibold text-navy-800 dark:text-white">{{ $ticket->updated_at->diffForHumans() }}</span></div>
+                    @if($ticket->vexalyn_sent_at)
+                    <div class="flex justify-between"><span class="text-slate-500">Dikirim</span><span class="text-green-600 font-semibold flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> {{ $ticket->vexalyn_sent_at->format('d M H:i') }}</span></div>
+                    @endif
+                </div>
+            </div>
+
+            @if($ticket->metadata)
+            <div class="card p-5 space-y-3">
+                <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Info Sistem</p>
+                <div class="space-y-2 text-xs text-slate-600 dark:text-slate-400">
+                    @foreach(['browser'=>'Browser','os'=>'OS','device'=>'Device','resolution'=>'Resolusi'] as $k=>$label)
+                    @if($ticket->metadata[$k] ?? null)
+                    <div class="flex justify-between"><span>{{ $label }}</span><span class="font-semibold text-navy-800 dark:text-white">{{ $ticket->metadata[$k] }}</span></div>
+                    @endif
+                    @endforeach
+                    @if($ticket->metadata['url'] ?? null)
+                    <div class="pt-1 border-t border-slate-100 dark:border-slate-800">
+                        <p class="text-[10px] text-slate-400 mb-1">URL</p>
+                        <p class="font-mono text-[10px] text-slate-500 break-all">{{ $ticket->metadata['url'] }}</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            {{-- Vexalyn status jika dapat response --}}
+            @if($vexalynData)
+            <div class="card p-5 border-2 border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                    <p class="text-xs font-bold text-green-800 dark:text-green-400">Terdaftar di Vexalyn</p>
+                </div>
+                <p class="text-xs text-green-700 dark:text-green-400">Tiket Anda sudah masuk ke Vexalyn Dev Center dan sedang diproses.</p>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.lucide) lucide.createIcons(); });</script>
+<style>.fade-in{animation:fadeIn .4s ease-out}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}</style>
+@endsection
