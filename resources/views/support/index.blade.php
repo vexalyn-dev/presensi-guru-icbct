@@ -13,7 +13,7 @@
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Pusat Bantuan</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Laporkan masalah atau kirim permintaan ke Tim Vexalyn</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Laporkan masalah atau kirim permintaan ke Vexalyn Dev Center</p>
             </div>
         </div>
         <a href="{{ route($rp . '.history') }}"
@@ -110,25 +110,53 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Prioritas <span class="text-red-500">*</span></label>
-                    <select name="priority" required
-                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all">
-                        <option value="">-- Pilih Prioritas --</option>
-                        <option value="low"      {{ old('priority')=='low'      ? 'selected':'' }}>🟢 Rendah</option>
-                        <option value="medium"   {{ old('priority')=='medium'   ? 'selected':'' }}>🟡 Sedang</option>
-                        <option value="high"     {{ old('priority')=='high'     ? 'selected':'' }}>🟠 Tinggi</option>
-                        <option value="critical" {{ old('priority')=='critical' ? 'selected':'' }}>🔴 Kritis</option>
-                    </select>
+                    <div class="relative" id="priority-dropdown">
+                        <input type="hidden" name="priority" id="priority-input" value="{{ old('priority') }}">
+                        <button type="button" onclick="toggleDropdown('priority-menu')"
+                                class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
+                            <span id="priority-label" class="text-slate-400 dark:text-slate-400">-- Pilih Prioritas --</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform" id="priority-chevron"></i>
+                        </button>
+                        <div id="priority-menu"
+                             class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
+                            @foreach([
+                                ['value'=>'low',      'label'=>'Rendah',  'dot'=>'bg-green-500'],
+                                ['value'=>'medium',   'label'=>'Sedang',  'dot'=>'bg-amber-500'],
+                                ['value'=>'high',     'label'=>'Tinggi',  'dot'=>'bg-orange-500'],
+                                ['value'=>'critical', 'label'=>'Kritis',  'dot'=>'bg-red-500'],
+                            ] as $opt)
+                            <button type="button"
+                                    onclick="selectOption('priority', '{{ $opt['value'] }}', '{{ $opt['label'] }}')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300">
+                                <span class="w-2.5 h-2.5 rounded-full {{ $opt['dot'] }} flex-shrink-0"></span>
+                                {{ $opt['label'] }}
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
                     @error('priority')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                 </div>
                 <div id="category-field">
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Kategori <span class="text-red-500">*</span></label>
-                    <select name="category" id="category-select"
-                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all">
-                        <option value="">-- Pilih Kategori --</option>
-                        @foreach(['UI','Login','Presensi','Database','API','Performa','Keamanan','Lainnya'] as $cat)
-                        <option value="{{ $cat }}" {{ old('category')==$cat ? 'selected':'' }}>{{ $cat }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative" id="category-dropdown">
+                        <input type="hidden" name="category" id="category-input" value="{{ old('category') }}">
+                        <button type="button" onclick="toggleDropdown('category-menu')"
+                                class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
+                            <span id="category-label" class="text-slate-400 dark:text-slate-400">-- Pilih Kategori --</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform" id="category-chevron"></i>
+                        </button>
+                        <div id="category-menu"
+                             class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
+                            @foreach(['UI','Login','Presensi','Database','API','Performa','Keamanan','Lainnya'] as $cat)
+                            <button type="button"
+                                    onclick="selectOption('category', '{{ $cat }}', '{{ $cat }}')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300">
+                                <i data-lucide="tag" class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"></i>
+                                {{ $cat }}
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
                     @error('category')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                 </div>
             </div>
@@ -204,12 +232,24 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Jenis Maintenance</label>
-                        <select name="maintenance_type" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
-                            <option value="">-- Pilih Jenis --</option>
-                            @foreach(['Update Sistem','Perbaikan Database','Backup Data','Optimasi Performa','Keamanan','Lainnya'] as $m)
-                            <option>{{ $m }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative">
+                            <input type="hidden" name="maintenance_type" id="maintenance-type-input">
+                            <button type="button" onclick="toggleDropdown('maint-menu')"
+                                    class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
+                                <span id="maint-type-label" class="text-slate-400">-- Pilih Jenis --</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400" id="maint-chevron"></i>
+                            </button>
+                            <div id="maint-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
+                                @foreach(['Update Sistem','Perbaikan Database','Backup Data','Optimasi Performa','Keamanan','Lainnya'] as $m)
+                                <button type="button"
+                                        onclick="selectMaintType('{{ $m }}')"
+                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300">
+                                    <i data-lucide="wrench" class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"></i>
+                                    {{ $m }}
+                                </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Jadwal yang Diinginkan</label>
@@ -358,13 +398,12 @@ function setType(t) {
 
     // Show/hide category
     var catField = document.getElementById('category-field');
-    var catSel   = document.getElementById('category-select');
+    var catInput = document.getElementById('category-input');
     if (t === 'bug') {
         catField.classList.remove('hidden');
-        catSel.required = true;
     } else {
         catField.classList.add('hidden');
-        catSel.required = false;
+        if (catInput) catInput.value = '';
     }
 
     // Update placeholders
@@ -403,7 +442,55 @@ document.getElementById('dev-modal').addEventListener('click', function(e) {
     if (e.target === this) closeDevModal();
 });
 
-// Auto-detect metadata
+// Dropdown helpers
+function toggleDropdown(menuId) {
+    var menu    = document.getElementById(menuId);
+    var isOpen  = !menu.classList.contains('hidden');
+    // Tutup semua dropdown dulu
+    document.querySelectorAll('[id$="-menu"]').forEach(function(m) {
+        m.classList.add('hidden');
+        var chevronId = m.id.replace('-menu', '-chevron');
+        var ch = document.getElementById(chevronId);
+        if (ch) ch.style.transform = 'rotate(0deg)';
+    });
+    if (!isOpen) {
+        menu.classList.remove('hidden');
+        var chevronId = menuId.replace('-menu', '-chevron');
+        var ch = document.getElementById(chevronId);
+        if (ch) ch.style.transform = 'rotate(180deg)';
+    }
+}
+
+function selectOption(key, value, label) {
+    document.getElementById(key + '-input').value = value;
+    var lbl = document.getElementById(key + '-label');
+    if (lbl) { lbl.textContent = label; lbl.classList.remove('text-slate-400','dark:text-slate-400'); lbl.classList.add('text-navy-800','dark:text-white','font-medium'); }
+    document.getElementById(key + '-menu').classList.add('hidden');
+    var chevronId = key + '-chevron';
+    var ch = document.getElementById(chevronId);
+    if (ch) ch.style.transform = 'rotate(0deg)';
+}
+
+function selectMaintType(val) {
+    document.getElementById('maintenance-type-input').value = val;
+    var lbl = document.getElementById('maint-type-label');
+    if (lbl) { lbl.textContent = val; lbl.classList.remove('text-slate-400'); lbl.classList.add('text-navy-800','dark:text-white','font-medium'); }
+    document.getElementById('maint-menu').classList.add('hidden');
+    var ch = document.getElementById('maint-chevron');
+    if (ch) ch.style.transform = 'rotate(0deg)';
+}
+
+// Tutup dropdown saat klik di luar
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('[id$="-dropdown"]') && !e.target.closest('[id$="-menu"]')) {
+        document.querySelectorAll('[id$="-menu"]').forEach(function(m) {
+            m.classList.add('hidden');
+        });
+        document.querySelectorAll('[id$="-chevron"]').forEach(function(c) {
+            c.style.transform = 'rotate(0deg)';
+        });
+    }
+});
 document.addEventListener('DOMContentLoaded', function() {
     var ua = navigator.userAgent;
     var browser = 'Unknown';
