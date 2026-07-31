@@ -18,7 +18,7 @@
             <a href="{{ route('activity-logs.export', request()->query()) }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold transition-all shadow-lg hover:shadow-xl">
                 <i data-lucide="download" class="w-4 h-4"></i>
-                <span>Export CSV</span>
+                <span>Export Excel</span>
             </a>
             <button type="button" onclick="document.getElementById('cleanupModal').classList.remove('hidden')"
                     class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-all shadow-lg">
