@@ -92,25 +92,31 @@
                        placeholder="Cari deskripsi atau IP address..."
                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
-            <select name="category" class="px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
-                <option value="">Semua Kategori</option>
+
+            <select name="category" class="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                <option value="">-- Semua Kategori --</option>
                 @foreach($categories as $key => $cat)
                     <option value="{{ $key }}" {{ request('category') === $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
                 @endforeach
             </select>
-            <select name="user_id" class="px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
-                <option value="">Semua User</option>
+
+            <select name="user_id" class="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                <option value="">-- Semua User --</option>
                 @foreach($teachers as $teacher)
                     <option value="{{ $teacher->id }}" {{ request('user_id') == $teacher->id ? 'selected' : '' }}>{{ $teacher->name }}</option>
                 @endforeach
             </select>
+
             <input type="date" name="date_from" value="{{ request('date_from') }}"
-                   class="px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                   class="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+
             <input type="date" name="date_to" value="{{ request('date_to') }}"
-                   class="px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                   class="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+
             <button type="submit" class="px-5 py-2.5 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
                 Filter
             </button>
+
             @if(request()->hasAny(['search', 'category', 'user_id', 'date_from', 'date_to']))
                 <a href="{{ route('activity-logs.index') }}" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
                     Reset
@@ -168,7 +174,20 @@
                                     <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500 dark:text-slate-400">
                                         <span class="inline-flex items-center gap-1">
                                             <i data-lucide="clock" class="w-3 h-3"></i>
-                                            {{ $log->created_at->diffForHumans() }}
+                                            @php
+                                                $now = \Carbon\Carbon::now();
+                                                $diff = $log->created_at->diff($now);
+                                                
+                                                if ($diff->days > 0) {
+                                                    echo $diff->days . ' hari ' . $diff->h . ' jam lalu';
+                                                } elseif ($diff->h > 0) {
+                                                    echo $diff->h . ' jam ' . $diff->i . ' menit lalu';
+                                                } elseif ($diff->i > 0) {
+                                                    echo $diff->i . ' menit lalu';
+                                                } else {
+                                                    echo 'Baru saja';
+                                                }
+                                            @endphp
                                         </span>
                                         @if($log->ip_address)
                                         <span class="inline-flex items-center gap-1">
