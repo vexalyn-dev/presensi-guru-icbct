@@ -114,22 +114,24 @@
                         <input type="hidden" name="priority" id="priority-input" value="{{ old('priority') }}">
                         <button type="button" onclick="toggleDropdown('priority-menu')"
                                 class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
-                            <span id="priority-label" class="text-slate-400 dark:text-slate-400">-- Pilih Prioritas --</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform" id="priority-chevron"></i>
+                            <span id="priority-label" class="flex items-center gap-2.5 text-slate-400 dark:text-slate-400">-- Pilih Prioritas --</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0" id="priority-chevron"></i>
                         </button>
                         <div id="priority-menu"
                              class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
                             @foreach([
-                                ['value'=>'low',      'label'=>'Rendah',  'dot'=>'bg-green-500'],
-                                ['value'=>'medium',   'label'=>'Sedang',  'dot'=>'bg-amber-500'],
-                                ['value'=>'high',     'label'=>'Tinggi',  'dot'=>'bg-orange-500'],
-                                ['value'=>'critical', 'label'=>'Kritis',  'dot'=>'bg-red-500'],
+                                ['value'=>'low',      'label'=>'Rendah',  'dot'=>'bg-green-500',  'bg'=>'bg-green-100 dark:bg-green-900/30',  'text'=>'text-green-700 dark:text-green-400',  'icon'=>'circle-check'],
+                                ['value'=>'medium',   'label'=>'Sedang',  'dot'=>'bg-amber-500',  'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'text'=>'text-amber-700 dark:text-amber-400',  'icon'=>'alert-circle'],
+                                ['value'=>'high',     'label'=>'Tinggi',  'dot'=>'bg-orange-500', 'bg'=>'bg-orange-100 dark:bg-orange-900/30','text'=>'text-orange-700 dark:text-orange-400','icon'=>'alert-triangle'],
+                                ['value'=>'critical', 'label'=>'Kritis',  'dot'=>'bg-red-500',    'bg'=>'bg-red-100 dark:bg-red-900/30',      'text'=>'text-red-700 dark:text-red-400',      'icon'=>'flame'],
                             ] as $opt)
                             <button type="button"
-                                    onclick="selectOption('priority', '{{ $opt['value'] }}', '{{ $opt['label'] }}')"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300">
-                                <span class="w-2.5 h-2.5 rounded-full {{ $opt['dot'] }} flex-shrink-0"></span>
-                                {{ $opt['label'] }}
+                                    onclick="selectPriority('{{ $opt['value'] }}', '{{ $opt['label'] }}', '{{ $opt['bg'] }}', '{{ $opt['text'] }}', '{{ $opt['icon'] }}')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                <div class="w-7 h-7 rounded-lg {{ $opt['bg'] }} flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="{{ $opt['icon'] }}" class="w-3.5 h-3.5 {{ $opt['text'] }}"></i>
+                                </div>
+                                <span class="{{ $opt['text'] }} font-semibold">{{ $opt['label'] }}</span>
                             </button>
                             @endforeach
                         </div>
@@ -142,17 +144,28 @@
                         <input type="hidden" name="category" id="category-input" value="{{ old('category') }}">
                         <button type="button" onclick="toggleDropdown('category-menu')"
                                 class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
-                            <span id="category-label" class="text-slate-400 dark:text-slate-400">-- Pilih Kategori --</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform" id="category-chevron"></i>
+                            <span id="category-label" class="flex items-center gap-2.5 text-slate-400 dark:text-slate-400">-- Pilih Kategori --</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0" id="category-chevron"></i>
                         </button>
                         <div id="category-menu"
                              class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
-                            @foreach(['UI','Login','Presensi','Database','API','Performa','Keamanan','Lainnya'] as $cat)
+                            @foreach([
+                                ['v'=>'UI',        'icon'=>'layout',       'bg'=>'bg-blue-100 dark:bg-blue-900/30',    'c'=>'text-blue-600 dark:text-blue-400'],
+                                ['v'=>'Login',     'icon'=>'log-in',       'bg'=>'bg-purple-100 dark:bg-purple-900/30','c'=>'text-purple-600 dark:text-purple-400'],
+                                ['v'=>'Presensi',  'icon'=>'scan-line',    'bg'=>'bg-green-100 dark:bg-green-900/30',  'c'=>'text-green-600 dark:text-green-400'],
+                                ['v'=>'Database',  'icon'=>'database',     'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'c'=>'text-amber-600 dark:text-amber-400'],
+                                ['v'=>'API',       'icon'=>'code-2',       'bg'=>'bg-cyan-100 dark:bg-cyan-900/30',    'c'=>'text-cyan-600 dark:text-cyan-400'],
+                                ['v'=>'Performa',  'icon'=>'zap',          'bg'=>'bg-orange-100 dark:bg-orange-900/30','c'=>'text-orange-600 dark:text-orange-400'],
+                                ['v'=>'Keamanan',  'icon'=>'shield-alert', 'bg'=>'bg-red-100 dark:bg-red-900/30',      'c'=>'text-red-600 dark:text-red-400'],
+                                ['v'=>'Lainnya',   'icon'=>'more-horizontal','bg'=>'bg-slate-100 dark:bg-slate-700',   'c'=>'text-slate-600 dark:text-slate-400'],
+                            ] as $cat)
                             <button type="button"
-                                    onclick="selectOption('category', '{{ $cat }}', '{{ $cat }}')"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300">
-                                <i data-lucide="tag" class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"></i>
-                                {{ $cat }}
+                                    onclick="selectCategory('{{ $cat['v'] }}', '{{ $cat['icon'] }}', '{{ $cat['bg'] }}', '{{ $cat['c'] }}')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
+                                <div class="w-7 h-7 rounded-lg {{ $cat['bg'] }} flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="{{ $cat['icon'] }}" class="w-3.5 h-3.5 {{ $cat['c'] }}"></i>
+                                </div>
+                                {{ $cat['v'] }}
                             </button>
                             @endforeach
                         </div>
@@ -198,13 +211,31 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Tingkat Dampak</label>
-                        <select name="impact_level" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
-                            <option value="">-- Pilih Dampak --</option>
-                            <option>Hanya saya</option>
-                            <option>Beberapa pengguna</option>
-                            <option>Semua pengguna</option>
-                            <option>Seluruh sistem terganggu</option>
-                        </select>
+                        <div class="relative" id="impact-dropdown">
+                            <input type="hidden" name="impact_level" id="impact-input">
+                            <button type="button" onclick="toggleDropdown('impact-menu')"
+                                    class="w-full flex items-center justify-between px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
+                                <span id="impact-label" class="flex items-center gap-2.5 text-slate-400">-- Pilih Dampak --</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform" id="impact-chevron"></i>
+                            </button>
+                            <div id="impact-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
+                                @foreach([
+                                    ['v'=>'Hanya saya',             'icon'=>'user',         'bg'=>'bg-slate-100 dark:bg-slate-700',     'c'=>'text-slate-600 dark:text-slate-400'],
+                                    ['v'=>'Beberapa pengguna',      'icon'=>'users',        'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'c'=>'text-amber-600 dark:text-amber-400'],
+                                    ['v'=>'Semua pengguna',         'icon'=>'users-round',  'bg'=>'bg-orange-100 dark:bg-orange-900/30','c'=>'text-orange-600 dark:text-orange-400'],
+                                    ['v'=>'Seluruh sistem terganggu','icon'=>'alert-octagon','bg'=>'bg-red-100 dark:bg-red-900/30',     'c'=>'text-red-600 dark:text-red-400'],
+                                ] as $imp)
+                                <button type="button"
+                                        onclick="selectImpact('{{ $imp['v'] }}', '{{ $imp['icon'] }}', '{{ $imp['bg'] }}', '{{ $imp['c'] }}')"
+                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
+                                    <div class="w-7 h-7 rounded-lg {{ $imp['bg'] }} flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="{{ $imp['icon'] }}" class="w-3.5 h-3.5 {{ $imp['c'] }}"></i>
+                                    </div>
+                                    {{ $imp['v'] }}
+                                </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -480,7 +511,36 @@ function selectMaintType(val) {
     if (ch) ch.style.transform = 'rotate(0deg)';
 }
 
-// Tutup dropdown saat klik di luar
+function setLabelWithIcon(labelId, menuId, bg, iconName, iconColor, text) {
+    var lbl = document.getElementById(labelId);
+    if (!lbl) return;
+    lbl.innerHTML = '<div class="w-6 h-6 rounded-lg ' + bg + ' flex items-center justify-center flex-shrink-0"><i data-lucide="' + iconName + '" class="w-3.5 h-3.5 ' + iconColor + '"></i></div><span class="font-semibold text-navy-800 dark:text-white">' + text + '</span>';
+    document.getElementById(menuId).classList.add('hidden');
+    var chId = menuId.replace('-menu', '-chevron');
+    var ch = document.getElementById(chId);
+    if (ch) ch.style.transform = 'rotate(0deg)';
+    if (window.lucide) lucide.createIcons();
+}
+
+function selectPriority(val, label, bg, color, icon) {
+    document.getElementById('priority-input').value = val;
+    setLabelWithIcon('priority-label', 'priority-menu', bg, icon, color, label);
+}
+
+function selectCategory(val, icon, bg, color) {
+    document.getElementById('category-input').value = val;
+    setLabelWithIcon('category-label', 'category-menu', bg, icon, color, val);
+}
+
+function selectImpact(val, icon, bg, color) {
+    document.getElementById('impact-input').value = val;
+    setLabelWithIcon('impact-label', 'impact-menu', bg, icon, color, val);
+}
+
+function selectMaintType(val, icon, bg, color) {
+    document.getElementById('maintenance-type-input').value = val;
+    setLabelWithIcon('maint-type-label', 'maint-menu', bg, icon, color, val);
+}
 document.addEventListener('click', function(e) {
     if (!e.target.closest('[id$="-dropdown"]') && !e.target.closest('[id$="-menu"]')) {
         document.querySelectorAll('[id$="-menu"]').forEach(function(m) {
