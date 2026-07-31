@@ -1,10 +1,11 @@
-@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
+﻿@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
 @section('page-title', 'Detail Tiket')
+@php $rp = auth()->user()->isAdmin() ? 'admin.support' : 'teacher.support'; @endphp
 @section('content')
 <div class="space-y-6 fade-in">
 
     <div class="flex items-center gap-4">
-        <a href="{{ route('support.history') }}"
+        <a href="{{ route($rp . '.history') }}"
            class="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm group">
             <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform"></i>
         </a>

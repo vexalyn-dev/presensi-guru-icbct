@@ -1,5 +1,6 @@
-@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
+﻿@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
 @section('page-title', 'Pusat Bantuan')
+@php $rp = auth()->user()->isAdmin() ? 'admin.support' : 'teacher.support'; @endphp
 @section('content')
 <div class="space-y-6 fade-in" x-data="supportCenter()">
 
@@ -14,7 +15,7 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Laporkan masalah atau kirim permintaan ke Tim Vexalyn</p>
             </div>
         </div>
-        <a href="{{ route('support.history') }}"
+        <a href="{{ route($rp . '.history') }}"
            class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm">
             <i data-lucide="clock" class="w-4 h-4"></i>
             Riwayat Laporan
@@ -72,7 +73,7 @@
             </div>
         </div>
 
-        <form action="{{ route('support.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5" id="support-form" @submit="onSubmit">
+        <form action="{{ route($rp . '.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5" id="support-form" @submit="onSubmit">
             @csrf
             <input type="hidden" name="type" :value="activeType">
 

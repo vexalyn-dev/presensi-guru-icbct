@@ -1,5 +1,6 @@
-@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
+﻿@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
 @section('page-title', 'Riwayat Laporan')
+@php $rp = auth()->user()->isAdmin() ? 'admin.support' : 'teacher.support'; @endphp
 @section('content')
 <div class="space-y-6 fade-in">
 
@@ -14,7 +15,7 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Semua tiket yang pernah Anda kirimkan</p>
             </div>
         </div>
-        <a href="{{ route('support.index') }}"
+        <a href="{{ route($rp) }}"
            class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-semibold shadow-lg hover:opacity-90 transition-all">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Buat Laporan Baru
@@ -61,7 +62,7 @@
         </div>
         <h3 class="text-lg font-bold text-navy-800 dark:text-white mb-2">Belum ada laporan</h3>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-xs mx-auto">Anda belum pernah mengirim laporan. Temui masalah? Laporkan sekarang!</p>
-        <a href="{{ route('support.index') }}"
+        <a href="{{ route($rp) }}"
            class="inline-flex items-center gap-2 px-5 py-2.5 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl text-sm font-bold hover:opacity-90 transition-all shadow-lg">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Buat Laporan Pertama
@@ -71,7 +72,7 @@
     <div class="card overflow-hidden">
         <div class="divide-y divide-slate-100 dark:divide-slate-800">
             @foreach($tickets as $ticket)
-            <a href="{{ route('support.show', $ticket) }}"
+            <a href="{{ route($rp . '.show', $ticket) }}"
                class="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
 
                 {{-- Icon tipe --}}
