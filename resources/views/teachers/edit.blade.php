@@ -548,7 +548,9 @@
                 if (input.files && input.files[0]) {
                     const reader = new FileReader();
                     reader.onload = function (e) {
-                        const preview = document.getElementById('photo-preview');
+                        // Coba kedua ID — photo-preview-main atau photo-preview
+                        const preview = document.getElementById('photo-preview-main') 
+                                     || document.getElementById('photo-preview');
                         if (preview) {
                             preview.src = e.target.result;
                             preview.classList.remove('hidden');
