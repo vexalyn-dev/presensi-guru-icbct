@@ -138,71 +138,137 @@ class ActivityLogController extends Controller
     public function export(Request $request)
     {
         $query = ActivityLog::with('user:id,name,email,teacher_code');
-
         if ($request->filled('category')) $query->where('category', $request->category);
         if ($request->filled('date_from')) $query->whereDate('created_at', '>=', $request->date_from);
-        if ($request->filled('date_to')) $query->whereDate('created_at', '<=', $request->date_to);
-
+        if ($request->filled('date_to'))   $query->whereDate('created_at', '<=', $request->date_to);
         $logs = $query->orderBy('created_at', 'desc')->limit(5000)->get();
 
-        // Generate CSV sederhana (Excel bisa baca CSV)
-        $filename = 'activity_logs_' . date('Y-m-d_His') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        $categoryLabels = [
+            'attendance' => 'Presensi',    'auth' => 'Autentikasi',
+            'settings'   => 'Pengaturan',  'teacher' => 'Data Guru',
+            'classroom'  => 'Data Kelas',  'system' => 'Sistem',
+        ];
+        $typeLabels = [
+            'scan_in_daily'   => 'Scan Masuk Harian',
+            'scan_out_daily'  => 'Scan Keluar Harian',
+            'scan_in'         => 'Scan Masuk Kelas',
+            'scan_out'        => 'Scan Keluar Kelas',
+            'login'           => 'Login ke Sistem',
+            'logout'          => 'Logout dari Sistem',
+            'teacher_created' => 'Tambah Data Guru',
+            'teacher_updated' => 'Ubah Data Guru',
+            'teacher_deleted' => 'Hapus Data Guru',
+            'settings_change' => 'Ubah Pengaturan',
         ];
 
-        $callback = function() use ($logs) {
-            $categoryLabels = [
-                'attendance' => 'Presensi',
-                'auth'       => 'Autentikasi',
-                'settings'   => 'Pengaturan Sistem',
-                'teacher'    => 'Data Guru',
-                'classroom'  => 'Data Kelas',
-                'system'     => 'Sistem',
-            ];
-            $typeLabels = [
-                'scan_in_daily'   => 'Scan Masuk Harian',
-                'scan_out_daily'  => 'Scan Keluar Harian',
-                'scan_in'         => 'Scan Masuk Kelas',
-                'scan_out'        => 'Scan Keluar Kelas',
-                'login'           => 'Login ke Sistem',
-                'logout'          => 'Logout dari Sistem',
-                'teacher_created' => 'Tambah Data Guru',
-                'teacher_updated' => 'Ubah Data Guru',
-                'teacher_deleted' => 'Hapus Data Guru',
-                'settings_change' => 'Ubah Pengaturan',
-            ];
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Log Aktivitas');
 
-            $file = fopen('php://output', 'w');
-            // BOM agar Excel baca UTF-8 dengan benar
-            fwrite($file, "\xEF\xBB\xBF");
+        // ── JUDUL ──────────────────────────────────────────────
+        $sheet->mergeCells('A1:J1');
+        $sheet->setCellValue('A1', 'LOG AKTIVITAS SISTEM — ' . strtoupper(\App\Models\AppSetting::get('school_name', 'SMK ICB CT')));
+        $sheet->getStyle('A1')->applyFromArray([
+            'font'      => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']],
+            'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => '1E3A5F']],
+            'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(32);
 
-            fputcsv($file, [
-                'No', 'Tanggal & Waktu', 'Nama Guru', 'Kategori', 'Jenis Aktivitas',
-                'Keterangan', 'Alamat IP', 'Perangkat', 'Browser', 'Sistem Operasi'
-            ], ';'); // pakai semicolon agar Excel baca kolom terpisah
+        // ── SUB JUDUL (tanggal cetak) ───────────────────────────
+        $sheet->mergeCells('A2:J2');
+        $sheet->setCellValue('A2', 'Dicetak pada: ' . now()->locale('id')->isoFormat('dddd, D MMMM YYYY HH:mm') . ' WIB');
+        $sheet->getStyle('A2')->applyFromArray([
+            'font'      => ['size' => 9, 'italic' => true, 'color' => ['rgb' => '64748B']],
+            'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => 'F8FAFC']],
+            'alignment' => ['horizontal' => 'center'],
+        ]);
+        $sheet->getRowDimension(2)->setRowHeight(18);
 
-            foreach ($logs as $i => $log) {
-                $device = $log->device ?? [];
-                fputcsv($file, [
-                    $i + 1,
-                    $log->created_at->format('d/m/Y H:i:s'),
-                    $log->user?->name ?? 'Sistem',
-                    $categoryLabels[$log->category] ?? ucfirst($log->category),
-                    $typeLabels[$log->type] ?? ucfirst(str_replace('_', ' ', $log->type)),
-                    $log->description,
-                    $log->ip_address ?? '-',
-                    $device['device'] ?? '-',
-                    $device['browser'] ?? '-',
-                    $device['os'] ?? '-',
-                ], ';');
+        // ── HEADER KOLOM ────────────────────────────────────────
+        $headers = ['No', 'Tanggal & Waktu', 'Nama Guru', 'Kategori', 'Jenis Aktivitas',
+                    'Keterangan', 'IP Address', 'Perangkat', 'Browser', 'Sistem Operasi'];
+        $cols = range('A', 'J');
+        foreach ($headers as $i => $h) {
+            $cell = $cols[$i] . '3';
+            $sheet->setCellValue($cell, $h);
+        }
+        $sheet->getStyle('A3:J3')->applyFromArray([
+            'font'      => ['bold' => true, 'size' => 10, 'color' => ['rgb' => 'FFFFFF']],
+            'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => '1E3A5F']],
+            'alignment' => ['horizontal' => 'center', 'vertical' => 'center', 'wrapText' => false],
+            'borders'   => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['rgb' => 'FFFFFF']]],
+        ]);
+        $sheet->getRowDimension(3)->setRowHeight(22);
+
+        // ── DATA ROWS ───────────────────────────────────────────
+        $row = 4;
+        foreach ($logs as $i => $log) {
+            $device  = $log->device ?? [];
+            $isEven  = ($i % 2 === 0);
+            $bgColor = $isEven ? 'FFFFFF' : 'F1F5F9';
+
+            $sheet->setCellValue("A{$row}", $i + 1);
+            $sheet->setCellValue("B{$row}", $log->created_at->format('d/m/Y H:i'));
+            $sheet->setCellValue("C{$row}", $log->user?->name ?? 'Sistem');
+            $sheet->setCellValue("D{$row}", $categoryLabels[$log->category] ?? ucfirst($log->category));
+            $sheet->setCellValue("E{$row}", $typeLabels[$log->type] ?? ucfirst(str_replace('_', ' ', $log->type)));
+            $sheet->setCellValue("F{$row}", $log->description);
+            $sheet->setCellValue("G{$row}", $log->ip_address ?? '-');
+            $sheet->setCellValue("H{$row}", $device['device'] ?? '-');
+            $sheet->setCellValue("I{$row}", $device['browser'] ?? '-');
+            $sheet->setCellValue("J{$row}", $device['os'] ?? '-');
+
+            // Row style
+            $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
+                'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => $bgColor]],
+                'font'      => ['size' => 9],
+                'alignment' => ['vertical' => 'center'],
+                'borders'   => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['rgb' => 'E2E8F0']]],
+            ]);
+            // Kolom No center
+            $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal('center');
+            // Kolom kategori — warna sesuai tipe
+            $catColors = ['Presensi' => '166534', 'Autentikasi' => '1D4ED8', 'Data Guru' => '92400E',
+                          'Pengaturan' => '6D28D9', 'Data Kelas' => 'B45309', 'Sistem' => '475569'];
+            $catLabel = $categoryLabels[$log->category] ?? '';
+            if (isset($catColors[$catLabel])) {
+                $sheet->getStyle("D{$row}")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color($catColors[$catLabel]))->setBold(true);
             }
 
-            fclose($file);
-        };
+            $sheet->getRowDimension($row)->setRowHeight(18);
+            $row++;
+        }
 
-        return response()->stream($callback, 200, $headers);
+        // ── SUMMARY ROW ─────────────────────────────────────────
+        $sheet->mergeCells("A{$row}:E{$row}");
+        $sheet->setCellValue("A{$row}", "Total: {$logs->count()} aktivitas");
+        $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
+            'font'      => ['bold' => true, 'size' => 9, 'color' => ['rgb' => 'FFFFFF']],
+            'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => '334155']],
+            'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+        ]);
+        $sheet->getRowDimension($row)->setRowHeight(20);
+
+        // ── COLUMN WIDTHS ────────────────────────────────────────
+        $widths = ['A'=>6,'B'=>18,'C'=>20,'D'=>14,'E'=>22,'F'=>40,'G'=>15,'H'=>12,'I'=>16,'J'=>14];
+        foreach ($widths as $col => $w) {
+            $sheet->getColumnDimension($col)->setWidth($w);
+        }
+
+        // Freeze header + filter
+        $sheet->freezePane('A4');
+        $sheet->setAutoFilter("A3:J" . ($row - 1));
+
+        // ── OUTPUT ──────────────────────────────────────────────
+        $filename = 'log_aktivitas_' . date('Y-m-d_His') . '.xlsx';
+        $writer   = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     private function getCategoryLabel($category)
