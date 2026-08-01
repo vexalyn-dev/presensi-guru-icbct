@@ -325,7 +325,7 @@
                     <div><span class="text-slate-400">Browser:</span> <span id="show-browser" class="font-medium text-navy-800 dark:text-white ml-1">—</span></div>
                     <div><span class="text-slate-400">OS:</span> <span id="show-os" class="font-medium text-navy-800 dark:text-white ml-1">—</span></div>
                     <div><span class="text-slate-400">Device:</span> <span id="show-device" class="font-medium text-navy-800 dark:text-white ml-1">—</span></div>
-                    <div><span class="text-slate-400">IP:</span> <span id="show-ip" class="font-medium text-navy-800 dark:text-white ml-1">—</span></div>
+                    <div><span class="text-slate-400">IP:</span> <span id="show-ip" class="font-medium text-navy-800 dark:text-white ml-1">{{ request()->ip() }}</span></div>
                 </div>
             </div>
 
@@ -584,7 +584,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('show-device').textContent  = device;
     document.getElementById('show-res').textContent     = window.screen.width + 'x' + window.screen.height;
 
-    document.getElementById('show-ip').textContent = '{{ request()->ip() }}';
     setType('bug');
     if (window.lucide) lucide.createIcons();
 });
