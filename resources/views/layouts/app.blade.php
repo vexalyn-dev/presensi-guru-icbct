@@ -552,7 +552,7 @@
                             <p class="text-[11px] font-semibold text-navy-800 dark:text-white leading-tight">{{ Auth::user()->name }}</p>
                             <div class="flex items-center">
                                 <span class="text-[9px] text-green-600 dark:text-green-400 font-medium">
-                                    {{ Auth::user()->isAdmin() ? 'Operator' : (Auth::user()->subject ?? 'Guru') }}
+                                    {{ Auth::user()->role_label }}
                                 </span>
                             </div>
                         </div>

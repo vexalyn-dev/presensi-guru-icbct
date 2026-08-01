@@ -12,13 +12,19 @@ class LoginController extends Controller
 {
     private function redirectByRole(\App\Models\User $user)
     {
+        if ($user->isGuruPiket()) {
+            return redirect()->route('piket.dashboard')
+                ->with('show_welcome', true)
+                ->with('success', 'Selamat datang, ' . $user->name . '!');
+        }
+
         if ($user->isTeacher()) {
             return redirect()->route('teacher.dashboard')
                 ->with('show_welcome', true)
                 ->with('success', 'Selamat datang, ' . $user->name . '!');
         }
 
-        if ($user->isAdmin()) {
+        if ($user->canAccessAdmin()) {
             return redirect()->route('dashboard')
                 ->with('success', 'Selamat datang, ' . $user->name . '!');
         }

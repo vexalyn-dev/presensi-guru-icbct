@@ -20,13 +20,19 @@ class SocialAuthController extends Controller
             ? 'Akun berhasil dibuat dan Anda telah masuk melalui ' . ucfirst($provider) . '!'
             : 'Login berhasil melalui ' . ucfirst($provider);
 
+        if ($user->isGuruPiket()) {
+            return redirect()->route('piket.dashboard')
+                ->with('success', $message)
+                ->with('show_welcome', true);
+        }
+
         if ($user->isTeacher()) {
             return redirect()->route('teacher.dashboard')
                 ->with('success', $message)
                 ->with('show_welcome', true);
         }
 
-        if ($user->isAdmin()) {
+        if ($user->canAccessAdmin()) {
             return redirect()->route('dashboard')->with('success', $message);
         }
 

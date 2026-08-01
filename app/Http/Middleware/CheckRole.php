@@ -8,12 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  ...$roles
-     */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (!$request->user()) {
@@ -22,16 +16,20 @@ class CheckRole
 
         $user = $request->user();
 
-        if (!in_array($user->role, $roles)) {
+        // operator selalu dapat akses ke route yang allow 'admin'
+        $allowedRoles = $roles;
+        if (in_array('admin', $roles) && !in_array('operator', $roles)) {
+            $allowedRoles[] = 'operator';
+        }
+
+        if (!in_array($user->role, $allowedRoles)) {
+            if ($user->canAccessAdmin()) {
+                return redirect()->route('dashboard');
+            }
             if ($user->isTeacher()) {
                 return redirect()->route('teacher.dashboard');
             }
-
-            if ($user->isAdmin()) {
-                return redirect()->route('dashboard');
-            }
-
-            abort(403, 'Unauthorized access. You do not have permission to access this page.');
+            abort(403, 'Unauthorized access.');
         }
 
         return $next($request);

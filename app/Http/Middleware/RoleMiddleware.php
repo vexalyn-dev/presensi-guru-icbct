@@ -16,18 +16,24 @@ class RoleMiddleware
 
         $user = auth()->user();
 
-        if ($user->role !== $role) {
-            if ($user->isTeacher()) {
-                return redirect()->route('teacher.dashboard');
-            }
+        // operator mendapat akses ke semua route yang membutuhkan 'admin'
+        $effectiveRole = ($role === 'admin' && $user->role === 'operator') ? 'admin' : $user->role;
 
-            if ($user->isAdmin()) {
-                return redirect()->route('dashboard');
-            }
-
-            abort(403, 'Unauthorized');
+        if ($effectiveRole !== $role) {
+            return $this->redirectByRole($user);
         }
 
         return $next($request);
+    }
+
+    private function redirectByRole($user): Response
+    {
+        if ($user->canAccessAdmin()) {
+            return redirect()->route('dashboard');
+        }
+        if ($user->isTeacher()) {
+            return redirect()->route('teacher.dashboard');
+        }
+        abort(403, 'Unauthorized');
     }
 }

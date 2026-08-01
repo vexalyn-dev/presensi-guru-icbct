@@ -274,6 +274,57 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::get('/support/{ticket}', [SupportController::class, 'show'])   ->name('support.show');
 });
 
+// ============================================================
+// Guru Piket Routes — akses terbatas
+// ============================================================
+Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [App\Http\Controllers\Piket\DashboardController::class, 'index'])->name('dashboard');
+
+    // Presensi Harian (scan manual oleh piket)
+    Route::get('/attendance',       [App\Http\Controllers\Teacher\AttendanceController::class, 'index'])  ->name('attendance');
+    Route::post('/attendance/store',[App\Http\Controllers\Teacher\AttendanceController::class, 'store'])  ->name('attendance.store');
+
+    // Manual Presensi (admin manual)
+    Route::get('/class-attendance/manual', [ManualClassAttendanceController::class, 'index'])->name('class-attendance.manual');
+    Route::post('/class-attendance/manual', [ManualClassAttendanceController::class, 'store'])->name('class-attendance.manual.store');
+    Route::delete('/class-attendance/manual/{id}', [ManualClassAttendanceController::class, 'destroy'])->name('class-attendance.manual.destroy');
+
+    // Jadwal Kerja
+    Route::get('/work-schedule', [App\Http\Controllers\Teacher\WorkScheduleController::class, 'index'])->name('work-schedule');
+
+    // Kalender Libur
+    Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays');
+
+    // Izin & Sakit (hanya lihat / approve)
+    Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves');
+    Route::get('/leaves/{leave}', [LeaveController::class, 'show'])->name('leaves.show');
+    Route::get('/leave-approval', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'index'])->name('leave-approval');
+    Route::post('/leave-approval/{leave}/approve', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'approve'])->name('leave-approval.approve');
+    Route::post('/leave-approval/{leave}/reject', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'reject'])->name('leave-approval.reject');
+
+    // Pengaturan (read-only view)
+    Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings');
+
+    // Profil
+    Route::get('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [App\Http\Controllers\Teacher\ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    // Pusat Bantuan
+    Route::get('/support',          [SupportController::class, 'index'])  ->name('support');
+    Route::post('/support',         [SupportController::class, 'store'])  ->name('support.store');
+    Route::get('/support/history',  [SupportController::class, 'history'])->name('support.history');
+    Route::get('/support/{ticket}', [SupportController::class, 'show'])   ->name('support.show');
+
+    // Notifikasi
+    Route::get('/notifications',               [App\Http\Controllers\Teacher\NotificationController::class, 'index'])       ->name('notifications');
+    Route::get('/notifications/api/unread',    [App\Http\Controllers\Teacher\NotificationController::class, 'getUnread'])   ->name('notifications.api.unread');
+    Route::post('/notifications/{id}/read',    [App\Http\Controllers\Teacher\NotificationController::class, 'markAsRead'])  ->name('notifications.read');
+    Route::post('/notifications/read-all',     [App\Http\Controllers\Teacher\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+});
+
 Route::get('/run-migrate-secret', function (Request $request) {
     // Lu cuma bisa akses kalo bawa key yang bener
     if ($request->get('key') !== 'vexalyn19052009') {

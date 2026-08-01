@@ -184,21 +184,44 @@ class User extends Authenticatable
     // ==========================================
     // ROLE CHECK METHODS
     // ==========================================
-    
+
+    /** Role constants */
+    public const ROLE_ADMIN      = 'admin';
+    public const ROLE_GURU       = 'guru';
+    public const ROLE_OPERATOR   = 'operator';
+    public const ROLE_GURU_PIKET = 'guru_piket';
+
     /**
-     * Check if user is admin
+     * Operator = full access seperti admin
+     * Admin lama tetap diterima untuk backward compatibility
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_OPERATOR]);
     }
 
-    /**
-     * Check if user is teacher
-     */
+    /** Cek khusus role operator (baru) */
+    public function isOperator(): bool
+    {
+        return $this->role === self::ROLE_OPERATOR;
+    }
+
+    /** Cek role guru reguler */
     public function isTeacher(): bool
     {
-        return $this->role === 'guru';
+        return in_array($this->role, [self::ROLE_GURU, self::ROLE_GURU_PIKET]);
+    }
+
+    /** Cek khusus guru piket */
+    public function isGuruPiket(): bool
+    {
+        return $this->role === self::ROLE_GURU_PIKET;
+    }
+
+    /** Cek apakah boleh akses dashboard admin/operator */
+    public function canAccessAdmin(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_OPERATOR]);
     }
 
     /**
@@ -209,10 +232,22 @@ class User extends Authenticatable
         return $this->role === $role;
     }
 
+    /** Label role untuk tampilan UI */
+    public function getRoleLabelAttribute(): string
+    {
+        return match($this->role) {
+            self::ROLE_ADMIN      => 'Administrator',
+            self::ROLE_OPERATOR   => 'Operator',
+            self::ROLE_GURU       => 'Guru',
+            self::ROLE_GURU_PIKET => 'Guru Piket',
+            default               => ucfirst($this->role),
+        };
+    }
+
     // ==========================================
     // SCOPES (Query Builder)
     // ==========================================
-    
+
     /**
      * Scope: Filter only teachers (role = 'guru')
      * ⚠️ METHOD INI YANG MENGHILANGKAN ERROR teachers()
