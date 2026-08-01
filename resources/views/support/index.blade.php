@@ -1,4 +1,4 @@
-﻿@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
+﻿﻿@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
 @section('page-title', 'Pusat Bantuan')
 @php $rp = auth()->user()->isAdmin() ? 'admin.support' : 'teacher.support'; @endphp
 
@@ -322,9 +322,9 @@
             <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/40">
                 <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Info Sistem (Otomatis Terisi)</p>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div><span class="text-slate-400">Browser:</span> <span id="show-browser" class="font-medium text-navy-800 dark:text-white ml-1">—</span></div>
-                    <div><span class="text-slate-400">OS:</span> <span id="show-os" class="font-medium text-navy-800 dark:text-white ml-1">—</span></div>
-                    <div><span class="text-slate-400">Device:</span> <span id="show-device" class="font-medium text-navy-800 dark:text-white ml-1">—</span></div>
+                    <div><span class="text-slate-400">Browser:</span> <span id="show-browser" class="font-medium text-navy-800 dark:text-white ml-1">-</span></div>
+                    <div><span class="text-slate-400">OS:</span> <span id="show-os" class="font-medium text-navy-800 dark:text-white ml-1">-</span></div>
+                    <div><span class="text-slate-400">Device:</span> <span id="show-device" class="font-medium text-navy-800 dark:text-white ml-1">-</span></div>
                     <div><span class="text-slate-400">IP:</span> <span id="show-ip" class="font-medium text-navy-800 dark:text-white ml-1">{{ request()->ip() }}</span></div>
                 </div>
             </div>

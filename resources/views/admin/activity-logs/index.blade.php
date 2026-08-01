@@ -206,18 +206,16 @@
             @forelse($logs as $log)
                 @php
                     // Badge config berdasarkan type
-                    $badgeConfig = match(true) {
-                        in_array($log->type, ['scan_in_daily','scan_in'])    => ['label' => 'Masuk',       'bg' => 'bg-emerald-100 dark:bg-emerald-900/30', 'text' => 'text-emerald-700 dark:text-emerald-400', 'dot' => 'bg-emerald-500'],
-                        in_array($log->type, ['scan_out_daily','scan_out'])  => ['label' => 'Keluar',      'bg' => 'bg-blue-100 dark:bg-blue-900/30',     'text' => 'text-blue-700 dark:text-blue-400',     'dot' => 'bg-blue-500'],
-                        in_array($log->type, ['login','login_daily'])        => ['label' => 'Login',       'bg' => 'bg-violet-100 dark:bg-violet-900/30', 'text' => 'text-violet-700 dark:text-violet-400', 'dot' => 'bg-violet-500'],
-                        in_array($log->type, ['logout'])                     => ['label' => 'Logout',      'bg' => 'bg-slate-100 dark:bg-slate-800',      'text' => 'text-slate-600 dark:text-slate-400',   'dot' => 'bg-slate-400'],
-                        in_array($log->type, ['teacher_created'])            => ['label' => 'Tambah Guru', 'bg' => 'bg-amber-100 dark:bg-amber-900/30',  'text' => 'text-amber-700 dark:text-amber-400',  'dot' => 'bg-amber-500'],
-                        in_array($log->type, ['teacher_updated'])            => ['label' => 'Ubah Guru',   'bg' => 'bg-orange-100 dark:bg-orange-900/30','text' => 'text-orange-700 dark:text-orange-400','dot' => 'bg-orange-500'],
-                        in_array($log->type, ['teacher_deleted'])            => ['label' => 'Hapus Guru',  'bg' => 'bg-red-100 dark:bg-red-900/30',     'text' => 'text-red-700 dark:text-red-400',      'dot' => 'bg-red-500'],
-                        in_array($log->type, ['settings_change'])            => ['label' => 'Pengaturan',  'bg' => 'bg-purple-100 dark:bg-purple-900/30','text' => 'text-purple-700 dark:text-purple-400','dot' => 'bg-purple-500'],
-                        str_contains($log->type ?? '', 'in')                => ['label' => 'Masuk',       'bg' => 'bg-emerald-100 dark:bg-emerald-900/30','text' => 'text-emerald-700 dark:text-emerald-400','dot' => 'bg-emerald-500'],
-                        str_contains($log->type ?? '', 'out')               => ['label' => 'Keluar',      'bg' => 'bg-blue-100 dark:bg-blue-900/30',    'text' => 'text-blue-700 dark:text-blue-400',    'dot' => 'bg-blue-500'],
-                        default                                              => ['label' => ucwords(str_replace('_',' ',$log->type ?? '')), 'bg' => 'bg-navy-100 dark:bg-navy-900/30', 'text' => 'text-navy-700 dark:text-navy-300', 'dot' => 'bg-navy-500'],
+                    $badgeConfig = match(trim($log->type ?? '')) {
+                        'scan_in_daily', 'scan_in'   => ['label' => 'Masuk',       'bg' => 'bg-emerald-100 dark:bg-emerald-900/30', 'text' => 'text-emerald-700 dark:text-emerald-400', 'dot' => 'bg-emerald-500'],
+                        'scan_out_daily', 'scan_out' => ['label' => 'Keluar',      'bg' => 'bg-blue-100 dark:bg-blue-900/30',     'text' => 'text-blue-700 dark:text-blue-400',     'dot' => 'bg-blue-500'],
+                        'login'                      => ['label' => 'Login',       'bg' => 'bg-violet-100 dark:bg-violet-900/30', 'text' => 'text-violet-700 dark:text-violet-400', 'dot' => 'bg-violet-500'],
+                        'logout'                     => ['label' => 'Logout',      'bg' => 'bg-slate-100 dark:bg-slate-800',      'text' => 'text-slate-600 dark:text-slate-400',   'dot' => 'bg-slate-400'],
+                        'teacher_created'            => ['label' => 'Tambah Guru', 'bg' => 'bg-amber-100 dark:bg-amber-900/30',   'text' => 'text-amber-700 dark:text-amber-400',  'dot' => 'bg-amber-500'],
+                        'teacher_updated'            => ['label' => 'Ubah Guru',   'bg' => 'bg-orange-100 dark:bg-orange-900/30', 'text' => 'text-orange-700 dark:text-orange-400','dot' => 'bg-orange-500'],
+                        'teacher_deleted'            => ['label' => 'Hapus Guru',  'bg' => 'bg-red-100 dark:bg-red-900/30',      'text' => 'text-red-700 dark:text-red-400',      'dot' => 'bg-red-500'],
+                        'settings_change'            => ['label' => 'Pengaturan',  'bg' => 'bg-purple-100 dark:bg-purple-900/30', 'text' => 'text-purple-700 dark:text-purple-400','dot' => 'bg-purple-500'],
+                        default                      => ['label' => ucwords(str_replace('_', ' ', trim($log->type ?? 'aktivitas'))), 'bg' => 'bg-slate-100 dark:bg-slate-800', 'text' => 'text-slate-600 dark:text-slate-400', 'dot' => 'bg-slate-500'],
                     };
                     $photoUrl = $log->user?->photo ? asset('storage/' . $log->user->photo) : null;
                 @endphp
