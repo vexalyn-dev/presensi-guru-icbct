@@ -340,3 +340,22 @@ Route::get('/sapu-jagat', function () {
     
     return 'Optimize clear sukses! Semua cache udah ludes.';
 });
+
+Route::get('/git-pull-rahasia', function (Request $request) {
+    // Validasi key rahasia biar aman dari orang Iseng
+    if ($request->get('key') !== 'vexalyn19052009') {
+        abort(404);
+    }
+
+    // Pindah ke folder project lalu git pull
+    $path = base_path(); // Otomatis ngambil path root project Laravel lu
+    $command = "cd {$path} && git pull origin main 2>&1";
+
+    $output = [];
+    $exitCode = null;
+    
+    // Pakai passthru atau system sebagai alternatif pengganti shell_exec
+    passthru($command, $exitCode);
+
+    return '<pre>Exit Code: ' . $exitCode . '</pre>';
+});
