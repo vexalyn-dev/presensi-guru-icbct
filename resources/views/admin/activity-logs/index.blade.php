@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+﻿﻿@extends('layouts.app')
 @section('page-title', 'Log Aktivitas')
 @section('content')
 <div class="space-y-6 fade-in">
@@ -164,7 +164,7 @@
                     <input type="date" name="date_from" value="{{ request('date_from') }}"
                            class="pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                 </div>
-                <span class="text-slate-400 text-sm">â€”</span>
+                <span class="text-slate-400 text-sm">s/d</span>
                 <div class="relative">
                     <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
                     <input type="date" name="date_to" value="{{ request('date_to') }}"
@@ -318,7 +318,7 @@
 </div>
 
 
-{{-- Detail Modal — dengan backdrop --}}
+{{-- Detail Modal - dengan backdrop --}}
 <div id="logDetailModal" class="fixed inset-0 z-50 hidden" style="background:rgba(15,23,42,0.55);backdrop-filter:blur(6px);">
     <div class="min-h-screen flex items-end sm:items-center justify-center sm:p-4">
         <div id="logDetailBox"
@@ -333,7 +333,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-navy-800 dark:text-white leading-tight">Detail Aktivitas</h3>
-                        <p id="modalCategoryBadge" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">—</p>
+                        <p id="modalCategoryBadge" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">-</p>
                     </div>
                 </div>
                 <button onclick="closeLogDetail()"
@@ -370,13 +370,25 @@
                 @csrf
                 <div>
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Hapus log lebih dari (hari)</label>
-                    <select name="days" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
-                        <option value="30">30 hari</option>
-                        <option value="60">60 hari</option>
-                        <option value="90" selected>90 hari</option>
-                        <option value="180">180 hari</option>
-                        <option value="365">365 hari</option>
-                    </select>
+                    <div class="relative">
+                        <input type="hidden" name="days" id="cleanup-days-input" value="90">
+                        <button type="button" id="btn-cleanup-dd"
+                                onclick="toggleDD('cleanup-dd')"
+                                class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium text-navy-800 dark:text-white hover:bg-white dark:hover:bg-slate-700 transition-all focus:outline-none">
+                            <span id="lbl-cleanup-dd">90 hari</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform" id="chev-cleanup-dd"></i>
+                        </button>
+                        <div id="cleanup-dd" class="dd-portal hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-2xl z-[9999] overflow-hidden">
+                            @foreach([30 => '30 hari', 60 => '60 hari', 90 => '90 hari', 180 => '180 hari', 365 => '365 hari'] as $val => $lbl)
+                            <button type="button"
+                                    onclick="pickDD('cleanup-dd','cleanup-days-input','lbl-cleanup-dd','btn-cleanup-dd','chev-cleanup-dd','{{ $val }}','{{ $lbl }}')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300 {{ $val == 90 ? 'font-semibold text-navy-800 dark:text-gold-400' : '' }}">
+                                <i data-lucide="clock" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+                                {{ $lbl }}
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
                     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">⚠️ Tindakan ini tidak dapat dibatalkan</p>
                 </div>
                 <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -421,10 +433,58 @@ document.getElementById('cleanupModal').addEventListener('click', function(e) {
     if (e.target === this) this.classList.add('hidden');
 });
 
+// ── Dropdown Portal (shared) ──────────────────────────────
+var _ddOpen = null;
+function toggleDD(id) {
+    var btnId = 'btn-' + id.replace('dd-','').replace(id.startsWith('btn-') ? 'btn-' : '', '');
+    // Cari button via konvensi btn-{ddId tanpa 'dd-' prefix jika ada}
+    var btn = document.getElementById('btn-' + id) || document.getElementById(id.replace(/^(dd-)?/, 'btn-'));
+    var dd  = document.getElementById(id);
+    if (!btn || !dd) return;
+    if (_ddOpen && _ddOpen !== id) closeDD(_ddOpen);
+    dd.classList.contains('hidden') ? openDD(id, btn) : closeDD(id);
+}
+function openDD(id, btn) {
+    var dd = document.getElementById(id);
+    if (!dd) return;
+    if (dd.parentElement !== document.body) document.body.appendChild(dd);
+    var r = btn.getBoundingClientRect();
+    dd.style.cssText = 'position:fixed;top:'+(r.bottom+4)+'px;left:'+r.left+'px;width:'+r.width+'px;opacity:0;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease;';
+    dd.classList.remove('hidden');
+    requestAnimationFrame(function() { requestAnimationFrame(function() { dd.style.opacity='1'; dd.style.transform='translateY(0)'; }); });
+    var ch = btn.querySelector('i');
+    if (ch) ch.style.transform = 'rotate(180deg)';
+    _ddOpen = id;
+}
+function closeDD(id) {
+    var dd = document.getElementById(id);
+    if (!dd) return;
+    dd.style.opacity = '0'; dd.style.transform = 'translateY(-6px)';
+    setTimeout(function() { dd.classList.add('hidden'); }, 170);
+    var btn = document.querySelector('[onclick*="toggleDD(\''+id+'\'"]') || document.getElementById('btn-'+id);
+    if (btn) { var ch = btn.querySelector('i'); if (ch) ch.style.transform = ''; }
+    if (_ddOpen === id) _ddOpen = null;
+}
+function pickDD(ddId, inputId, labelId, btnId, chevId, value, label) {
+    var inp = document.getElementById(inputId);
+    var lbl = document.getElementById(labelId);
+    if (inp) inp.value = value;
+    if (lbl) { lbl.textContent = label; }
+    closeDD(ddId);
+    if (window.lucide) lucide.createIcons();
+}
+document.addEventListener('click', function(e) {
+    if (!_ddOpen) return;
+    var dd  = document.getElementById(_ddOpen);
+    var btn = document.getElementById('btn-'+_ddOpen);
+    if (dd && !dd.contains(e.target) && btn && !btn.contains(e.target)) closeDD(_ddOpen);
+});
+// ──────────────────────────────────────────────────────────
+
 async function showLogDetail(id) {
     const content   = document.getElementById('logDetailContent');
     const catBadge  = document.getElementById('modalCategoryBadge');
-    catBadge.textContent = '—';
+    catBadge.textContent = '-';
     content.innerHTML = `<div class="flex items-center justify-center py-10 gap-3">
         <div class="w-5 h-5 border-2 border-navy-800/20 border-t-navy-800 dark:border-gold-400/20 dark:border-t-gold-400 rounded-full animate-spin"></div>
         <span class="text-sm text-slate-400">Memuat data...</span></div>`;

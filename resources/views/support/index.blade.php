@@ -263,31 +263,75 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Jenis Maintenance</label>
-                        <div class="relative">
+                        <div class="relative" x-data="{
+                            open: false,
+                            selected: '',
+                            selectedIcon: 'wrench',
+                            selectedBg: '',
+                            selectedColor: '',
+                            options: [
+                                {v:'Update Sistem',      icon:'refresh-cw',     bg:'bg-blue-100',   c:'text-blue-600'},
+                                {v:'Perbaikan Database', icon:'database',       bg:'bg-amber-100',  c:'text-amber-600'},
+                                {v:'Backup Data',        icon:'hard-drive',     bg:'bg-green-100',  c:'text-green-600'},
+                                {v:'Optimasi Performa',  icon:'zap',            bg:'bg-purple-100', c:'text-purple-600'},
+                                {v:'Keamanan',           icon:'shield',         bg:'bg-red-100',    c:'text-red-600'},
+                                {v:'Lainnya',            icon:'more-horizontal',bg:'bg-slate-100',  c:'text-slate-600'},
+                            ],
+                            select(opt) {
+                                this.selected = opt.v;
+                                this.selectedIcon = opt.icon;
+                                this.selectedBg = opt.bg;
+                                this.selectedColor = opt.c;
+                                this.open = false;
+                                document.getElementById('maintenance-type-input').value = opt.v;
+                                this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+                            }
+                        }" @click.outside="open = false">
                             <input type="hidden" name="maintenance_type" id="maintenance-type-input">
-                            <button type="button" onclick="toggleDropdown('maint-menu')"
-                                    class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
-                                <span id="maint-type-label" class="text-slate-400">-- Pilih Jenis --</span>
-                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400" id="maint-chevron"></i>
+
+                            <!-- Trigger Button -->
+                            <button type="button" @click="open = !open"
+                                    class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none"
+                                    :class="open && 'border-navy-800 dark:border-gold-400'">
+                                <span class="flex items-center gap-2.5">
+                                    <template x-if="!selected">
+                                        <span class="flex items-center gap-2 text-slate-400">
+                                            <i data-lucide="wrench" class="w-4 h-4"></i>
+                                            -- Pilih Jenis --
+                                        </span>
+                                    </template>
+                                    <template x-if="selected">
+                                        <span class="flex items-center gap-2.5">
+                                            <span :class="selectedBg + ' w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0'">
+                                                <i :data-lucide="selectedIcon" :class="selectedColor + ' w-3.5 h-3.5'"></i>
+                                            </span>
+                                            <span class="font-semibold text-navy-800 dark:text-white" x-text="selected"></span>
+                                        </span>
+                                    </template>
+                                </span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200"
+                                   :class="open && 'rotate-180'"></i>
                             </button>
-                            <div id="maint-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
-                                @foreach([
-                                    ['v'=>'Update Sistem',     'icon'=>'refresh-cw',    'bg'=>'bg-blue-100 dark:bg-blue-900/30',    'c'=>'text-blue-600 dark:text-blue-400'],
-                                    ['v'=>'Perbaikan Database','icon'=>'database',      'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'c'=>'text-amber-600 dark:text-amber-400'],
-                                    ['v'=>'Backup Data',       'icon'=>'hard-drive',    'bg'=>'bg-green-100 dark:bg-green-900/30',  'c'=>'text-green-600 dark:text-green-400'],
-                                    ['v'=>'Optimasi Performa', 'icon'=>'zap',           'bg'=>'bg-purple-100 dark:bg-purple-900/30','c'=>'text-purple-600 dark:text-purple-400'],
-                                    ['v'=>'Keamanan',          'icon'=>'shield',        'bg'=>'bg-red-100 dark:bg-red-900/30',      'c'=>'text-red-600 dark:text-red-400'],
-                                    ['v'=>'Lainnya',           'icon'=>'more-horizontal','bg'=>'bg-slate-100 dark:bg-slate-700',    'c'=>'text-slate-600 dark:text-slate-400'],
-                                ] as $m)
-                                <button type="button"
-                                        onclick="selectMaintType('{{ $m['v'] }}', '{{ $m['icon'] }}', '{{ $m['bg'] }}', '{{ $m['c'] }}')"
-                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
-                                    <div class="w-7 h-7 rounded-lg {{ $m['bg'] }} flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="{{ $m['icon'] }}" class="w-3.5 h-3.5 {{ $m['c'] }}"></i>
-                                    </div>
-                                    {{ $m['v'] }}
-                                </button>
-                                @endforeach
+
+                            <!-- Dropdown -->
+                            <div x-show="open"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                                 class="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-2xl z-[9999] overflow-hidden"
+                                 style="display:none;">
+                                <template x-for="opt in options" :key="opt.v">
+                                    <button type="button" @click="select(opt)"
+                                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
+                                        <span :class="opt.bg + ' dark:opacity-80 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform'">
+                                            <i :data-lucide="opt.icon" :class="opt.c + ' w-4 h-4'"></i>
+                                        </span>
+                                        <span class="font-medium text-slate-700 dark:text-slate-200" x-text="opt.v"></span>
+                                    </button>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -494,12 +538,47 @@ function toggleDropdown(menuId) {
         if (ch) ch.style.transform = 'rotate(0deg)';
     });
     if (!isOpen) {
-        menu.classList.remove('hidden');
+        // Portal: pindah ke body agar tidak terpotong overflow
+        var btnId = 'btn-' + menuId;
+        var btn = document.getElementById(btnId);
+        if (btn) {
+            if (menu.parentElement !== document.body) {
+                document.body.appendChild(menu);
+            }
+            // Pakai requestAnimationFrame supaya browser sempat render posisi button
+            requestAnimationFrame(function() {
+                var rect = btn.getBoundingClientRect();
+                menu.style.position  = 'fixed';
+                menu.style.top       = (rect.bottom + 4) + 'px';
+                menu.style.left      = rect.left + 'px';
+                menu.style.width     = rect.width + 'px';
+                menu.style.zIndex    = '9999';
+                menu.classList.remove('hidden');
+                if (window.lucide) lucide.createIcons();
+            });
+        } else {
+            menu.classList.remove('hidden');
+        }
         var chevronId = menuId.replace('-menu', '-chevron');
         var ch = document.getElementById(chevronId);
         if (ch) ch.style.transform = 'rotate(180deg)';
     }
 }
+
+// Tutup dropdown saat klik di luar
+document.addEventListener('click', function(e) {
+    var openMenus = document.querySelectorAll('[id$="-menu"]:not(.hidden)');
+    openMenus.forEach(function(menu) {
+        var btnId = 'btn-' + menu.id;
+        var btn   = document.getElementById(btnId);
+        if (btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.add('hidden');
+            var chevronId = menu.id.replace('-menu', '-chevron');
+            var ch = document.getElementById(chevronId);
+            if (ch) ch.style.transform = 'rotate(0deg)';
+        }
+    });
+});
 
 function selectOption(key, value, label) {
     document.getElementById(key + '-input').value = value;
@@ -540,8 +619,70 @@ function selectImpact(val, icon, bg, color) {
 
 function selectMaintType(val, icon, bg, color) {
     document.getElementById('maintenance-type-input').value = val;
-    setLabelWithIcon('maint-type-label', 'maint-menu', bg, icon, color, val);
+
+    // Update label
+    var lbl = document.getElementById('maint-type-label');
+    if (lbl) {
+        lbl.innerHTML =
+            '<div class="w-6 h-6 rounded-lg ' + bg + ' flex items-center justify-center flex-shrink-0">' +
+            '<i data-lucide="' + icon + '" class="w-3.5 h-3.5 ' + color + '"></i></div>' +
+            '<span class="font-semibold text-navy-800 dark:text-white">' + val + '</span>';
+    }
+
+    // Tutup dropdown
+    closeMaintDropdown();
+    if (window.lucide) lucide.createIcons();
 }
+
+function openMaintDropdown() {
+    var menu = document.getElementById('maint-menu');
+    var btn  = document.getElementById('btn-maint-menu');
+    var chevron = document.getElementById('maint-chevron');
+
+    if (!menu || !btn) return;
+
+    var isOpen = !menu.classList.contains('hidden');
+
+    // Tutup semua dropdown lain dulu
+    document.querySelectorAll('[id$="-menu"]').forEach(function(m) {
+        if (m.id !== 'maint-menu') {
+            m.classList.add('hidden');
+        }
+    });
+
+    if (isOpen) {
+        closeMaintDropdown();
+        return;
+    }
+
+    // Posisikan menu tepat di bawah button
+    var rect = btn.getBoundingClientRect();
+    menu.style.top   = (rect.bottom + window.scrollY + 4) + 'px';
+    menu.style.left  = rect.left + 'px';
+    menu.style.width = rect.width + 'px';
+    menu.style.position = 'fixed';
+    menu.style.top   = (rect.bottom + 4) + 'px';
+
+    menu.classList.remove('hidden');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+    if (window.lucide) lucide.createIcons();
+}
+
+function closeMaintDropdown() {
+    var menu    = document.getElementById('maint-menu');
+    var chevron = document.getElementById('maint-chevron');
+    if (menu) menu.classList.add('hidden');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+}
+
+// Tutup maint dropdown saat klik di luar
+document.addEventListener('click', function(e) {
+    var btn  = document.getElementById('btn-maint-menu');
+    var menu = document.getElementById('maint-menu');
+    if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+        closeMaintDropdown();
+    }
+});
 document.addEventListener('click', function(e) {
     if (!e.target.closest('[id$="-dropdown"]') && !e.target.closest('[id$="-menu"]')) {
         document.querySelectorAll('[id$="-menu"]').forEach(function(m) {
@@ -582,7 +723,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('show-browser').textContent = browser;
     document.getElementById('show-os').textContent      = os;
     document.getElementById('show-device').textContent  = device;
-    document.getElementById('show-res').textContent     = window.screen.width + 'x' + window.screen.height;
+    var showRes = document.getElementById('show-res');
+    if (showRes) showRes.textContent = window.screen.width + 'x' + window.screen.height;
 
     setType('bug');
     if (window.lucide) lucide.createIcons();

@@ -12,10 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'role'             => \App\Http\Middleware\RoleMiddleware::class,
+            'session.timeout'  => \App\Http\Middleware\EnforceSessionTimeout::class,
+            'maintenance.check'=> \App\Http\Middleware\CheckMaintenanceMode::class,
         ]);
+        // Session timeout + maintenance check global untuk semua web request
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnforceSessionTimeout::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\CheckMaintenanceMode::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
+            return response()->view('errors.404', [], 404);
+        });
     })
     ->create();

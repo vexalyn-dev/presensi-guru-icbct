@@ -373,11 +373,29 @@
 
                 <a href="{{ route('reports.index') }}" 
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('reports.*') 
+                          {{ request()->routeIs('reports.index') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                    <span>Laporan</span>
+                    <span>Laporan Umum</span>
+                </a>
+
+                <a href="{{ route('reports.attendance') }}"
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('reports.attendance*')
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                    <span>Laporan Presensi</span>
+                </a>
+
+                <a href="{{ route('reports.performance') }}"
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('reports.performance')
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    <span>Kinerja & Analitik</span>
                 </a>
 
                 <a href="{{ route('activity-logs.index') }}" 

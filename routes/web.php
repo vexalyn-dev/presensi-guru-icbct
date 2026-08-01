@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AttendanceController;
@@ -161,8 +161,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        // Report Enhancement
+        Route::get('/reports/attendance',        [\App\Http\Controllers\Reports\AttendanceReportController::class,  'index']) ->name('reports.attendance');
+        Route::get('/reports/attendance/export', [\App\Http\Controllers\Reports\AttendanceReportController::class,  'export'])->name('reports.attendance.export');
+        Route::get('/reports/performance',       [\App\Http\Controllers\Reports\PerformanceReportController::class, 'index']) ->name('reports.performance');
     });
-    
+
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -228,7 +233,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Live Monitoring
     Route::get('/live-monitoring',         [\App\Http\Controllers\Admin\LiveMonitoringController::class, 'index'])  ->name('live-monitoring.index');
     Route::get('/live-monitoring/refresh', [\App\Http\Controllers\Admin\LiveMonitoringController::class, 'refresh'])->name('live-monitoring.refresh');
+
+    // Maintenance Mode Toggle
+    Route::post('/maintenance/toggle', [\App\Http\Controllers\Admin\MaintenanceModeController::class, 'toggle'])->name('maintenance.toggle');
 });
+
+// ============================================================
+// Device Management — semua role bisa akses (auth only)
+// ============================================================
 
 // Teacher Routes
 Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->group(function () {

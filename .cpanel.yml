@@ -1,5 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/smkicbte/public_html/
+    - export DEPLOYPATH=/home/smkicbte/public_html/presensi-guru.smkicb-teknika.sch.id/
     - /bin/cp -R * $DEPLOYPATH
+    - /bin/cp -R .env $DEPLOYPATH

@@ -30,13 +30,16 @@ class AppSetting extends Model
         'admin_email',
         'primary_color',
         'accent_color',
+        'maintenance_mode',
+        'maintenance_message',
     ];
 
     protected $casts = [
         'location_required' => 'boolean',
         'photo_required' => 'boolean',
         'email_notification' => 'boolean',
-        'late_notification' => 'boolean',
+        'late_notification'            => 'boolean',
+        'maintenance_mode'             => 'boolean',
         'attendance_late_grace_period' => 'integer',
         'class_switch_grace_period'    => 'integer',
         'location_radius'              => 'integer',

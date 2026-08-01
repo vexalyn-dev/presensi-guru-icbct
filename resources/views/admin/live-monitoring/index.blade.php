@@ -35,61 +35,122 @@
 
     {{-- STATS CARDS --}}
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="card p-5">
+
+        {{-- Total Guru --}}
+        <div class="card p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+             style="animation: slideUp 0.4s ease-out 0.05s both;">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div class="relative w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0">
                     <i data-lucide="users" class="w-5 h-5 text-slate-500 dark:text-slate-400"></i>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400">Total Guru</p>
-                    <p class="text-2xl font-extrabold text-navy-800 dark:text-white" x-text="data.stats.total_guru"></p>
+                    <p class="text-2xl font-extrabold text-navy-800 dark:text-white tabular-nums"
+                       x-text="data.stats.total_guru"
+                       x-effect="animateCount($el, data.stats.total_guru)"></p>
                 </div>
             </div>
+            <div class="mt-3 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-slate-400 rounded-full transition-all duration-700"
+                     :style="`width: 100%`"></div>
+            </div>
         </div>
-        <div class="card p-5">
+
+        {{-- Sudah Masuk --}}
+        <div class="card p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+             style="animation: slideUp 0.4s ease-out 0.1s both;">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div class="relative w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
                     <i data-lucide="log-in" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                    <span x-show="data.stats.sudah_masuk > 0"
+                          class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400">Sudah Masuk</p>
-                    <p class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400" x-text="data.stats.sudah_masuk"></p>
+                    <p class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums"
+                       x-text="data.stats.sudah_masuk"
+                       x-effect="animateCount($el, data.stats.sudah_masuk)"></p>
                 </div>
             </div>
+            <div class="mt-3 h-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-full overflow-hidden">
+                <div class="h-full bg-emerald-500 rounded-full transition-all duration-700"
+                     :style="`width: ${data.stats.total_guru > 0 ? (data.stats.sudah_masuk / data.stats.total_guru * 100) : 0}%`"></div>
+            </div>
         </div>
-        <div class="card p-5">
+
+        {{-- Sedang Mengajar --}}
+        <div class="card p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+             style="animation: slideUp 0.4s ease-out 0.15s both;">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div class="relative w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
                     <i data-lucide="presentation" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                    <span x-show="data.stats.sedang_mengajar > 0"
+                          class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                    </span>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400">Sedang Mengajar</p>
-                    <p class="text-2xl font-extrabold text-blue-600 dark:text-blue-400" x-text="data.stats.sedang_mengajar"></p>
+                    <p class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 tabular-nums"
+                       x-text="data.stats.sedang_mengajar"
+                       x-effect="animateCount($el, data.stats.sedang_mengajar)"></p>
                 </div>
             </div>
+            <div class="mt-3 h-1 bg-blue-100 dark:bg-blue-900/30 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full transition-all duration-700"
+                     :style="`width: ${data.stats.total_guru > 0 ? (data.stats.sedang_mengajar / data.stats.total_guru * 100) : 0}%`"></div>
+            </div>
         </div>
-        <div class="card p-5">
+
+        {{-- Belum Masuk --}}
+        <div class="card p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+             style="animation: slideUp 0.4s ease-out 0.2s both;">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div class="relative w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
                     <i data-lucide="user-x" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+                    <span x-show="data.stats.belum_masuk > 0"
+                          class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400">Belum Masuk</p>
-                    <p class="text-2xl font-extrabold text-red-600 dark:text-red-400" x-text="data.stats.belum_masuk"></p>
+                    <p class="text-2xl font-extrabold text-red-600 dark:text-red-400 tabular-nums"
+                       x-text="data.stats.belum_masuk"
+                       x-effect="animateCount($el, data.stats.belum_masuk)"></p>
                 </div>
             </div>
+            <div class="mt-3 h-1 bg-red-100 dark:bg-red-900/30 rounded-full overflow-hidden">
+                <div class="h-full bg-red-500 rounded-full transition-all duration-700"
+                     :style="`width: ${data.stats.total_guru > 0 ? (data.stats.belum_masuk / data.stats.total_guru * 100) : 0}%`"></div>
+            </div>
         </div>
-        <div class="card p-5">
+
+        {{-- Sudah Keluar --}}
+        <div class="card p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+             style="animation: slideUp 0.4s ease-out 0.25s both;">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
                     <i data-lucide="log-out" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400">Sudah Keluar</p>
-                    <p class="text-2xl font-extrabold text-amber-600 dark:text-amber-400" x-text="data.stats.sudah_keluar"></p>
+                    <p class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 tabular-nums"
+                       x-text="data.stats.sudah_keluar"
+                       x-effect="animateCount($el, data.stats.sudah_keluar)"></p>
                 </div>
             </div>
+            <div class="mt-3 h-1 bg-amber-100 dark:bg-amber-900/30 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-500 rounded-full transition-all duration-700"
+                     :style="`width: ${data.stats.total_guru > 0 ? (data.stats.sudah_keluar / data.stats.total_guru * 100) : 0}%`"></div>
+            </div>
         </div>
+
     </div>
 
     {{-- GRID UTAMA: Sedang Mengajar + Belum Scan --}}
@@ -339,10 +400,33 @@ function liveMonitoring(initialData) {
         }
     };
 }
+
+// Counter animasi: hitung dari angka sebelumnya ke target
+function animateCount(el, target) {
+    const current = parseInt(el.dataset.current || '0');
+    if (current === target) return;
+    el.dataset.current = target;
+    const start = parseInt(el.textContent) || 0;
+    const diff  = target - start;
+    if (diff === 0) return;
+    const duration = 600;
+    const startTime = performance.now();
+    function step(now) {
+        const elapsed  = Math.min(now - startTime, duration);
+        const progress = elapsed / duration;
+        // ease-out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(start + diff * eased);
+        if (elapsed < duration) requestAnimationFrame(step);
+        else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+}
 </script>
 
 <style>
 .fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 </style>
 @endsection

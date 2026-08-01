@@ -7,7 +7,15 @@
     <title>@yield('page-title', 'Dashboard') - {{ config('app.name', 'ICB CT') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest" onload="if(window.lucide)lucide.createIcons()"></script>
+    <script>
+        // Fallback: init setelah DOM siap (saat lucide sudah tersedia)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.lucide) lucide.createIcons();
+        });
+        // Re-init setelah navigasi (untuk halaman yang load setelah DOMContentLoaded)
+        window.initLucide = function() { if (window.lucide) lucide.createIcons(); };
+    </script>
 
     {{-- Define Alpine component functions BEFORE Alpine loads (deferred) --}}
     <script>
