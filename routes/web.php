@@ -224,6 +224,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/support',         [SupportController::class, 'store'])  ->name('support.store');
     Route::get('/support/history',  [SupportController::class, 'history'])->name('support.history');
     Route::get('/support/{ticket}', [SupportController::class, 'show'])   ->name('support.show');
+
+    // Live Monitoring
+    Route::get('/live-monitoring',         [\App\Http\Controllers\Admin\LiveMonitoringController::class, 'index'])  ->name('live-monitoring.index');
+    Route::get('/live-monitoring/refresh', [\App\Http\Controllers\Admin\LiveMonitoringController::class, 'refresh'])->name('live-monitoring.refresh');
 });
 
 // Teacher Routes

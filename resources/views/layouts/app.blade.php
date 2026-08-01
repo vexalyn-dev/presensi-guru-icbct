@@ -252,6 +252,19 @@
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                     <span>Dashboard</span>
                 </a>
+
+                <a href="{{ route('admin.live-monitoring.index') }}"
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('admin.live-monitoring.*')
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="monitor" class="w-4 h-4"></i>
+                    <span>Live Monitoring</span>
+                    <span class="ml-auto flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                </a>
             </div>
 
             <!-- DATA MASTER -->
