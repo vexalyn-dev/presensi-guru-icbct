@@ -44,6 +44,12 @@ use Illuminate\Http\Request;
 |--------------------------------------------------------------------------
 */
 
+// Storage symlink helper (untuk shared hosting)
+Route::get('/link-storage', function () {
+    Artisan::call('storage:link');
+    return 'Symlink storage berhasil dibuat!';
+});
+
 // Landing page
 Route::get('/', function () {
     if (Auth::check()) {
