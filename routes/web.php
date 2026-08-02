@@ -21,6 +21,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\TeachingScheduleController;
@@ -75,6 +77,12 @@ Route::middleware(['guest'])->group(function () {
 
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
     Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+
+    // Password Reset
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
 
 // Social Login Routes

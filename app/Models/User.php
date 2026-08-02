@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
+use App\Notifications\ResetPasswordNotification;
 
 /**
  * @property int $id
@@ -641,6 +642,15 @@ class User extends Authenticatable
     public function canBeDeleted(): bool
     {
         return $this->attendances()->count() === 0;
+    }
+
+    /**
+     * Override default password reset notification dengan versi custom
+     * yang pakai bahasa Indonesia dan tampilan premium
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     /**

@@ -267,32 +267,42 @@
             height: 20px;
         }
 
-        /* Custom Eye Icon */
+        /* ── CUSTOM STYLED EYE ICON ── */
         .password-toggle {
             position: absolute;
-            right: 16px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: #94A3B8;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            transition: color 0.3s ease;
             background: none;
             border: none;
+            cursor: pointer;
+            color: #94A3B8;
+            width: 36px;
+            height: 36px;
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 8px;
+            transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
         }
-
         .password-toggle:hover {
             color: #0F172A;
+            background: rgba(15,23,42,0.06);
         }
-
+        .password-toggle:active {
+            transform: translateY(-50%) scale(0.9);
+        }
         .password-toggle svg {
             width: 20px;
             height: 20px;
+            stroke-width: 1.8;
+            flex-shrink: 0;
+        }
+        /* Beri ruang di kanan input untuk eye button */
+        .input-wrapper input.password-input {
+            padding-right: 48px !important;
         }
 
         .btn-submit {
@@ -305,7 +315,7 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.4s ease;
+            transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(15, 23, 42, 0.25);
             margin-top: 0.75rem;
             letter-spacing: 0.02em;
@@ -314,9 +324,9 @@
         }
 
         .btn-submit:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.35);
-            background: #1E3A8A;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+            background: #1a2540;
         }
 
         .error-message {
@@ -437,164 +447,6 @@
             text-decoration: underline;
         }
 
-        /* MOBILE RESPONSIVE */
-        @media (max-width: 768px) {
-            .auth-container {
-                flex-direction: column;
-                height: auto;
-                min-height: auto;
-                padding: 0;
-                margin: 0 auto;
-                box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.15);
-                border-radius: 20px;
-                overflow: hidden;
-                background: white;
-            }
-
-            .auth-panel {
-                display: none;
-            }
-
-            .forms-container {
-                position: relative;
-                width: 100%;
-                height: auto;
-            }
-
-            .form-container {
-                position: relative;
-                width: 100%;
-                opacity: 1 !important;
-                z-index: 2 !important;
-                padding: 32px 26px 40px;
-                border-radius: 0 0 20px 20px;
-                overflow-y: auto;
-                max-height: calc(100vh - 300px);
-            }
-
-            #loginForm {
-                display: flex;
-                opacity: 1 !important;
-                z-index: 2 !important;
-            }
-
-            #loginForm.hidden {
-                display: none;
-                opacity: 0 !important;
-                z-index: 1 !important;
-            }
-
-            #registerForm {
-                display: none;
-                opacity: 0 !important;
-                z-index: 1 !important;
-            }
-
-            #registerForm.visible {
-                display: flex;
-                opacity: 1 !important;
-                z-index: 2 !important;
-            }
-
-            .form-header h2 {
-                font-size: 1.75rem;
-                margin-bottom: 0.25rem;
-            }
-
-            .form-header p {
-                font-size: 0.9rem;
-                line-height: 1.5;
-            }
-
-            .input-wrapper input {
-                padding: 12px 14px 12px 40px;
-                font-size: 0.9rem;
-            }
-
-            .input-group {
-                margin-bottom: 1rem;
-            }
-
-            .btn-submit {
-                padding: 14px;
-                font-size: 1.05rem;
-            }
-
-            .divider {
-                margin: 1.25rem 0;
-            }
-
-            .panel-content h1 {
-                font-size: 1.3rem;
-            }
-
-            .panel-content p {
-                font-size: 0.8rem;
-                max-width: 100%;
-            }
-
-            .btn-toggle {
-                padding: 12px 35px;
-                font-size: 0.9rem;
-            }
-
-            .social-btn {
-                width: 45px;
-                height: 45px;
-            }
-        }
-
-        /* SMALL MOBILE */
-        @media (max-width: 480px) {
-            .mobile-header {
-                padding: 32px 20px 28px;
-                border-radius: 16px 16px 0 0;
-            }
-
-            .mobile-logo-container {
-                width: 100px;
-                height: 100px;
-                margin: 0 auto 16px;
-                border-radius: 18px;
-            }
-
-            .mobile-header h1 {
-                font-size: 1.35rem;
-                margin-bottom: 8px;
-            }
-
-            .mobile-header p {
-                font-size: 0.85rem;
-                line-height: 1.6;
-                max-width: 290px;
-            }
-
-            .form-header h2 {
-                font-size: 1.5rem;
-            }
-
-            .form-header p {
-                font-size: 0.85rem;
-            }
-
-            .input-wrapper input {
-                padding: 11px 12px 11px 36px;
-                font-size: 0.85rem;
-            }
-
-            .btn-submit {
-                padding: 13px;
-                font-size: 1rem;
-            }
-
-            .divider {
-                margin: 1rem 0;
-            }
-
-            .terms-text {
-                font-size: 0.7rem;
-            }
-        }
 
         /* Mobile Header Panel - NAVY/GOLD THEME */
         .mobile-header {
@@ -708,572 +560,436 @@
             text-decoration: underline;
         }
 
-        /* Update Mobile Responsive */
+        /* ════════════════════════════════════════
+           MOBILE REDESIGN — MODERN & PREMIUM
+           Berlaku untuk semua layar ≤ 768px
+           ════════════════════════════════════════ */
         @media (max-width: 768px) {
-            .mobile-header {
-                display: block;
-                padding: 35px 22px 32px;
-                margin-bottom: 0;
-                border-radius: 20px 20px 0 0;
-                background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-            }
 
-            .mobile-logo-container {
-                width: 105px;
-                height: 105px;
-                margin: 0 auto 18px;
-            }
-
-            .mobile-header h1 {
-                font-size: 1.45rem;
-                margin-bottom: 10px;
-            }
-
-            .mobile-header p {
-                font-size: 0.88rem;
-                line-height: 1.65;
-            }
-
-            .auth-container {
-                flex-direction: column;
-                padding: 0;
-                min-height: auto;
-                box-shadow: none;
-                border-radius: 20px 20px 0 0;
-                max-width: 100%;
-            }
-
-            .auth-panel {
-                display: none !important;
-            }
-
-            .forms-container {
-                position: relative;
-                width: 100%;
-                height: auto;
-            }
-
-            .form-container {
-                position: relative;
-                width: 100%;
-                opacity: 1 !important;
-                z-index: 2 !important;
-                padding: 28px 24px 32px;
-                overflow-y: auto;
-                max-height: calc(100vh - 280px);
-            }
-
-            #loginForm {
-                display: flex;
-                opacity: 1 !important;
-                z-index: 2 !important;
-            }
-
-            #loginForm.hidden {
-                display: none;
-                opacity: 0 !important;
-                z-index: 1 !important;
-            }
-
-            #registerForm {
-                display: none;
-                opacity: 0 !important;
-                z-index: 1 !important;
-            }
-
-            #registerForm.visible {
-                display: flex;
-                opacity: 1 !important;
-                z-index: 2 !important;
-            }
-
-            .form-header h2 {
-                font-size: 1.65rem;
-                margin-bottom: 0.3rem;
-            }
-
-            .form-header p {
-                font-size: 0.9rem;
-                line-height: 1.5;
-            }
-
-            .input-wrapper input {
-                padding: 13px 14px 13px 42px;
-                font-size: 16px;
-                min-height: 44px;
-            }
-
-            .input-icon {
-                width: 18px;
-                height: 18px;
-            }
-
-            .password-toggle {
-                width: 18px;
-                height: 18px;
-            }
-
-            .input-group {
-                margin-bottom: 1.1rem;
-            }
-
-            .btn-submit {
-                padding: 15px;
-                font-size: 1.05rem;
-                min-height: 50px;
-            }
-
-            .divider {
-                margin: 1.25rem 0;
-                font-size: 0.85rem;
-            }
-
-            .social-btn {
-                width: 48px;
-                height: 48px;
-            }
-
-            .terms-text {
-                font-size: 0.75rem;
-                line-height: 1.5;
-            }
-
-            .register-link {
-                margin-top: 1.25rem;
-                padding-top: 1.25rem;
-            }
-
-            .register-link p {
-                font-size: 0.9rem;
-            }
-
-            .register-link a {
-                font-weight: 600;
-            }
-        }
-
-        /* Small Mobile */
-        @media (max-width: 480px) {
-            .mobile-header {
-                padding: 25px 20px;
-            }
-
-            .mobile-logo-container {
-                width: 90px;
-                height: 90px;
-            }
-
-            .mobile-header h1 {
-                font-size: 1.25rem;
-            }
-
-            .mobile-header p {
-                font-size: 0.8rem;
-            }
-
-            .form-container {
-                padding: 20px 20px 25px;
-            }
-
-            .form-header h2 {
-                font-size: 1.5rem;
-            }
-
-            .btn-submit {
-                padding: 13px;
-                font-size: 1rem;
-            }
-        }
-
-        /* Extra Small Mobile (360px and below) */
-        @media (max-width: 360px) {
-            body {
-                padding: 12px;
-            }
-
-            .mobile-header {
-                padding: 28px 18px 24px;
-                border-radius: 16px 16px 0 0;
-            }
-
-            .mobile-logo-container {
-                width: 95px;
-                height: 95px;
-                margin: 0 auto 14px;
-                border-radius: 16px;
-            }
-
-            .mobile-header h1 {
-                font-size: 1.25rem;
-                margin-bottom: 6px;
-            }
-
-            .mobile-header p {
-                font-size: 0.8rem;
-                line-height: 1.55;
-                max-width: 270px;
-            }
-
-            .auth-container {
-                max-width: 100%;
-                padding: 0;
-                border-radius: 16px;
-                overflow: hidden;
-            }
-
-            .form-container {
-                padding: 24px 18px 32px;
-                max-height: calc(100vh - 240px);
-                border-radius: 0 0 16px 16px;
-            }
-
-            #loginForm {
-                display: flex;
-                opacity: 1 !important;
-                z-index: 2 !important;
-            }
-
-            #loginForm.hidden {
-                display: none;
-                opacity: 0 !important;
-                z-index: 1 !important;
-            }
-
-            #registerForm {
-                display: none;
-                opacity: 0 !important;
-                z-index: 1 !important;
-            }
-
-            #registerForm.visible {
-                display: flex;
-                opacity: 1 !important;
-                z-index: 2 !important;
-            }
-
-            .form-header h2 {
-                font-size: 1.4rem;
-                margin-bottom: 0.2rem;
-            }
-
-            .form-header p {
-                font-size: 0.8rem;
-            }
-
-            .input-wrapper input {
-                padding: 11px 11px 11px 36px;
-                font-size: 16px;
-                min-height: 44px;
-            }
-
-            .input-group {
-                margin-bottom: 0.9rem;
-            }
-
-            .btn-submit {
-                padding: 13px;
-                font-size: 0.95rem;
-                min-height: 44px;
-                margin-top: 0.5rem;
-            }
-
-            .divider {
-                margin: 0.9rem 0;
-                font-size: 0.75rem;
-            }
-
-            .terms-text {
-                font-size: 0.65rem;
-                line-height: 1.4;
-                margin-top: 0.8rem;
-            }
-
-            .register-link {
-                margin-top: 1rem;
-                padding-top: 1rem;
-            }
-
-            .register-link p {
-                font-size: 0.85rem;
-            }
-
-            .register-link a {
-                font-weight: 600;
-            }
-        }
-
-        @media (max-width: 768px) {
-            html,
-            body {
+            /* ── Body & html: full viewport, no scroll bounce ── */
+            html, body {
                 min-height: 100%;
+                height: 100%;
+                background: #0A1628;
+                margin: 0; padding: 0;
             }
-
             body {
                 align-items: flex-start;
-                padding: 18px 14px;
-                background: #FFFFFF;
+                padding: 0;
+                justify-content: flex-start;
             }
 
+            /* ── Auth container: true full-screen ── */
             .auth-container {
-                width: min(100%, 390px);
-                max-width: 390px;
-                min-height: auto;
-                display: block;
-                border-radius: 24px;
-                overflow: hidden;
-                background: #FFFFFF;
-                box-shadow: 0 22px 45px rgba(15, 23, 42, 0.18);
-                border: 1px solid rgba(226, 232, 240, 0.9);
+                width: 100%;
+                max-width: 100%;
+                min-height: 100vh;
+                min-height: 100svh;
+                display: flex;
+                flex-direction: column;
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+                overflow: visible;
+                background: transparent;
+                position: relative;
             }
-
             .auth-container::before,
-            .auth-container::after {
+            .auth-container::after { display: none !important; }
+
+            /* ── Sembunyikan panel desktop ── */
+            .auth-panel { display: none !important; }
+
+            /* ── MOBILE HEADER: navy gradient, lega ── */
+            .mobile-header {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 56px 32px 52px;
+                background: linear-gradient(160deg, #080F1E 0%, #0F172A 60%, #162035 100%);
+                border-radius: 0;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+            .mobile-header::before {
                 content: '';
-                position: absolute;
-                width: 34px;
-                height: 34px;
-                background: #0F172A;
-                z-index: 30;
+                position: absolute; top: -80px; right: -80px;
+                width: 300px; height: 300px; border-radius: 50%;
+                background: radial-gradient(circle, rgba(250,204,21,0.09) 0%, transparent 65%);
+                pointer-events: none;
+            }
+            .mobile-header::after {
+                content: '';
+                position: absolute; bottom: -60px; left: -60px;
+                width: 240px; height: 240px; border-radius: 50%;
+                background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 65%);
                 pointer-events: none;
             }
 
-            .auth-container.register-mode::before,
-            .auth-container.register-mode::after {
-                background: #FACC15;
-            }
-
-            .auth-container::before {
-                top: -1px;
-                left: -1px;
-                border-bottom-right-radius: 20px;
-                box-shadow: inset -1px -1px 0 rgba(226, 232, 240, 0.9);
-            }
-
-            .auth-container::after {
-                right: -1px;
-                bottom: -1px;
-                border-top-left-radius: 20px;
-                box-shadow: inset 1px 1px 0 rgba(226, 232, 240, 0.9);
-            }
-
-            .auth-panel {
-                display: none !important;
-            }
-
-            .mobile-header {
-                display: block !important;
-                padding: 36px 24px 18px;
-                background: #FFFFFF;
-                border-radius: 24px 24px 0 0;
-                box-shadow: none;
-                color: #0F172A;
-                overflow: visible;
-            }
-
-            .mobile-header::before,
-            .mobile-header::after {
-                display: none;
-            }
-
+            /* Logo box */
             .mobile-logo-container {
-                width: 92px;
-                height: 92px;
-                margin: 0 auto 16px;
-                border-radius: 0;
-                background: transparent;
-                border: 0;
-                box-shadow: none;
+                width: 112px !important;
+                height: 112px !important;
+                margin: 0 auto 24px !important;
+                border-radius: 30px !important;
+                background: rgba(255,255,255,0.04) !important;
+                border: 1.5px solid rgba(250,204,21,0.28) !important;
+                box-shadow: 0 20px 48px rgba(0,0,0,0.4),
+                            inset 0 1px 0 rgba(255,255,255,0.07) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                position: relative;
+                z-index: 1;
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
             }
-
             .mobile-logo-container img {
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-                filter: none;
-            }
-
-            .mobile-logo-container svg {
-                width: 50%;
-                height: 50%;
-                color: #0F172A;
+                width: 80% !important;
+                height: 80% !important;
+                object-fit: contain !important;
+                filter: drop-shadow(0 4px 14px rgba(0,0,0,0.35)) !important;
             }
 
             .mobile-header h1 {
-                font-size: 1.25rem;
-                color: #0F172A;
-                text-shadow: none;
-                margin-bottom: 6px;
-                letter-spacing: 0;
+                font-size: 1.4rem !important;
+                font-weight: 800 !important;
+                color: #FFFFFF !important;
+                text-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+                margin-bottom: 10px !important;
+                letter-spacing: -0.3px;
+                position: relative; z-index: 1;
             }
-
             .mobile-header p {
-                font-size: 0.82rem;
-                line-height: 1.55;
-                color: #64748B;
-                max-width: 280px;
+                font-size: 0.85rem !important;
+                line-height: 1.65 !important;
+                color: rgba(255,255,255,0.45) !important;
+                max-width: 270px;
+                margin: 0 auto;
+                position: relative; z-index: 1;
             }
 
+            /* ── Forms container: flex grow, putih ── */
             .forms-container {
                 position: relative;
                 width: 100%;
-                height: auto;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                background: #FFFFFF;
+                border-radius: 32px 32px 0 0;
+                margin-top: -28px;
+                box-shadow: 0 -4px 32px rgba(15,23,42,0.18);
+                z-index: 2;
                 overflow: visible;
             }
 
+            /* ── Form card: fill sisa tinggi layar ── */
             .form-container {
                 position: relative;
                 width: 100%;
-                height: auto;
+                flex: 1;
                 min-height: 0;
                 max-height: none;
-                padding: 10px 24px 34px;
+                padding: 40px 28px 52px;
                 overflow: visible;
                 justify-content: flex-start;
-                background: #FFFFFF;
-                border-radius: 0 0 24px 24px;
-            }
-
-            #loginForm {
-                display: flex;
-                right: auto;
+                background: transparent;
+                border-radius: 0;
+                box-shadow: none;
+                margin-top: 0;
+                left: auto; right: auto;
                 opacity: 1 !important;
                 z-index: 2 !important;
             }
 
-            #loginForm.hidden {
-                display: none;
-            }
-
-            #registerForm {
-                display: none;
-                left: auto;
-                opacity: 0 !important;
-            }
-
-            #registerForm.visible {
+            /* Tunjuk-sembunyikan form login/register mobile */
+            #loginForm {
                 display: flex;
+                flex-direction: column;
                 opacity: 1 !important;
+                z-index: 2 !important;
             }
+            #loginForm.hidden { display: none !important; }
+            #registerForm { display: none !important; }
+            #registerForm.visible { display: flex !important; flex-direction: column; opacity: 1 !important; }
 
+            /* ── Form header: lebih lega ── */
             .form-header {
-                margin-bottom: 1.35rem;
-                text-align: center;
+                margin-bottom: 32px;
+                text-align: left;
             }
-
             .form-header h2 {
-                font-size: 1.35rem;
-                margin-bottom: 0.3rem;
+                font-size: 1.85rem !important;
+                font-weight: 800 !important;
                 color: #0F172A;
+                margin-bottom: 6px;
+                letter-spacing: -0.6px;
             }
-
             .form-header p {
-                font-size: 0.82rem;
-                color: #64748B;
+                font-size: 0.88rem !important;
+                color: #64748B !important;
+                line-height: 1.55;
             }
 
-            .input-group {
-                margin-bottom: 0.9rem;
-            }
-
+            /* ── Input groups: spacing lega ── */
+            .input-group { margin-bottom: 20px; }
             .input-group label {
-                font-size: 0.78rem;
-                margin-bottom: 0.4rem;
+                display: block;
+                font-size: 0.82rem !important;
+                font-weight: 600;
+                color: #1E293B;
+                margin-bottom: 8px !important;
+                letter-spacing: 0.01em;
             }
-
             .input-wrapper input {
-                min-height: 42px;
-                padding: 11px 44px 11px 40px;
-                border-width: 0;
-                border-radius: 999px;
-                background: #F1F5F9;
-                font-size: 16px;
-                box-shadow: inset 0 0 0 1px #E2E8F0;
+                height: 54px !important;
+                padding: 0 52px 0 48px !important;
+                border-radius: 14px !important;
+                border: 1.5px solid #E2E8F0 !important;
+                background: #F8FAFC !important;
+                font-size: 15px !important;
+                color: #0F172A;
+                box-shadow: none !important;
+                transition: border-color 0.2s, box-shadow 0.2s, background 0.2s !important;
             }
-
             .input-wrapper input:focus {
-                border-color: transparent;
-                box-shadow: inset 0 0 0 2px #0F172A, 0 0 0 4px rgba(250, 204, 21, 0.18);
+                border-color: #0F172A !important;
+                background: #FFFFFF !important;
+                box-shadow: 0 0 0 4px rgba(15,23,42,0.08) !important;
             }
-
+            .input-wrapper input::placeholder { color: #94A3B8 !important; }
             .input-icon {
-                width: 16px;
-                height: 16px;
-                left: 15px;
+                left: 16px !important;
+                width: 19px !important;
+                height: 19px !important;
             }
-
             .password-toggle {
-                right: 15px;
-                width: 18px;
-                height: 18px;
+                right: 10px !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
+            .password-toggle svg {
+                width: 20px !important;
+                height: 20px !important;
             }
 
+            /* ── Remember me row ── */
+            .cb-label {
+                font-size: 0.88rem !important;
+                color: #475569;
+            }
+            .cb-box {
+                width: 20px !important;
+                height: 20px !important;
+                min-width: 20px !important;
+                border-radius: 6px !important;
+            }
+
+            /* Remember+LupaPassword row spacing */
+            .input-group + div[style*="flex"] {
+                margin: 4px 0 24px !important;
+            }
+
+            /* ── Submit button: tinggi & menonjol ── */
             .btn-submit {
-                min-height: 42px;
-                padding: 11px 16px;
-                border-radius: 999px;
-                margin-top: 0.35rem;
-                font-size: 0.95rem;
-                background: linear-gradient(135deg, #0F172A, #1E293B);
-                box-shadow: 0 10px 22px rgba(15, 23, 42, 0.24);
+                width: 100%;
+                height: 56px !important;
+                border-radius: 16px !important;
+                font-size: 1.05rem !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.03em !important;
+                background: #0F172A !important;
+                box-shadow: 0 8px 24px rgba(15,23,42,0.28) !important;
+                margin-top: 4px !important;
+                padding: 0 !important;
+                transition: transform 0.15s, box-shadow 0.2s, background 0.2s !important;
             }
+            .btn-submit:hover { background: #1a2540 !important; }
+            .btn-submit:active { transform: scale(0.98) !important; }
 
-            .divider {
-                margin: 1rem 0;
-                font-size: 0.72rem;
-            }
-
-            .social-login a {
-                min-height: 42px;
-                border-radius: 999px;
-                padding: 10px 16px;
-                font-size: 0.85rem;
-            }
-
-            .register-link {
-                margin-top: 1rem;
-                padding-top: 1rem;
-            }
-
-            .register-link p {
-                font-size: 0.82rem;
-            }
-
-            .error-message,
-            .success-message {
-                border-radius: 14px;
-                font-size: 0.82rem;
-                margin-bottom: 1rem;
+            /* ── Error/success messages ── */
+            .error-message, .success-message {
+                border-radius: 12px;
+                font-size: 0.84rem;
+                margin-bottom: 20px;
+                padding: 14px 16px;
             }
         }
 
-        @media (max-width: 380px) {
-            body {
-                padding: 12px;
-            }
+        /* ── 480px ke bawah ── */
+        @media (max-width: 480px) {
+            .mobile-header { padding: 48px 24px 44px; }
+            .mobile-logo-container { width: 100px !important; height: 100px !important; }
+            .form-container { padding: 36px 22px 48px; }
+            .form-header { margin-bottom: 28px; }
+            .form-header h2 { font-size: 1.65rem !important; }
+        }
 
-            .auth-container {
-                border-radius: 20px;
-            }
+        /* ── 390px ke bawah ── */
+        @media (max-width: 390px) {
+            .mobile-header { padding: 40px 20px 36px; }
+            .mobile-logo-container { width: 92px !important; height: 92px !important; }
+            .form-container { padding: 30px 18px 44px; }
+            .form-header h2 { font-size: 1.5rem !important; }
+            .input-wrapper input { height: 50px !important; }
+            .btn-submit { height: 52px !important; }
+        }
+        /* ── PAGE TRANSITION LOADING OVERLAY ── */
+        #pt-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #0F172A;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 18px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #pt-overlay.show { opacity: 1; pointer-events: all; }
+        .pt-logo-box {
+            width: 60px; height: 60px;
+            border-radius: 16px;
+            background: rgba(250,204,21,0.1);
+            border: 1.5px solid rgba(250,204,21,0.25);
+            display: flex; align-items: center; justify-content: center;
+            animation: ptBeat 1.1s ease-in-out infinite;
+        }
+        .pt-logo-box img { width: 75%; height: 75%; object-fit: contain; }
+        @keyframes ptBeat {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.07); }
+        }
+        .pt-track {
+            width: 160px; height: 3px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 99px; overflow: hidden;
+        }
+        .pt-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #FACC15, #F59E0B);
+            border-radius: 99px;
+            transition: width 0.5s ease;
+        }
+        .pt-label {
+            font-size: 0.72rem; font-weight: 500;
+            color: rgba(255,255,255,0.38);
+            letter-spacing: 0.06em; text-transform: uppercase;
+        }
 
-            .mobile-header {
-                padding: 32px 20px 14px;
-            }
 
-            .mobile-logo-container {
-                width: 84px;
-                height: 84px;
-                margin-bottom: 14px;
-            }
-
-            .form-container {
-                padding: 8px 20px 28px;
+        /* ── PC DESKTOP: sembunyikan tombol Buat Akun ── */
+        @media (min-width: 769px) {
+            .btn-toggle {
+                display: none !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
             }
         }
+
+        /* ── CUSTOM CHECKBOX (menggantikan native) ── */
+        /* Sembunyikan native checkbox asli */
+        .cb-remember-native {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+        /* Box visual */
+        .cb-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            border: 2px solid #CBD5E1;
+            border-radius: 7px;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+        }
+        .cb-box:hover {
+            border-color: #0F172A;
+            box-shadow: 0 0 0 4px rgba(15,23,42,0.08);
+        }
+        .cb-box .cb-check {
+            opacity: 0;
+            transform: scale(0) rotate(-10deg);
+            transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .cb-box.checked {
+            background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
+            border-color: #0F172A;
+            box-shadow: 0 4px 14px rgba(15,23,42,0.28);
+            animation: cbBounce 0.38s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .cb-box.checked .cb-check {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+        @keyframes cbBounce {
+            0%   { transform: scale(0.8); }
+            55%  { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+        .cb-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #475569;
+        }
+        .cb-label:hover .cb-box {
+            border-color: #0F172A;
+            box-shadow: 0 0 0 4px rgba(15,23,42,0.08);
+        }
+
+        /* ── HAPUS BROWSER NATIVE EYE ICON ── */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none !important;
+            width: 0; height: 0;
+        }
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-contacts-auto-fill-button,
+        input[type="password"]::-webkit-textfield-decoration-container {
+            display: none !important;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        /* Edge Chromium */
+        input[type="password"]::-webkit-input-placeholder { }
+        ::-webkit-credential-manager-button { display: none !important; }
     </style>
 
 </head>
 
 <body>
+
+<!-- ── PAGE TRANSITION OVERLAY ── -->
+<div id="pt-overlay">
+    <div class="pt-logo-box">
+        @php $appS = null; try { $appS = \App\Models\AppSetting::getInstance(); } catch (\Throwable $e) {} @endphp
+        @if($appS && $appS->app_logo)
+            <img src="{{ asset('storage/' . $appS->app_logo) }}" alt="Logo">
+        @else
+            <svg width="28" height="28" fill="none" stroke="#FACC15" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+        @endif
+    </div>
+    <div class="pt-track"><div class="pt-fill" id="ptFill"></div></div>
+    <p class="pt-label">Memuat dashboard…</p>
+</div>
+
     <div class="auth-container">
         <!-- Mobile Header Panel -->
         <div class="mobile-header" id="mobileHeader" style="display: none;">
@@ -1364,7 +1080,7 @@
                         <label for="login-password">Password</label>
                         <div class="input-wrapper">
                             <input type="password" id="login-password" name="password" placeholder="••••••••" required
-                                class="password-input">
+                                class="password-input" autocomplete="current-password">
                             <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
@@ -1383,23 +1099,26 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-submit">Masuk</button>
+                    <!-- Remember Me & Lupa Password -->
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin:0.25rem 0 0.85rem;">
+                        <label class="cb-label" onclick="toggleRemember()">
+                            <div class="cb-box" id="cbBox">
+                                <svg class="cb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                    <path d="M2 6.5L5 9.5L11 3.5" stroke="#FACC15" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input type="checkbox" name="remember" id="remember" class="cb-remember-native" {{ old('remember') ? 'checked' : '' }}>
+                            Ingat Saya
+                        </label>
+                        <a href="{{ route('password.request') }}"
+                           style="font-size:0.84rem;font-weight:600;color:#0F172A;text-decoration:none;transition:opacity 0.2s;"
+                           onmouseover="this.style.opacity='0.55'" onmouseout="this.style.opacity='1'">
+                            Lupa Password?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="loginSubmitBtn">Masuk</button>
                 </form>
-
-                <div class="divider"><span>atau masuk dengan</span></div>
-
-                <div class="social-login">
-                    <a href="{{ url('auth/google') }}"
-                        class="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-slate-200 hover:border-navy-800 hover:bg-slate-50 rounded-xl font-semibold text-slate-700 transition-all shadow-sm hover:shadow-md">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
-                            class="w-5 h-5">
-                        <span>Masuk dengan Google</span>
-                    </a>
-                </div>
-
-                <div class="register-link">
-                    <p>Belum punya akun? <a href="#" onclick="toggleAuth(); return false;">Daftar sekarang</a></p>
-                </div>
             </div>
             {{-- END #loginForm --}}
 
@@ -1496,15 +1215,6 @@
                 </form>
 
                 <div class="divider"><span>atau daftar dengan</span></div>
-
-                <div class="social-login">
-                    <a href="{{ url('auth/google') }}"
-                        class="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-slate-200 hover:border-navy-800 hover:bg-slate-50 rounded-xl font-semibold text-slate-700 transition-all shadow-sm hover:shadow-md">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
-                            class="w-5 h-5">
-                        <span>Daftar dengan Google</span>
-                    </a>
-                </div>
 
                 <div class="register-link">
                     <p>Sudah punya akun? <a href="#" onclick="toggleAuth(); return false;">Login sekarang</a></p>
@@ -1610,13 +1320,53 @@
             }
         }
 
-        // Auto-focus email input on page load
+        // ── Custom Checkbox Toggle ──────────────────────────
+        // Init state on load
         document.addEventListener('DOMContentLoaded', function() {
             const emailInput = document.getElementById('login-email');
-            if (emailInput) {
-                emailInput.focus();
+            if (emailInput) emailInput.focus();
+
+            // Sync checkbox display state with native input
+            const native = document.getElementById('remember');
+            const box    = document.getElementById('cbBox');
+            if (native && box && native.checked) {
+                box.classList.add('checked');
             }
         });
+
+        function toggleRemember() {
+            const native = document.getElementById('remember');
+            const box    = document.getElementById('cbBox');
+            if (!native || !box) return;
+            native.checked = !native.checked;
+            if (native.checked) {
+                box.classList.add('checked');
+            } else {
+                box.classList.remove('checked');
+            }
+        }
+
+        // ── Loading overlay on login submit ──────────────────
+        (function() {
+            var form = document.getElementById('loginFormElement');
+            if (!form) return;
+            form.addEventListener('submit', function() {
+                var email = document.getElementById('login-email')?.value.trim();
+                var pass  = document.getElementById('login-password')?.value;
+                if (!email || !pass) return;
+
+                var overlay = document.getElementById('pt-overlay');
+                var fill    = document.getElementById('ptFill');
+                overlay.classList.add('show');
+
+                var w = 0;
+                var iv = setInterval(function() {
+                    w = Math.min(w + (w < 65 ? 9 : 1.5), 90);
+                    fill.style.width = w + '%';
+                    if (w >= 90) clearInterval(iv);
+                }, 90);
+            });
+        })();
     </script>
 </body>
 
