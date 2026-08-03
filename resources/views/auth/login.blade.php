@@ -25,6 +25,7 @@
             padding: 24px 16px;
             background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
             margin: 0;
+            overflow-y: auto;
         }
 
         .auth-container {
