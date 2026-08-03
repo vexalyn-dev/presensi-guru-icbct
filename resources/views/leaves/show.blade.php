@@ -1,10 +1,14 @@
-@extends('layouts.app')
+@extends(activeLayout())
+@extends(activeLayout())
 
 @section('page-title', 'Detail Pengajuan')
 
 @section('content')
     @php
-        $isAdmin = Auth::user()->isAdmin();
+        $isPiket      = isset($isPiket) ? $isPiket : auth()->user()?->isGuruPiket();
+        $approveRoute = isset($approveRoute) ? $approveRoute : 'leaves.approve';
+        $rejectRoute  = isset($rejectRoute)  ? $rejectRoute  : 'leaves.reject';
+        $backRoute    = $isPiket ? route('piket.leave-approval') : route('leaves.index');
         $statusColors = [
             'pending'  => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
             'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -21,7 +25,7 @@
         <!-- Page Header -->
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center gap-4">
-                <a href="{{ $isAdmin ? route('leaves.index') : route('teacher.leaves') }}"
+                <a href="{{ $backRoute }}"
                     class="group flex items-center gap-2.5 px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
                     <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
                     <span>Kembali</span>
@@ -287,7 +291,7 @@
                             <h4 class="text-sm font-bold text-green-800 dark:text-green-300">Setujui Pengajuan</h4>
                         </div>
 
-                        <form action="{{ route('leaves.approve', $leave) }}" method="POST" class="space-y-3">
+                        <form action="{{ route($approveRoute, $leave) }}" method="POST" class="space-y-3">
                             @csrf
                             <div>
                                 <label class="block text-xs font-semibold text-green-700 dark:text-green-400 mb-1.5">
@@ -317,7 +321,7 @@
                             <h4 class="text-sm font-bold text-red-800 dark:text-red-300">Tolak Pengajuan</h4>
                         </div>
 
-                        <form action="{{ route('leaves.reject', $leave) }}" method="POST" class="space-y-3">
+                        <form action="{{ route($rejectRoute, $leave) }}" method="POST" class="space-y-3">
                             @csrf
                             <div>
                                 <label class="block text-xs font-semibold text-red-700 dark:text-red-400 mb-1.5">

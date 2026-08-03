@@ -274,6 +274,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::get('/profile', [TeacherProfileController::class, 'index'])->name('profile');
         Route::put('/profile', [TeacherProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [TeacherProfileController::class, 'updatePassword'])->name('profile.password');
+        Route::put('/profile/email', [TeacherProfileController::class, 'updateEmail'])->name('profile.email');
 
         Route::get('/history', [TeacherHistoryController::class, 'index'])->name('history');
         Route::get('/history/data', [TeacherHistoryController::class, 'getData'])->name('history.data');
@@ -308,9 +309,9 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Piket\DashboardController::class, 'index'])->name('dashboard');
 
-    // Presensi Harian (scan manual oleh piket)
-    Route::get('/attendance',       [App\Http\Controllers\Teacher\AttendanceController::class, 'index'])  ->name('attendance');
-    Route::post('/attendance/store',[App\Http\Controllers\Teacher\AttendanceController::class, 'store'])  ->name('attendance.store');
+    // Presensi Harian — pakai halaman scan QR admin yang sama
+    Route::get('/attendance',        [QrCodeController::class, 'scan'])       ->name('attendance');
+    Route::post('/attendance/store', [QrCodeController::class, 'processScan'])->name('attendance.store');
 
     // Manual Presensi (admin manual)
     Route::get('/class-attendance/manual', [ManualClassAttendanceController::class, 'index'])->name('class-attendance.manual');
@@ -323,10 +324,10 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     // Kalender Libur
     Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays');
 
-    // Izin & Sakit (hanya lihat / approve)
-    Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves');
-    Route::get('/leaves/{leave}', [LeaveController::class, 'show'])->name('leaves.show');
-    Route::get('/leave-approval', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'index'])->name('leave-approval');
+    // Izin & Sakit (tampilan sama dengan admin, full approve/reject)
+    Route::get('/leave-approval', [LeaveController::class, 'index'])->name('leave-approval');
+    Route::get('/leave-approval/{leave}', [LeaveController::class, 'show'])->name('leave-approval.show');
+    Route::get('/leave-approval/api/latest', [LeaveController::class, 'latest'])->name('leave-approval.api.latest');
     Route::post('/leave-approval/{leave}/approve', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'approve'])->name('leave-approval.approve');
     Route::post('/leave-approval/{leave}/reject', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'reject'])->name('leave-approval.reject');
 

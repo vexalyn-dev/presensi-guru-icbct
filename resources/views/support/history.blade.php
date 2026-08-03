@@ -1,4 +1,4 @@
-﻿@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.teacher')
+@extends(activeLayout())
 @section('page-title', 'Riwayat Laporan')
 @php $rp = auth()->user()->isAdmin() ? 'admin.support' : 'teacher.support'; @endphp
 @section('content')

@@ -94,8 +94,7 @@
                                 <h2 class="text-lg font-bold text-navy-800 dark:text-white mt-3">{{ $teacher->name }}</h2>
                                 @if($teacher->subject)
                                     <div class="flex justify-center mt-2">
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 uppercase tracking-wide">
-                                            <i data-lucide="book" class="w-3 h-3 mr-1.5"></i>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 max-w-[200px] truncate">
                                             {{ $teacher->subject }}
                                         </span>
                                     </div>

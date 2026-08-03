@@ -55,17 +55,83 @@
             transform: translateY(-2px);
         }
         
-        /* Nav Item Animation */
-        .nav-item { position: relative; overflow: hidden; }
+        /* ══════════════════════════════════════════
+           NAV ITEM — PREMIUM SIDEBAR ANIMATIONS
+           ══════════════════════════════════════════ */
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+            /* Smooth transition untuk semua state */
+            transition: background 0.22s ease, color 0.22s ease,
+                        transform 0.18s cubic-bezier(0.34,1.56,0.64,1),
+                        box-shadow 0.22s ease,
+                        padding-left 0.22s ease !important;
+        }
+
+        /* Shimmer sweep saat hover */
         .nav-item::before {
             content: '';
             position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s;
+            top: 0; left: -120%;
+            width: 60%; height: 100%;
+            background: linear-gradient(
+                105deg,
+                transparent 0%,
+                rgba(255,255,255,0.07) 50%,
+                transparent 100%
+            );
+            transition: left 0.55s cubic-bezier(0.4,0,0.2,1);
+            pointer-events: none;
+            z-index: 0;
         }
-        .nav-item:hover::before { left: 100%; }
+        .nav-item:hover::before { left: 160%; }
+
+        /* Left accent bar — creeps in dari kiri */
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 20%; bottom: 20%;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: rgba(250,204,21,0.7);
+            transform: scaleY(0);
+            transform-origin: center;
+            transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .nav-item:hover::after { transform: scaleY(1); }
+
+        /* Sembunyikan accent bar di active (karena bg sudah navy) */
+        .nav-item.bg-navy-800::after,
+        .nav-item[class*="bg-navy-800"]::after { display: none; }
+
+        /* Scale & indent saat hover */
+        .nav-item:hover:not([class*="bg-navy-800"]) {
+            transform: translateX(3px);
+        }
+
+        /* Icon scale saat hover */
+        .nav-item:hover i[data-lucide],
+        .nav-item:hover svg {
+            transform: scale(1.15);
+            transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .nav-item i[data-lucide],
+        .nav-item svg {
+            transition: transform 0.2s ease;
+        }
+
+        /* Click ripple effect */
+        .nav-item:active {
+            transform: translateX(2px) scale(0.97) !important;
+            transition: transform 0.08s ease !important;
+        }
+
+        /* Active state: subtle inner glow */
+        .nav-item.bg-navy-800,
+        .nav-item[class*="bg-navy-800"] {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08),
+                        0 4px 12px rgba(15,23,42,0.25) !important;
+        }
         
         /* ==========================================
            PULSE DOT ANIMATION - FIXED & PERMANENT
@@ -731,5 +797,38 @@
     @endif
 
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
+
+    {{-- ── LOGOUT LOADING OVERLAY ── --}}
+    <div id="logout-overlay"
+         style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,15,30,0.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:20px;padding:32px 36px 28px;width:220px;text-align:center;box-shadow:0 20px 48px rgba(0,0,0,0.3);">
+            <div style="position:relative;width:64px;height:64px;margin:0 auto 18px;">
+                <div style="position:absolute;inset:0;border-radius:50%;border:4px solid #E2E8F0;border-top-color:#0F172A;animation:ptSpin 0.9s linear infinite;"></div>
+                <div style="position:absolute;top:8px;left:8px;right:8px;bottom:8px;border-radius:50%;border:4px solid transparent;border-bottom-color:#FACC15;animation:ptSpinRev 0.7s linear infinite;"></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px;">
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:ptBounce 0.6s ease-in-out infinite;"></span>
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:ptBounce 0.6s ease-in-out 0.15s infinite;"></span>
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:ptBounce 0.6s ease-in-out 0.3s infinite;"></span>
+            </div>
+            <p style="font-size:0.88rem;font-weight:700;color:#0F172A;margin:0 0 3px;">Keluar...</p>
+            <p style="font-size:0.75rem;color:#94A3B8;margin:0;">Sampai jumpa lagi 👋</p>
+        </div>
+    </div>
+    <style>
+        @keyframes ptSpin    { to { transform: rotate(360deg); } }
+        @keyframes ptSpinRev { to { transform: rotate(-360deg); } }
+        @keyframes ptBounce  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    </style>
+    <script>
+    (function() {
+        document.querySelectorAll('form[action*="logout"]').forEach(function(form) {
+            form.addEventListener('submit', function() {
+                var overlay = document.getElementById('logout-overlay');
+                if (overlay) overlay.style.display = 'flex';
+            });
+        });
+    })();
+    </script>
 </body>
 </html>

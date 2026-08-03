@@ -1543,4 +1543,54 @@
         if (chartAnimationId) cancelAnimationFrame(chartAnimationId);
     });
 </script>
+
+@if(session('show_welcome'))
+<script>sessionStorage.setItem('show_welcome_admin_{{ auth()->id() }}', '1');</script>
+@endif
+
+{{-- Welcome Modal Admin/Operator --}}
+<div id="admin-welcome-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;">
+    <div id="admin-welcome-box" style="background:#fff;border-radius:24px;padding:32px 28px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 56px rgba(15,23,42,0.2);transform:translateY(20px) scale(0.97);opacity:0;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,#0F172A,#1E293B);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 20px rgba(15,23,42,0.2);">
+            <span style="font-size:28px;">⚡</span>
+        </div>
+        <h2 style="font-size:1.3rem;font-weight:800;color:#0F172A;margin:0 0 6px;letter-spacing:-0.3px;">Selamat Datang!</h2>
+        <p style="font-size:0.9rem;font-weight:600;color:#0F172A;margin:0 0 12px;">Halo, {{ auth()->user()->name }} 👋</p>
+        <p style="font-size:0.83rem;color:#64748B;line-height:1.65;margin:0 0 24px;">
+            Siap mengelola sistem hari ini?<br>
+            Pantau kehadiran guru, validasi data, dan pastikan semua berjalan lancar. 🚀<br><br>
+            Sistem presensi butuh tangan kamu untuk tetap akurat dan terpercaya.
+        </p>
+        <button onclick="closeAdminWelcome()" style="width:100%;padding:13px;background:#0F172A;color:#fff;border:none;border-radius:14px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:background 0.2s,transform 0.15s;box-shadow:0 6px 18px rgba(15,23,42,0.22);"
+                onmouseover="this.style.background='#1a2540'" onmouseout="this.style.background='#0F172A'"
+                onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
+            Mulai Kelola →
+        </button>
+    </div>
+</div>
+<script>
+(function() {
+    var KEY = 'show_welcome_admin_{{ auth()->id() }}';
+    if (sessionStorage.getItem(KEY) !== '1') return;
+    sessionStorage.removeItem(KEY);
+    var overlay = document.getElementById('admin-welcome-overlay');
+    var box     = document.getElementById('admin-welcome-box');
+    if (!overlay || !box) return;
+    overlay.style.display = 'flex';
+    requestAnimationFrame(function() { requestAnimationFrame(function() {
+        box.style.transform = 'translateY(0) scale(1)';
+        box.style.opacity   = '1';
+    }); });
+})();
+function closeAdminWelcome() {
+    var overlay = document.getElementById('admin-welcome-overlay');
+    var box     = document.getElementById('admin-welcome-box');
+    box.style.transform = 'translateY(10px) scale(0.97)';
+    box.style.opacity   = '0';
+    setTimeout(function() { overlay.style.display = 'none'; }, 320);
+}
+document.getElementById('admin-welcome-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAdminWelcome();
+});
+</script>
 @endsection

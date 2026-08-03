@@ -20,6 +20,40 @@
     <style>
         * { font-family: 'Inter', sans-serif; }
         [x-cloak] { display: none !important; }
+
+        /* ══ NAV ITEM — PREMIUM ANIMATIONS ══ */
+        .nav-item {
+            position: relative; overflow: hidden;
+            transition: background 0.22s ease, color 0.22s ease,
+                        transform 0.18s cubic-bezier(0.34,1.56,0.64,1),
+                        box-shadow 0.22s ease !important;
+        }
+        .nav-item::before {
+            content: ''; position: absolute;
+            top: 0; left: -120%; width: 60%; height: 100%;
+            background: linear-gradient(105deg,transparent 0%,rgba(255,255,255,0.07) 50%,transparent 100%);
+            transition: left 0.55s cubic-bezier(0.4,0,0.2,1);
+            pointer-events: none; z-index: 0;
+        }
+        .nav-item:hover::before { left: 160%; }
+        .nav-item::after {
+            content: ''; position: absolute;
+            left: 0; top: 20%; bottom: 20%;
+            width: 3px; border-radius: 0 3px 3px 0;
+            background: rgba(250,204,21,0.7);
+            transform: scaleY(0); transform-origin: center;
+            transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .nav-item:hover::after { transform: scaleY(1); }
+        .nav-item.bg-navy-800::after,
+        .nav-item[class*="bg-navy-800"]::after { display: none; }
+        .nav-item:hover:not([class*="bg-navy-800"]) { transform: translateX(3px); }
+        .nav-item i[data-lucide], .nav-item svg { transition: transform 0.2s ease; }
+        .nav-item:hover i[data-lucide], .nav-item:hover svg { transform: scale(1.15); transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+        .nav-item:active { transform: translateX(2px) scale(0.97) !important; transition: transform 0.08s ease !important; }
+        .nav-item.bg-navy-800, .nav-item[class*="bg-navy-800"] {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 12px rgba(15,23,42,0.25) !important;
+        }
         
         /* Reset body margin/padding */
         body { margin: 0; padding: 0; }
@@ -147,25 +181,11 @@
 
                 <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Administrasi</p>
 
-                <a href="{{ route('piket.leaves') }}"
-                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('piket.leaves*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="file-text" class="w-4 h-4"></i>
-                    <span>Izin & Sakit</span>
-                </a>
-
                 <a href="{{ route('piket.leave-approval') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('piket.leave-approval*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="check-circle" class="w-4 h-4"></i>
-                    <span>Approval Izin</span>
-                </a>
-
-                <a href="{{ route('piket.work-schedule') }}"
-                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('piket.work-schedule*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="briefcase" class="w-4 h-4"></i>
-                    <span>Jadwal Kerja</span>
+                          {{ request()->routeIs('piket.leave-approval*') || request()->routeIs('piket.leaves*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
+                    <i data-lucide="file-check" class="w-4 h-4"></i>
+                    <span>Izin &amp; Sakit</span>
                 </a>
 
                 <a href="{{ route('piket.holidays') }}"
@@ -184,32 +204,12 @@
                     <span>Pusat Bantuan</span>
                 </a>
 
-                <a href="{{ route('piket.profile') }}"
-                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('piket.profile*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="user" class="w-4 h-4"></i>
-                    <span>Profil Saya</span>
-                </a>
-
-            </nav>">
-                    <i data-lucide="file-text" class="w-4 h-4"></i>
-                    <span>Izin/Sakit</span>
-                </a>
-
-                <a href="{{ route('teacher.support') }}" 
-                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('teacher.support*') 
-                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
-                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="life-buoy" class="w-4 h-4"></i>
-                    <span>Pusat Bantuan</span>
-                </a>
             </nav>
         </aside>
 
            <!-- Notification config (used by external JS) -->
            <div id="laravel-config" style="display:none;"
-               data-unread-url="{{ route('teacher.notifications.api.unread') }}"
+               data-unread-url="{{ route('piket.notifications.api.unread') }}"
                data-user-id="{{ auth()->id() ?? '' }}"></div>
 
            <!-- Main Content -->
@@ -325,9 +325,9 @@
                         <div class="relative" x-data="{ open: false }">
                             <button @click.stop="open = !open"
                                     class="flex items-center gap-1.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-1 sm:p-1.5 pr-1.5 sm:pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
-                                <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}" 
+                                <img src="{{ auth()->user()->photo_url }}" 
                                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
-                                     onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
+                                     onerror="this.src='{{ asset('images/default-operator.png') }}'">
                                 <div class="hidden sm:block text-left">
                                     <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[120px]">{{ auth()->user()->name }}</p>
                                     <div class="flex items-center gap-1.5 mt-0.5">
@@ -366,9 +366,9 @@
                                 
                                 <div class="border-b border-slate-100 dark:border-slate-700/80 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-slate-700 dark:to-slate-800 p-4">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}"
+                                        <img src="{{ auth()->user()->photo_url }}"
                                              class="w-10 h-10 rounded-full object-cover border-2 border-white/30 flex-shrink-0"
-                                             onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
+                                             onerror="this.src='{{ asset('images/default-operator.png') }}'">
                                         <div class="min-w-0">
                                             <p class="text-sm font-bold text-white truncate">{{ auth()->user()->name }}</p>
                                             <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
@@ -392,13 +392,6 @@
                                         <span class="font-medium">Profil Saya</span>
                                     </a>
 
-                                    <a href="{{ route('teacher.attendance') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 rounded-xl transition-all duration-150 hover:bg-navy-800 hover:text-white dark:hover:bg-gold-400/20 dark:hover:text-gold-400 group">
-                                        <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 dark:group-hover:bg-gold-400/20 transition-colors">
-                                            <i data-lucide="scan-line" class="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-white dark:group-hover:text-gold-400"></i>
-                                        </div>
-                                        <span class="font-medium">Presensi Harian</span>
-                                    </a>
                                 </div>
 
                                 <div class="border-t border-slate-100 dark:border-slate-700/80 p-1.5">
@@ -463,5 +456,39 @@
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
 
     @stack('scripts')
+
+    {{-- ── LOGOUT LOADING OVERLAY ── --}}
+    <div id="logout-overlay"
+         style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,15,30,0.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:20px;padding:32px 36px 28px;width:220px;text-align:center;box-shadow:0 20px 48px rgba(0,0,0,0.3);">
+            <div style="position:relative;width:64px;height:64px;margin:0 auto 18px;">
+                <div style="position:absolute;inset:0;border-radius:50%;border:4px solid #E2E8F0;border-top-color:#0F172A;animation:ptSpin 0.9s linear infinite;"></div>
+                <div style="position:absolute;top:8px;left:8px;right:8px;bottom:8px;border-radius:50%;border:4px solid transparent;border-bottom-color:#FACC15;animation:ptSpinRev 0.7s linear infinite;"></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px;">
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:ptBounce 0.6s ease-in-out infinite;"></span>
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:ptBounce 0.6s ease-in-out 0.15s infinite;"></span>
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:ptBounce 0.6s ease-in-out 0.3s infinite;"></span>
+            </div>
+            <p style="font-size:0.88rem;font-weight:700;color:#0F172A;margin:0 0 3px;">Keluar...</p>
+            <p style="font-size:0.75rem;color:#94A3B8;margin:0;">Sampai jumpa lagi 👋</p>
+        </div>
+    </div>
+    <style>
+        @keyframes ptSpin    { to { transform: rotate(360deg); } }
+        @keyframes ptSpinRev { to { transform: rotate(-360deg); } }
+        @keyframes ptBounce  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    </style>
+    <script>
+    (function() {
+        var logoutForms = document.querySelectorAll('form[action*="logout"]');
+        logoutForms.forEach(function(form) {
+            form.addEventListener('submit', function() {
+                var overlay = document.getElementById('logout-overlay');
+                if (overlay) overlay.style.display = 'flex';
+            });
+        });
+    })();
+    </script>
 </body>
 </html>

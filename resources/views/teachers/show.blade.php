@@ -36,7 +36,7 @@
                         <p class="text-sm font-bold text-navy-800 dark:text-white font-mono mb-4">{{ $teacher->teacher_code ?? '-' }}</p>
                         
                         <!-- Badges -->
-                        <div class="flex flex-wrap items-center gap-2 mb-4">
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
                             <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium {{ $teacher->is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-slate-100 text-slate-700' }}">
                                 <span class="w-1.5 h-1.5 rounded-full {{ $teacher->is_active ? 'bg-green-500' : 'bg-slate-400' }} mr-1.5"></span>
                                 {{ $teacher->is_active ? 'Aktif' : 'Nonaktif' }}
@@ -46,19 +46,20 @@
                                 {{ ucfirst($teacher->role) }}
                             </span>
                             @if($teacher->subject)
-                            <div class="flex flex-col gap-2 mb-4">
-                                <span class="inline-flex items-center w-fit px-3 py-1.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 uppercase tracking-wide">
-                                    <i data-lucide="book" class="w-3 h-3 mr-1"></i>
-                                    {{ $teacher->subject }}
-                                </span>
-                                @if($subjectDetails && $subjectDetails->description)
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 italic">
-                                        "{{ $subjectDetails->description }}"
-                                    </p>
-                                @endif
-                            </div>
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                {{ $teacher->subject }}
+                            </span>
                             @endif
                         </div>
+
+                        {{-- Deskripsi mapel sejajar kiri di bawah badges --}}
+                        @if($teacher->subject && $subjectDetails && $subjectDetails->description)
+                        <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">
+                            "{{ $subjectDetails->description }}"
+                        </p>
+                        @else
+                        <div class="mb-4"></div>
+                        @endif
                         
                         <!-- Contact Info - BOTH FULL WIDTH, STACKED VERTICALLY -->
                         <div class="grid grid-cols-1 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">

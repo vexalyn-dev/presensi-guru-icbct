@@ -92,4 +92,43 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Password berhasil diubah');
     }
+
+    public function updateEmail(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'email'            => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'email_password'   => ['required'],
+        ], [
+            'email.required'        => 'Email tidak boleh kosong.',
+            'email.email'           => 'Format email tidak valid.',
+            'email.unique'          => 'Email sudah digunakan akun lain.',
+            'email_password.required' => 'Masukkan password untuk konfirmasi.',
+        ]);
+
+        // Konfirmasi password
+        if (!Hash::check($request->email_password, $user->password)) {
+            return back()
+                ->withErrors(['email_password' => 'Password tidak sesuai.'])
+                ->withInput()
+                ->with('open_email_form', true);
+        }
+
+        $oldEmail = $user->email;
+        $newEmail = $request->email;
+
+        // Tidak ada perubahan
+        if ($oldEmail === $newEmail) {
+            return back()->with('success', 'Email tidak ada perubahan.')->with('open_email_form', true);
+        }
+
+        // Update email & langsung verified (verifikasi email tidak digunakan di sistem ini)
+        $user->update([
+            'email'             => $newEmail,
+            'email_verified_at' => now(),
+        ]);
+
+        return back()->with('success', 'Email berhasil diubah ke ' . $newEmail . '. Silakan verifikasi email baru Anda.');
+    }
 }

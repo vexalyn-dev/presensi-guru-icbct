@@ -1,4 +1,4 @@
-@extends('layouts.teacher')
+@extends(activeLayout())
 @section('page-title', 'Profil Saya')
 @section('content')
 <div class="fade-in space-y-6">
@@ -143,7 +143,10 @@
                             <input type="email" value="{{ auth()->user()->email }}" readonly
                                    class="w-full pl-11 pr-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-400 cursor-not-allowed">
                         </div>
-                        <p class="mt-1 text-xs text-slate-400">Email tidak dapat diubah</p>
+                        <p class="mt-1 text-xs text-slate-400 flex items-center gap-1">
+                            <i data-lucide="info" class="w-3 h-3"></i>
+                            Untuk ganti email, gunakan form <a href="#email-section" class="text-navy-700 dark:text-gold-400 font-semibold underline">Ganti Email</a> di bawah
+                        </p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -219,6 +222,72 @@
                     <div class="flex justify-end pt-2">
                         <button type="submit" class="px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
                             <i data-lucide="lock" class="w-4 h-4"></i> Ganti Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- ─── GANTI EMAIL ─── --}}
+            <div class="card overflow-hidden" id="email-section">
+                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-slate-50/50 dark:bg-slate-800/30">
+                    <div class="w-9 h-9 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                        <i data-lucide="mail" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-navy-800 dark:text-white">Ganti Email</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Perbarui alamat email login Anda</p>
+                    </div>
+                </div>
+                <form action="{{ route('teacher.profile.email') }}" method="POST"
+                      class="p-6 space-y-5"
+                      id="email-change-form">
+                    @csrf
+                    @method('PUT')
+
+                    {{-- Email sekarang (info) --}}
+                    <div class="flex items-center gap-3 p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <i data-lucide="mail-check" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-[10px] text-slate-400 leading-none mb-0.5">Email saat ini</p>
+                            <p class="text-sm font-semibold text-navy-800 dark:text-white">{{ auth()->user()->email }}</p>
+                        </div>
+                    </div>
+
+                    {{-- Email baru --}}
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            Email Baru <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                            <input type="email" name="email" required
+                                   value="{{ old('email') }}"
+                                   placeholder="email@contoh.com"
+                                   autocomplete="off"
+                                   class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('email') ? 'border-red-400' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all">
+                        </div>
+                        @error('email')<p class="mt-1 text-xs text-red-500 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
+                    </div>
+
+                    {{-- Konfirmasi password --}}
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            Konfirmasi Password <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                            <input type="password" name="email_password" required
+                                   placeholder="Masukkan password Anda untuk konfirmasi"
+                                   autocomplete="current-password"
+                                   class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('email_password') ? 'border-red-400' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all">
+                        </div>
+                        @error('email_password')<p class="mt-1 text-xs text-red-500 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit"
+                                class="px-6 py-3 bg-navy-800 dark:bg-gold-400 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
+                            <i data-lucide="mail-check" class="w-4 h-4"></i> Simpan Email Baru
                         </button>
                     </div>
                 </form>

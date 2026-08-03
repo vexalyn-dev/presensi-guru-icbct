@@ -20,7 +20,17 @@ class LeaveController extends Controller
             'rejected' => $leaveRequests->where('status', 'rejected')->count(),
         ];
 
-        return view('leaves.index', compact('leaveRequests', 'stats'));
+        // Route dinamis berdasarkan role
+        $isPiket = auth()->user()?->isGuruPiket();
+        $routeShow    = $isPiket ? 'piket.leave-approval.show'    : 'leaves.show';
+        $routeApprove = $isPiket ? 'piket.leave-approval.approve' : 'leaves.approve';
+        $routeReject  = $isPiket ? 'piket.leave-approval.reject'  : 'leaves.reject';
+        $routeLatest  = $isPiket ? 'piket.leave-approval.api.latest' : 'leaves.api.latest';
+
+        return view('leaves.index', compact(
+            'leaveRequests', 'stats',
+            'routeShow', 'routeApprove', 'routeReject', 'routeLatest'
+        ));
     }
 
     public function latest()
@@ -28,6 +38,8 @@ class LeaveController extends Controller
         $leaveRequests = LeaveRequest::with(['user', 'approvedBy'])
             ->orderBy('created_at', 'desc')
             ->get();
+
+        $isPiket = auth()->user()?->isGuruPiket();
 
         return response()->json([
             'success' => true,
@@ -50,9 +62,9 @@ class LeaveController extends Controller
                 'duration' => $leave->duration,
                 'reason' => $leave->reason,
                 'admin_notes' => $leave->admin_notes,
-                'show_url' => route('leaves.show', $leave),
-                'approve_url' => route('leaves.approve', $leave),
-                'reject_url' => route('leaves.reject', $leave),
+                'show_url'    => route($isPiket ? 'piket.leave-approval.show'    : 'leaves.show',    $leave),
+                'approve_url' => route($isPiket ? 'piket.leave-approval.approve' : 'leaves.approve', $leave),
+                'reject_url'  => route($isPiket ? 'piket.leave-approval.reject'  : 'leaves.reject',  $leave),
             ]),
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
@@ -100,17 +112,23 @@ class LeaveController extends Controller
 
     public function show(LeaveRequest $leave)
     {
-        if (!auth()->user()->isAdmin() && (int) $leave->user_id !== (int) auth()->id()) {
+        $isPiket = auth()->user()?->isGuruPiket();
+        $isAdmin = auth()->user()?->isAdmin() || $isPiket;
+
+        if (!$isAdmin && (int) $leave->user_id !== (int) auth()->id()) {
             abort(403);
         }
 
-        if (!auth()->user()->isAdmin()) {
+        if (!$isAdmin) {
             return redirect()->route('teacher.leave.show', $leave);
         }
 
         $leave->load(['user', 'approvedBy']);
 
-        return view('leaves.show', compact('leave'));
+        $approveRoute = $isPiket ? 'piket.leave-approval.approve' : 'leaves.approve';
+        $rejectRoute  = $isPiket ? 'piket.leave-approval.reject'  : 'leaves.reject';
+
+        return view('leaves.show', compact('leave', 'approveRoute', 'rejectRoute', 'isPiket'));
     }
 
     public function approve(LeaveRequest $leave)

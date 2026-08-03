@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(activeLayout())
 
 @section('page-title', 'Scan QR Absensi')
 
@@ -21,7 +21,12 @@
                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pilih mode presensi dan arahkan kamera ke QR code</p>
                 </div>
             </div>
-            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-sm group w-fit">
+            @php
+                $backRoute = auth()->user()?->isGuruPiket()
+                    ? route('piket.dashboard')
+                    : (auth()->user()?->isTeacher() ? route('teacher.dashboard') : route('dashboard'));
+            @endphp
+            <a href="{{ $backRoute }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-sm group w-fit">
                 <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
                 Kembali
             </a>

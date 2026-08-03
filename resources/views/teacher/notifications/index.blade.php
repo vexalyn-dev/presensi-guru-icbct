@@ -1,4 +1,4 @@
-@extends('layouts.teacher')
+@extends(activeLayout())
 
 @section('page-title', 'Notifikasi')
 

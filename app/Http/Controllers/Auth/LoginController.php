@@ -26,6 +26,7 @@ class LoginController extends Controller
 
         if ($user->canAccessAdmin()) {
             return redirect()->route('dashboard')
+                ->with('show_welcome', true)
                 ->with('success', 'Selamat datang, ' . $user->name . '!');
         }
 
@@ -58,7 +59,39 @@ class LoginController extends Controller
             // Log aktivitas login
             try { ActivityLogService::login($user); } catch (\Exception $e) {}
 
+            // AJAX request — return JSON dengan redirect URL
+            if ($request->expectsJson() || $request->ajax()) {
+                $redirectUrl = match(true) {
+                    $user->isGuruPiket()    => route('piket.dashboard'),
+                    $user->isTeacher()      => route('teacher.dashboard'),
+                    $user->canAccessAdmin() => route('dashboard'),
+                    default                 => route('login'),
+                };
+                $welcomeKey = match(true) {
+                    $user->isGuruPiket()    => 'show_welcome_piket_' . $user->id,
+                    $user->isTeacher()      => 'show_welcome_' . $user->id,
+                    $user->canAccessAdmin() => 'show_welcome_admin_' . $user->id,
+                    default                 => null,
+                };
+                return response()->json([
+                    'success'      => true,
+                    'redirect'     => $redirectUrl,
+                    'show_welcome' => true,
+                    'welcome_key'  => $welcomeKey,
+                    'user_id'      => $user->id,
+                    'user_name'    => $user->name,
+                ]);
+            }
+
             return $this->redirectByRole($user);
+        }
+
+        // AJAX request — return JSON error
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => ['email' => ['Email atau password yang Anda masukkan salah.']],
+            ], 422);
         }
 
         return redirect()->back()->withErrors([

@@ -4,6 +4,28 @@
     const UNREAD_URL = cfgEl ? cfgEl.dataset.unreadUrl : '/teacher/notifications/api/unread';
     const USER_ID = cfgEl ? cfgEl.dataset.userId : null;
 
+    // Detect role from current URL prefix
+    const isPiket = window.location.pathname.startsWith('/piket/');
+    const isAdmin = !window.location.pathname.startsWith('/teacher/') && !isPiket;
+
+    function getNotifReadUrl(id) {
+        if (isPiket) return `/piket/notifications/${id}/read`;
+        if (isAdmin) return `/notifications/${id}/read`;
+        return `/teacher/notifications/${id}/read`;
+    }
+
+    function getNotifReadAllUrl() {
+        if (isPiket) return '/piket/notifications/read-all';
+        if (isAdmin) return '/notifications/mark-all-read';
+        return '/teacher/notifications/read-all';
+    }
+
+    function getMarkAsReadUrl(id) {
+        if (isPiket) return `/piket/notifications/${id}/read`;
+        if (isAdmin) return `/notifications/${id}/read`;
+        return `/teacher/notifications/${id}/read`;
+    }
+
     // Initialize Lucide icons
     function initIcons() {
         if (window.lucide) try { lucide.createIcons(); } catch(e){}
@@ -29,7 +51,7 @@
 
     // Mark notification as read (simple reload on success)
     window.markAsRead = function(notificationId) {
-        fetch(`/teacher/notifications/${notificationId}/read`, {
+        fetch(getMarkAsReadUrl(notificationId), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -45,7 +67,7 @@
 
     // Mark single notification as read (update UI)
     window.markNotifRead = function(btn, id, type) {
-        const url = type === 'admin' ? `/notifications/${id}/read` : `/teacher/notifications/${id}/read`;
+        const url = getNotifReadUrl(id);
         fetch(url, {
             method: 'POST',
             headers: {
@@ -76,7 +98,7 @@
 
     // Mark ALL notifications as read
     window.markAllNotifRead = function(type) {
-        const url = type === 'teacher' ? '/teacher/notifications/read-all' : '/notifications/mark-all-read';
+        const url = getNotifReadAllUrl();
         fetch(url, {
             method: 'POST',
             headers: {

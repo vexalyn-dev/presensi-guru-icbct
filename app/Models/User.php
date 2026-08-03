@@ -442,7 +442,11 @@ class User extends Authenticatable
             return asset('storage/' . ($this->teacher->photo_path ?: $this->teacher->photo));
         }
 
-        return asset('images/default-teacher.png');
+        // Foto default berdasarkan role
+        return match($this->role) {
+            'operator', 'guru_piket' => asset('images/default-operator.png'),
+            default                  => asset('images/default-teacher.png'),
+        };
     }
 
     /**

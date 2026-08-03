@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(activeLayout())
 
 @section('page-title', 'Manual Presensi Kelas')
 

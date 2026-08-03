@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(activeLayout())
 
 @section('page-title', 'Izin & Sakit')
 
@@ -97,7 +97,7 @@
     </div>
 
     <!-- Leave Requests List -->
-    <div class="space-y-4" id="leave-requests-list" data-latest-url="{{ route('leaves.api.latest') }}">
+    <div class="space-y-4" id="leave-requests-list" data-latest-url="{{ route($routeLatest) }}">
         @forelse($leaveRequests as $leave)
         <div class="card p-5 hover:shadow-lg transition-all">
             <div class="flex items-start justify-between gap-4">
@@ -138,24 +138,24 @@
                 
                 <div class="flex items-center gap-2 flex-shrink-0">
                     @if($leave->status === 'pending')
-                    <form action="{{ route('leaves.approve', $leave) }}" method="POST" class="inline">
+                    <form action="{{ route($routeApprove, $leave) }}" method="POST" class="inline">
                         @csrf
-                        <input type="hidden" name="admin_notes" value="Disetujui oleh admin">
+                        <input type="hidden" name="admin_notes" value="Disetujui">
                         <button type="submit" class="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
                             <i data-lucide="check" class="w-3.5 h-3.5"></i>
                             Setujui
                         </button>
                     </form>
-                    <form action="{{ route('leaves.reject', $leave) }}" method="POST" class="inline">
+                    <form action="{{ route($routeReject, $leave) }}" method="POST" class="inline">
                         @csrf
-                        <input type="hidden" name="admin_notes" value="Ditolak oleh admin">
+                        <input type="hidden" name="admin_notes" value="Ditolak">
                         <button type="submit" onclick="return confirm('Yakin ingin menolak pengajuan ini?')" class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
                             <i data-lucide="x" class="w-3.5 h-3.5"></i>
                             Tolak
                         </button>
                     </form>
                     @endif
-                    <a href="{{ route('leaves.show', $leave) }}" class="px-3 py-2 bg-navy-800 dark:bg-gold-400 hover:bg-navy-900 dark:hover:bg-gold-500 text-white dark:text-navy-900 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
+                    <a href="{{ route($routeShow, $leave) }}" class="px-3 py-2 bg-navy-800 dark:bg-gold-400 hover:bg-navy-900 dark:hover:bg-gold-500 text-white dark:text-navy-900 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
                         <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                         Detail
                     </a>
