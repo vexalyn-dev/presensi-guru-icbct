@@ -29,12 +29,33 @@ class ProfileController extends Controller
             'bio' => 'nullable|string|max:500',
         ]);
 
-        // Handle Photo Upload
-        if ($request->hasFile('photo')) {
+        $croppedData = $request->input('cropped_photo_data');
+
+        if ($croppedData === 'DELETE') {
+            // Delete existing photo
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            $validated['photo'] = null;
+        } elseif ($croppedData && str_starts_with($croppedData, 'data:image')) {
+            // Decode base64 and save as JPEG
+            $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $croppedData);
+            $imageData = base64_decode($imageData);
+            $filename = 'profiles/' . uniqid('photo_', true) . '.jpg';
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            Storage::disk('public')->put($filename, $imageData);
+            $validated['photo'] = $filename;
+        } elseif ($request->hasFile('photo')) {
+            // Regular file upload
             if ($user->photo) {
                 Storage::disk('public')->delete($user->photo);
             }
             $validated['photo'] = $request->file('photo')->store('profiles', 'public');
+        } else {
+            // No photo change — remove from validated so it's not overwritten
+            unset($validated['photo']);
         }
 
         $user->update($validated);

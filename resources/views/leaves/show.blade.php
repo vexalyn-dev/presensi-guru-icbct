@@ -6,6 +6,7 @@
 @section('content')
     @php
         $isPiket      = isset($isPiket) ? $isPiket : auth()->user()?->isGuruPiket();
+        $isAdmin      = isset($isAdmin)  ? $isAdmin  : (auth()->user()?->isAdmin() || $isPiket);
         $approveRoute = isset($approveRoute) ? $approveRoute : 'leaves.approve';
         $rejectRoute  = isset($rejectRoute)  ? $rejectRoute  : 'leaves.reject';
         $backRoute    = $isPiket ? route('piket.leave-approval') : route('leaves.index');

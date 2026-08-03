@@ -148,7 +148,7 @@ class QrCodeController extends Controller
             });
 
             // Send notification to admins
-            $admins = User::where('role', 'admin')->get();
+            $admins = User::whereIn('role', ['admin', 'operator'])->get();
             foreach ($admins as $admin) {
                 /** @var User $admin */
                 $admin->notify(new SystemNotification(

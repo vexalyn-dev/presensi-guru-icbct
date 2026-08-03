@@ -66,7 +66,7 @@ class LeaveController extends Controller
         );
 
         // Kirim notifikasi ke semua admin/operator
-        $admins = \App\Models\User::where('role', 'admin')->get();
+        $admins = \App\Models\User::whereIn('role', ['admin', 'operator'])->get();
         foreach ($admins as $admin) {
             NotificationHelper::send(
                 $admin,

@@ -118,7 +118,7 @@ class TeacherController extends Controller
         });
 
         // Send notification
-        $admins = User::where('role', 'admin')->get();
+        $admins = User::whereIn('role', ['admin', 'operator'])->get();
         foreach ($admins as $admin) {
             /** @var User $admin */
             $admin->notify(new SystemNotification(
@@ -457,7 +457,7 @@ class TeacherController extends Controller
         });
 
         // Send notification
-        $admins = User::where('role', 'admin')->get();
+        $admins = User::whereIn('role', ['admin', 'operator'])->get();
         foreach ($admins as $admin) {
             /** @var User $admin */
             $admin->notify(new SystemNotification(

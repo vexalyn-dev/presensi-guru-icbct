@@ -50,13 +50,68 @@
                 <div class="relative group">
                     <div class="w-28 h-28 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 p-1 shadow-xl">
                         <img src="{{ $user->photo_url }}" id="photo-preview" 
-                             class="w-full h-full rounded-xl object-cover" alt="Profile">
+                             class="w-full h-full rounded-xl object-cover" alt="Profile"
+                             style="cursor:pointer;"
+                             onclick="openPhotoViewer(this.src)">
                     </div>
                     <label for="photo-upload" 
                            class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                        <i data-lucide="camera" class="w-6 h-6 text-white"></i>
-                        <input type="file" name="photo" id="photo-upload" class="hidden" accept="image/*" onchange="previewImage(this)">
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="event.preventDefault();openPhotoViewer(document.getElementById('photo-preview').src)"
+                                    class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="eye" class="w-4 h-4 text-white"></i>
+                            </button>
+                            <button type="button" onclick="event.preventDefault();document.getElementById('photo-upload').click()"
+                                    class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center">
+                                <i data-lucide="camera" class="w-4 h-4 text-white"></i>
+                            </button>
+                        </div>
+                        <input type="file" name="photo" id="photo-upload" class="hidden" accept="image/*" onchange="handleAdminPhotoChange(this)">
                     </label>
+                </div>
+                {{-- Hidden inputs --}}
+                <input type="hidden" name="cropped_photo_data" id="cropped_photo_data">
+                {{-- 3-dot menu --}}
+                <div style="margin-top:8px;display:flex;justify-content:center;" id="photo-menu-wrap">
+                    <div style="position:relative;display:inline-block;">
+                        <button type="button" onclick="togglePhotoMenu()"
+                                style="width:34px;height:34px;background:#F1F5F9;border:1.5px solid #E2E8F0;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;"
+                                title="Opsi foto">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#64748B">
+                                <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                            </svg>
+                        </button>
+                        <div id="photo-3dot-menu"
+                             style="display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+                                    background:#fff;border:1px solid #E2E8F0;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.12);
+                                    min-width:160px;overflow:hidden;z-index:100;animation:cropModalIn 0.18s ease;">
+                            <button type="button" onclick="openPhotoViewer(document.getElementById('photo-preview').src);togglePhotoMenu();"
+                                    style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#1E293B;text-align:left;transition:background 0.15s;"
+                                    onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
+                                <svg width="15" height="15" fill="none" stroke="#64748B" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                Lihat Foto
+                            </button>
+                            <button type="button" onclick="document.getElementById('photo-upload').click();togglePhotoMenu();"
+                                    style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#1E293B;text-align:left;transition:background 0.15s;"
+                                    onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
+                                <svg width="15" height="15" fill="none" stroke="#64748B" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Ganti Foto
+                            </button>
+                            <button type="button" onclick="document.getElementById('photo-upload').click();togglePhotoMenu();"
+                                    style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#1E293B;text-align:left;transition:background 0.15s;"
+                                    onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
+                                <svg width="15" height="15" fill="none" stroke="#64748B" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 9h6v6H9z"/></svg>
+                                Crop Ulang
+                            </button>
+                            <div style="height:1px;background:#F1F5F9;margin:2px 0;"></div>
+                            <button type="button" onclick="deletePhoto();togglePhotoMenu();"
+                                    style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#EF4444;text-align:left;transition:background 0.15s;"
+                                    onmouseover="this.style.background='#FFF5F5'" onmouseout="this.style.background='none'">
+                                <svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                Hapus Foto
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -411,16 +466,20 @@
         }));
     });
     
-    // Preview Image Function
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('photo-preview').src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
+    // Photo function — buka crop modal
+    function handleAdminPhotoChange(input) {
+        if (!input.files || !input.files[0]) return;
+        var file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Ukuran file terlalu besar. Maksimal 5MB.');
+            input.value = '';
+            return;
         }
+        openCropModal(file, input, ['photo-preview']);
     }
+
+    // Alias lama agar tidak error jika masih ada referensi
+    function previewImage(input) { handleAdminPhotoChange(input); }
     
     // Open Delete Modal Function
     function openDeleteModal() {
@@ -464,4 +523,14 @@
         transition: all 0.2s ease-in-out;
     }
 </style>
+
+<script>
+@php
+    $defaultPhotoUrl = 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=1E3A5F&color=fff&size=200&bold=true';
+@endphp
+window.profileDefaultPhoto = '{{ $defaultPhotoUrl }}';
+</script>
+
+@include('partials.photo-cropper')
+
 @endsection

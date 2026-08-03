@@ -411,13 +411,16 @@ class ReportController extends Controller
         // Output Excel
         $filename = 'Laporan_' . ($reportType === 'daily' ? 'Harian' : 'Kelas') . '_' . Carbon::parse($startDate)->format('dmY') . '_' . Carbon::parse($endDate)->format('dmY') . '.xlsx';
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
         $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
+
+        return response()->stream(function() use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control'       => 'max-age=0, no-cache, no-store',
+            'Pragma'              => 'no-cache',
+        ]);
     }
 
     /**

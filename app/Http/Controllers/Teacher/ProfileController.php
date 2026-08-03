@@ -30,25 +30,52 @@ class ProfileController extends Controller
         ]);
 
         $photoPath = null;
+        $croppedData = $request->input('cropped_photo_data');
 
-        // Handle photo upload
-        if ($request->hasFile('photo')) {
-            // Delete old photo
+        if ($croppedData === 'DELETE') {
+            // Delete existing photos
             if ($teacher && $teacher->photo) {
                 Storage::disk('public')->delete($teacher->photo);
             }
             if ($user->photo) {
                 Storage::disk('public')->delete($user->photo);
             }
-            
+            $photoPath = null;
+            $deletePhoto = true;
+        } elseif ($croppedData && str_starts_with($croppedData, 'data:image')) {
+            // Decode base64 and save as JPEG
+            $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $croppedData);
+            $imageData = base64_decode($imageData);
+            $filename = 'teachers/' . uniqid('photo_', true) . '.jpg';
+            // Delete old photos
+            if ($teacher && $teacher->photo) {
+                Storage::disk('public')->delete($teacher->photo);
+            }
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            Storage::disk('public')->put($filename, $imageData);
+            $photoPath = $filename;
+            $deletePhoto = false;
+        } elseif ($request->hasFile('photo')) {
+            // Regular file upload
+            if ($teacher && $teacher->photo) {
+                Storage::disk('public')->delete($teacher->photo);
+            }
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
             $photoPath = $request->file('photo')->store('teachers', 'public');
+            $deletePhoto = false;
+        } else {
+            $deletePhoto = false;
         }
 
-        // Update user (including photo)
-        $userData = [
-            'name' => $validated['name'],
-        ];
-        if ($photoPath) {
+        // Update user
+        $userData = ['name' => $validated['name']];
+        if (isset($deletePhoto) && $deletePhoto) {
+            $userData['photo'] = null;
+        } elseif ($photoPath) {
             $userData['photo'] = $photoPath;
         }
         $user->update($userData);
@@ -56,15 +83,15 @@ class ProfileController extends Controller
         // Update teacher
         if ($teacher) {
             $teacherData = [
-                'name' => $validated['name'],
-                'phone' => $validated['phone'] ?? null,
+                'name'    => $validated['name'],
+                'phone'   => $validated['phone'] ?? null,
                 'address' => $validated['address'] ?? null,
             ];
-
-            if ($photoPath) {
+            if (isset($deletePhoto) && $deletePhoto) {
+                $teacherData['photo'] = null;
+            } elseif ($photoPath) {
                 $teacherData['photo'] = $photoPath;
             }
-
             $teacher->update($teacherData);
         }
 

@@ -54,7 +54,7 @@ class CheckIncompleteClassAttendance extends Command
                     );
 
                     // Notifikasi ke semua admin
-                    $admins = User::where('role', 'admin')->get();
+                    $admins = User::whereIn('role', ['admin', 'operator'])->get();
                     foreach ($admins as $admin) {
                         NotificationHelper::send(
                             $admin,
