@@ -37,7 +37,7 @@ class LeaveApprovalController extends Controller
             $leaveRequest->user,
             'success',
             'Pengajuan ' . ucfirst($leaveRequest->type) . ' Disetujui',
-            'Pengajuan ' . $leaveRequest->type . ' Anda dari tanggal ' . $leaveRequest->start_date->format('d M Y') . ' s/d ' . $leaveRequest->end_date->format('d M Y') . ' telah disetujui.',
+            'Pengajuan ' . $leaveRequest->type . ' Anda dari tanggal ' . optional($leaveRequest->start_date)->format('d M Y') . ' s/d ' . optional($leaveRequest->end_date)->format('d M Y') . ' telah disetujui.',
             route('teacher.leave.show', $leaveRequest),
             'check-circle',
             'bg-green-100 text-green-600'
