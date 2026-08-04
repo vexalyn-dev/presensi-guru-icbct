@@ -43,79 +43,65 @@
     @endif
 
     <!-- Row 1: Profile Card (Full Width) -->
-    <div class="card p-6">
-        <div class="flex flex-col md:flex-row items-center gap-6">
-            <!-- Avatar -->
-            <div class="flex-shrink-0">
-                <div class="relative group">
-                    <div class="w-28 h-28 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 p-1 shadow-xl">
-                        <img src="{{ $user->photo_url }}" id="photo-preview" 
-                             class="w-full h-full rounded-xl object-cover" alt="Profile"
-                             style="cursor:pointer;"
-                             onclick="openPhotoViewer(this.src)">
-                    </div>
-                    <label for="photo-upload" 
-                           class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="event.preventDefault();openPhotoViewer(document.getElementById('photo-preview').src)"
-                                    class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center">
-                                <i data-lucide="eye" class="w-4 h-4 text-white"></i>
-                            </button>
-                            <button type="button" onclick="event.preventDefault();document.getElementById('photo-upload').click()"
-                                    class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center">
-                                <i data-lucide="camera" class="w-4 h-4 text-white"></i>
-                            </button>
-                        </div>
-                        <input type="file" name="photo" id="photo-upload" class="hidden" accept="image/*" onchange="handleAdminPhotoChange(this)">
-                    </label>
-                </div>
-                {{-- Hidden inputs --}}
-                <input type="hidden" name="cropped_photo_data" id="cropped_photo_data">
-                {{-- 3-dot menu --}}
-                <div style="margin-top:8px;display:flex;justify-content:center;" id="photo-menu-wrap">
-                    <div style="position:relative;display:inline-block;">
-                        <button type="button" onclick="togglePhotoMenu()"
-                                style="width:34px;height:34px;background:#F1F5F9;border:1.5px solid #E2E8F0;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;"
-                                title="Opsi foto">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#64748B">
-                                <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
-                            </svg>
-                        </button>
-                        <div id="photo-3dot-menu"
-                             style="display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
-                                    background:#fff;border:1px solid #E2E8F0;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.12);
-                                    min-width:160px;overflow:hidden;z-index:100;animation:cropModalIn 0.18s ease;">
-                            <button type="button" onclick="openPhotoViewer(document.getElementById('photo-preview').src);togglePhotoMenu();"
-                                    style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#1E293B;text-align:left;transition:background 0.15s;"
-                                    onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
-                                <svg width="15" height="15" fill="none" stroke="#64748B" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                Lihat Foto
-                            </button>
-                            <button type="button" onclick="document.getElementById('photo-upload').click();togglePhotoMenu();"
-                                    style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#1E293B;text-align:left;transition:background 0.15s;"
-                                    onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
-                                <svg width="15" height="15" fill="none" stroke="#64748B" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                Ganti Foto
-                            </button>
-                            <button type="button" onclick="document.getElementById('photo-upload').click();togglePhotoMenu();"
-                                    style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#1E293B;text-align:left;transition:background 0.15s;"
-                                    onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
-                                <svg width="15" height="15" fill="none" stroke="#64748B" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 9h6v6H9z"/></svg>
-                                Crop Ulang
-                            </button>
-                            <div style="height:1px;background:#F1F5F9;margin:2px 0;"></div>
-                            <button type="button" onclick="deletePhoto();togglePhotoMenu();"
-                                    style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#EF4444;text-align:left;transition:background 0.15s;"
-                                    onmouseover="this.style.background='#FFF5F5'" onmouseout="this.style.background='none'">
-                                <svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                Hapus Foto
-                            </button>
-                        </div>
-                    </div>
+    <div class="card overflow-hidden">
+        {{-- Gradient header dengan titik 3 di pojok kanan atas --}}
+        <div class="h-24 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:via-gold-500 dark:to-amber-500 relative">
+            <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 25% 50%,white 1px,transparent 1px),radial-gradient(circle at 75% 20%,white 1px,transparent 1px);background-size:20px 20px;"></div>
+
+            {{-- 3-dot menu pojok kanan atas --}}
+            <div class="absolute top-3 right-3" id="photo-menu-wrap" style="z-index:20;">
+                <button type="button" onclick="togglePhotoMenu(event)"
+                        style="width:32px;height:32px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:background 0.15s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+                        title="Opsi foto">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
+                        <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                    </svg>
+                </button>
+                <div id="photo-3dot-menu"
+                     style="display:none;position:absolute;top:calc(100% + 6px);right:0;
+                            background:#fff;border:1px solid #E2E8F0;border-radius:12px;
+                            box-shadow:0 8px 24px rgba(15,23,42,0.14);
+                            min-width:165px;overflow:hidden;z-index:100;">
+                    <button type="button" onclick="openPhotoViewer(document.getElementById('photo-preview').src);togglePhotoMenu(event);"
+                            style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#1E293B;text-align:left;"
+                            onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
+                        <svg width="15" height="15" fill="none" stroke="#64748B" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        Lihat Foto
+                    </button>
+                    <button type="button" onclick="document.getElementById('photo-upload').click();togglePhotoMenu(event);"
+                            style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#1E293B;text-align:left;"
+                            onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
+                        <svg width="15" height="15" fill="none" stroke="#64748B" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        Ganti / Crop Foto
+                    </button>
+                    <div style="height:1px;background:#F1F5F9;margin:2px 0;"></div>
+                    <button type="button" onclick="deletePhoto();togglePhotoMenu(event);"
+                            style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:none;cursor:pointer;font-size:0.83rem;font-weight:500;color:#EF4444;text-align:left;"
+                            onmouseover="this.style.background='#FFF5F5'" onmouseout="this.style.background='none'">
+                        <svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Hapus Foto
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- User Info -->
+        {{-- Hidden inputs dipindah ke dalam form --}}
+        <input type="file" id="photo-upload" name="photo" class="hidden" accept="image/*" onchange="handleAdminPhotoChange(this)">
+
+        <div class="p-6 flex flex-col md:flex-row items-center gap-6 -mt-10">
+            {{-- Avatar: klik = viewer --}}
+            <div class="flex-shrink-0 relative group cursor-pointer" onclick="openPhotoViewer(this.querySelector('img').src)">
+                <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 p-1 shadow-xl">
+                    <img src="{{ $user->photo_url }}" id="photo-preview"
+                         class="w-full h-full rounded-xl object-cover" alt="Profile">
+                </div>
+                <div class="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                </div>
+            </div>
             <div class="flex-1 text-center md:text-left">
                 <h2 class="text-2xl font-bold text-navy-800 dark:text-white mb-1">{{ $user->name }}</h2>
                 <p class="text-slate-500 dark:text-slate-400 mb-2">{{ $user->email }}</p>
@@ -138,7 +124,6 @@
             @endif
         </div>
     </div>
-
     <!-- Row 2: Informasi Pribadi (Full Width) -->
     <div class="card p-6">
         <div class="flex items-center gap-3 mb-6 pb-5 border-b border-slate-200 dark:border-slate-700">
@@ -154,6 +139,8 @@
         <form id="profile-form" action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
             @csrf
             @method('PUT')
+            {{-- cropped_photo_data harus di dalam form agar ikut submit --}}
+            <input type="hidden" name="cropped_photo_data" id="cropped_photo_data">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <!-- Name -->

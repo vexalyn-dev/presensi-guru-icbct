@@ -1,4 +1,3 @@
-﻿@@extends(activeLayout())
 @extends(activeLayout())
 @section('page-title', 'Pusat Bantuan')
 @php $rp = auth()->user()->isAdmin() ? 'admin.support' : 'teacher.support'; @endphp

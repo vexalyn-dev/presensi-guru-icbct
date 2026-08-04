@@ -338,6 +338,7 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     Route::get('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [App\Http\Controllers\Teacher\ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::put('/profile/email', [App\Http\Controllers\Teacher\ProfileController::class, 'updateEmail'])->name('profile.email');
 
     // Pusat Bantuan
     Route::get('/support',          [SupportController::class, 'index'])  ->name('support');
