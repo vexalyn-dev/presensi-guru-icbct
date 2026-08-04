@@ -101,8 +101,15 @@ class VexalynService
         try {
             $meta = is_array($ticket->metadata) ? $ticket->metadata : [];
 
-            // Upload lampiran gambar ke GitHub & kumpulkan URL-nya
-            $attachmentLinks = $this->uploadAttachmentsToGitHub($ticket);
+            // Upload lampiran ke GitHub — jika gagal, issue tetap dibuat tanpa lampiran
+            $attachmentLinks = [];
+            try {
+                $attachmentLinks = $this->uploadAttachmentsToGitHub($ticket);
+            } catch (\Exception $uploadEx) {
+                Log::warning('Upload attachment ke GitHub gagal, issue tetap dibuat tanpa lampiran: ' . $uploadEx->getMessage(), [
+                    'ticket_id' => $ticket->id,
+                ]);
+            }
 
             // Susun body issue dalam format Markdown
             $body = $this->buildGitHubBody($ticket, $meta, $attachmentLinks);
@@ -148,10 +155,7 @@ class VexalynService
 
     /**
      * Upload file lampiran ke GitHub repo (Contents API) dan kembalikan
-     * array of ['name' => ..., 'url' => ..., 'raw_url' => ..., 'is_image' => bool].
-     *
-     * GitHub Contents API: PUT /repos/{owner}/{repo}/contents/{path}
-     * File dikirim sebagai base64. URL raw.githubusercontent.com bisa diembed di Markdown.
+     * array of ['name' => ..., 'url' => ..., 'is_image' => bool].
      */
     private function uploadAttachmentsToGitHub(SupportTicket $ticket): array
     {
@@ -163,35 +167,28 @@ class VexalynService
         foreach ($attachments as $file) {
             try {
                 $fileUrl  = $file['url']  ?? null;
-                $fileName = $file['name'] ?? basename($fileUrl ?? 'file');
+                $fileName = $file['name'] ?? basename((string) $fileUrl);
                 $mimeType = $file['type'] ?? '';
 
                 if (!$fileUrl) continue;
 
-                // Ambil path relatif dari storage URL
-                $storagePath = ltrim(
-                    str_replace(rtrim(\Storage::disk('public')->url(''), '/'), '', rtrim($fileUrl, '/')),
-                    '/'
-                );
+                $fileContent = $this->readAttachmentContent($fileUrl);
 
-                // Baca isi file dari disk lokal
-                if (!\Storage::disk('public')->exists($storagePath)) {
-                    Log::warning("GitHub upload: file tidak ditemukan di storage: {$storagePath}");
-                    // Fallback: coba fetch via HTTP jika file ada di server publik
-                    $fileContent = $this->fetchFileContent($fileUrl);
-                } else {
-                    $fileContent = \Storage::disk('public')->get($storagePath);
+                if (empty($fileContent)) {
+                    Log::warning("GitHub upload: tidak bisa membaca konten file '{$fileName}'", [
+                        'url' => $fileUrl, 'ticket_id' => $ticket->id,
+                    ]);
+                    continue;
                 }
 
-                if (empty($fileContent)) continue;
-
                 $base64Content = base64_encode($fileContent);
-                $isImage       = str_starts_with($mimeType, 'image/') ||
-                                 preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $fileName);
+                $isImage       = str_starts_with($mimeType, 'image/')
+                              || (bool) preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $fileName);
 
-                // Path di repo: support-attachments/ticket-{id}/{filename}
-                $repoPath = 'support-attachments/ticket-' . $ticket->id . '/' .
-                            now()->format('YmdHis') . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $fileName);
+                // Path di repo: support-attachments/ticket-{id}/{timestamp}_{filename}
+                $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $fileName);
+                $repoPath = 'support-attachments/ticket-' . $ticket->id . '/'
+                          . now()->format('YmdHis') . '_' . $safeName;
 
                 $uploadResponse = Http::withHeaders([
                     'Authorization'        => 'Bearer ' . $this->githubToken,
@@ -212,21 +209,18 @@ class VexalynService
                     $results[] = [
                         'name'     => $fileName,
                         'url'      => $rawUrl,
-                        'is_image' => (bool) $isImage,
+                        'is_image' => $isImage,
                     ];
-
                     Log::info("GitHub attachment uploaded: {$rawUrl}");
                 } else {
                     Log::warning('GitHub attachment upload gagal: ' . $uploadResponse->body(), [
-                        'file'      => $fileName,
-                        'ticket_id' => $ticket->id,
+                        'status' => $uploadResponse->status(), 'file' => $fileName, 'ticket_id' => $ticket->id,
                     ]);
                 }
 
             } catch (\Exception $e) {
-                Log::warning('Exception upload attachment ke GitHub: ' . $e->getMessage(), [
-                    'file'      => $file['name'] ?? '?',
-                    'ticket_id' => $ticket->id,
+                Log::warning('Exception upload attachment: ' . $e->getMessage(), [
+                    'file' => $file['name'] ?? '?', 'ticket_id' => $ticket->id,
                 ]);
             }
         }
@@ -235,16 +229,35 @@ class VexalynService
     }
 
     /**
-     * Fetch isi file via HTTP (fallback jika storage tidak bisa dibaca langsung).
+     * Baca konten file attachment — coba dari disk storage dulu, fallback ke HTTP fetch.
      */
-    private function fetchFileContent(string $url): string
+    private function readAttachmentContent(string $fileUrl): string
     {
+        // Coba baca dari storage disk public langsung (lebih cepat, tidak butuh HTTP)
         try {
-            $response = Http::withoutVerifying()->timeout(10)->get($url);
-            return $response->successful() ? $response->body() : '';
+            $publicDiskUrl = rtrim(\Storage::disk('public')->url(''), '/');
+            if (str_starts_with($fileUrl, $publicDiskUrl)) {
+                $relativePath = ltrim(substr($fileUrl, strlen($publicDiskUrl)), '/');
+                if (\Storage::disk('public')->exists($relativePath)) {
+                    return \Storage::disk('public')->get($relativePath);
+                }
+            }
+
+            // Fallback: coba path relatif dari APP_URL
+            $appUrl = rtrim(config('app.url', ''), '/');
+            $storagePubUrl = $appUrl . '/storage/';
+            if (str_starts_with($fileUrl, $storagePubUrl)) {
+                $relativePath = ltrim(substr($fileUrl, strlen($storagePubUrl)), '/');
+                if (\Storage::disk('public')->exists($relativePath)) {
+                    return \Storage::disk('public')->get($relativePath);
+                }
+            }
         } catch (\Exception $e) {
-            return '';
+            Log::debug('readAttachmentContent disk read failed: ' . $e->getMessage());
         }
+
+        // Last resort: fetch via HTTP
+        return $this->fetchFileContent($fileUrl);
     }
 
     /**
