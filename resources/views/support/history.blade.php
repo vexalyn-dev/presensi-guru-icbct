@@ -76,7 +76,10 @@
         <div class="divide-y divide-slate-100 dark:divide-slate-800">
             @foreach($tickets as $ticket)
             <a href="{{ route($rp . '.show', $ticket) }}"
-               class="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
+               class="ticket-row flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group"
+               data-ticket-id="{{ $ticket->id }}"
+               data-delete-url="{{ route($rp . '.destroy', $ticket) }}"
+               data-ticket-title="{{ $ticket->title }}">
 
                 {{-- Icon tipe --}}
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
@@ -122,6 +125,103 @@
     </div>
     @endif
 </div>
-<script>document.addEventListener('DOMContentLoaded', () => { if (window.lucide) lucide.createIcons(); });</script>
-<style>.fade-in{animation:fadeIn .4s ease-out}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}</style>
+
+{{-- Context Menu --}}
+<div id="ctx-menu"
+     class="fixed z-[9999] hidden min-w-[160px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden py-1"
+     style="top:0;left:0">
+    <button id="ctx-view"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors">
+        <i data-lucide="eye" class="w-4 h-4 text-slate-400"></i>
+        Lihat Detail
+    </button>
+    <div class="h-px bg-slate-100 dark:bg-slate-700 mx-2 my-1"></div>
+    <button id="ctx-delete"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+        Hapus Laporan
+    </button>
+</div>
+
+{{-- Hidden delete form --}}
+<form id="delete-form" method="POST" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) lucide.createIcons();
+
+    const menu      = document.getElementById('ctx-menu');
+    const btnView   = document.getElementById('ctx-view');
+    const btnDelete = document.getElementById('ctx-delete');
+    const form      = document.getElementById('delete-form');
+
+    let activeRow = null;
+
+    // Sembunyikan menu saat klik di luar
+    function hideMenu() {
+        menu.classList.add('hidden');
+        activeRow = null;
+    }
+
+    document.addEventListener('click', hideMenu);
+    document.addEventListener('scroll', hideMenu, true);
+    window.addEventListener('resize', hideMenu);
+
+    // Munculkan context menu saat klik kanan di atas baris tiket
+    document.querySelectorAll('.ticket-row').forEach(row => {
+        row.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            activeRow = row;
+
+            // Posisikan menu agar tidak keluar viewport
+            const menuW = 180;
+            const menuH = 90;
+            let x = e.clientX;
+            let y = e.clientY;
+            if (x + menuW > window.innerWidth)  x = window.innerWidth  - menuW - 8;
+            if (y + menuH > window.innerHeight) y = window.innerHeight - menuH - 8;
+
+            menu.style.left = x + 'px';
+            menu.style.top  = y + 'px';
+            menu.classList.remove('hidden');
+
+            if (window.lucide) lucide.createIcons();
+        });
+    });
+
+    // Tombol "Lihat Detail"
+    btnView.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!activeRow) return;
+        hideMenu();
+        window.location.href = activeRow.href;
+    });
+
+    // Tombol "Hapus"
+    btnDelete.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!activeRow) return;
+
+        const title     = activeRow.dataset.ticketTitle;
+        const deleteUrl = activeRow.dataset.deleteUrl;
+        hideMenu();
+
+        if (!confirm(`Hapus laporan "${title}"?\n\nTindakan ini tidak bisa dibatalkan.`)) return;
+
+        form.action = deleteUrl;
+        form.submit();
+    });
+});
+</script>
+<style>
+.fade-in{animation:fadeIn .4s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#ctx-menu{animation:ctxIn .12s ease-out}
+@keyframes ctxIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+</style>
 @endsection

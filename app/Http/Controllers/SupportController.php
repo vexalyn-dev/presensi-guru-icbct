@@ -218,6 +218,30 @@ class SupportController extends Controller
         ]);
     }
 
+    /** Hapus tiket */
+    public function destroy(SupportTicket $ticket)
+    {
+        abort_if($ticket->user_id !== auth()->id(), 403);
+
+        // Hapus file lampiran dari storage
+        if (!empty($ticket->attachments)) {
+            foreach ($ticket->attachments as $file) {
+                if (!empty($file['url'])) {
+                    // Ekstrak path relatif dari URL storage
+                    $path = str_replace(Storage::disk('public')->url(''), '', $file['url']);
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+            }
+        }
+
+        $ticket->delete();
+
+        return redirect()->to($this->supportRoute('history'))
+            ->with('success', '✅ Laporan berhasil dihapus.');
+    }
+
     /** Detail tiket (ambil dari Vexalyn jika ada) */
     public function show(SupportTicket $ticket)
     {

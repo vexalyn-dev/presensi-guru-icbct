@@ -101,28 +101,31 @@ class VexalynService
         try {
             $meta = is_array($ticket->metadata) ? $ticket->metadata : [];
 
+            // Upload lampiran gambar ke GitHub & kumpulkan URL-nya
+            $attachmentLinks = $this->uploadAttachmentsToGitHub($ticket);
+
             // Susun body issue dalam format Markdown
-            $body = $this->buildGitHubBody($ticket, $meta);
+            $body = $this->buildGitHubBody($ticket, $meta, $attachmentLinks);
 
             // Label: tipe tiket + prioritas
-            $labels = array_filter([
+            $labels = array_values(array_filter([
                 $ticket->type,
                 $ticket->priority ?? 'medium',
-            ]);
+            ]));
 
             $issueTitle = '[' . strtoupper($ticket->type) . '] ' . $ticket->title;
 
             $response = Http::withHeaders([
-                'Authorization'      => 'Bearer ' . $this->githubToken,
-                'Accept'             => 'application/vnd.github+json',
+                'Authorization'        => 'Bearer ' . $this->githubToken,
+                'Accept'               => 'application/vnd.github+json',
                 'X-GitHub-Api-Version' => '2022-11-28',
-                'Content-Type'       => 'application/json',
+                'Content-Type'         => 'application/json',
             ])
             ->timeout(15)
             ->post("https://api.github.com/repos/{$this->githubRepo}/issues", [
                 'title'  => $issueTitle,
                 'body'   => $body,
-                'labels' => array_values($labels),
+                'labels' => $labels,
             ]);
 
             if ($response->successful()) {
@@ -144,9 +147,112 @@ class VexalynService
     }
 
     /**
-     * Susun konten Markdown untuk body GitHub Issue.
+     * Upload file lampiran ke GitHub repo (Contents API) dan kembalikan
+     * array of ['name' => ..., 'url' => ..., 'raw_url' => ..., 'is_image' => bool].
+     *
+     * GitHub Contents API: PUT /repos/{owner}/{repo}/contents/{path}
+     * File dikirim sebagai base64. URL raw.githubusercontent.com bisa diembed di Markdown.
      */
-    private function buildGitHubBody(SupportTicket $ticket, array $meta): string
+    private function uploadAttachmentsToGitHub(SupportTicket $ticket): array
+    {
+        $attachments = is_array($ticket->attachments) ? $ticket->attachments : [];
+        if (empty($attachments)) return [];
+
+        $results = [];
+
+        foreach ($attachments as $file) {
+            try {
+                $fileUrl  = $file['url']  ?? null;
+                $fileName = $file['name'] ?? basename($fileUrl ?? 'file');
+                $mimeType = $file['type'] ?? '';
+
+                if (!$fileUrl) continue;
+
+                // Ambil path relatif dari storage URL
+                $storagePath = ltrim(
+                    str_replace(rtrim(\Storage::disk('public')->url(''), '/'), '', rtrim($fileUrl, '/')),
+                    '/'
+                );
+
+                // Baca isi file dari disk lokal
+                if (!\Storage::disk('public')->exists($storagePath)) {
+                    Log::warning("GitHub upload: file tidak ditemukan di storage: {$storagePath}");
+                    // Fallback: coba fetch via HTTP jika file ada di server publik
+                    $fileContent = $this->fetchFileContent($fileUrl);
+                } else {
+                    $fileContent = \Storage::disk('public')->get($storagePath);
+                }
+
+                if (empty($fileContent)) continue;
+
+                $base64Content = base64_encode($fileContent);
+                $isImage       = str_starts_with($mimeType, 'image/') ||
+                                 preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $fileName);
+
+                // Path di repo: support-attachments/ticket-{id}/{filename}
+                $repoPath = 'support-attachments/ticket-' . $ticket->id . '/' .
+                            now()->format('YmdHis') . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $fileName);
+
+                $uploadResponse = Http::withHeaders([
+                    'Authorization'        => 'Bearer ' . $this->githubToken,
+                    'Accept'               => 'application/vnd.github+json',
+                    'X-GitHub-Api-Version' => '2022-11-28',
+                    'Content-Type'         => 'application/json',
+                ])
+                ->timeout(30)
+                ->put("https://api.github.com/repos/{$this->githubRepo}/contents/{$repoPath}", [
+                    'message' => "chore: upload attachment for support ticket #{$ticket->id}",
+                    'content' => $base64Content,
+                ]);
+
+                if ($uploadResponse->successful()) {
+                    $rawUrl = $uploadResponse->json('content.download_url')
+                           ?? "https://raw.githubusercontent.com/{$this->githubRepo}/main/{$repoPath}";
+
+                    $results[] = [
+                        'name'     => $fileName,
+                        'url'      => $rawUrl,
+                        'is_image' => (bool) $isImage,
+                    ];
+
+                    Log::info("GitHub attachment uploaded: {$rawUrl}");
+                } else {
+                    Log::warning('GitHub attachment upload gagal: ' . $uploadResponse->body(), [
+                        'file'      => $fileName,
+                        'ticket_id' => $ticket->id,
+                    ]);
+                }
+
+            } catch (\Exception $e) {
+                Log::warning('Exception upload attachment ke GitHub: ' . $e->getMessage(), [
+                    'file'      => $file['name'] ?? '?',
+                    'ticket_id' => $ticket->id,
+                ]);
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Fetch isi file via HTTP (fallback jika storage tidak bisa dibaca langsung).
+     */
+    private function fetchFileContent(string $url): string
+    {
+        try {
+            $response = Http::withoutVerifying()->timeout(10)->get($url);
+            return $response->successful() ? $response->body() : '';
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
+    /**
+     * Susun konten Markdown untuk body GitHub Issue.
+     *
+     * @param array $attachmentLinks  Output dari uploadAttachmentsToGitHub()
+     */
+    private function buildGitHubBody(SupportTicket $ticket, array $meta, array $attachmentLinks = []): string
     {
         $extra = is_array($ticket->extra_fields) ? $ticket->extra_fields : [];
 
@@ -224,6 +330,24 @@ class VexalynService
 
         $lines[] = '';
         $lines[] = '---';
+
+        // Section lampiran
+        if (!empty($attachmentLinks)) {
+            $lines[] = '## Lampiran';
+            foreach ($attachmentLinks as $att) {
+                if ($att['is_image']) {
+                    // Embed gambar langsung di Markdown
+                    $lines[] = '**' . $att['name'] . '**';
+                    $lines[] = '![](' . $att['url'] . ')';
+                } else {
+                    // Link download untuk non-gambar
+                    $lines[] = '📎 [' . $att['name'] . '](' . $att['url'] . ')';
+                }
+                $lines[] = '';
+            }
+            $lines[] = '---';
+        }
+
         $lines[] = '*Issue ini dibuat otomatis dari Pusat Bantuan ICB CT Absensi Guru.*';
 
         return implode("\n", $lines);
