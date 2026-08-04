@@ -60,7 +60,7 @@ class LeaveController extends Controller
             'info',
             'Pengajuan ' . ucfirst($validated['type']) . ' Berhasil Dikirim',
             'Pengajuan ' . $validated['type'] . ' Anda dari tanggal ' . Carbon::parse($validated['start_date'])->format('d M Y') . ' s/d ' . Carbon::parse($validated['end_date'])->format('d M Y') . ' telah dikirim dan menunggu persetujuan admin.',
-            route('teacher.leave.show', $leaveRequest),
+            route('teacher.leave.show', ['leaveRequest' => $leaveRequest->id]),
             'file-text',
             'bg-blue-100 text-blue-600'
         );

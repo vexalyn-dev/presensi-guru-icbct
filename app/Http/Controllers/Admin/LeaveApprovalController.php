@@ -38,7 +38,7 @@ class LeaveApprovalController extends Controller
             'success',
             'Pengajuan ' . ucfirst($leaveRequest->type) . ' Disetujui',
             'Pengajuan ' . $leaveRequest->type . ' Anda dari tanggal ' . optional($leaveRequest->start_date)->format('d M Y') . ' s/d ' . optional($leaveRequest->end_date)->format('d M Y') . ' telah disetujui.',
-            route('teacher.leave.show', $leaveRequest),
+            route('teacher.leave.show', ['leaveRequest' => $leaveRequest->id]),
             'check-circle',
             'bg-green-100 text-green-600'
         );
@@ -60,7 +60,7 @@ class LeaveApprovalController extends Controller
             'error',
             'Pengajuan ' . ucfirst($leaveRequest->type) . ' Ditolak',
             'Pengajuan ' . $leaveRequest->type . ' Anda ditolak. Alasan: ' . (request('admin_notes') ?? '-'),
-            route('teacher.leave.show', $leaveRequest),
+            route('teacher.leave.show', ['leaveRequest' => $leaveRequest->id]),
             'x-circle',
             'bg-red-100 text-red-600'
         );

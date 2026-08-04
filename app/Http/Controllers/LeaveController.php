@@ -120,7 +120,7 @@ class LeaveController extends Controller
         }
 
         if (!$isAdmin) {
-            return redirect()->route('teacher.leave.show', $leave);
+            return redirect()->route('teacher.leave.show', ['leaveRequest' => $leave->id]);
         }
 
         $leave->load(['user', 'approvedBy']);
@@ -146,7 +146,7 @@ class LeaveController extends Controller
             'success',
             'Pengajuan ' . ucfirst($leave->type) . ' Disetujui',
             'Pengajuan ' . $leave->type . ' Anda dari tanggal ' . $leave->start_date->format('d M Y') . ' s/d ' . $leave->end_date->format('d M Y') . ' telah disetujui oleh admin.',
-            route('teacher.leave.show', $leave),
+            route('teacher.leave.show', ['leaveRequest' => $leave->id]),
             'check-circle',
             'bg-green-100 text-green-600'
         );
@@ -169,7 +169,7 @@ class LeaveController extends Controller
             'error',
             'Pengajuan ' . ucfirst($leave->type) . ' Ditolak',
             'Pengajuan ' . $leave->type . ' Anda dari tanggal ' . $leave->start_date->format('d M Y') . ' s/d ' . $leave->end_date->format('d M Y') . ' ditolak. Alasan: ' . (request('admin_notes') ?? '-'),
-            route('teacher.leave.show', $leave),
+            route('teacher.leave.show', ['leaveRequest' => $leave->id]),
             'x-circle',
             'bg-red-100 text-red-600'
         );
