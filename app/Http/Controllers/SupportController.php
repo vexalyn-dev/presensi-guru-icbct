@@ -21,6 +21,28 @@ class SupportController extends Controller
         return $this->vexalyn;
     }
 
+    /**
+     * Resolve route prefix berdasarkan role user yang sedang login.
+     * Admin/operator → 'admin', guru_piket → 'piket', guru → 'teacher'
+     */
+    private function routePrefix(): string
+    {
+        $user = auth()->user();
+        if (!$user) return 'teacher';
+
+        return match (true) {
+            $user->canAccessAdmin() => 'admin',
+            $user->isGuruPiket()    => 'piket',
+            default                 => 'teacher',
+        };
+    }
+
+    /** Shortcut: route dengan prefix role yang tepat */
+    private function supportRoute(string $name, mixed $params = []): string
+    {
+        return route($this->routePrefix() . '.support.' . $name, $params);
+    }
+
     /** Halaman utama Pusat Bantuan */
     public function index(Request $request)
     {
@@ -151,7 +173,7 @@ class SupportController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('SupportTicket create failed: ' . $e->getMessage());
-            return redirect()->route('teacher.support')
+            return redirect()->to($this->supportRoute('index'))
                 ->with('warning', '⚠️ Laporan gagal disimpan. Hubungi admin untuk menjalankan migrasi database.');
         }
 
@@ -165,14 +187,14 @@ class SupportController extends Controller
                 'vexalyn_response' => json_encode($result['data']),
             ]);
 
-            return redirect()->route('support.history')
+            return redirect()->to($this->supportRoute('history'))
                 ->with('success', '✅ Laporan berhasil dikirim! Nomor tiket: ' . ($result['ticket_id'] ?? $ticket->id));
         }
 
         // Gagal kirim ke Vexalyn — tetap simpan lokal
         $ticket->update(['vexalyn_response' => json_encode($result)]);
 
-        return redirect()->route('support.history')
+        return redirect()->to($this->supportRoute('history'))
             ->with('warning', '⚠️ Laporan tersimpan namun gagal dikirim ke server. Tim kami akan segera menindaklanjuti.');
     }
 

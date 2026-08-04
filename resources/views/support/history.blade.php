@@ -1,6 +1,9 @@
 @extends(activeLayout())
 @section('page-title', 'Riwayat Laporan')
-@php $rp = auth()->user()->isAdmin() ? 'admin.support' : 'teacher.support'; @endphp
+@php
+    $user = auth()->user();
+    $rp = $user->canAccessAdmin() ? 'admin.support' : ($user->isGuruPiket() ? 'piket.support' : 'teacher.support');
+@endphp
 @section('content')
 <div class="space-y-6 fade-in">
 
