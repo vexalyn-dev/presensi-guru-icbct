@@ -328,8 +328,8 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     Route::get('/leave-approval', [LeaveController::class, 'index'])->name('leave-approval');
     Route::get('/leave-approval/{leave}', [LeaveController::class, 'show'])->name('leave-approval.show');
     Route::get('/leave-approval/api/latest', [LeaveController::class, 'latest'])->name('leave-approval.api.latest');
-    Route::post('/leave-approval/{leave}/approve', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'approve'])->name('leave-approval.approve');
-    Route::post('/leave-approval/{leave}/reject', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'reject'])->name('leave-approval.reject');
+    Route::post('/leave-approval/{leaveRequest}/approve', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'approve'])->name('leave-approval.approve');
+    Route::post('/leave-approval/{leaveRequest}/reject', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'reject'])->name('leave-approval.reject');
 
     // Pengaturan (read-only view)
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings');
