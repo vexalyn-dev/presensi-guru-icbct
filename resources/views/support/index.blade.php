@@ -748,13 +748,16 @@ function showSupportOverlay(state, msg, redirectUrl) {
         dots.style.display  = 'none';
         iconS.style.display = 'flex';
         lbl.textContent = 'Laporan Terkirim!';
-        sub.textContent = msg || 'Mengalihkan ke riwayat...';
+        sub.textContent = 'Tunggu sebentar...';
         if (window.lucide) lucide.createIcons();
-        // Setelah 1.5 detik tutup overlay, tampilkan modal terima kasih
+        // Setelah 1 detik: sembunyikan overlay, langsung tampilkan modal thanks
         setTimeout(function() {
-            hideSupportOverlay();
-            showThanksModal(_overlayRedirectUrl);
-        }, 1500);
+            ov.classList.remove('sov-show');
+            // Tunggu transition selesai baru tampilkan modal
+            setTimeout(function() {
+                showThanksModal(_overlayRedirectUrl);
+            }, 280);
+        }, 1000);
     } else if (state === 'error') {
         ring.style.display  = 'none';
         dots.style.display  = 'none';
@@ -807,9 +810,10 @@ function closeThanksModal(redirectUrl) {
     box.style.opacity   = '0';
     setTimeout(function() {
         document.getElementById('thanks-modal').classList.add('hidden');
-        var url = redirectUrl || _overlayRedirectUrl;
-        if (url) window.location.href = url;
-        else     window.location.reload();
+        // Prioritas: redirectUrl argumen → _overlayRedirectUrl global → history.go(-1)
+        var dest = redirectUrl || _overlayRedirectUrl || null;
+        if (dest) window.location.href = dest;
+        // Kalau tidak ada redirect URL sama sekali, biarkan user tetap di halaman
     }, 280);
 }
 // ─────────────────────────────────────────────────────────────

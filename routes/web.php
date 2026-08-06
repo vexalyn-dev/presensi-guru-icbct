@@ -52,6 +52,11 @@ Route::get('/link-storage', function () {
     return 'Symlink storage berhasil dibuat!';
 });
 
+// GitHub Webhook — menerima event dari GitHub (no auth, verifikasi via HMAC signature)
+Route::post('/webhooks/github', [\App\Http\Controllers\GitHubWebhookController::class, 'handle'])
+    ->name('webhooks.github')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
 // Landing page
 Route::get('/', function () {
     if (Auth::check()) {
