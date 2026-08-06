@@ -5,10 +5,10 @@
     $rp = $user->canAccessAdmin() ? 'admin.support' : ($user->isGuruPiket() ? 'piket.support' : 'teacher.support');
 
     $typeLabels = [
-        'bug'         => ['label' => 'Bug',         'icon' => 'bug',          'bg' => 'bg-red-100 dark:bg-red-900/30',    'text' => 'text-red-600 dark:text-red-400'],
-        'feature'     => ['label' => 'Fitur',        'icon' => 'lightbulb',    'bg' => 'bg-amber-100 dark:bg-amber-900/30','text' => 'text-amber-600 dark:text-amber-400'],
-        'maintenance' => ['label' => 'Maintenance',  'icon' => 'wrench',        'bg' => 'bg-blue-100 dark:bg-blue-900/30',  'text' => 'text-blue-600 dark:text-blue-400'],
-        'question'    => ['label' => 'Pertanyaan',   'icon' => 'help-circle',   'bg' => 'bg-purple-100 dark:bg-purple-900/30','text' => 'text-purple-600 dark:text-purple-400'],
+        'bug'         => ['label' => 'Laporkan Bug',    'icon' => 'bug',          'bg' => 'bg-red-100 dark:bg-red-900/30',    'text' => 'text-red-600 dark:text-red-400'],
+        'feature'     => ['label' => 'Request Fitur',   'icon' => 'lightbulb',    'bg' => 'bg-amber-100 dark:bg-amber-900/30','text' => 'text-amber-600 dark:text-amber-400'],
+        'maintenance' => ['label' => 'Maintenance',     'icon' => 'wrench',        'bg' => 'bg-blue-100 dark:bg-blue-900/30',  'text' => 'text-blue-600 dark:text-blue-400'],
+        'question'    => ['label' => 'Pertanyaan',      'icon' => 'help-circle',   'bg' => 'bg-purple-100 dark:bg-purple-900/30','text' => 'text-purple-600 dark:text-purple-400'],
     ];
     $statusColors = [
         'new'         => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
@@ -169,19 +169,35 @@
                          @click="selectMode ? toggleItem({{ $ticket->id }}) : (window.location.href = '{{ route($rp . '.show', $ticket) }}')"
                          :class="selectMode ? 'cursor-pointer' : 'cursor-pointer'">
 
-                        {{-- Icon tipe + label --}}
-                        <div class="flex flex-col items-center gap-1 flex-shrink-0">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center {{ $tCfg['bg'] }}">
-                                <i data-lucide="{{ $tCfg['icon'] }}" class="w-5 h-5 {{ $tCfg['text'] }}"></i>
-                            </div>
-                            <span class="text-[9px] font-bold {{ $tCfg['text'] }} uppercase tracking-wide leading-none">{{ $tCfg['label'] }}</span>
+                        {{-- Icon tipe --}}
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 {{ $tCfg['bg'] }}">
+                            <i data-lucide="{{ $tCfg['icon'] }}" class="w-5 h-5 {{ $tCfg['text'] }}"></i>
                         </div>
 
                         {{-- Content --}}
                         <div class="flex-1 min-w-0">
+                            {{-- Baris 1: label tipe + badge role --}}
+                            @php
+                                $roleMap = [
+                                    'admin'      => ['label' => 'Admin',      'cls' => 'bg-navy-100 text-navy-700 dark:bg-navy-800/40 dark:text-navy-300'],
+                                    'operator'   => ['label' => 'Operator',   'cls' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'],
+                                    'guru'       => ['label' => 'Guru',        'cls' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'],
+                                    'guru_piket' => ['label' => 'Guru Piket', 'cls' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'],
+                                ];
+                                $role    = $ticket->user?->role ?? 'guru';
+                                $roleCfg = $roleMap[$role] ?? ['label' => ucfirst($role), 'cls' => 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400'];
+                            @endphp
+                            <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
+                                <span class="text-[10px] font-bold {{ $tCfg['text'] }} leading-none">{{ $tCfg['label'] }}</span>
+                                <span class="text-[9px] font-semibold px-1.5 py-0.5 rounded-md {{ $roleCfg['cls'] }}">{{ $roleCfg['label'] }}</span>
+                            </div>
+
+                            {{-- Baris 2: judul --}}
                             <p class="text-sm font-semibold text-navy-800 dark:text-white truncate mb-1 group-hover:text-navy-600 dark:group-hover:text-gold-400 transition-colors">
                                 {{ $ticket->title }}
                             </p>
+
+                            {{-- Baris 3: status, prioritas, waktu --}}
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $statusColors[$ticket->status] ?? '' }}">
                                     {{ $statusLabels[$ticket->status]['label'] ?? ucfirst($ticket->status) }}
