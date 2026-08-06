@@ -115,14 +115,17 @@
             </div>
             @endif
 
-            {{-- Vexalyn status jika dapat response --}}
-            @if($vexalynData)
-            <div class="card p-5 border-2 border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
-                <div class="flex items-center gap-2 mb-3">
-                    <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
-                    <p class="text-xs font-bold text-green-800 dark:text-green-400">Terdaftar di Vexalyn</p>
+            {{-- GitHub Issue link jika ada --}}
+            @if($ticket->github_issue_url)
+            <div class="card p-5 border-2 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10">
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="github" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                    <p class="text-xs font-bold text-blue-800 dark:text-blue-400">Terdaftar di GitHub Issues</p>
                 </div>
-                <p class="text-xs text-green-700 dark:text-green-400">Tiket Anda sudah masuk ke Vexalyn Dev Center dan sedang diproses.</p>
+                <a href="{{ $ticket->github_issue_url }}" target="_blank"
+                   class="text-xs text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:text-blue-800 break-all">
+                    {{ $ticket->github_issue_url }}
+                </a>
             </div>
             @endif
         </div>
