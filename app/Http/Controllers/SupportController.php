@@ -187,15 +187,34 @@ class SupportController extends Controller
                 'vexalyn_response' => json_encode($result['data']),
             ]);
 
-            return redirect()->to($this->supportRoute('history'))
-                ->with('success', '✅ Laporan berhasil dikirim! Nomor tiket: ' . ($result['ticket_id'] ?? $ticket->id));
+            $successMsg = '✅ Laporan berhasil dikirim! Nomor tiket: ' . ($result['ticket_id'] ?? '#' . $ticket->id);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success'    => true,
+                    'message'    => $successMsg,
+                    'ticket_id'  => $result['ticket_id'] ?? $ticket->id,
+                    'redirect'   => $this->supportRoute('history'),
+                ]);
+            }
+
+            return redirect()->to($this->supportRoute('history'))->with('success', $successMsg);
         }
 
         // Gagal kirim ke Vexalyn — tetap simpan lokal
         $ticket->update(['vexalyn_response' => json_encode($result)]);
 
-        return redirect()->to($this->supportRoute('history'))
-            ->with('warning', '⚠️ Laporan tersimpan namun gagal dikirim ke server. Tim kami akan segera menindaklanjuti.');
+        $warningMsg = '⚠️ Laporan tersimpan namun gagal dikirim ke server. Tim kami akan segera menindaklanjuti.';
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success'  => true, // tetap sukses karena data tersimpan
+                'message'  => $warningMsg,
+                'redirect' => $this->supportRoute('history'),
+            ]);
+        }
+
+        return redirect()->to($this->supportRoute('history'))->with('warning', $warningMsg);
     }
 
     /** Riwayat tiket */

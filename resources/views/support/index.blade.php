@@ -502,7 +502,49 @@ function setType(t) {
 
 function handleSubmit() {
     if (!SUPPORT_ENABLED) { openDevModal(); return; }
-    document.getElementById('support-form').submit();
+
+    var form = document.getElementById('support-form');
+
+    // Validasi client-side cepat sebelum submit
+    var title = document.getElementById('title-input').value.trim();
+    var desc  = document.getElementById('desc-input').value.trim();
+    var prio  = document.getElementById('priority-input').value;
+    if (!title || title.length < 5) { document.getElementById('title-input').focus(); return; }
+    if (!desc  || desc.length  < 10){ document.getElementById('desc-input').focus();  return; }
+    if (!prio)                       { return; }
+
+    // Tampilkan overlay loading
+    showSupportOverlay('loading');
+
+    // Submit form via AJAX supaya bisa tangkap redirect
+    var formData = new FormData(form);
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        redirect: 'follow'
+    })
+    .then(function(res) {
+        var ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+            return res.json().then(function(data) {
+                if (data.disabled) {
+                    hideSupportOverlay();
+                    openDevModal();
+                } else if (data.success) {
+                    showSupportOverlay('success', data.message || 'Laporan berhasil dikirim!', data.redirect || null);
+                } else {
+                    showSupportOverlay('error', data.message || 'Gagal mengirim laporan.');
+                }
+            });
+        }
+        // Fallback: redirect biasa (Laravel redirect response)
+        showSupportOverlay('success', 'Laporan berhasil dikirim!', res.url);
+    })
+    .catch(function() {
+        hideSupportOverlay();
+        form.submit();
+    });
 }
 
 function openDevModal() {
@@ -733,7 +775,60 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.lucide) lucide.createIcons();
 });
 
-// File upload
+// ── SUPPORT SUBMIT OVERLAY ──────────────────────────────────
+var _overlayRedirectUrl = null;
+
+function showSupportOverlay(state, msg, redirectUrl) {
+    var ov    = document.getElementById('support-ov');
+    var ring  = document.getElementById('sov-ring');
+    var dots  = document.getElementById('sov-dots');
+    var iconS = document.getElementById('sov-icon-success');
+    var iconE = document.getElementById('sov-icon-error');
+    var lbl   = document.getElementById('sov-label');
+    var sub   = document.getElementById('sov-sublabel');
+
+    // Reset
+    ring.style.display  = '';
+    dots.style.display  = '';
+    iconS.style.display = 'none';
+    iconE.style.display = 'none';
+
+    if (state === 'loading') {
+        lbl.textContent = 'Mengirim laporan...';
+        sub.textContent = 'Mohon tunggu sebentar';
+    } else if (state === 'success') {
+        _overlayRedirectUrl = redirectUrl || null;
+        ring.style.display  = 'none';
+        dots.style.display  = 'none';
+        iconS.style.display = 'flex';
+        lbl.textContent = 'Laporan Terkirim!';
+        sub.textContent = msg || 'Mengalihkan ke riwayat...';
+        if (window.lucide) lucide.createIcons();
+        // Auto-redirect setelah 2 detik
+        setTimeout(function() {
+            if (_overlayRedirectUrl) {
+                window.location.href = _overlayRedirectUrl;
+            } else {
+                window.location.reload();
+            }
+        }, 2000);
+    } else if (state === 'error') {
+        ring.style.display  = 'none';
+        dots.style.display  = 'none';
+        iconE.style.display = 'flex';
+        lbl.textContent = 'Gagal Terkirim';
+        sub.textContent = msg || 'Silakan coba lagi';
+        setTimeout(hideSupportOverlay, 2500);
+    }
+
+    ov.classList.add('sov-show');
+}
+
+function hideSupportOverlay() {
+    var ov = document.getElementById('support-ov');
+    ov.classList.remove('sov-show');
+}
+// ─────────────────────────────────────────────────────────────
 var selectedFiles = [];
 function handleFiles(files) {
     for (var i = 0; i < files.length; i++) {
@@ -765,5 +860,140 @@ function removeFile(i) { selectedFiles.splice(i, 1); renderFiles(); }
 .fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 .type-btn { cursor: pointer; }
+
+/* ── SUPPORT SUBMIT OVERLAY ─────────────────────── */
+#support-ov {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(10, 15, 30, 0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+#support-ov.sov-show { opacity: 1; pointer-events: all; }
+
+.sov-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 36px 40px 32px;
+    width: 240px;
+    text-align: center;
+    box-shadow: 0 24px 56px rgba(0,0,0,0.35);
+    position: relative;
+    overflow: hidden;
+}
+/* Dark mode card */
+.dark .sov-card { background: #1e293b; }
+
+.sov-ring-wrap {
+    position: relative;
+    width: 72px; height: 72px;
+    margin: 0 auto 20px;
+}
+.sov-ring-outer {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 4px solid #E2E8F0;
+    border-top-color: #0F172A;
+    animation: sovSpin 0.9s linear infinite;
+}
+.sov-ring-inner {
+    position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-bottom-color: #FACC15;
+    animation: sovSpinRev 0.7s linear infinite;
+}
+.sov-dots {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-bottom: 16px;
+}
+.sov-dots span {
+    width: 7px; height: 7px;
+    background: #0F172A; border-radius: 50%;
+}
+.dark .sov-dots span { background: #FACC15; }
+.sov-dots span:nth-child(1) { animation: sovBounce 0.6s ease-in-out infinite; }
+.sov-dots span:nth-child(2) { animation: sovBounce 0.6s ease-in-out 0.15s infinite; }
+.sov-dots span:nth-child(3) { animation: sovBounce 0.6s ease-in-out 0.30s infinite; }
+
+.sov-icon-success, .sov-icon-error {
+    align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    width: 72px; height: 72px;
+}
+.sov-label {
+    font-size: 0.95rem; font-weight: 700; color: #0F172A; margin-bottom: 4px;
+}
+.dark .sov-label { color: #f1f5f9; }
+.sov-sublabel {
+    font-size: 0.78rem; color: #94A3B8; font-weight: 400;
+}
+
+@keyframes sovSpin    { to { transform: rotate(360deg); } }
+@keyframes sovSpinRev { to { transform: rotate(-360deg); } }
+@keyframes sovBounce  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes sovCheckIn {
+    0%   { stroke-dashoffset: 60; opacity: 0; }
+    100% { stroke-dashoffset: 0;  opacity: 1; }
+}
+@keyframes sovCircleIn {
+    0%   { stroke-dashoffset: 180; }
+    100% { stroke-dashoffset: 0; }
+}
+@keyframes sovScaleIn {
+    0%  { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.15); }
+    100%{ transform: scale(1); opacity: 1; }
+}
+/* ─────────────────────────────────────────────────────── */
 </style>
+
+{{-- Support Submit Overlay --}}
+<div id="support-ov">
+    <div class="sov-card">
+        {{-- Spinner --}}
+        <div id="sov-ring" class="sov-ring-wrap">
+            <div class="sov-ring-outer"></div>
+            <div class="sov-ring-inner"></div>
+        </div>
+
+        {{-- Bouncing dots --}}
+        <div id="sov-dots" class="sov-dots">
+            <span></span><span></span><span></span>
+        </div>
+
+        {{-- Success icon --}}
+        <div id="sov-icon-success" class="sov-icon-success" style="display:none">
+            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="36" cy="36" r="32"
+                    stroke="#22C55E" stroke-width="4"
+                    fill="none"
+                    stroke-dasharray="180" stroke-dashoffset="180"
+                    style="animation: sovCircleIn 0.5s cubic-bezier(0.65,0,0.35,1) forwards"/>
+                <path d="M20 37l12 12 20-22"
+                    stroke="#22C55E" stroke-width="4.5"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    fill="none"
+                    stroke-dasharray="60" stroke-dashoffset="60"
+                    style="animation: sovCheckIn 0.4s ease 0.45s forwards"/>
+            </svg>
+        </div>
+
+        {{-- Error icon --}}
+        <div id="sov-icon-error" class="sov-icon-success" style="display:none">
+            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"
+                 style="animation: sovScaleIn 0.35s ease forwards">
+                <circle cx="36" cy="36" r="32" stroke="#EF4444" stroke-width="4" fill="none"/>
+                <path d="M24 24l24 24M48 24L24 48"
+                    stroke="#EF4444" stroke-width="4.5"
+                    stroke-linecap="round"/>
+            </svg>
+        </div>
+
+        <p class="sov-label" id="sov-label">Mengirim laporan...</p>
+        <p class="sov-sublabel" id="sov-sublabel">Mohon tunggu sebentar</p>
+    </div>
+</div>
+
 @endsection
