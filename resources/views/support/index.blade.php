@@ -1020,16 +1020,16 @@ function removeFile(i) { selectedFiles.splice(i, 1); renderFiles(); }
             <div class="h-1.5 w-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-400"></div>
 
             <div class="p-8 text-center">
-                {{-- Emoji / Icon --}}
+                {{-- Icon --}}
                 <div class="w-20 h-20 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/20 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm">
-                    <span class="text-4xl" role="img" aria-label="Thanks">🙏</span>
+                    <i data-lucide="heart-handshake" class="w-10 h-10 text-emerald-500 dark:text-emerald-400"></i>
                 </div>
 
                 <h3 class="text-xl font-extrabold text-navy-800 dark:text-white mb-2 tracking-tight">
                     Makasih udah laporan ya!
                 </h3>
                 <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-1">
-                    Laporan lo udah kita terima & langsung masuk ke sistem kita.
+                    Laporan kamu udah kita terima & langsung masuk ke sistem kita.
                 </p>
                 <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
                     Tim developer bakal segera ngecek dan nindaklanjutin. <span class="text-navy-800 dark:text-slate-200 font-semibold">Stay tuned! 🚀</span>
