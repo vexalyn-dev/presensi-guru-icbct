@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupportTicket;
+use App\Models\User;
 use App\Services\GitHubService;
+use App\Helpers\NotificationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -149,6 +151,9 @@ class SupportController extends Controller
             $ticket->update(['github_issue_url' => $result['issue_url']]);
         }
 
+        // Kirim notifikasi ke semua admin & guru_piket
+        $this->notifyAdmins($ticket);
+
         // Selalu sukses (data sudah tersimpan lokal, GitHub best-effort)
         $successMsg = '✅ Laporan berhasil dikirim! ID lokal: #' . $ticket->id
                     . ($result['issue_url'] ? ' · GitHub: ' . $result['issue_url'] : '');
@@ -162,6 +167,42 @@ class SupportController extends Controller
         }
 
         return redirect()->to($this->supportRoute('history'))->with('success', $successMsg);
+    }
+
+    /** Kirim notifikasi laporan baru ke semua admin & guru_piket */
+    private function notifyAdmins(SupportTicket $ticket): void
+    {
+        $typeMap = [
+            'bug'         => ['icon' => 'bug',          'color' => 'bg-red-100 text-red-600'],
+            'feature'     => ['icon' => 'lightbulb',    'color' => 'bg-amber-100 text-amber-600'],
+            'maintenance' => ['icon' => 'wrench',        'color' => 'bg-blue-100 text-blue-600'],
+            'question'    => ['icon' => 'help-circle',   'color' => 'bg-purple-100 text-purple-600'],
+        ];
+
+        $cfg      = $typeMap[$ticket->type] ?? $typeMap['bug'];
+        $reporter = $ticket->user?->name ?? 'Seseorang';
+        $typeText = SupportTicket::typeLabels()[$ticket->type]['label'] ?? ucfirst($ticket->type);
+
+        $title   = "Laporan Baru: {$typeText}";
+        $message = "{$reporter} baru aja kirim laporan \"{$ticket->title}\". Cek deh!";
+
+        $recipients = User::whereIn('role', ['admin', 'operator', 'guru_piket'])->get();
+
+        foreach ($recipients as $user) {
+            // Tentukan URL show tiket sesuai role penerima
+            $prefix = match (true) {
+                in_array($user->role, ['admin', 'operator']) => 'admin',
+                $user->role === 'guru_piket'                 => 'piket',
+                default                                      => 'admin',
+            };
+
+            try {
+                $url = route("{$prefix}.support.show", $ticket);
+                NotificationHelper::send($user, 'warning', $title, $message, $url, $cfg['icon'], $cfg['color']);
+            } catch (\Throwable $e) {
+                \Log::warning('notifyAdmins gagal untuk user #' . $user->id . ': ' . $e->getMessage());
+            }
+        }
     }
 
     /** Riwayat tiket */
@@ -208,7 +249,11 @@ class SupportController extends Controller
     /** Detail tiket */
     public function show(SupportTicket $ticket)
     {
-        abort_if($ticket->user_id !== auth()->id(), 403);
+        $user = auth()->user();
+        // Pemilik tiket selalu boleh, admin & piket juga boleh
+        if ((int) $ticket->user_id !== (int) $user->id && !$user->canAccessAdmin() && !$user->isGuruPiket()) {
+            abort(403);
+        }
 
         return view('support.show', [
             'ticket'         => $ticket,

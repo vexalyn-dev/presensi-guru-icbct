@@ -750,14 +750,11 @@ function showSupportOverlay(state, msg, redirectUrl) {
         lbl.textContent = 'Laporan Terkirim!';
         sub.textContent = msg || 'Mengalihkan ke riwayat...';
         if (window.lucide) lucide.createIcons();
-        // Auto-redirect setelah 2 detik
+        // Setelah 1.5 detik tutup overlay, tampilkan modal terima kasih
         setTimeout(function() {
-            if (_overlayRedirectUrl) {
-                window.location.href = _overlayRedirectUrl;
-            } else {
-                window.location.reload();
-            }
-        }, 2000);
+            hideSupportOverlay();
+            showThanksModal(_overlayRedirectUrl);
+        }, 1500);
     } else if (state === 'error') {
         ring.style.display  = 'none';
         dots.style.display  = 'none';
@@ -773,6 +770,47 @@ function showSupportOverlay(state, msg, redirectUrl) {
 function hideSupportOverlay() {
     var ov = document.getElementById('support-ov');
     ov.classList.remove('sov-show');
+}
+
+function showThanksModal(redirectUrl) {
+    var modal = document.getElementById('thanks-modal');
+    var box   = document.getElementById('thanks-box');
+    var bar   = document.getElementById('thanks-progress');
+    modal.classList.remove('hidden');
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            box.style.transform = 'translateY(0) scale(1)';
+            box.style.opacity   = '1';
+            // Mulai animasi progress bar mengecil ke 0 dalam 4 detik
+            if (bar) {
+                bar.style.transition = 'none';
+                bar.style.width = '100%';
+                requestAnimationFrame(function() {
+                    bar.style.transition = 'width 4s linear';
+                    bar.style.width = '0%';
+                });
+            }
+            if (window.lucide) lucide.createIcons();
+        });
+    });
+    _thanksRedirectTimer = setTimeout(function() {
+        closeThanksModal(redirectUrl);
+    }, 4000);
+}
+
+var _thanksRedirectTimer = null;
+
+function closeThanksModal(redirectUrl) {
+    clearTimeout(_thanksRedirectTimer);
+    var box = document.getElementById('thanks-box');
+    box.style.transform = 'translateY(20px) scale(0.96)';
+    box.style.opacity   = '0';
+    setTimeout(function() {
+        document.getElementById('thanks-modal').classList.add('hidden');
+        var url = redirectUrl || _overlayRedirectUrl;
+        if (url) window.location.href = url;
+        else     window.location.reload();
+    }, 280);
 }
 // ─────────────────────────────────────────────────────────────
 var selectedFiles = [];
@@ -939,6 +977,46 @@ function removeFile(i) { selectedFiles.splice(i, 1); renderFiles(); }
 
         <p class="sov-label" id="sov-label">Mengirim laporan...</p>
         <p class="sov-sublabel" id="sov-sublabel">Mohon tunggu sebentar</p>
+    </div>
+</div>
+
+{{-- Modal Terima Kasih --}}
+<div id="thanks-modal" class="fixed inset-0 z-[9998] hidden" style="background:rgba(10,15,30,0.55);backdrop-filter:blur(6px);">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div id="thanks-box"
+             class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-700/60 transition-all duration-300"
+             style="transform:translateY(24px) scale(0.96);opacity:0;">
+
+            {{-- Top accent bar --}}
+            <div class="h-1.5 w-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-400"></div>
+
+            <div class="p-8 text-center">
+                {{-- Emoji / Icon --}}
+                <div class="w-20 h-20 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/20 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm">
+                    <span class="text-4xl" role="img" aria-label="Thanks">🙏</span>
+                </div>
+
+                <h3 class="text-xl font-extrabold text-navy-800 dark:text-white mb-2 tracking-tight">
+                    Makasih udah laporan ya!
+                </h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-1">
+                    Laporan lo udah kita terima & langsung masuk ke sistem kita.
+                </p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+                    Tim developer bakal segera ngecek dan nindaklanjutin. <span class="text-navy-800 dark:text-slate-200 font-semibold">Stay tuned! 🚀</span>
+                </p>
+
+                {{-- Progress bar auto-close --}}
+                <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1 mb-5 overflow-hidden">
+                    <div id="thanks-progress" class="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full" style="width:100%;transition:width 4s linear;"></div>
+                </div>
+
+                <button onclick="closeThanksModal()"
+                        class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-lg shadow-navy-800/20 dark:shadow-gold-400/20">
+                    Siap, cek riwayat laporan →
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
