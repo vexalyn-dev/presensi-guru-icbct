@@ -779,8 +779,13 @@ function showThanksModal(redirectUrl) {
     var modal = document.getElementById('thanks-modal');
     var box   = document.getElementById('thanks-box');
     var bar   = document.getElementById('thanks-progress');
-    modal.classList.remove('hidden');
-    requestAnimationFrame(function() {
+
+    // Pindahkan ke body agar terlepas dari stacking context sidebar/layout
+    if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(10,15,30,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;';
         requestAnimationFrame(function() {
             box.style.transform = 'translateY(0) scale(1)';
             box.style.opacity   = '1';
