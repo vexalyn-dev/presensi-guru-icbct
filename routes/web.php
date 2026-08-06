@@ -239,11 +239,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/class-attendance/manual/{id}', [ManualClassAttendanceController::class, 'destroy'])->name('class-attendance.manual.destroy');
 
     // Pusat Bantuan untuk Admin
-    Route::get('/support',            [SupportController::class, 'index'])  ->name('support');
-    Route::post('/support',           [SupportController::class, 'store'])  ->name('support.store');
-    Route::get('/support/history',    [SupportController::class, 'history'])->name('support.history');
-    Route::delete('/support/{ticket}',[SupportController::class, 'destroy'])->name('support.destroy');
-    Route::get('/support/{ticket}',   [SupportController::class, 'show'])   ->name('support.show');
+    Route::get('/support',            [SupportController::class, 'index'])       ->name('support');
+    Route::post('/support',           [SupportController::class, 'store'])       ->name('support.store');
+    Route::get('/support/history',    [SupportController::class, 'history'])     ->name('support.history');
+    Route::delete('/support/bulk',    [SupportController::class, 'bulkDestroy']) ->name('support.bulk-destroy');
+    Route::delete('/support/{ticket}',[SupportController::class, 'destroy'])     ->name('support.destroy');
+    Route::get('/support/{ticket}',   [SupportController::class, 'show'])        ->name('support.show');
 
     // Live Monitoring
     Route::get('/live-monitoring',         [\App\Http\Controllers\Admin\LiveMonitoringController::class, 'index'])  ->name('live-monitoring.index');
@@ -296,11 +297,12 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::delete('/leave/{leaveRequest}', [TeacherLeaveController::class, 'destroy'])->name('leave.destroy');
 
         // Pusat Bantuan (Support Center)
-        Route::get('/support',            [SupportController::class, 'index'])  ->name('support');
-        Route::post('/support',           [SupportController::class, 'store'])  ->name('support.store');
-        Route::get('/support/history',    [SupportController::class, 'history'])->name('support.history');
-        Route::delete('/support/{ticket}',[SupportController::class, 'destroy'])->name('support.destroy');
-        Route::get('/support/{ticket}',   [SupportController::class, 'show'])   ->name('support.show');
+        Route::get('/support',            [SupportController::class, 'index'])       ->name('support');
+        Route::post('/support',           [SupportController::class, 'store'])       ->name('support.store');
+        Route::get('/support/history',    [SupportController::class, 'history'])     ->name('support.history');
+        Route::delete('/support/bulk',    [SupportController::class, 'bulkDestroy']) ->name('support.bulk-destroy');
+        Route::delete('/support/{ticket}',[SupportController::class, 'destroy'])     ->name('support.destroy');
+        Route::get('/support/{ticket}',   [SupportController::class, 'show'])        ->name('support.show');
 });
 
 // ============================================================
@@ -343,11 +345,12 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     Route::put('/profile/email', [App\Http\Controllers\Teacher\ProfileController::class, 'updateEmail'])->name('profile.email');
 
     // Pusat Bantuan
-    Route::get('/support',            [SupportController::class, 'index'])  ->name('support');
-    Route::post('/support',           [SupportController::class, 'store'])  ->name('support.store');
-    Route::get('/support/history',    [SupportController::class, 'history'])->name('support.history');
-    Route::delete('/support/{ticket}',[SupportController::class, 'destroy'])->name('support.destroy');
-    Route::get('/support/{ticket}',   [SupportController::class, 'show'])   ->name('support.show');
+    Route::get('/support',            [SupportController::class, 'index'])       ->name('support');
+    Route::post('/support',           [SupportController::class, 'store'])       ->name('support.store');
+    Route::get('/support/history',    [SupportController::class, 'history'])     ->name('support.history');
+    Route::delete('/support/bulk',    [SupportController::class, 'bulkDestroy']) ->name('support.bulk-destroy');
+    Route::delete('/support/{ticket}',[SupportController::class, 'destroy'])     ->name('support.destroy');
+    Route::get('/support/{ticket}',   [SupportController::class, 'show'])        ->name('support.show');
 
     // Notifikasi
     Route::get('/notifications',               [App\Http\Controllers\Teacher\NotificationController::class, 'index'])       ->name('notifications');

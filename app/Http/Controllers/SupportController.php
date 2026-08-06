@@ -224,6 +224,38 @@ class SupportController extends Controller
         ]);
     }
 
+    /** Hapus banyak tiket sekaligus (bulk delete) */
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->to($this->supportRoute('history'))
+                ->with('warning', 'Pilih minimal 1 laporan untuk dihapus.');
+        }
+
+        $tickets = SupportTicket::whereIn('id', $ids)
+            ->where('user_id', auth()->id()) // hanya milik sendiri
+            ->get();
+
+        foreach ($tickets as $ticket) {
+            if (!empty($ticket->attachments)) {
+                foreach ($ticket->attachments as $file) {
+                    if (!empty($file['url'])) {
+                        $path = str_replace(Storage::disk('public')->url(''), '', $file['url']);
+                        if (Storage::disk('public')->exists($path)) {
+                            Storage::disk('public')->delete($path);
+                        }
+                    }
+                }
+            }
+            $ticket->delete();
+        }
+
+        $count = $tickets->count();
+        return redirect()->to($this->supportRoute('history'))
+            ->with('success', "✅ {$count} laporan berhasil dihapus.");
+    }
+
     /** Hapus tiket */
     public function destroy(SupportTicket $ticket)
     {
