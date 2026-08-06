@@ -804,21 +804,22 @@ function showThanksModal(redirectUrl) {
     }
 
     modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(10,15,30,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;';
-        requestAnimationFrame(function() {
-            box.style.transform = 'translateY(0) scale(1)';
-            box.style.opacity   = '1';
-            // Mulai animasi progress bar mengecil ke 0 dalam 4 detik
-            if (bar) {
-                bar.style.transition = 'none';
-                bar.style.width = '100%';
-                requestAnimationFrame(function() {
-                    bar.style.transition = 'width 4s linear';
-                    bar.style.width = '0%';
-                });
-            }
-            if (window.lucide) lucide.createIcons();
-        });
+
+    requestAnimationFrame(function() {
+        box.style.transform = 'translateY(0) scale(1)';
+        box.style.opacity   = '1';
+        // Mulai animasi progress bar mengecil ke 0 dalam 4 detik
+        if (bar) {
+            bar.style.transition = 'none';
+            bar.style.width = '100%';
+            requestAnimationFrame(function() {
+                bar.style.transition = 'width 4s linear';
+                bar.style.width = '0%';
+            });
+        }
+        if (window.lucide) lucide.createIcons();
     });
+
     _thanksRedirectTimer = setTimeout(function() {
         closeThanksModal(redirectUrl);
     }, 4000);
