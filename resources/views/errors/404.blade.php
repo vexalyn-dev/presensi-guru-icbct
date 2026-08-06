@@ -138,7 +138,6 @@
         <!-- Subtitle -->
         <p class="text-slate-500 text-base leading-relaxed mb-8 fade-up" style="animation-delay:.35s">
             Halaman yang kamu cari kayaknya udah pindah, dihapus, atau emang gak pernah ada.
-            <br>Tenang, ini bukan salah kamu kok! ✌️
         </p>
 
         <!-- Buttons -->

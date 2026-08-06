@@ -564,6 +564,7 @@ document.addEventListener('click', function(e) {
         var btn   = document.getElementById(btnId);
         if (btn && !btn.contains(e.target) && !menu.contains(e.target)) {
             menu.classList.add('hidden');
+            menu.style.pointerEvents = 'none';
             var chevronId = menu.id.replace('-menu', '-chevron');
             var ch = document.getElementById(chevronId);
             if (ch) ch.style.transform = 'rotate(0deg)';
@@ -733,7 +734,11 @@ function showSupportOverlay(state, msg, redirectUrl) {
     var lbl   = document.getElementById('sov-label');
     var sub   = document.getElementById('sov-sublabel');
 
-    // Reset
+    // Tampilkan dulu sebelum animasi
+    ov.style.display = 'flex';
+    requestAnimationFrame(function() {
+        ov.classList.add('sov-show');
+    });
     ring.style.display  = '';
     dots.style.display  = '';
     iconS.style.display = 'none';
@@ -773,6 +778,19 @@ function showSupportOverlay(state, msg, redirectUrl) {
 function hideSupportOverlay() {
     var ov = document.getElementById('support-ov');
     ov.classList.remove('sov-show');
+    // Benar-benar sembunyikan setelah transisi selesai
+    setTimeout(function() {
+        ov.style.display = 'none';
+    }, 280);
+}
+
+// Fix dropdown portal cleanup — hapus semua menu yang tertinggal di body
+function cleanupPortaledMenus() {
+    document.querySelectorAll('[id$="-menu"]').forEach(function(menu) {
+        if (menu.parentElement === document.body) {
+            menu.classList.add('hidden');
+        }
+    });
 }
 
 function showThanksModal(redirectUrl) {
@@ -860,11 +878,12 @@ function removeFile(i) { selectedFiles.splice(i, 1); renderFiles(); }
     background: rgba(10, 15, 30, 0.82);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none;
+    display: none;
+    align-items: center; justify-content: center;
+    opacity: 0;
     transition: opacity 0.25s ease;
 }
-#support-ov.sov-show { opacity: 1; pointer-events: all; }
+#support-ov.sov-show { display: flex; opacity: 1; }
 
 .sov-card {
     background: #fff;

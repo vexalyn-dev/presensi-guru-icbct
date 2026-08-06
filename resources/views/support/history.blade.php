@@ -38,7 +38,7 @@
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Riwayat Laporan</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Semua tiket yang pernah kamu kirimkan</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Semua laporan yang pernah kamu kirimkan</p>
             </div>
         </div>
 
