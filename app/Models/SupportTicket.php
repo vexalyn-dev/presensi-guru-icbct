@@ -10,14 +10,13 @@ class SupportTicket extends Model
     protected $fillable = [
         'user_id', 'ticket_id', 'type', 'title', 'description',
         'category', 'priority', 'status', 'metadata', 'attachments',
-        'extra_fields', 'vexalyn_sent_at', 'vexalyn_response',
+        'extra_fields', 'github_issue_url',
     ];
 
     protected $casts = [
-        'metadata'         => 'array',
-        'attachments'      => 'array',
-        'extra_fields'     => 'array',
-        'vexalyn_sent_at'  => 'datetime',
+        'metadata'    => 'array',
+        'attachments' => 'array',
+        'extra_fields'=> 'array',
     ];
 
     public function user(): BelongsTo

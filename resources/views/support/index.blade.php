@@ -16,7 +16,7 @@
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Pusat Bantuan</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Laporkan masalah atau kirim permintaan ke Vexalyn Dev Center</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Laporkan masalah atau kirim permintaan ke tim developer</p>
             </div>
         </div>
         <a href="{{ route($rp . '.history') }}"
@@ -423,33 +423,8 @@
     </div>
 </div>
 
-{{-- Modal Dalam Pengembangan --}}
-<div id="dev-modal" class="fixed inset-0 z-[9999] hidden" style="background:rgba(15,23,42,0.6);backdrop-filter:blur(8px);">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div id="dev-modal-box"
-             class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 transition-all duration-300"
-             style="transform:translateY(30px) scale(0.96);opacity:0;">
-            <div class="p-8 text-center">
-                <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5">
-                    <i data-lucide="construction" class="w-8 h-8 text-amber-600 dark:text-amber-400"></i>
-                </div>
-                <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">Fitur Dalam Pengembangan</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
-                    Pusat Bantuan sedang dalam proses integrasi dengan Vexalyn Dev Center dan akan segera hadir sepenuhnya.<br><br>
-                    <span class="font-semibold text-navy-800 dark:text-slate-300">Terima kasih atas kesabaran Anda! 🙏</span>
-                </p>
-                <button onclick="closeDevModal()"
-                        class="w-full py-3 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-lg">
-                    Oke, Mengerti
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
-var SUPPORT_ENABLED = {{ config('vexalyn.enabled') ? 'true' : 'false' }};
-
 var typeConfig = {
     bug:         { title: 'Laporkan Bug',          icon: 'bug' },
     feature:     { title: 'Request Fitur',          icon: 'lightbulb' },
@@ -501,8 +476,6 @@ function setType(t) {
 }
 
 function handleSubmit() {
-    if (!SUPPORT_ENABLED) { openDevModal(); return; }
-
     var form = document.getElementById('support-form');
 
     // Validasi client-side cepat sebelum submit
@@ -528,17 +501,13 @@ function handleSubmit() {
         var ct = res.headers.get('content-type') || '';
         if (ct.includes('application/json')) {
             return res.json().then(function(data) {
-                if (data.disabled) {
-                    hideSupportOverlay();
-                    openDevModal();
-                } else if (data.success) {
+                if (data.success) {
                     showSupportOverlay('success', data.message || 'Laporan berhasil dikirim!', data.redirect || null);
                 } else {
                     showSupportOverlay('error', data.message || 'Gagal mengirim laporan.');
                 }
             });
         }
-        // Fallback: redirect biasa (Laravel redirect response)
         showSupportOverlay('success', 'Laporan berhasil dikirim!', res.url);
     })
     .catch(function() {
@@ -547,31 +516,8 @@ function handleSubmit() {
     });
 }
 
-function openDevModal() {
-    var modal = document.getElementById('dev-modal');
-    var box   = document.getElementById('dev-modal-box');
-    modal.classList.remove('hidden');
-    requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
-            box.style.transform = 'translateY(0) scale(1)';
-            box.style.opacity   = '1';
-            if (window.lucide) lucide.createIcons();
-        });
-    });
-}
 
-function closeDevModal() {
-    var box = document.getElementById('dev-modal-box');
-    box.style.transform = 'translateY(30px) scale(0.96)';
-    box.style.opacity   = '0';
-    setTimeout(function() { document.getElementById('dev-modal').classList.add('hidden'); }, 300);
-}
-
-document.getElementById('dev-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeDevModal();
-});
-
-// Dropdown helpers
+// ── SUPPORT SUBMIT OVERLAY
 function toggleDropdown(menuId) {
     var menu    = document.getElementById(menuId);
     var isOpen  = !menu.classList.contains('hidden');
@@ -775,7 +721,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.lucide) lucide.createIcons();
 });
 
-// ── SUPPORT SUBMIT OVERLAY ──────────────────────────────────
+// ── SUPPORT SUBMIT OVERLAY
 var _overlayRedirectUrl = null;
 
 function showSupportOverlay(state, msg, redirectUrl) {
