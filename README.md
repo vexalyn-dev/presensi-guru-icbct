@@ -509,7 +509,8 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 ### Made with ❤️ by
 
-<img src="public/images/logo-dev-banner.png" height="32" alt="Vexalyn Dev">
+<img src="public/images/logo-dev-banner.png" height="32" alt="Vexalyn Dev" #gh-light-mode-only>
+<img src="public/images/logo-dev-banner.png" height="32" alt="Vexalyn Dev" style="filter:invert(1)" #gh-dark-mode-only>
 
 Full-Stack Developer
 
@@ -555,6 +556,6 @@ Full-Stack Developer
 
 **⭐ Star this repo if you find it helpful!**
 
-Made with ❤️ by <img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;"> • © 2026 ICB Cinta Teknika
+Made with ❤️ by <img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;" #gh-light-mode-only><img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;filter:invert(1)" #gh-dark-mode-only> • © 2026 ICB Cinta Teknika
 
 [⬆️ Back to Top](#-icb-ct---sistem-presensi-guru)
