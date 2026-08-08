@@ -5,7 +5,9 @@
 {{-- ════════════════════════════════════════════════════════ --}}
 {{--  BANNER SLIDER                                          --}}
 {{-- ════════════════════════════════════════════════════════ --}}
-<div class="relative -mx-6 -mt-6 overflow-hidden rounded-b-2xl sm:rounded-b-3xl mb-6" style="height:240px;" id="apk-slider">
+<div class="relative overflow-hidden rounded-2xl sm:rounded-3xl mb-6 shadow-xl shadow-navy-900/20"
+     style="height:210px;min-height:210px;"
+     id="apk-slider">
 
     {{-- Slide 1: Presensi Mudah --}}
     <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
@@ -80,31 +82,66 @@
         <div class="pointer-events-none absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
     </div>
 
-    {{-- Slide 4: Developer Info --}}
-    <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
-         style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 60%,#1E3A5C 100%);">
-        <div class="z-10 max-w-xs">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-400/15 text-gold-300 text-xs font-bold mb-3 border border-gold-400/30 backdrop-blur-sm">
-                <i data-lucide="code-2" class="w-3 h-3"></i> Developer
-            </span>
-            <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Dikembangkan Oleh<br><span class="text-gold-400">Vexalyn Dev</span></h2>
-            <p class="text-xs sm:text-sm text-white/60 leading-relaxed mb-3">Tim developer berpengalaman yang fokus membangun solusi digital untuk pendidikan.</p>
-            <a href="https://vexalyn.dev" target="_blank"
-               class="inline-flex items-center gap-2 px-4 py-2.5 bg-gold-400/15 hover:bg-gold-400/25 border border-gold-400/40 text-gold-200 rounded-xl text-xs sm:text-sm font-semibold transition-all hover:-translate-y-0.5">
-                <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Cek Profile Developer
-            </a>
+    {{-- Slide 4: Developer Info — dark purple premium --}}
+    <div class="apk-slide absolute inset-0 overflow-hidden"
+         style="background:linear-gradient(135deg,#0D0618 0%,#160D2E 45%,#1F1040 75%,#2A1455 100%);">
+
+        {{-- Glow blobs --}}
+        <div class="pointer-events-none absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl" style="background:rgba(139,92,246,0.12)"></div>
+        <div class="pointer-events-none absolute -bottom-16 -left-16 w-56 h-56 rounded-full blur-3xl" style="background:rgba(168,85,247,0.08)"></div>
+        <div class="pointer-events-none absolute top-1/2 right-1/4 w-32 h-32 rounded-full blur-2xl" style="background:rgba(196,132,252,0.07)"></div>
+
+        <div class="relative z-10 h-full flex items-center justify-between px-6 sm:px-12">
+
+            {{-- Kiri: teks --}}
+            <div class="max-w-[240px] sm:max-w-sm">
+                {{-- Badge --}}
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold mb-4 border backdrop-blur-sm"
+                      style="background:rgba(139,92,246,0.15);color:#C4B5FD;border-color:rgba(139,92,246,0.35);">
+                    <i data-lucide="code-2" class="w-3 h-3"></i> Developer
+                </span>
+
+                {{-- Logo + nama --}}
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
+                         style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.35);">
+                        <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
+                             class="w-7 h-7 object-contain"
+                             style="filter:brightness(0) saturate(100%) invert(60%) sepia(60%) saturate(500%) hue-rotate(230deg) brightness(110%);">
+                    </div>
+                    <div>
+                        <p class="text-base sm:text-lg font-extrabold leading-none" style="color:#E9D5FF;">Vexalyn Dev</p>
+                        <p class="text-[10px] mt-0.5" style="color:rgba(196,181,253,0.6);">vexalyndev.my.id</p>
+                    </div>
+                </div>
+
+                <p class="text-xs leading-relaxed mb-4" style="color:rgba(255,255,255,0.55);">
+                    Tim developer berpengalaman yang fokus membangun solusi digital untuk dunia pendidikan.
+                </p>
+
+                <a href="https://vexalyndev.my.id" target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 active:scale-95"
+                   style="background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(168,85,247,0.25));border:1px solid rgba(139,92,246,0.45);color:#DDD6FE;backdrop-filter:blur(8px);">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    Cek Profile Developer
+                </a>
+            </div>
+
+            {{-- Kanan: ilustrasi SVG --}}
+            <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+                <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-75">
+                    <rect x="40" y="50" width="100" height="80" rx="10" fill="#8B5CF6" fill-opacity=".12" stroke="#8B5CF6" stroke-width="2.2"/>
+                    <path d="M60 70 L72 80 L60 90" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M120 70 L108 80 L120 90" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M100 67 L80 93" stroke="#C4B5FD" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="90" cy="38" r="15" fill="#8B5CF6" fill-opacity=".18" stroke="#8B5CF6" stroke-width="2"/>
+                    <path d="M90 30v16m-5-10l5-6 5 6" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="40" cy="50" r="5" fill="#8B5CF6" fill-opacity=".3"/>
+                    <circle cx="140" cy="130" r="7" fill="#8B5CF6" fill-opacity=".2"/>
+                    <circle cx="148" cy="55" r="4" fill="#A78BFA" fill-opacity=".35"/>
+                </svg>
+            </div>
         </div>
-        <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-80">
-                <rect x="40" y="50" width="100" height="80" rx="8" fill="#FACC15" fill-opacity=".1" stroke="#FACC15" stroke-width="2.2"/>
-                <path d="M60 70 L70 80 L60 90" stroke="#FACC15" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M120 70 L110 80 L120 90" stroke="#FACC15" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M100 68 L80 92" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="90" cy="40" r="16" fill="#FACC15" fill-opacity=".15" stroke="#FACC15" stroke-width="2"/>
-                <path d="M90 32v16m-6-10l6-6 6 6" stroke="#FACC15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
-        <div class="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
     </div>
 
     {{-- Dots --}}
@@ -255,8 +292,11 @@
                 {{-- Footer --}}
                 <div class="flex items-center justify-center gap-2 mt-4 text-[10px] text-slate-400">
                     <span>Dikembangkan oleh</span>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-fuchsia-500/10 to-purple-500/10 border border-fuchsia-400/20 text-fuchsia-600 dark:text-fuchsia-400 font-bold tracking-tight">
-                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-bold tracking-tight"
+                          style="background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(168,85,247,0.08));border-color:rgba(139,92,246,0.25);color:#7C3AED;">
+                        <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
+                             class="w-3.5 h-3.5 object-contain"
+                             style="filter:brightness(0) saturate(100%) invert(30%) sepia(80%) saturate(600%) hue-rotate(240deg);">
                         Vexalyn Dev
                     </span>
                     <span>· v1.0.0</span>
