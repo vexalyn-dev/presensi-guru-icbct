@@ -289,7 +289,7 @@
                     <span class="text-[10px] text-slate-400">Dikembangkan oleh</span>
                     <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
                          class="dark:invert"
-                         style="height:14px;width:auto;max-width:none;transform:translateX(-8px);">
+                         style="height:14px;width:auto;max-width:none;transform:translateX(-4px);">
                 </div>
                 </div>
             </div>
