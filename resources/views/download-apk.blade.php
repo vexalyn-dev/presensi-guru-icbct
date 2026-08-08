@@ -5,110 +5,110 @@
 {{-- ════════════════════════════════════════════════════════ --}}
 {{--  BANNER SLIDER                                          --}}
 {{-- ════════════════════════════════════════════════════════ --}}
-<div class="relative -mx-6 -mt-6 overflow-hidden rounded-b-3xl" style="height:280px;" id="apk-slider">
+<div class="relative -mx-6 -mt-6 overflow-hidden rounded-b-2xl sm:rounded-b-3xl mb-6" style="height:240px;" id="apk-slider">
 
     {{-- Slide 1: Presensi Mudah --}}
-    <div class="apk-slide absolute inset-0 flex items-center justify-between px-10 sm:px-16"
-         style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 50%,#1a3a5c 100%);">
-        <div class="z-10 max-w-xs sm:max-w-md">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-400/15 text-sky-300 text-xs font-bold mb-3 border border-sky-400/30 backdrop-blur-sm">
+    <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
+         style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 60%,#1E3A5C 100%);">
+        <div class="z-10 max-w-xs">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-400/15 text-gold-300 text-xs font-bold mb-3 border border-gold-400/30 backdrop-blur-sm">
                 <i data-lucide="sparkles" class="w-3 h-3"></i> Aplikasi Resmi
             </span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-2">Presensi Guru<br><span class="text-sky-400">Lebih Mudah</span></h2>
-            <p class="text-sm text-white/60 leading-relaxed">Scan QR, validasi GPS, semua bisa dari HP kamu kapan aja.</p>
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Presensi Guru<br><span class="text-gold-400">Lebih Mudah</span></h2>
+            <p class="text-xs sm:text-sm text-white/60 leading-relaxed">Scan QR, validasi GPS, semua bisa dari HP kamu kapan aja.</p>
         </div>
-        <div class="hidden sm:flex items-center justify-center w-44 h-44 flex-shrink-0">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-85">
-                <rect x="50" y="20" width="80" height="140" rx="16" fill="#38BDF8" fill-opacity=".12" stroke="#38BDF8" stroke-width="2.5"/>
+        <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-80">
+                <rect x="50" y="20" width="80" height="140" rx="16" fill="#FACC15" fill-opacity=".1" stroke="#FACC15" stroke-width="2.5"/>
                 <rect x="62" y="36" width="56" height="88" rx="6" fill="#0F172A"/>
-                <circle cx="90" cy="142" r="6" fill="#38BDF8" fill-opacity=".7"/>
-                <rect x="74" y="28" width="32" height="4" rx="2" fill="#38BDF8" fill-opacity=".45"/>
-                <rect x="68" y="50" width="44" height="6" rx="3" fill="#38BDF8" fill-opacity=".3"/>
-                <rect x="68" y="62" width="30" height="4" rx="2" fill="white" fill-opacity=".2"/>
-                <rect x="68" y="72" width="38" height="4" rx="2" fill="white" fill-opacity=".15"/>
-                <circle cx="90" cy="95" r="16" fill="#38BDF8" fill-opacity=".18" stroke="#38BDF8" stroke-width="1.8"/>
-                <path d="M84 95l4 4 8-8" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="90" cy="142" r="6" fill="#FACC15" fill-opacity=".6"/>
+                <rect x="74" y="28" width="32" height="4" rx="2" fill="#FACC15" fill-opacity=".4"/>
+                <rect x="68" y="50" width="44" height="6" rx="3" fill="#FACC15" fill-opacity=".25"/>
+                <rect x="68" y="62" width="30" height="4" rx="2" fill="white" fill-opacity=".15"/>
+                <rect x="68" y="72" width="38" height="4" rx="2" fill="white" fill-opacity=".12"/>
+                <circle cx="90" cy="95" r="16" fill="#FACC15" fill-opacity=".15" stroke="#FACC15" stroke-width="1.8"/>
+                <path d="M84 95l4 4 8-8" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </div>
-        <div class="pointer-events-none absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-sky-400/8 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
     </div>
 
     {{-- Slide 2: GPS Validasi --}}
-    <div class="apk-slide absolute inset-0 flex items-center justify-between px-10 sm:px-16"
-         style="background:linear-gradient(135deg,#0A1F0E 0%,#0D3E1F 50%,#155D30 100%);">
-        <div class="z-10 max-w-xs sm:max-w-md">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-400/15 text-emerald-300 text-xs font-bold mb-3 border border-emerald-400/30 backdrop-blur-sm">
+    <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
+         style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 60%,#1E3A5C 100%);">
+        <div class="z-10 max-w-xs">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-400/15 text-gold-300 text-xs font-bold mb-3 border border-gold-400/30 backdrop-blur-sm">
                 <i data-lucide="map-pin" class="w-3 h-3"></i> GPS Validasi
             </span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-2">Absensi Hanya<br><span class="text-emerald-400">Di Area Sekolah</span></h2>
-            <p class="text-sm text-white/60 leading-relaxed">Sistem otomatis cek lokasi kamu sebelum absensi diproses.</p>
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Absensi Hanya<br><span class="text-gold-400">Di Area Sekolah</span></h2>
+            <p class="text-xs sm:text-sm text-white/60 leading-relaxed">Sistem otomatis cek lokasi kamu sebelum absensi diproses.</p>
         </div>
-        <div class="hidden sm:flex items-center justify-center w-44 h-44 flex-shrink-0">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-85">
-                <circle cx="90" cy="75" r="42" fill="#10B981" fill-opacity=".08" stroke="#10B981" stroke-width="2"/>
-                <circle cx="90" cy="75" r="26" fill="#10B981" fill-opacity=".15" stroke="#10B981" stroke-width="2"/>
-                <circle cx="90" cy="75" r="11" fill="#10B981" fill-opacity=".45"/>
-                <path d="M90 75v50" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 4"/>
-                <ellipse cx="90" cy="128" rx="20" ry="7" fill="#10B981" fill-opacity=".22"/>
-                <path d="M58 132 Q68 110 90 125 Q112 110 122 132" stroke="#10B981" stroke-width="1.6" fill="none" opacity=".45"/>
+        <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-80">
+                <circle cx="90" cy="75" r="42" fill="#FACC15" fill-opacity=".08" stroke="#FACC15" stroke-width="2"/>
+                <circle cx="90" cy="75" r="26" fill="#FACC15" fill-opacity=".12" stroke="#FACC15" stroke-width="2"/>
+                <circle cx="90" cy="75" r="11" fill="#FACC15" fill-opacity=".35"/>
+                <path d="M90 75v50" stroke="#FACC15" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 4"/>
+                <ellipse cx="90" cy="128" rx="20" ry="7" fill="#FACC15" fill-opacity=".18"/>
+                <path d="M58 132 Q68 110 90 125 Q112 110 122 132" stroke="#FACC15" stroke-width="1.6" fill="none" opacity=".35"/>
             </svg>
         </div>
-        <div class="pointer-events-none absolute -top-20 -left-20 w-72 h-72 rounded-full bg-emerald-400/8 blur-3xl"></div>
+        <div class="pointer-events-none absolute -top-20 -left-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
     </div>
 
     {{-- Slide 3: Notifikasi Real-time --}}
-    <div class="apk-slide absolute inset-0 flex items-center justify-between px-10 sm:px-16"
-         style="background:linear-gradient(135deg,#1A0A28 0%,#2D1842 50%,#44265D 100%);">
-        <div class="z-10 max-w-xs sm:max-w-md">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-400/15 text-purple-300 text-xs font-bold mb-3 border border-purple-400/30 backdrop-blur-sm">
+    <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
+         style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 60%,#1E3A5C 100%);">
+        <div class="z-10 max-w-xs">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-400/15 text-gold-300 text-xs font-bold mb-3 border border-gold-400/30 backdrop-blur-sm">
                 <i data-lucide="bell" class="w-3 h-3"></i> Real-time
             </span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-2">Notifikasi<br><span class="text-purple-400">Langsung Masuk</span></h2>
-            <p class="text-sm text-white/60 leading-relaxed">Jadwal, pengumuman & izin semua langsung muncul di HP kamu.</p>
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Notifikasi<br><span class="text-gold-400">Langsung Masuk</span></h2>
+            <p class="text-xs sm:text-sm text-white/60 leading-relaxed">Jadwal, pengumuman & izin semua langsung muncul di HP kamu.</p>
         </div>
-        <div class="hidden sm:flex items-center justify-center w-44 h-44 flex-shrink-0">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-85">
-                <path d="M90 30 C65 30 48 50 48 72 L48 110 L36 122 L144 122 L132 110 L132 72 C132 50 115 30 90 30Z" fill="#A855F7" fill-opacity=".15" stroke="#A855F7" stroke-width="2.2"/>
-                <path d="M82 122 Q82 132 90 132 Q98 132 98 122" stroke="#A855F7" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-                <circle cx="90" cy="30" r="6" fill="#A855F7" fill-opacity=".5"/>
-                <circle cx="126" cy="46" r="13" fill="#A855F7" fill-opacity=".88"/>
-                <path d="M121 46h5m-2.5-2.5v5" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-                <rect x="62" y="78" width="56" height="7" rx="3.5" fill="#A855F7" fill-opacity=".28"/>
-                <rect x="62" y="92" width="40" height="5" rx="2.5" fill="#A855F7" fill-opacity=".18"/>
+        <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-80">
+                <path d="M90 30 C65 30 48 50 48 72 L48 110 L36 122 L144 122 L132 110 L132 72 C132 50 115 30 90 30Z" fill="#FACC15" fill-opacity=".12" stroke="#FACC15" stroke-width="2.2"/>
+                <path d="M82 122 Q82 132 90 132 Q98 132 98 122" stroke="#FACC15" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                <circle cx="90" cy="30" r="6" fill="#FACC15" fill-opacity=".4"/>
+                <circle cx="126" cy="46" r="13" fill="#FACC15" fill-opacity=".7"/>
+                <path d="M121 46h5m-2.5-2.5v5" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round"/>
+                <rect x="62" y="78" width="56" height="7" rx="3.5" fill="#FACC15" fill-opacity=".22"/>
+                <rect x="62" y="92" width="40" height="5" rx="2.5" fill="#FACC15" fill-opacity=".15"/>
             </svg>
         </div>
-        <div class="pointer-events-none absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-purple-400/8 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
     </div>
 
     {{-- Slide 4: Developer Info --}}
-    <div class="apk-slide absolute inset-0 flex items-center justify-between px-10 sm:px-16"
-         style="background:linear-gradient(135deg,#1E0A28 0%,#3D1A4F 50%,#5C2A76 100%);">
-        <div class="z-10 max-w-xs sm:max-w-md">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-fuchsia-400/15 text-fuchsia-300 text-xs font-bold mb-3 border border-fuchsia-400/30 backdrop-blur-sm">
+    <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
+         style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 60%,#1E3A5C 100%);">
+        <div class="z-10 max-w-xs">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-400/15 text-gold-300 text-xs font-bold mb-3 border border-gold-400/30 backdrop-blur-sm">
                 <i data-lucide="code-2" class="w-3 h-3"></i> Developer
             </span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-2">Dikembangkan Oleh<br><span class="text-fuchsia-400">Vexalyn Dev</span></h2>
-            <p class="text-sm text-white/60 leading-relaxed mb-4">Tim developer berpengalaman yang fokus membangun solusi digital untuk pendidikan.</p>
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Dikembangkan Oleh<br><span class="text-gold-400">Vexalyn Dev</span></h2>
+            <p class="text-xs sm:text-sm text-white/60 leading-relaxed mb-3">Tim developer berpengalaman yang fokus membangun solusi digital untuk pendidikan.</p>
             <a href="https://vexalyn.dev" target="_blank"
-               class="inline-flex items-center gap-2 px-4 py-2.5 bg-fuchsia-500/20 hover:bg-fuchsia-500/30 border border-fuchsia-400/40 text-fuchsia-200 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5">
-                <i data-lucide="external-link" class="w-4 h-4"></i> Cek Profile Developer
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-gold-400/15 hover:bg-gold-400/25 border border-gold-400/40 text-gold-200 rounded-xl text-xs sm:text-sm font-semibold transition-all hover:-translate-y-0.5">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Cek Profile Developer
             </a>
         </div>
-        <div class="hidden sm:flex items-center justify-center w-44 h-44 flex-shrink-0">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-85">
-                <rect x="40" y="50" width="100" height="80" rx="8" fill="#C026D3" fill-opacity=".12" stroke="#C026D3" stroke-width="2.2"/>
-                <path d="M60 70 L70 80 L60 90" stroke="#C026D3" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M120 70 L110 80 L120 90" stroke="#C026D3" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M100 68 L80 92" stroke="#C026D3" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="90" cy="40" r="16" fill="#C026D3" fill-opacity=".2" stroke="#C026D3" stroke-width="2"/>
-                <path d="M90 32v16m-6-10l6-6 6 6" stroke="#C026D3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-80">
+                <rect x="40" y="50" width="100" height="80" rx="8" fill="#FACC15" fill-opacity=".1" stroke="#FACC15" stroke-width="2.2"/>
+                <path d="M60 70 L70 80 L60 90" stroke="#FACC15" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M120 70 L110 80 L120 90" stroke="#FACC15" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M100 68 L80 92" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="90" cy="40" r="16" fill="#FACC15" fill-opacity=".15" stroke="#FACC15" stroke-width="2"/>
+                <path d="M90 32v16m-6-10l6-6 6 6" stroke="#FACC15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </div>
-        <div class="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-fuchsia-400/8 blur-3xl"></div>
+        <div class="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
     </div>
 
     {{-- Dots --}}
-    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
         <button class="apk-dot w-6 h-1.5 rounded-full bg-white/90 transition-all shadow-sm" data-idx="0"></button>
         <button class="apk-dot w-2 h-1.5 rounded-full bg-white/30 transition-all" data-idx="1"></button>
         <button class="apk-dot w-2 h-1.5 rounded-full bg-white/30 transition-all" data-idx="2"></button>
