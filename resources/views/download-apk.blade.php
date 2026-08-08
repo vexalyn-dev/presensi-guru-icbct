@@ -285,15 +285,13 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="flex items-center justify-center gap-1.5 mt-4 text-[10px] text-slate-400">
-                    <span>Dikembangkan oleh</span>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border font-bold"
-                          style="background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);">
-                        <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
-                             class="w-3 h-3 object-contain opacity-70">
-                        <span style="color:#A78BFA;">Vexalyn Dev</span>
-                    </span>
-                    <span>· v1.0.0</span>
+                <div class="flex items-center justify-center gap-2 mt-4">
+                    <span class="text-[10px] text-slate-400">Dikembangkan oleh</span>
+                    <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
+                         class="h-4 w-auto object-contain opacity-60 dark:opacity-40"
+                         style="max-width:80px;">
+                    <span class="text-[10px] text-slate-400">· v1.0.0</span>
+                </div>
                 </div>
             </div>
         </div>
