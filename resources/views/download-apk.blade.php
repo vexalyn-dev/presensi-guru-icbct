@@ -97,7 +97,7 @@
             <div class="max-w-[240px] sm:max-w-sm">
                 {{-- Badge --}}
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold mb-4 border backdrop-blur-sm"
-                      style="background:rgba(139,92,246,0.15);color:#C4B5FD;border-color:rgba(139,92,246,0.35);">
+                      style="background:rgba(139,92,246,0.2);color:#E9D5FF;border-color:rgba(139,92,246,0.4);">
                     <i data-lucide="code-2" class="w-3 h-3"></i> Developer
                 </span>
 
@@ -144,21 +144,26 @@
         </div>
     </div>
 
-    {{-- Dots --}}
-    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-        <button class="apk-dot w-6 h-1.5 rounded-full bg-white/90 transition-all shadow-sm" data-idx="0"></button>
-        <button class="apk-dot w-2 h-1.5 rounded-full bg-white/30 transition-all" data-idx="1"></button>
-        <button class="apk-dot w-2 h-1.5 rounded-full bg-white/30 transition-all" data-idx="2"></button>
-        <button class="apk-dot w-2 h-1.5 rounded-full bg-white/30 transition-all" data-idx="3"></button>
+    {{-- Dots — pojok kiri bawah, kecil di mobile --}}
+    <div class="absolute bottom-3 left-4 flex gap-1.5 z-20">
+        <button class="apk-dot w-5 h-1 sm:w-6 sm:h-1.5 rounded-full bg-white/90 transition-all shadow-sm" data-idx="0"></button>
+        <button class="apk-dot w-1.5 h-1 sm:w-2 sm:h-1.5 rounded-full bg-white/30 transition-all" data-idx="1"></button>
+        <button class="apk-dot w-1.5 h-1 sm:w-2 sm:h-1.5 rounded-full bg-white/30 transition-all" data-idx="2"></button>
+        <button class="apk-dot w-1.5 h-1 sm:w-2 sm:h-1.5 rounded-full bg-white/30 transition-all" data-idx="3"></button>
     </div>
 
-    {{-- Prev / Next arrows --}}
-    <button id="apk-prev" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all">
-        <i data-lucide="chevron-left" class="w-4 h-4 text-white"></i>
-    </button>
-    <button id="apk-next" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all">
-        <i data-lucide="chevron-right" class="w-4 h-4 text-white"></i>
-    </button>
+    {{-- Prev / Next — pojok kanan bawah, HANYA desktop --}}
+    <div class="hidden sm:flex absolute bottom-2.5 right-3 z-20 gap-1.5">
+        <button id="apk-prev" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all border border-white/10">
+            <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-white"></i>
+        </button>
+        <button id="apk-next" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all border border-white/10">
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-white"></i>
+        </button>
+    </div>
+    {{-- Mobile: dummy prev/next agar JS tidak error --}}
+    <button id="apk-prev-m" class="sm:hidden hidden"></button>
+    <button id="apk-next-m" class="sm:hidden hidden"></button>
 </div>
 
 {{-- ════════════════════════════════════════════════════════ --}}
@@ -290,13 +295,13 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="flex items-center justify-center gap-2 mt-4 text-[10px] text-slate-400">
+                <div class="flex items-center justify-center gap-1.5 mt-4 text-[10px] text-slate-400">
                     <span>Dikembangkan oleh</span>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-bold tracking-tight"
-                          style="background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(168,85,247,0.08));border-color:rgba(139,92,246,0.25);color:#7C3AED;">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border font-bold tracking-tight"
+                          style="background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(168,85,247,0.08));border-color:rgba(139,92,246,0.3);color:#A78BFA;">
                         <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
-                             class="w-3.5 h-3.5 object-contain"
-                             style="filter:brightness(0) saturate(100%) invert(30%) sepia(80%) saturate(600%) hue-rotate(240deg);">
+                             class="w-3 h-3 object-contain"
+                             style="filter:brightness(0) saturate(100%) invert(70%) sepia(60%) saturate(600%) hue-rotate(230deg);">
                         Vexalyn Dev
                     </span>
                     <span>· v1.0.0</span>
@@ -428,10 +433,21 @@ function apkStartAuto() {
     apkTimer = setInterval(function(){ apkGoTo(apkCurrent + 1); }, 5000);
 }
 
-document.getElementById('apk-next').addEventListener('click', function(){ apkGoTo(apkCurrent+1); apkStartAuto(); });
-document.getElementById('apk-prev').addEventListener('click', function(){ apkGoTo(apkCurrent-1); apkStartAuto(); });
+document.getElementById('apk-next') && document.getElementById('apk-next').addEventListener('click', function(){ apkGoTo(apkCurrent+1); apkStartAuto(); });
+document.getElementById('apk-prev') && document.getElementById('apk-prev').addEventListener('click', function(){ apkGoTo(apkCurrent-1); apkStartAuto(); });
 apkDots.forEach(function(d){ d.addEventListener('click', function(){ apkGoTo(+d.dataset.idx); apkStartAuto(); }); });
 apkStartAuto();
+
+// ── Touch swipe untuk mobile ──
+var apkSliderEl = document.getElementById('apk-slider');
+var apkTouchX = null;
+apkSliderEl.addEventListener('touchstart', function(e){ apkTouchX = e.touches[0].clientX; }, {passive:true});
+apkSliderEl.addEventListener('touchend', function(e){
+    if (apkTouchX === null) return;
+    var dx = e.changedTouches[0].clientX - apkTouchX;
+    if (Math.abs(dx) > 40) { apkGoTo(dx < 0 ? apkCurrent+1 : apkCurrent-1); apkStartAuto(); }
+    apkTouchX = null;
+}, {passive:true});
 
 // ── Modal ──
 function showApkModal(type) {
