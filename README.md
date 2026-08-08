@@ -511,10 +511,11 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 <img src="public/images/logo-dev-banner.png" height="32" alt="Vexalyn Dev">
 
-Full-Stack Developer
+**Vio Atmajaya Saputra**
 
-[![GitHub](https://img.shields.io/badge/GitHub-Vexalyn-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vexalyn-dev)
-[![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:vioatmajaya@gmail.com)
+[![GitHub](https://img.shields.io/badge/GitHub-vexalyn--dev-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vexalyn-dev)
+[![Email](https://img.shields.io/badge/Email-vioatmajaya%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:vioatmajaya@gmail.com)
+[![Website](https://img.shields.io/badge/Website-vexalyndev.my.id-0A66C2?style=for-the-badge&logo=google-chrome&logoColor=white)](https://vexalyndev.my.id)
 
 </div>
 
