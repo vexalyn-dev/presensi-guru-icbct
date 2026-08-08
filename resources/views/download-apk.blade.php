@@ -423,7 +423,7 @@ function apkGoTo(idx) {
 
 function apkStartAuto() {
     clearInterval(apkTimer);
-    apkTimer = setInterval(function(){ apkGoTo(apkCurrent + 1); }, 5000);
+    apkTimer = setInterval(function(){ apkGoTo(apkCurrent + 1); }, 3000);
 }
 
 apkDots.forEach(function(d){ d.addEventListener('click', function(){ apkGoTo(+d.dataset.idx); apkStartAuto(); }); });
