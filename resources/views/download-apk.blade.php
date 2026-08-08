@@ -133,27 +133,18 @@
         </div>
     </div>
 
-    {{-- Dots — pojok kiri bawah, kecil di mobile --}}
-    {{-- Dots — tengah bawah --}}
-    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-        <button class="apk-dot w-5 h-1.5 rounded-full bg-white/90 transition-all duration-300 shadow-sm" data-idx="0"></button>
-        <button class="apk-dot w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300" data-idx="1"></button>
-        <button class="apk-dot w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300" data-idx="2"></button>
-        <button class="apk-dot w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300" data-idx="3"></button>
+    {{-- Dots — modern pill style, tengah bawah --}}
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20"
+         style="background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);border-radius:99px;padding:5px 8px;display:flex;align-items:center;gap:5px;">
+        <button class="apk-dot transition-all duration-400" data-idx="0"
+                style="width:20px;height:4px;border-radius:99px;background:rgba(255,255,255,0.95);box-shadow:0 0 6px rgba(255,255,255,0.5);"></button>
+        <button class="apk-dot transition-all duration-400" data-idx="1"
+                style="width:4px;height:4px;border-radius:99px;background:rgba(255,255,255,0.3);"></button>
+        <button class="apk-dot transition-all duration-400" data-idx="2"
+                style="width:4px;height:4px;border-radius:99px;background:rgba(255,255,255,0.3);"></button>
+        <button class="apk-dot transition-all duration-400" data-idx="3"
+                style="width:4px;height:4px;border-radius:99px;background:rgba(255,255,255,0.3);"></button>
     </div>
-
-    {{-- Prev / Next — pojok kanan bawah, HANYA desktop --}}
-    <div class="hidden sm:flex absolute bottom-2.5 right-3 z-20 gap-1.5">
-        <button id="apk-prev" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all border border-white/10">
-            <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-white"></i>
-        </button>
-        <button id="apk-next" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all border border-white/10">
-            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-white"></i>
-        </button>
-    </div>
-    {{-- Mobile: dummy prev/next agar JS tidak error --}}
-    <button id="apk-prev-m" class="sm:hidden hidden"></button>
-    <button id="apk-next-m" class="sm:hidden hidden"></button>
 </div>
 
 {{-- ════════════════════════════════════════════════════════ --}}
@@ -429,10 +420,12 @@ function apkGoTo(idx) {
     apkSlides[apkCurrent].classList.add('active');
 
     // Update dots
-    apkDots[prev].classList.remove('w-5','bg-white/90','shadow-sm');
-    apkDots[prev].classList.add('w-1.5','bg-white/30');
-    apkDots[apkCurrent].classList.remove('w-1.5','bg-white/30');
-    apkDots[apkCurrent].classList.add('w-5','bg-white/90','shadow-sm');
+    apkDots[prev].style.width = '4px';
+    apkDots[prev].style.background = 'rgba(255,255,255,0.3)';
+    apkDots[prev].style.boxShadow = 'none';
+    apkDots[apkCurrent].style.width = '20px';
+    apkDots[apkCurrent].style.background = 'rgba(255,255,255,0.95)';
+    apkDots[apkCurrent].style.boxShadow = '0 0 6px rgba(255,255,255,0.5)';
 }
 
 function apkStartAuto() {
@@ -440,8 +433,6 @@ function apkStartAuto() {
     apkTimer = setInterval(function(){ apkGoTo(apkCurrent + 1); }, 5000);
 }
 
-document.getElementById('apk-next') && document.getElementById('apk-next').addEventListener('click', function(){ apkGoTo(apkCurrent+1); apkStartAuto(); });
-document.getElementById('apk-prev') && document.getElementById('apk-prev').addEventListener('click', function(){ apkGoTo(apkCurrent-1); apkStartAuto(); });
 apkDots.forEach(function(d){ d.addEventListener('click', function(){ apkGoTo(+d.dataset.idx); apkStartAuto(); }); });
 apkStartAuto();
 
