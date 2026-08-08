@@ -287,12 +287,9 @@
                 {{-- Footer --}}
                 <div class="flex items-center justify-center gap-1.5 mt-4">
                     <span class="text-[10px] text-slate-400">Dikembangkan oleh</span>
-                    {{-- Wrapper crop whitespace kiri PNG --}}
-                    <div class="overflow-hidden dark:invert" style="width:58px;height:14px;flex-shrink:0;">
-                        <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
-                             class="h-full w-auto object-cover object-right"
-                             style="margin-left:-16px;max-width:none;">
-                    </div>
+                    <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
+                         class="dark:invert"
+                         style="height:14px;width:auto;max-width:none;transform:translateX(-8px);">
                 </div>
                 </div>
             </div>
