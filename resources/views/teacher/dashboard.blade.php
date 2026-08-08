@@ -6,18 +6,18 @@
 <div class="fade-in space-y-3 sm:space-y-6">
     
     <!-- Welcome Card -->
-    <div class="card p-4 sm:p-6 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:to-gold-400 text-white overflow-hidden">
+    <div class="card p-5 sm:p-8 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:to-gold-400 text-white overflow-hidden">
         <div class="flex items-center justify-between gap-3">
             <div class="min-w-0 flex-1">
-                <h2 class="text-base sm:text-2xl font-bold mb-1 sm:mb-2 truncate">Selamat Datang, {{ auth()->user()->name }}! 👋</h2>
-                <p class="text-white/80 dark:text-navy-900/80 text-xs sm:text-base leading-snug break-words">
+                <h2 class="text-lg sm:text-2xl font-bold mb-1.5 sm:mb-2 truncate">Selamat Datang, {{ auth()->user()->name }}! 👋</h2>
+                <p class="text-white/80 dark:text-navy-900/80 text-sm sm:text-base leading-snug break-words">
                     Semangat mengajar hari ini. Anda memiliki 
                     <span class="font-bold">{{ $todaySchedules->count() }}</span> jadwal mengajar.
                 </p>
             </div>
             <div class="flex-shrink-0">
-                <div class="w-12 h-12 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                    <i data-lucide="school" class="w-6 h-6 sm:w-10 sm:h-10 text-white dark:text-navy-900"></i>
+                <div class="w-14 h-14 sm:w-24 sm:h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                    <i data-lucide="school" class="w-7 h-7 sm:w-12 sm:h-12 text-white dark:text-navy-900"></i>
                 </div>
             </div>
         </div>
