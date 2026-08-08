@@ -240,6 +240,8 @@
 </style>
 
 <script>
+var APK_URL = '{{ env("APK_DOWNLOAD_URL", "") }}';
+
 document.addEventListener('DOMContentLoaded', function() {
     if (window.lucide) lucide.createIcons();
 
@@ -248,26 +250,164 @@ document.addEventListener('DOMContentLoaded', function() {
         el.style.animationDelay = (i * 0.08) + 's';
     });
 
-    // Download button — progress feedback
     var btn = document.getElementById('apk-btn');
-    if (btn) {
-        btn.addEventListener('click', function(e) {
-            var href = btn.getAttribute('href');
-            if (!href || href === '#') {
-                e.preventDefault();
-                // APK belum tersedia — tampilkan toast
-                var toast = document.createElement('div');
-                toast.className = 'fixed bottom-6 right-6 z-[9999] flex items-center gap-3 px-5 py-3.5 bg-amber-500 text-white rounded-2xl shadow-2xl text-sm font-semibold';
-                toast.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg> APK belum tersedia. Segera hadir!';
-                document.body.appendChild(toast);
-                setTimeout(function() {
-                    toast.style.opacity = '0';
-                    toast.style.transition = 'opacity 0.3s';
-                    setTimeout(function() { toast.remove(); }, 300);
-                }, 3000);
-            }
+    if (!btn) return;
+
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!APK_URL || APK_URL === '' || APK_URL === '#') {
+            showApkModal('soon');
+        } else {
+            showApkModal('downloading');
+            // Trigger download setelah sedikit delay biar modal sempat muncul
+            setTimeout(function() {
+                var a = document.createElement('a');
+                a.href = APK_URL;
+                a.download = 'ICB-CT-Presensi.apk';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }, 400);
+        }
+    });
+});
+
+// ── Modal Controller ──────────────────────────────────────────────────────
+function showApkModal(type) {
+    var modal  = document.getElementById('apk-modal');
+    var box    = document.getElementById('apk-modal-box');
+
+    // Sembunyikan semua panel dulu
+    document.getElementById('apk-panel-soon').style.display       = 'none';
+    document.getElementById('apk-panel-downloading').style.display = 'none';
+    document.getElementById('apk-panel-done').style.display        = 'none';
+
+    if (type === 'soon') {
+        document.getElementById('apk-panel-soon').style.display = 'block';
+    } else if (type === 'downloading') {
+        document.getElementById('apk-panel-downloading').style.display = 'block';
+        // Setelah 2.5 detik switch ke panel sukses
+        setTimeout(function() { showApkModal('done'); }, 2500);
+    } else if (type === 'done') {
+        document.getElementById('apk-panel-downloading').style.display = 'none';
+        document.getElementById('apk-panel-done').style.display        = 'block';
+        if (window.lucide) lucide.createIcons();
+    }
+
+    // Tampilkan modal
+    modal.style.display = 'flex';
+    box.style.transform  = 'translateY(30px) scale(0.96)';
+    box.style.opacity    = '0';
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            box.style.transition = 'transform 0.3s cubic-bezier(0.22,1,0.36,1), opacity 0.25s ease';
+            box.style.transform  = 'translateY(0) scale(1)';
+            box.style.opacity    = '1';
+            if (window.lucide) lucide.createIcons();
+        });
+    });
+}
+
+function closeApkModal() {
+    var modal = document.getElementById('apk-modal');
+    var box   = document.getElementById('apk-modal-box');
+    box.style.transform = 'translateY(20px) scale(0.96)';
+    box.style.opacity   = '0';
+    setTimeout(function() { modal.style.display = 'none'; }, 280);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('apk-modal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeApkModal();
         });
     }
 });
 </script>
+
+{{-- ── MODAL: Belum Tersedia + Download Sukses ─────────────────────────── --}}
+<div id="apk-modal"
+     style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,15,30,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px;">
+    <div id="apk-modal-box"
+         style="background:#fff;width:100%;max-width:360px;border-radius:24px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.35);"
+         class="dark:!bg-slate-900">
+
+        {{-- Top accent bar --}}
+        <div class="h-1.5 w-full bg-gradient-to-r from-navy-800 via-gold-400 to-amber-400"></div>
+
+        {{-- ── PANEL: APK Belum Tersedia ── --}}
+        <div id="apk-panel-soon" class="p-8 text-center">
+            <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <i data-lucide="construction" class="w-8 h-8 text-amber-500"></i>
+            </div>
+            <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">Bentar dulu ya! 🙏</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-1">
+                APK-nya lagi kita siapkan biar mantap banget sebelum rilis.
+            </p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+                Nantikan update-nya, ya! <span class="font-semibold text-navy-800 dark:text-slate-200">Gak bakal lama kok 🚀</span>
+            </p>
+            <button onclick="closeApkModal()"
+                    class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold transition-all hover:opacity-90 active:scale-95 shadow-lg">
+                Siap, ditunggu!
+            </button>
+        </div>
+
+        {{-- ── PANEL: Sedang Download (spinner) ── --}}
+        <div id="apk-panel-downloading" class="p-8 text-center" style="display:none">
+            {{-- Double ring spinner persis kayak login --}}
+            <div class="relative w-16 h-16 mx-auto mb-5">
+                <div style="position:absolute;inset:0;border-radius:50%;border:4px solid #E2E8F0;border-top-color:#0F172A;animation:apkSpin 0.9s linear infinite;"></div>
+                <div style="position:absolute;top:8px;left:8px;right:8px;bottom:8px;border-radius:50%;border:4px solid transparent;border-bottom-color:#FACC15;animation:apkSpinRev 0.7s linear infinite;"></div>
+            </div>
+            {{-- Bouncing dots --}}
+            <div class="flex items-center justify-center gap-1.5 mb-4">
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;display:inline-block;animation:apkDot 0.6s ease-in-out infinite;"></span>
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;display:inline-block;animation:apkDot 0.6s ease-in-out 0.15s infinite;"></span>
+                <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;display:inline-block;animation:apkDot 0.6s ease-in-out 0.3s infinite;"></span>
+            </div>
+            <p class="text-base font-bold text-navy-800 dark:text-white mb-1">Mempersiapkan unduhan...</p>
+            <p class="text-xs text-slate-400">Sebentar lagi file APK-nya mulai diunduh</p>
+        </div>
+
+        {{-- ── PANEL: Download Sukses ── --}}
+        <div id="apk-panel-done" class="p-8 text-center" style="display:none">
+            {{-- Animated checkmark circle persis login success --}}
+            <div class="w-16 h-16 mx-auto mb-5">
+                <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="36" cy="36" r="32"
+                        stroke="#22C55E" stroke-width="4" fill="none"
+                        stroke-dasharray="180" stroke-dashoffset="180"
+                        style="animation:apkCircleIn 0.5s cubic-bezier(0.65,0,0.35,1) forwards"/>
+                    <path d="M20 37l12 12 20-22"
+                        stroke="#22C55E" stroke-width="4.5"
+                        stroke-linecap="round" stroke-linejoin="round" fill="none"
+                        stroke-dasharray="60" stroke-dashoffset="60"
+                        style="animation:apkCheckIn 0.4s ease 0.45s forwards"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">Unduhan Dimulai! 🎉</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-1">
+                File APK udah mulai diunduh ke HP/perangkat lo.
+            </p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+                Cek folder <span class="font-semibold text-navy-800 dark:text-slate-200">Downloads</span> terus install deh! 🙌
+            </p>
+            <button onclick="closeApkModal()"
+                    class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold transition-all hover:opacity-90 active:scale-95 shadow-lg">
+                Oke, siap install!
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<style>
+@keyframes apkSpin    { to { transform: rotate(360deg); } }
+@keyframes apkSpinRev { to { transform: rotate(-360deg); } }
+@keyframes apkDot     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes apkCircleIn{ 0%{stroke-dashoffset:180} 100%{stroke-dashoffset:0} }
+@keyframes apkCheckIn { 0%{stroke-dashoffset:60;opacity:0} 100%{stroke-dashoffset:0;opacity:1} }
+</style>
 @endsection
