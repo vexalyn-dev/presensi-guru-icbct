@@ -103,7 +103,7 @@
                          style="height:40px;width:auto;max-width:200px;filter:invert(1) brightness(2);transform:translateX(-10px);">
                 </div>
                 <p class="text-[10px] sm:text-xs leading-relaxed mb-3 sm:mb-4" style="color:rgba(255,255,255,0.5);">
-                    Tim developer yang fokus membangun solusi digital untuk dunia pendidikan.
+                    Vio Atmajaya Saputra
                 </p>
                 <a href="https://vexalyndev.my.id" target="_blank"
                    class="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all hover:-translate-y-0.5 active:scale-95"
