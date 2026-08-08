@@ -2,26 +2,25 @@
 @section('page-title', 'Download Aplikasi')
 
 @section('content')
-<div class="min-h-screen -m-6 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+<div class="apk-wrapper min-h-screen -m-6 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
 
-    {{-- ── HERO ─────────────────────────────────────────────────────────── --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-slate-900 px-6 py-20 text-center">
+    {{-- ══ PC LAYOUT: 2 kolom (hanya aktif di ≥1024px via CSS) ══ --}}
+    <div class="apk-pc-split">
+
+    {{-- ── KOLOM KIRI / MOBILE FULL: HERO ─────────────────────────────── --}}
+    <div class="apk-pc-hero relative overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-slate-900 px-6 py-20 text-center">
 
         {{-- Decorative blobs --}}
         <div class="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-gold-400/10 blur-3xl"></div>
         <div class="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-navy-400/20 blur-3xl"></div>
         <div class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.02] border border-white/5"></div>
-
-        {{-- Floating rings --}}
         <div class="apk-ring pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full border border-gold-400/10"></div>
         <div class="apk-ring-slow pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] h-[360px] rounded-full border border-white/5"></div>
 
-        <div class="relative z-10 max-w-2xl mx-auto">
-            {{-- App icon --}}
+        <div class="apk-pc-hero-inner relative z-10 max-w-2xl mx-auto">
             <div class="apk-icon-bounce w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gold-400 to-gold-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-gold-400/30">
                 <i data-lucide="smartphone" class="w-12 h-12 text-navy-900"></i>
             </div>
-
             <div class="apk-fade-up">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight leading-tight">
                     ICB CT <span class="text-gold-400">Presensi</span>
@@ -32,19 +31,41 @@
                         <i data-lucide="tag" class="w-3 h-3"></i> v1.0.0
                     </span>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/70 text-xs font-semibold border border-white/10">
-                        <i data-lucide="android" class="w-3 h-3"></i> Android 8.0+
+                        <i data-lucide="cpu" class="w-3 h-3"></i> Android 8.0+
                     </span>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/70 text-xs font-semibold border border-white/10">
                         <i data-lucide="hard-drive" class="w-3 h-3"></i> ~12 MB
                     </span>
                 </div>
+
+                {{-- PC only: tampilkan fitur highlights di kolom kiri --}}
+                <div class="hidden lg:grid grid-cols-2 gap-3 mt-6 text-left">
+                    @foreach([
+                        ['icon'=>'scan-line',    'title'=>'Presensi QR',       'desc'=>'Absensi cepat & akurat'],
+                        ['icon'=>'map-pin',      'title'=>'GPS Validasi',       'desc'=>'Hanya valid di sekolah'],
+                        ['icon'=>'bell',         'title'=>'Notif Real-time',    'desc'=>'Info jadwal langsung'],
+                        ['icon'=>'file-text',    'title'=>'Pengajuan Izin',     'desc'=>'Langsung dari HP'],
+                    ] as $f)
+                    <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/8 border border-white/10 backdrop-blur-sm">
+                        <div class="w-8 h-8 bg-gold-400/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="{{ $f['icon'] }}" class="w-4 h-4 text-gold-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white">{{ $f['title'] }}</p>
+                            <p class="text-[10px] text-white/50">{{ $f['desc'] }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
             </div>
         </div>
-    </div>
+    </div>{{-- /hero --}}
+
+    {{-- ── KOLOM KANAN / MOBILE BELOW: DOWNLOAD + DETAIL ─────────────── --}}
+    <div class="apk-pc-right">
 
     {{-- ── DOWNLOAD CARD ────────────────────────────────────────────────── --}}
-    <div class="relative z-10 -mt-8 px-6 pb-10 max-w-3xl mx-auto">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl shadow-navy-900/20 dark:shadow-black/40 border border-slate-100 dark:border-slate-700 overflow-hidden apk-card-in">
+    <div class="relative z-10 -mt-8 px-6 pb-10 max-w-3xl mx-auto">        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl shadow-navy-900/20 dark:shadow-black/40 border border-slate-100 dark:border-slate-700 overflow-hidden apk-card-in">
 
             {{-- Top accent --}}
             <div class="h-1 w-full bg-gradient-to-r from-gold-400 via-gold-500 to-amber-400"></div>
@@ -179,7 +200,9 @@
         </p>
     </div>
 
-</div>
+    </div>{{-- /apk-pc-right --}}
+    </div>{{-- /apk-pc-split --}}
+</div>{{-- /apk-wrapper --}}
 
 <style>
 /* ── Hero animations ── */
@@ -237,7 +260,69 @@
 .apk-dl-btn:hover .apk-btn-shine::before {
     left: 130%;
 }
-</style>
+
+/* ══════════════════════════════════════════════════════════
+   PC LAYOUT — min-width: 1024px
+   Hanya override tampilan desktop, mobile tidak tersentuh
+   ══════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+
+    /* Hapus negative margin mobile */
+    .apk-wrapper { margin: -1.5rem; }
+
+    /* ── Wrap hero + card jadi 2 kolom ── */
+    .apk-pc-split {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        min-height: 100vh;
+        align-items: stretch;
+    }
+
+    /* Kolom kiri: hero full height */
+    .apk-pc-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 48px;
+        position: sticky;
+        top: 0;
+        min-height: 100vh;
+    }
+    .apk-pc-hero .apk-ring,
+    .apk-pc-hero .apk-ring-slow { display: block; }
+
+    /* Override hero padding dari mobile */
+    .apk-pc-hero-inner {
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+    }
+    .apk-pc-hero-inner h1 { font-size: 3.5rem; }
+
+    /* Kolom kanan: scroll area dengan semua card */
+    .apk-pc-right {
+        background: #f8fafc;
+        min-height: 100vh;
+        overflow-y: auto;
+        padding: 40px 32px 60px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        border-left: 1px solid rgba(15,23,42,0.08);
+    }
+    .dark .apk-pc-right {
+        background: #0f172a;
+        border-left-color: rgba(255,255,255,0.06);
+    }
+
+    /* Card di kanan tidak butuh margin negatif */
+    .apk-pc-right .apk-card-in { margin-top: 0 !important; }
+    .apk-pc-right .apk-card-in > div { margin: 0; max-width: 100%; }
+
+    /* Sembunyikan section mobile-only di luar split */
+    .apk-mobile-only { display: none !important; }
+}</style>
 
 <script>
 var APK_URL = '{{ env("APK_DOWNLOAD_URL", "") }}';
