@@ -285,11 +285,11 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="flex items-center justify-center gap-3 mt-4">
+                <div class="flex items-center justify-center mt-4">
                     <span class="text-[10px] text-slate-400">Dikembangkan oleh</span>
                     <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
                          class="h-3.5 w-auto object-contain dark:invert"
-                         style="max-width:72px;">
+                         style="max-width:72px;margin-left:-2px;">
                 </div>
                 </div>
             </div>
