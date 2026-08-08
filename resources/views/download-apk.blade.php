@@ -98,16 +98,9 @@
                     <span class="text-[10px] sm:text-xs font-bold tracking-wide uppercase" style="color:#C4B5FD;letter-spacing:0.06em;">Developer</span>
                 </div>
                 <div class="flex items-center gap-2.5 mb-2 sm:mb-3">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                         style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.4);">
-                        <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
-                             class="w-5 h-5 sm:w-7 sm:h-7 object-contain"
-                             style="filter:invert(1) brightness(2);">
-                    </div>
-                    <div>
-                        <p class="text-sm sm:text-base font-extrabold leading-none" style="color:#E9D5FF;">Vexalyn Dev</p>
-                        <p class="text-[9px] sm:text-[10px] mt-0.5" style="color:rgba(196,181,253,0.6);">vexalyndev.my.id</p>
-                    </div>
+                    <img src="{{ asset('images/logo-dev-banner.png') }}" alt="Vexalyn Dev"
+                         class="object-contain"
+                         style="height:28px;width:auto;max-width:160px;filter:invert(1) brightness(1.8);transform:translateX(-6px);">
                 </div>
                 <p class="text-[10px] sm:text-xs leading-relaxed mb-3 sm:mb-4" style="color:rgba(255,255,255,0.5);">
                     Tim developer yang fokus membangun solusi digital untuk dunia pendidikan.
@@ -278,9 +271,9 @@
                 {{-- Footer --}}
                 <div class="flex items-center justify-center gap-1.5 mt-4">
                     <span class="text-[10px] text-slate-400">Dikembangkan oleh</span>
-                    <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
+                    <img src="{{ asset('images/logo-dev-banner.png') }}" alt="Vexalyn Dev"
                          class="dark:invert"
-                         style="height:14px;width:auto;max-width:none;transform:translateX(-4px);">
+                         style="height:13px;width:auto;max-width:none;transform:translateX(-4px);">
                 </div>
                 </div>
             </div>
