@@ -1552,7 +1552,7 @@
 <div id="admin-welcome-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;">
     <div id="admin-welcome-box" style="background:#fff;border-radius:24px;padding:32px 28px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 56px rgba(15,23,42,0.2);transform:translateY(20px) scale(0.97);opacity:0;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);">
         <div style="width:64px;height:64px;background:linear-gradient(135deg,#0F172A,#1E293B);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 20px rgba(15,23,42,0.2);">
-            <span style="font-size:28px;">⚡</span>
+            <i data-lucide="users-round" style="width:32px;height:32px;color:#FACC15;"></i>
         </div>
         <h2 style="font-size:1.3rem;font-weight:800;color:#0F172A;margin:0 0 6px;letter-spacing:-0.3px;">Selamat Datang!</h2>
         <p style="font-size:0.9rem;font-weight:600;color:#0F172A;margin:0 0 12px;">Halo, {{ auth()->user()->name }} 👋</p>
