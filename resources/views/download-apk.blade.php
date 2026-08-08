@@ -134,11 +134,12 @@
     </div>
 
     {{-- Dots — pojok kiri bawah, kecil di mobile --}}
-    <div class="absolute bottom-3 left-4 flex gap-1.5 z-20">
-        <button class="apk-dot w-5 h-1 sm:w-6 sm:h-1.5 rounded-full bg-white/90 transition-all shadow-sm" data-idx="0"></button>
-        <button class="apk-dot w-1.5 h-1 sm:w-2 sm:h-1.5 rounded-full bg-white/30 transition-all" data-idx="1"></button>
-        <button class="apk-dot w-1.5 h-1 sm:w-2 sm:h-1.5 rounded-full bg-white/30 transition-all" data-idx="2"></button>
-        <button class="apk-dot w-1.5 h-1 sm:w-2 sm:h-1.5 rounded-full bg-white/30 transition-all" data-idx="3"></button>
+    {{-- Dots — tengah bawah --}}
+    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+        <button class="apk-dot w-5 h-1.5 rounded-full bg-white/90 transition-all duration-300 shadow-sm" data-idx="0"></button>
+        <button class="apk-dot w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300" data-idx="1"></button>
+        <button class="apk-dot w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300" data-idx="2"></button>
+        <button class="apk-dot w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300" data-idx="3"></button>
     </div>
 
     {{-- Prev / Next — pojok kanan bawah, HANYA desktop --}}
@@ -287,11 +288,10 @@
                 <div class="flex items-center justify-center gap-1.5 mt-4 text-[10px] text-slate-400">
                     <span>Dikembangkan oleh</span>
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border font-bold"
-                          style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.25);color:#A78BFA;">
+                          style="background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);">
                         <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
-                             class="w-3 h-3 object-contain"
-                             style="filter:invert(1) brightness(1.5) sepia(1) hue-rotate(230deg) saturate(3);">
-                        Vexalyn Dev
+                             class="w-3 h-3 object-contain opacity-70">
+                        <span style="color:#A78BFA;">Vexalyn Dev</span>
                     </span>
                     <span>· v1.0.0</span>
                 </div>
@@ -371,15 +371,23 @@
     }
 }
 
-/* ── Slider smooth transitions ── */
+/* ── Slider Netflix-style transition ── */
 .apk-slide {
     opacity: 0;
-    transform: translateX(20px);
-    transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1);
+    transform: scale(1.04) translateX(30px);
+    transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1),
+                transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    will-change: opacity, transform;
 }
 .apk-slide.active {
     opacity: 1;
-    transform: translateX(0);
+    transform: scale(1) translateX(0);
+}
+.apk-slide.exit {
+    opacity: 0;
+    transform: scale(0.97) translateX(-20px);
+    transition: opacity 0.45s ease-in,
+                transform 0.45s ease-in;
 }
 
 /* ── Download button shine ── */
@@ -411,15 +419,23 @@ var apkTimer;
 apkSlides[0].classList.add('active');
 
 function apkGoTo(idx) {
-    apkSlides[apkCurrent].classList.remove('active');
-    apkDots[apkCurrent].classList.remove('w-6','bg-white/90','shadow-sm');
-    apkDots[apkCurrent].classList.add('w-2','bg-white/30');
-
+    if (idx === apkCurrent) return;
+    var prev = apkCurrent;
     apkCurrent = (idx + apkSlides.length) % apkSlides.length;
 
+    // Exit animation untuk slide lama
+    apkSlides[prev].classList.add('exit');
+    apkSlides[prev].classList.remove('active');
+    setTimeout(function(){ apkSlides[prev].classList.remove('exit'); }, 500);
+
+    // Enter animation untuk slide baru
     apkSlides[apkCurrent].classList.add('active');
-    apkDots[apkCurrent].classList.remove('w-2','bg-white/30');
-    apkDots[apkCurrent].classList.add('w-6','bg-white/90','shadow-sm');
+
+    // Update dots
+    apkDots[prev].classList.remove('w-5','bg-white/90','shadow-sm');
+    apkDots[prev].classList.add('w-1.5','bg-white/30');
+    apkDots[apkCurrent].classList.remove('w-1.5','bg-white/30');
+    apkDots[apkCurrent].classList.add('w-5','bg-white/90','shadow-sm');
 }
 
 function apkStartAuto() {

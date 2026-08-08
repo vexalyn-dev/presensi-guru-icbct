@@ -227,8 +227,8 @@
                     <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                         <!-- Hamburger Menu (Mobile Only) -->
                         <button @click="sidebarOpen = true" 
-                                class="lg:hidden p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0">
-                            <i data-lucide="menu" class="w-5 h-5 text-slate-600 dark:text-slate-400"></i>
+                                class="lg:hidden flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 flex-shrink-0">
+                            <i data-lucide="menu" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                         </button>
                         
                         <div class="min-w-0">
@@ -240,9 +240,9 @@
                     
                     <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
                         <!-- Dark/Light Mode Toggle -->
-                        <button onclick="toggleDarkMode()" class="p-1.5 sm:p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Toggle Dark Mode">
-                            <i data-lucide="sun" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400 hidden dark:block"></i>
-                            <i data-lucide="moon" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-400 block dark:hidden"></i>
+                        <button onclick="toggleDarkMode()" class="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300" title="Toggle Dark Mode">
+                            <i data-lucide="sun" class="w-4 h-4 sm:w-5 sm:h-5 hidden dark:block"></i>
+                            <i data-lucide="moon" class="w-4 h-4 sm:w-5 sm:h-5 block dark:hidden"></i>
                         </button>
 
                         <!-- Notifikasi Dropdown -->

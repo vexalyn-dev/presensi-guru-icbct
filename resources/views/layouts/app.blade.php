@@ -536,8 +536,8 @@
         <!-- Top Header -->
         <header class="sticky top-0 z-30 bg-white/80 dark:bg-navy-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-5 h-16 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <button @click="sidebarOpen = true" class="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors icon-click">
-                    <i data-lucide="menu" class="w-5 h-5"></i>
+                <button @click="sidebarOpen = true" class="lg:hidden flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
+                    <i data-lucide="menu" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </button>
                 
                 <div>
@@ -549,9 +549,9 @@
             <div class="flex items-center gap-3">
                 <!-- Dark Mode Toggle -->
                 <button @click="darkMode = !darkMode; spinAnim = true; setTimeout(() => spinAnim = false, 500)" 
-                        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 group cursor-pointer focus:outline-none">
-                    <i data-lucide="sun" x-show="!darkMode" class="w-5 h-5 text-slate-600 transition-transform" :class="spinAnim ? 'rotate-center' : ''"></i>
-                    <i data-lucide="moon" x-show="darkMode" x-cloak class="w-5 h-5 text-gold-400 transition-transform" :class="spinAnim ? 'rotate-center' : ''"></i>
+                        class="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 cursor-pointer focus:outline-none">
+                    <i data-lucide="sun" x-show="!darkMode" class="w-4 h-4 sm:w-5 sm:h-5 transition-transform" :class="spinAnim ? 'rotate-center' : ''"></i>
+                    <i data-lucide="moon" x-show="darkMode" x-cloak class="w-4 h-4 sm:w-5 sm:h-5 transition-transform" :class="spinAnim ? 'rotate-center' : ''"></i>
                 </button>
 
                 <!-- Notifications Dropdown -->
