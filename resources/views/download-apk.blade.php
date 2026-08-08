@@ -10,134 +10,123 @@
      id="apk-slider">
 
     {{-- Slide 1: Presensi Mudah --}}
-    <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
+    <div class="apk-slide absolute inset-0 flex items-center justify-between px-5 sm:px-12"
          style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 60%,#1E3A5C 100%);">
-        <div class="z-10 max-w-xs">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-400/15 text-gold-300 text-xs font-bold mb-3 border border-gold-400/30 backdrop-blur-sm">
-                <i data-lucide="sparkles" class="w-3 h-3"></i> Aplikasi Resmi
-            </span>
-            <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Presensi Guru<br><span class="text-gold-400">Lebih Mudah</span></h2>
-            <p class="text-xs sm:text-sm text-white/60 leading-relaxed">Scan QR, validasi GPS, semua bisa dari HP kamu kapan aja.</p>
+        <div class="z-10 max-w-[200px] sm:max-w-sm">
+            <div class="inline-flex items-center gap-1.5 mb-3 sm:mb-4">
+                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(250,204,21,0.2);border:1px solid rgba(250,204,21,0.35);">
+                    <i data-lucide="sparkles" class="w-2.5 h-2.5 sm:w-3 sm:h-3" style="color:#FDE68A;"></i>
+                </div>
+                <span class="text-[10px] sm:text-xs font-bold tracking-wide uppercase" style="color:#FDE68A;letter-spacing:0.06em;">Aplikasi Resmi</span>
+            </div>
+            <h2 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1.5 sm:mb-2">Presensi Guru<br><span style="color:#FACC15;">Lebih Mudah</span></h2>
+            <p class="text-[10px] sm:text-sm leading-relaxed" style="color:rgba(255,255,255,0.55);">Scan QR, validasi GPS, semua bisa dari HP kamu kapan aja.</p>
         </div>
-        <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-80">
+        <div class="hidden sm:flex items-center justify-center w-36 h-36 md:w-44 md:h-44 flex-shrink-0">
+            <svg viewBox="0 0 180 180" fill="none" class="w-full h-full opacity-80">
                 <rect x="50" y="20" width="80" height="140" rx="16" fill="#FACC15" fill-opacity=".1" stroke="#FACC15" stroke-width="2.5"/>
                 <rect x="62" y="36" width="56" height="88" rx="6" fill="#0F172A"/>
                 <circle cx="90" cy="142" r="6" fill="#FACC15" fill-opacity=".6"/>
                 <rect x="74" y="28" width="32" height="4" rx="2" fill="#FACC15" fill-opacity=".4"/>
-                <rect x="68" y="50" width="44" height="6" rx="3" fill="#FACC15" fill-opacity=".25"/>
-                <rect x="68" y="62" width="30" height="4" rx="2" fill="white" fill-opacity=".15"/>
-                <rect x="68" y="72" width="38" height="4" rx="2" fill="white" fill-opacity=".12"/>
                 <circle cx="90" cy="95" r="16" fill="#FACC15" fill-opacity=".15" stroke="#FACC15" stroke-width="1.8"/>
                 <path d="M84 95l4 4 8-8" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </div>
-        <div class="pointer-events-none absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-20 -right-20 w-64 h-64 rounded-full blur-3xl" style="background:rgba(250,204,21,0.05);"></div>
     </div>
 
     {{-- Slide 2: GPS Validasi --}}
-    <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
+    <div class="apk-slide absolute inset-0 flex items-center justify-between px-5 sm:px-12"
          style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 60%,#1E3A5C 100%);">
-        <div class="z-10 max-w-xs">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-400/15 text-gold-300 text-xs font-bold mb-3 border border-gold-400/30 backdrop-blur-sm">
-                <i data-lucide="map-pin" class="w-3 h-3"></i> GPS Validasi
-            </span>
-            <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Absensi Hanya<br><span class="text-gold-400">Di Area Sekolah</span></h2>
-            <p class="text-xs sm:text-sm text-white/60 leading-relaxed">Sistem otomatis cek lokasi kamu sebelum absensi diproses.</p>
+        <div class="z-10 max-w-[200px] sm:max-w-sm">
+            <div class="inline-flex items-center gap-1.5 mb-3 sm:mb-4">
+                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(250,204,21,0.2);border:1px solid rgba(250,204,21,0.35);">
+                    <i data-lucide="map-pin" class="w-2.5 h-2.5 sm:w-3 sm:h-3" style="color:#FDE68A;"></i>
+                </div>
+                <span class="text-[10px] sm:text-xs font-bold tracking-wide uppercase" style="color:#FDE68A;letter-spacing:0.06em;">GPS Validasi</span>
+            </div>
+            <h2 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1.5 sm:mb-2">Absensi Hanya<br><span style="color:#FACC15;">Di Area Sekolah</span></h2>
+            <p class="text-[10px] sm:text-sm leading-relaxed" style="color:rgba(255,255,255,0.55);">Sistem otomatis cek lokasi sebelum absensi diproses.</p>
         </div>
-        <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-80">
+        <div class="hidden sm:flex items-center justify-center w-36 h-36 md:w-44 md:h-44 flex-shrink-0">
+            <svg viewBox="0 0 180 180" fill="none" class="w-full h-full opacity-80">
                 <circle cx="90" cy="75" r="42" fill="#FACC15" fill-opacity=".08" stroke="#FACC15" stroke-width="2"/>
                 <circle cx="90" cy="75" r="26" fill="#FACC15" fill-opacity=".12" stroke="#FACC15" stroke-width="2"/>
                 <circle cx="90" cy="75" r="11" fill="#FACC15" fill-opacity=".35"/>
                 <path d="M90 75v50" stroke="#FACC15" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 4"/>
                 <ellipse cx="90" cy="128" rx="20" ry="7" fill="#FACC15" fill-opacity=".18"/>
-                <path d="M58 132 Q68 110 90 125 Q112 110 122 132" stroke="#FACC15" stroke-width="1.6" fill="none" opacity=".35"/>
             </svg>
         </div>
-        <div class="pointer-events-none absolute -top-20 -left-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
+        <div class="pointer-events-none absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl" style="background:rgba(250,204,21,0.04);"></div>
     </div>
 
     {{-- Slide 3: Notifikasi Real-time --}}
-    <div class="apk-slide absolute inset-0 flex items-center justify-between px-6 sm:px-12"
+    <div class="apk-slide absolute inset-0 flex items-center justify-between px-5 sm:px-12"
          style="background:linear-gradient(135deg,#0A1628 0%,#0F2847 60%,#1E3A5C 100%);">
-        <div class="z-10 max-w-xs">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-400/15 text-gold-300 text-xs font-bold mb-3 border border-gold-400/30 backdrop-blur-sm">
-                <i data-lucide="bell" class="w-3 h-3"></i> Real-time
-            </span>
-            <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Notifikasi<br><span class="text-gold-400">Langsung Masuk</span></h2>
-            <p class="text-xs sm:text-sm text-white/60 leading-relaxed">Jadwal, pengumuman & izin semua langsung muncul di HP kamu.</p>
+        <div class="z-10 max-w-[200px] sm:max-w-sm">
+            <div class="inline-flex items-center gap-1.5 mb-3 sm:mb-4">
+                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(250,204,21,0.2);border:1px solid rgba(250,204,21,0.35);">
+                    <i data-lucide="bell" class="w-2.5 h-2.5 sm:w-3 sm:h-3" style="color:#FDE68A;"></i>
+                </div>
+                <span class="text-[10px] sm:text-xs font-bold tracking-wide uppercase" style="color:#FDE68A;letter-spacing:0.06em;">Real-time</span>
+            </div>
+            <h2 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1.5 sm:mb-2">Notifikasi<br><span style="color:#FACC15;">Langsung Masuk</span></h2>
+            <p class="text-[10px] sm:text-sm leading-relaxed" style="color:rgba(255,255,255,0.55);">Jadwal, izin & pengumuman langsung muncul di HP kamu.</p>
         </div>
-        <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-80">
+        <div class="hidden sm:flex items-center justify-center w-36 h-36 md:w-44 md:h-44 flex-shrink-0">
+            <svg viewBox="0 0 180 180" fill="none" class="w-full h-full opacity-80">
                 <path d="M90 30 C65 30 48 50 48 72 L48 110 L36 122 L144 122 L132 110 L132 72 C132 50 115 30 90 30Z" fill="#FACC15" fill-opacity=".12" stroke="#FACC15" stroke-width="2.2"/>
                 <path d="M82 122 Q82 132 90 132 Q98 132 98 122" stroke="#FACC15" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-                <circle cx="90" cy="30" r="6" fill="#FACC15" fill-opacity=".4"/>
                 <circle cx="126" cy="46" r="13" fill="#FACC15" fill-opacity=".7"/>
                 <path d="M121 46h5m-2.5-2.5v5" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round"/>
-                <rect x="62" y="78" width="56" height="7" rx="3.5" fill="#FACC15" fill-opacity=".22"/>
-                <rect x="62" y="92" width="40" height="5" rx="2.5" fill="#FACC15" fill-opacity=".15"/>
             </svg>
         </div>
-        <div class="pointer-events-none absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-gold-400/6 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-20 -left-20 w-64 h-64 rounded-full blur-3xl" style="background:rgba(250,204,21,0.04);"></div>
     </div>
 
-    {{-- Slide 4: Developer Info — dark purple premium --}}
+    {{-- Slide 4: Developer — dark purple premium --}}
     <div class="apk-slide absolute inset-0 overflow-hidden"
-         style="background:linear-gradient(135deg,#0D0618 0%,#160D2E 45%,#1F1040 75%,#2A1455 100%);">
-
-        {{-- Glow blobs --}}
-        <div class="pointer-events-none absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl" style="background:rgba(139,92,246,0.12)"></div>
-        <div class="pointer-events-none absolute -bottom-16 -left-16 w-56 h-56 rounded-full blur-3xl" style="background:rgba(168,85,247,0.08)"></div>
-        <div class="pointer-events-none absolute top-1/2 right-1/4 w-32 h-32 rounded-full blur-2xl" style="background:rgba(196,132,252,0.07)"></div>
-
-        <div class="relative z-10 h-full flex items-center justify-between px-6 sm:px-12">
-
-            {{-- Kiri: teks --}}
-            <div class="max-w-[240px] sm:max-w-sm">
-                {{-- Badge --}}
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold mb-4 border backdrop-blur-sm"
-                      style="background:rgba(139,92,246,0.2);color:#E9D5FF;border-color:rgba(139,92,246,0.4);">
-                    <i data-lucide="code-2" class="w-3 h-3"></i> Developer
-                </span>
-
-                {{-- Logo + nama --}}
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
-                         style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.35);">
+         style="background:linear-gradient(135deg,#0D0618 0%,#160D2E 45%,#2A1455 100%);">
+        <div class="pointer-events-none absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl" style="background:rgba(139,92,246,0.12);"></div>
+        <div class="pointer-events-none absolute -bottom-16 -left-16 w-56 h-56 rounded-full blur-3xl" style="background:rgba(168,85,247,0.08);"></div>
+        <div class="relative z-10 h-full flex items-center justify-between px-5 sm:px-12">
+            <div class="max-w-[210px] sm:max-w-sm">
+                <div class="inline-flex items-center gap-1.5 mb-3 sm:mb-4">
+                    <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.45);">
+                        <i data-lucide="code-2" class="w-2.5 h-2.5 sm:w-3 sm:h-3" style="color:#C4B5FD;"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-xs font-bold tracking-wide uppercase" style="color:#C4B5FD;letter-spacing:0.06em;">Developer</span>
+                </div>
+                <div class="flex items-center gap-2.5 mb-2 sm:mb-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                         style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.4);">
                         <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
-                             class="w-7 h-7 object-contain"
-                             style="filter:brightness(0) saturate(100%) invert(60%) sepia(60%) saturate(500%) hue-rotate(230deg) brightness(110%);">
+                             class="w-5 h-5 sm:w-7 sm:h-7 object-contain"
+                             style="filter:invert(1) brightness(2);">
                     </div>
                     <div>
-                        <p class="text-base sm:text-lg font-extrabold leading-none" style="color:#E9D5FF;">Vexalyn Dev</p>
-                        <p class="text-[10px] mt-0.5" style="color:rgba(196,181,253,0.6);">vexalyndev.my.id</p>
+                        <p class="text-sm sm:text-base font-extrabold leading-none" style="color:#E9D5FF;">Vexalyn Dev</p>
+                        <p class="text-[9px] sm:text-[10px] mt-0.5" style="color:rgba(196,181,253,0.6);">vexalyndev.my.id</p>
                     </div>
                 </div>
-
-                <p class="text-xs leading-relaxed mb-4" style="color:rgba(255,255,255,0.55);">
-                    Tim developer berpengalaman yang fokus membangun solusi digital untuk dunia pendidikan.
+                <p class="text-[10px] sm:text-xs leading-relaxed mb-3 sm:mb-4" style="color:rgba(255,255,255,0.5);">
+                    Tim developer yang fokus membangun solusi digital untuk dunia pendidikan.
                 </p>
-
                 <a href="https://vexalyndev.my.id" target="_blank"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 active:scale-95"
-                   style="background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(168,85,247,0.25));border:1px solid rgba(139,92,246,0.45);color:#DDD6FE;backdrop-filter:blur(8px);">
-                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                   class="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all hover:-translate-y-0.5 active:scale-95"
+                   style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.45);color:#DDD6FE;">
+                    <i data-lucide="external-link" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
                     Cek Profile Developer
                 </a>
             </div>
-
-            {{-- Kanan: ilustrasi SVG --}}
-            <div class="hidden sm:flex items-center justify-center w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
-                <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full opacity-75">
+            <div class="hidden sm:flex items-center justify-center w-36 h-36 md:w-44 md:h-44 flex-shrink-0">
+                <svg viewBox="0 0 180 180" fill="none" class="w-full h-full opacity-75">
                     <rect x="40" y="50" width="100" height="80" rx="10" fill="#8B5CF6" fill-opacity=".12" stroke="#8B5CF6" stroke-width="2.2"/>
                     <path d="M60 70 L72 80 L60 90" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M120 70 L108 80 L120 90" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M100 67 L80 93" stroke="#C4B5FD" stroke-width="2.5" stroke-linecap="round"/>
                     <circle cx="90" cy="38" r="15" fill="#8B5CF6" fill-opacity=".18" stroke="#8B5CF6" stroke-width="2"/>
-                    <path d="M90 30v16m-5-10l5-6 5 6" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <circle cx="40" cy="50" r="5" fill="#8B5CF6" fill-opacity=".3"/>
-                    <circle cx="140" cy="130" r="7" fill="#8B5CF6" fill-opacity=".2"/>
                     <circle cx="148" cy="55" r="4" fill="#A78BFA" fill-opacity=".35"/>
                 </svg>
             </div>
@@ -297,11 +286,11 @@
                 {{-- Footer --}}
                 <div class="flex items-center justify-center gap-1.5 mt-4 text-[10px] text-slate-400">
                     <span>Dikembangkan oleh</span>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border font-bold tracking-tight"
-                          style="background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(168,85,247,0.08));border-color:rgba(139,92,246,0.3);color:#A78BFA;">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border font-bold"
+                          style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.25);color:#A78BFA;">
                         <img src="{{ asset('images/logo-dev.png') }}" alt="Vexalyn Dev"
                              class="w-3 h-3 object-contain"
-                             style="filter:brightness(0) saturate(100%) invert(70%) sepia(60%) saturate(600%) hue-rotate(230deg);">
+                             style="filter:invert(1) brightness(1.5) sepia(1) hue-rotate(230deg) saturate(3);">
                         Vexalyn Dev
                     </span>
                     <span>· v1.0.0</span>
@@ -374,6 +363,11 @@
         grid-template-columns: 1fr 400px;
         align-items: start;
         gap: 32px;
+    }
+    /* Banner lebih tinggi di PC */
+    #apk-slider {
+        height: 280px !important;
+        min-height: 280px !important;
     }
 }
 
