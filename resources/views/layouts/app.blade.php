@@ -481,6 +481,15 @@
                     <i data-lucide="life-buoy" class="w-4 h-4"></i>
                     <span>Pusat Bantuan</span>
                 </a>
+
+                <a href="{{ route('download-apk') }}"
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('download-apk')
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="smartphone" class="w-4 h-4"></i>
+                    <span>Download APK</span>
+                </a>
             </div>
 
             <!-- PENGATURAN -->

@@ -98,6 +98,11 @@ Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/leaves/{leave}', [LeaveController::class, 'show'])->name('leaves.show');
+
+    // Download APK — semua role bisa akses
+    Route::get('/download-apk', function () {
+        return view('download-apk');
+    })->name('download-apk');
 });
 
 // Admin Routes
