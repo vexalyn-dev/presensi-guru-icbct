@@ -1,4 +1,4 @@
-# 📚 ICB CT - Sistem Presensi Guru
+# <img src="public/images/logo.png" height="36" alt="ICB CT Logo" style="vertical-align:middle;"> ICB CT - Sistem Presensi Guru
 
 <div align="center">
 
@@ -113,6 +113,7 @@
 - [x] Toast notifications
 - [x] Loading states & skeleton
 - [x] Modal animasi premium (spring cubic-bezier)
+- [x] Halaman Download APK dengan banner slider 4 slide, Netflix-style transition
 
 ---
 
@@ -508,7 +509,7 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 ### Made with ❤️ by
 
-**Vexalyn Dev**
+<img src="public/images/logo-dev-banner.png" height="32" alt="Vexalyn Dev">
 
 Full-Stack Developer
 
@@ -554,6 +555,6 @@ Full-Stack Developer
 
 **⭐ Star this repo if you find it helpful!**
 
-Made with ❤️ by **Vexalyn Dev** • © 2026 ICB Cinta Teknika
+Made with ❤️ by <img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;"> • © 2026 ICB Cinta Teknika
 
 [⬆️ Back to Top](#-icb-ct---sistem-presensi-guru)
