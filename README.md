@@ -556,6 +556,6 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 **⭐ Star this repo if you find it helpful!**
 
-Made with ❤️ by <img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;"> • © 2026 ICB Cinta Teknika
+Made with ❤️ by <img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;margin-bottom:3px;"> • © 2026 ICB Cinta Teknika
 
 [⬆️ Back to Top](#-icb-ct---sistem-presensi-guru)
