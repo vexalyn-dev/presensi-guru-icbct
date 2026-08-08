@@ -100,7 +100,7 @@
                 <div class="flex items-center gap-2.5 mb-2 sm:mb-3">
                     <img src="{{ asset('images/logo-dev-banner.png') }}" alt="Vexalyn Dev"
                          class="object-contain"
-                         style="height:28px;width:auto;max-width:160px;filter:invert(1) brightness(1.8);transform:translateX(-6px);">
+                         style="height:40px;width:auto;max-width:200px;filter:invert(1) brightness(1.8);transform:translateX(-10px);">
                 </div>
                 <p class="text-[10px] sm:text-xs leading-relaxed mb-3 sm:mb-4" style="color:rgba(255,255,255,0.5);">
                     Tim developer yang fokus membangun solusi digital untuk dunia pendidikan.
@@ -113,15 +113,9 @@
                 </a>
             </div>
             <div class="hidden sm:flex items-center justify-center w-36 h-36 md:w-44 md:h-44 flex-shrink-0">
-                <svg viewBox="0 0 180 180" fill="none" class="w-full h-full opacity-75">
-                    <rect x="40" y="50" width="100" height="80" rx="10" fill="#8B5CF6" fill-opacity=".12" stroke="#8B5CF6" stroke-width="2.2"/>
-                    <path d="M60 70 L72 80 L60 90" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M120 70 L108 80 L120 90" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M100 67 L80 93" stroke="#C4B5FD" stroke-width="2.5" stroke-linecap="round"/>
-                    <circle cx="90" cy="38" r="15" fill="#8B5CF6" fill-opacity=".18" stroke="#8B5CF6" stroke-width="2"/>
-                    <circle cx="40" cy="50" r="5" fill="#8B5CF6" fill-opacity=".3"/>
-                    <circle cx="148" cy="55" r="4" fill="#A78BFA" fill-opacity=".35"/>
-                </svg>
+                <img src="{{ asset('images/logo-dev-kotak.png') }}" alt="Vexalyn Dev"
+                     class="w-full h-full object-contain"
+                     style="filter:invert(1) brightness(1.8);opacity:0.75;">
             </div>
         </div>
     </div>
