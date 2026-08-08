@@ -100,7 +100,7 @@
                 <div class="flex items-center gap-2.5 mb-2 sm:mb-3">
                     <img src="{{ asset('images/logo-dev-banner.png') }}" alt="Vexalyn Dev"
                          class="object-contain"
-                         style="height:40px;width:auto;max-width:200px;filter:invert(1) brightness(1.8);transform:translateX(-10px);">
+                         style="height:40px;width:auto;max-width:200px;filter:invert(1) brightness(2);transform:translateX(-10px);">
                 </div>
                 <p class="text-[10px] sm:text-xs leading-relaxed mb-3 sm:mb-4" style="color:rgba(255,255,255,0.5);">
                     Tim developer yang fokus membangun solusi digital untuk dunia pendidikan.
