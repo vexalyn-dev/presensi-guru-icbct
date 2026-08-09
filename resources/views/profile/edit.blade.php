@@ -89,7 +89,7 @@
         {{-- Hidden inputs dipindah ke dalam form --}}
         <input type="file" id="photo-upload" name="photo" class="hidden" accept="image/*" onchange="handleAdminPhotoChange(this)">
 
-        <div class="p-6 flex flex-col md:flex-row items-center gap-6 -mt-10">
+        <div class="p-6 flex flex-col md:flex-row items-center gap-6 -mt-8 md:-mt-10">
             {{-- Avatar: klik = viewer --}}
             <div class="flex-shrink-0 relative group cursor-pointer" onclick="openPhotoViewer(this.querySelector('img').src)">
                 <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 p-1 shadow-xl">
@@ -102,8 +102,8 @@
                     </svg>
                 </div>
             </div>
-            <div class="flex-1 text-center md:text-left">
-                <h2 class="text-2xl font-bold text-navy-800 dark:text-white mb-1">{{ $user->name }}</h2>
+            <div class="flex-1 text-center md:text-left pt-10 md:pt-0">
+                <h2 class="text-2xl font-bold text-navy-800 dark:text-white mb-1 break-words">{{ $user->name }}</h2>
                 <p class="text-slate-500 dark:text-slate-400 mb-2">{{ $user->email }}</p>
                 <span class="inline-flex items-center px-3 py-1 bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300 rounded-full text-sm font-semibold">
                     {{ $user->role_name }}
