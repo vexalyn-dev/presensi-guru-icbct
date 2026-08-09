@@ -206,6 +206,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::post('/appearance', [SettingController::class, 'updateAppearance'])->name('appearance');
         Route::post('/notification', [SettingController::class, 'updateNotification'])->name('notification');
         Route::post('/maps', [SettingController::class, 'updateMaps'])->name('maps');
+        Route::post('/apk', [SettingController::class, 'updateApk'])->name('apk');
+        Route::delete('/apk', [SettingController::class, 'deleteApk'])->name('apk.delete');
         Route::post('/reset', [SettingController::class, 'reset'])->name('reset');
     });
     

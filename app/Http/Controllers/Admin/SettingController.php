@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\AppSetting;
+use App\Services\ApkService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -74,7 +75,9 @@ class SettingController extends Controller
             ],
         ];
 
-        return view('settings.index', compact('settings'));
+        $apkSetting = AppSetting::getInstance();
+
+        return view('settings.index', compact('settings', 'apkSetting'));
     }
 
     public function updateGeneral(Request $request)
@@ -190,6 +193,78 @@ class SettingController extends Controller
         $this->syncToAppSetting();
 
         return back()->with('success', 'Lokasi sekolah berhasil diperbarui!');
+    }
+
+    public function updateApk(Request $request)
+    {
+        $request->validate([
+            'apk_file'     => 'nullable|file|mimes:apk|max:102400', // max 100MB
+            'apk_name'     => 'nullable|string|max:100',
+            'apk_version'  => 'nullable|string|max:20',
+            'apk_min_android' => 'nullable|string|max:50',
+            'apk_changelog'   => 'nullable|string|max:1000',
+        ]);
+
+        $apkSetting = AppSetting::getInstance();
+        $data = [];
+
+        if ($request->hasFile('apk_file')) {
+            // Hapus file lama
+            if ($apkSetting->apk_file && Storage::disk('public')->exists($apkSetting->apk_file)) {
+                Storage::disk('public')->delete($apkSetting->apk_file);
+            }
+
+            $file = $request->file('apk_file');
+
+            // Extract metadata otomatis dari APK
+            $meta = ApkService::extractMetadata($file);
+
+            // Simpan file
+            $path = $file->storeAs('apk', $file->getClientOriginalName(), 'public');
+
+            $data['apk_file']        = $path;
+            $data['apk_size']        = $meta['apk_size'];
+            $data['apk_uploaded_at'] = now();
+
+            // Pakai metadata dari APK jika ada, fallback ke input manual
+            $data['apk_version']     = $meta['apk_version']     ?? $request->input('apk_version', $apkSetting->apk_version);
+            $data['apk_min_android'] = $meta['apk_min_android'] ?? $request->input('apk_min_android', $apkSetting->apk_min_android);
+            $data['apk_name']        = $request->input('apk_name') ?: ($meta['apk_name'] ?? $apkSetting->apk_name);
+        } else {
+            // Update info manual saja tanpa upload file
+            if ($request->filled('apk_name'))        $data['apk_name']        = $request->apk_name;
+            if ($request->filled('apk_version'))     $data['apk_version']     = $request->apk_version;
+            if ($request->filled('apk_min_android')) $data['apk_min_android'] = $request->apk_min_android;
+        }
+
+        if ($request->filled('apk_changelog')) {
+            $data['apk_changelog'] = $request->apk_changelog;
+        }
+
+        if (!empty($data)) {
+            $apkSetting->update($data);
+        }
+
+        // Juga update APK_DOWNLOAD_URL di env (opsional, untuk backward compat)
+        if (!empty($data['apk_file'])) {
+            Setting::set('apk_download_url', asset('storage/' . $data['apk_file']));
+        }
+
+        return back()->with('success', 'Pengaturan APK berhasil disimpan!')->with('active_tab', 'apk');
+    }
+
+    public function deleteApk()
+    {
+        $apkSetting = AppSetting::getInstance();
+        if ($apkSetting->apk_file && Storage::disk('public')->exists($apkSetting->apk_file)) {
+            Storage::disk('public')->delete($apkSetting->apk_file);
+        }
+        $apkSetting->update([
+            'apk_file' => null, 'apk_name' => null, 'apk_version' => null,
+            'apk_min_android' => null, 'apk_size' => null,
+            'apk_uploaded_at' => null, 'apk_changelog' => null,
+        ]);
+        return back()->with('success', 'APK berhasil dihapus.')->with('active_tab', 'apk');
     }
 
     public function reset()

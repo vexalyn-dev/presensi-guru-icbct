@@ -1,6 +1,7 @@
 @extends(activeLayout())
 @section('page-title', 'Download Aplikasi')
 @section('content')
+@php $apkSetting = \App\Models\AppSetting::getInstance(); @endphp
 
 {{-- ════════════════════════════════════════════════════════ --}}
 {{--  BANNER SLIDER                                          --}}
@@ -153,12 +154,12 @@
                 </div>
             @endif
             <div>
-                <h1 class="text-2xl font-extrabold text-navy-800 dark:text-white leading-tight">ICB CT <span class="text-gold-500">Presensi</span></h1>
+                <h1 class="text-2xl font-extrabold text-navy-800 dark:text-white leading-tight">{{ $apkSetting->apk_name ?? 'ICB CT' }} <span class="text-gold-500">Presensi</span></h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Presensi Guru — SMK ICB Cinta Teknika</p>
                 <div class="flex gap-2 mt-1.5 flex-wrap">
-                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">v1.0.0</span>
-                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Android 8.0+</span>
-                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">~12 MB</span>
+                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ $apkSetting->apk_version_label }}</span>
+                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ $apkSetting->apk_min_android ?? 'Android 8.0+' }}</span>
+                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ $apkSetting->apk_size_human }}</span>
                 </div>
             </div>
         </div>
@@ -236,7 +237,7 @@
                             <i data-lucide="zap" class="w-4 h-4 text-green-600"></i>
                         </div>
                         <p class="text-[10px] font-bold text-navy-800 dark:text-white">Ringan</p>
-                        <p class="text-[9px] text-slate-400 text-center leading-tight">Ukuran kecil ~12 MB</p>
+                        <p class="text-[9px] text-slate-400 text-center leading-tight">Ukuran kecil {{ $apkSetting->apk_size_human }}</p>
                     </div>
                     <div class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
                         <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
@@ -382,7 +383,7 @@
 </style>
 
 <script>
-var APK_URL = '{{ env("APK_DOWNLOAD_URL","") }}';
+var APK_URL = '{{ $apkSetting->apk_url ?? env("APK_DOWNLOAD_URL","") }}';
 
 // ── Slider dengan smooth transition ──
 var apkCurrent = 0;
