@@ -2,15 +2,17 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.2.0-blue?style=for-the-badge&logo=appveyor)
+![Version](https://img.shields.io/badge/version-2.3.0-blue?style=for-the-badge&logo=appveyor)
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge&logo=github)
+![Views](https://komarev.com/ghpvc/?username=vexalyn-dev&repo=presensi-guru-icbct&label=Views&color=0e75b6&style=for-the-badge)
+[![Stars](https://img.shields.io/github/stars/vexalyn-dev/presensi-guru-icbct?style=for-the-badge&color=yellow&logo=github)](https://github.com/vexalyn-dev/presensi-guru-icbct/stargazers)
 
 **Sistem Presensi Digital Modern untuk SMK ICB Cinta Teknika**
 
-[🚀 Fitur](#-fitur) • [📦 Instalasi](#-instalasi) • [📖 Dokumentasi](#-dokumentasi) • [🤝 Kontribusi](#-kontribusi)
+[🚀 Fitur](#-fitur-unggulan) • [📦 Instalasi](#-instalasi) • [📖 Dokumentasi](#dokumentasi) • [🤝 Kontribusi](#-kontribusi)
 
 </div>
 
@@ -35,7 +37,7 @@
 ### Authentication & Authorization
 - [x] Login dengan Email & Password
 - [x] Login dengan Google OAuth
-- [x] Multi-role (Admin, Guru, Operator)
+- [x] Multi-role (Admin, Guru, Operator, Guru Piket)
 - [x] Session management & auto-logout
 - [x] Password reset via email
 - [x] Modal sambutan saat login pertama
@@ -57,7 +59,7 @@
 - [x] Validasi durasi minimal mengajar
 - [x] Jadwal mengajar otomatis
 
-### 📡 Live Monitoring *(Baru)*
+### 📡 Live Monitoring
 - [x] Dashboard real-time siapa yang sedang mengajar
 - [x] Daftar guru yang belum scan masuk (dengan indikator keterlambatan)
 - [x] Daftar guru yang masih di sekolah (belum scan keluar)
@@ -65,29 +67,31 @@
 - [x] Timer durasi mengajar berjalan di client (tick per detik)
 - [x] Summary stats: Total Guru, Sudah Masuk, Sedang Mengajar, Belum Masuk, Sudah Keluar
 
-### 🔍 Log Aktivitas *(Baru)*
+### 🔍 Log Aktivitas
 - [x] Audit trail seluruh aktivitas sistem
 - [x] Log presensi masuk/keluar harian & kelas
-- [x] Log login/logout
-- [x] Log perubahan data guru
-- [x] Log perubahan pengaturan
+- [x] Log login/logout & perubahan data
 - [x] Filter berdasarkan kategori, user, dan tanggal
-- [x] Custom dropdown modern (Kategori & User)
 - [x] Detail modal per log (browser, OS, device, IP, GPS)
-- [x] Badge berwarna per jenis aktivitas
 - [x] Export ke Excel (PhpSpreadsheet, dengan styling)
 - [x] Cleanup log lama (configurable)
 
-### 🆘 Pusat Bantuan *(Baru)*
+### 🆘 Pusat Bantuan
 - [x] Form laporan Bug, Request Fitur, Maintenance, Pertanyaan
 - [x] Auto-detect metadata: browser, OS, device, IP
 - [x] Upload lampiran: PNG, JPG, PDF, MP4 (drag & drop)
-- [x] Integrasi webhook ke Vexalyn Dev Center (HTTPS + HMAC)
-- [x] Feature toggle via `.env` (`SUPPORT_CENTER_ENABLED`)
-- [x] Modal "Dalam Pengembangan" saat fitur di-nonaktifkan
+- [x] **Integrasi GitHub Issues** — tiket otomatis masuk ke GitHub
+- [x] **Integrasi ClickUp** — tiket otomatis masuk sebagai task di ClickUp
 - [x] Riwayat tiket dengan status tracking
-- [x] Detail tiket dengan timeline
-- [x] Tersedia untuk Admin & Guru
+- [x] Detail tiket dengan link ke GitHub & ClickUp
+- [x] Tersedia untuk semua role
+
+### 📱 Download APK
+- [x] Halaman download APK mobile
+- [x] Banner slider 4 slide dengan Netflix-style transition
+- [x] Upload & manajemen APK dari Settings
+- [x] Auto-extract metadata dari file APK (nama, versi, ukuran)
+- [x] Info versi, min Android, ukuran tampil otomatis dari DB
 
 ### ⚙️ Pengaturan Sistem
 - [x] Identitas sekolah (nama, logo, favicon)
@@ -95,7 +99,7 @@
 - [x] Konfigurasi radius GPS dengan visualisasi peta
 - [x] Custom color theme (Navy/Gold)
 - [x] Notifikasi email & alert
-- [x] Interactive map dengan Leaflet.js
+- [x] **Tab Aplikasi** — manajemen APK mobile (upload, versi, changelog)
 
 ### Laporan & Export
 - [x] Laporan harian, mingguan, bulanan
@@ -113,7 +117,6 @@
 - [x] Toast notifications
 - [x] Loading states & skeleton
 - [x] Modal animasi premium (spring cubic-bezier)
-- [x] Halaman Download APK dengan banner slider 4 slide, Netflix-style transition
 
 ---
 
@@ -133,6 +136,7 @@
 | **Charts** | Chart.js | 4.x |
 | **Excel** | PhpSpreadsheet | 5.x |
 | **Auth** | Laravel Socialite | 5.x |
+| **Issue Tracking** | GitHub Issues + ClickUp | — |
 
 </div>
 
@@ -140,7 +144,7 @@
 
 ## 📐 System Architecture
 
-### 🗂️ Database Schema (Updated)
+### 🗂️ Database Schema
 
 ```mermaid
 erDiagram
@@ -180,15 +184,6 @@ erDiagram
         time check_out_time
         string status
     }
-    ACTIVITY_LOGS {
-        int id
-        int user_id
-        string type
-        string category
-        string description
-        string ip_address
-        json properties
-    }
     SUPPORT_TICKETS {
         int id
         int user_id
@@ -198,6 +193,8 @@ erDiagram
         text description
         enum priority
         enum status
+        string github_issue_url
+        string clickup_task_url
         json metadata
         json attachments
     }
@@ -228,7 +225,27 @@ sequenceDiagram
     D-->>S: Success
     S->>L: Log scan_in_daily
     S-->>F: Response success
-    F-->>G: Toast + Notifikasi WhatsApp
+    F-->>G: Toast Notifikasi
+```
+
+### 🐛 Support Ticket Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant S as Server
+    participant D as Database
+    participant GH as GitHub Issues
+    participant CU as ClickUp
+
+    U->>S: Submit Laporan
+    S->>D: Simpan SupportTicket
+    S->>GH: createIssue()
+    GH-->>S: issue_url
+    S->>CU: createTask()
+    CU-->>S: task_url
+    S->>D: Update ticket (github_url + clickup_url)
+    S-->>U: Redirect + Success Toast
 ```
 
 ---
@@ -246,7 +263,7 @@ sequenceDiagram
 
 ### 🚀 Step-by-Step Installation
 
-#### 1️ Clone Repository
+#### 1️⃣ Clone Repository
 
 ```bash
 git clone https://github.com/vexalyn-dev/presensi-guru-icbct.git
@@ -285,12 +302,14 @@ GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
 
-# Vexalyn Dev Center (Pusat Bantuan)
-VEXALYN_API_URL=https://api.vexalyn.dev/v1
-VEXALYN_API_KEY=
-VEXALYN_PROJECT_ID=icb-ct-absensi-guru
-VEXALYN_WEBHOOK_SECRET=
-SUPPORT_CENTER_ENABLED=false
+# GitHub Issues (Pusat Bantuan)
+GITHUB_ISSUES_TOKEN=your-github-token
+GITHUB_ISSUES_REPO=owner/repo
+
+# ClickUp (Pusat Bantuan)
+CLICKUP_API_TOKEN=your-clickup-token
+CLICKUP_LIST_ID=your-list-id
+CLICKUP_ENABLED=true
 ```
 
 #### 4️⃣ Setup Database
@@ -321,12 +340,19 @@ Akses di: **http://localhost:8000**
 3. Set redirect URI: `http://your-domain/auth/google/callback`
 4. Isi `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` di `.env`
 
-### 🆘 Pusat Bantuan (Vexalyn Dev Center)
+### 🐛 Integrasi GitHub Issues
 
 ```env
-VEXALYN_API_KEY=your_api_key
-VEXALYN_WEBHOOK_SECRET=your_secret
-SUPPORT_CENTER_ENABLED=true   # true = aktif, false = mode pengembangan
+GITHUB_ISSUES_TOKEN=ghp_xxxxxxxxxxxx
+GITHUB_ISSUES_REPO=your-org/your-repo
+```
+
+### ✅ Integrasi ClickUp
+
+```env
+CLICKUP_API_TOKEN=pk_xxxxxxxxxxxx
+CLICKUP_LIST_ID=xxxxxxxxxxxx
+CLICKUP_ENABLED=true
 ```
 
 Setelah ubah `.env`, jalankan `php artisan config:clear`.
@@ -355,11 +381,7 @@ MAIL_ENCRYPTION=tls
 | **Guru** | `guru` | Presensi Harian, Presensi Kelas, Jadwal, Riwayat, Izin, Pusat Bantuan |
 | **Guru Piket** | `guru_piket` | Presensi Harian, Manual Presensi, Approval Izin, Jadwal Kerja, Kalender Libur, Pusat Bantuan |
 
-**Catatan:** `isAdmin()` di User model mengembalikan `true` untuk role `admin` **dan** `operator`. Middleware `role:admin` otomatis mengizinkan `operator` masuk tanpa perubahan route.
-
 ### 🔐 Demo Accounts
-
-Jalankan seeder untuk membuat akun demo:
 
 ```bash
 php artisan db:seed --class=DemoAccountSeeder
@@ -370,30 +392,12 @@ php artisan db:seed --class=DemoAccountSeeder
 | Operator | `operator@smkicb.sch.id` | `operator123` |
 | Guru Piket | `piket@smkicb.sch.id` | `piket123` |
 
-> Sebelum seeder, pastikan migration sudah dijalankan:
-> ```bash
-> php artisan migrate
-> ```
-> Atau jalankan SQL di phpMyAdmin:
-> ```sql
-> ALTER TABLE `users`
-> MODIFY COLUMN `role` ENUM('admin','guru','operator','guru_piket') NOT NULL DEFAULT 'guru';
-> ```
-
 ### 📡 Live Monitoring
-
-Live Monitoring menggunakan **AJAX Polling 15 detik** via Alpine.js:
 
 ```
 GET /admin/live-monitoring         → Halaman view
 GET /admin/live-monitoring/refresh → JSON data (polling endpoint)
 ```
-
-Data yang disajikan:
-- **Sedang Mengajar**: ClassAttendance `check_in_time` ada, `check_out_time` null
-- **Belum Scan Masuk**: TeachingSchedule hari ini yang jamnya sudah lewat tanpa scan
-- **Masih di Sekolah**: Attendance harian `check_in` ada, `check_out` null
-- **Sudah Selesai**: ClassAttendance lengkap IN + OUT
 
 ### 🔍 Log Aktivitas
 
@@ -406,24 +410,7 @@ Data yang disajikan:
 | `login` | auth | Login |
 | `logout` | auth | Logout |
 | `teacher_created` | teacher | Tambah Guru |
-| `teacher_updated` | teacher | Ubah Guru |
-| `teacher_deleted` | teacher | Hapus Guru |
 | `settings_change` | settings | Ubah Pengaturan |
-
-Menambahkan log baru:
-
-```php
-use App\Services\ActivityLogService;
-
-ActivityLogService::log(
-    'custom_type',
-    'category',
-    'Deskripsi aktivitas',
-    $subject,      // Model (opsional)
-    ['key' => 'value'],  // Extra properties
-    $user          // User (null = auth()->user())
-);
-```
 
 ---
 
@@ -432,7 +419,6 @@ ActivityLogService::log(
 ```bash
 php artisan test
 php artisan test --coverage
-php artisan test --filter=AttendanceTest
 ```
 
 ---
@@ -440,11 +426,6 @@ php artisan test --filter=AttendanceTest
 ## Deployment
 
 ### cPanel
-
-1. Upload ke `home/username/presensi-app/`
-2. Symlink `public/` ke `public_html/`
-3. Update `.env` production
-4. Jalankan di server:
 
 ```bash
 composer install --optimize-autoloader --no-dev
@@ -477,23 +458,11 @@ php artisan storage:link
 4. **Push** (`git push origin feature/NamaFitur`)
 5. **Open Pull Request**
 
-### Guidelines
-- Ikuti PSR-12 coding standard
-- Update dokumentasi jika menambah fitur baru
-- Pastikan semua tests passing
-
 ---
 
 ## 🐛 Bug Reports
 
-Gunakan **Pusat Bantuan** di dalam aplikasi (menu sidebar) atau buat GitHub Issue dengan template:
-
-```markdown
-**Deskripsi Bug:** ...
-**Steps to Reproduce:** ...
-**Expected Behavior:** ...
-**Environment:** OS, Browser, Laravel Version
-```
+Gunakan **Pusat Bantuan** di dalam aplikasi (menu sidebar) — laporan otomatis masuk ke GitHub Issues dan ClickUp.
 
 ---
 
@@ -534,13 +503,14 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 ## Acknowledgments
 
+- [Laravel](https://laravel.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Alpine.js](https://alpinejs.dev/)
 - [Leaflet.js](https://leafletjs.com/)
 - [Lucide Icons](https://lucide.dev/)
 - [Chart.js](https://www.chartjs.org/)
 - [PhpSpreadsheet](https://phpspreadsheet.readthedocs.io/)
-- [Laravel](https://laravel.com/)
+- [ClickUp API](https://clickup.com/api)
 
 ---
 
@@ -559,3 +529,5 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 Made with ❤️ by <img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;margin-bottom:3px;"> • © 2026 ICB Cinta Teknika
 
 [⬆️ Back to Top](#-icb-ct---sistem-presensi-guru)
+
+</div>
