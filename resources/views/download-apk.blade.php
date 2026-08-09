@@ -1,7 +1,18 @@
 @extends(activeLayout())
 @section('page-title', 'Download Aplikasi')
 @section('content')
-@php $apkSetting = \App\Models\AppSetting::getInstance(); @endphp
+@php
+    $apkSetting = \App\Models\AppSetting::getInstance();
+    // Fallback ke Setting key-value jika kolom APK belum ada (migration belum jalan)
+    if (!$apkSetting->apk_file && \App\Models\Setting::get('apk_file_path')) {
+        $apkSetting->apk_file        = \App\Models\Setting::get('apk_file_path');
+        $apkSetting->apk_name        = \App\Models\Setting::get('apk_name');
+        $apkSetting->apk_version     = \App\Models\Setting::get('apk_version');
+        $apkSetting->apk_min_android = \App\Models\Setting::get('apk_min_android');
+        $apkSetting->apk_size        = (int) \App\Models\Setting::get('apk_size', 0);
+        $apkSetting->apk_changelog   = \App\Models\Setting::get('apk_changelog');
+    }
+@endphp
 
 {{-- ════════════════════════════════════════════════════════ --}}
 {{--  BANNER SLIDER                                          --}}

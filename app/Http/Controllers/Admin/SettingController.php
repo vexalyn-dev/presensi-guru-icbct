@@ -78,8 +78,25 @@ class SettingController extends Controller
         $apkSetting = null;
         try {
             $apkSetting = AppSetting::getInstance();
+            // Jika kolom apk_file belum ada (migration belum jalan), baca dari Setting key-value
+            if (!isset($apkSetting->apk_file)) {
+                $apkSetting->apk_file        = Setting::get('apk_file_path', null);
+                $apkSetting->apk_name        = Setting::get('apk_name', null);
+                $apkSetting->apk_version     = Setting::get('apk_version', null);
+                $apkSetting->apk_min_android = Setting::get('apk_min_android', null);
+                $apkSetting->apk_size        = Setting::get('apk_size', null);
+                $apkSetting->apk_changelog   = Setting::get('apk_changelog', null);
+                $apkSetting->apk_uploaded_at = null;
+            } elseif (!$apkSetting->apk_file && Setting::get('apk_file_path')) {
+                // Kolom ada tapi kosong, sync dari Setting key-value
+                $apkSetting->apk_file        = Setting::get('apk_file_path', null);
+                $apkSetting->apk_name        = Setting::get('apk_name', null);
+                $apkSetting->apk_version     = Setting::get('apk_version', null);
+                $apkSetting->apk_min_android = Setting::get('apk_min_android', null);
+                $apkSetting->apk_size        = (int) Setting::get('apk_size', 0);
+            }
         } catch (\Throwable $e) {
-            // DB tidak aktif atau kolom belum ada
+            $apkSetting = null;
         }
 
         return view('settings.index', compact('settings', 'apkSetting'));
@@ -203,56 +220,76 @@ class SettingController extends Controller
     public function updateApk(Request $request)
     {
         $request->validate([
-            'apk_file'     => 'nullable|file|mimes:apk|max:102400', // max 100MB
-            'apk_name'     => 'nullable|string|max:100',
-            'apk_version'  => 'nullable|string|max:20',
+            'apk_file'        => 'nullable|file|mimes:apk|max:102400',
+            'apk_name'        => 'nullable|string|max:100',
+            'apk_version'     => 'nullable|string|max:20',
             'apk_min_android' => 'nullable|string|max:50',
             'apk_changelog'   => 'nullable|string|max:1000',
         ]);
 
-        $apkSetting = AppSetting::getInstance();
-        $data = [];
+        try {
+            $apkSetting = AppSetting::getInstance();
+            $data = [];
 
-        if ($request->hasFile('apk_file')) {
-            // Hapus file lama
-            if ($apkSetting->apk_file && Storage::disk('public')->exists($apkSetting->apk_file)) {
-                Storage::disk('public')->delete($apkSetting->apk_file);
+            if ($request->hasFile('apk_file')) {
+                // Hapus file lama
+                if ($apkSetting->apk_file && Storage::disk('public')->exists($apkSetting->apk_file)) {
+                    Storage::disk('public')->delete($apkSetting->apk_file);
+                }
+
+                $file = $request->file('apk_file');
+                $meta = ApkService::extractMetadata($file);
+                $path = $file->storeAs('apk', $file->getClientOriginalName(), 'public');
+
+                $data['apk_file']        = $path;
+                $data['apk_size']        = $meta['apk_size'];
+                $data['apk_uploaded_at'] = now();
+                $data['apk_version']     = $meta['apk_version']     ?? $request->input('apk_version', $apkSetting->apk_version);
+                $data['apk_min_android'] = $meta['apk_min_android'] ?? $request->input('apk_min_android', $apkSetting->apk_min_android);
+                $data['apk_name']        = $request->input('apk_name') ?: ($meta['apk_name'] ?? $apkSetting->apk_name);
+
+                // Simpan juga ke Setting key-value sebagai backup
+                Setting::set('apk_file_path', $path);
+                Setting::set('apk_name', $data['apk_name'] ?? 'ICB CT Presensi');
+                Setting::set('apk_version', $data['apk_version'] ?? '1.0.0');
+                Setting::set('apk_min_android', $data['apk_min_android'] ?? 'Android 8.0+');
+                Setting::set('apk_size', $meta['apk_size'] ?? 0, 'number');
+                Setting::set('apk_download_url', asset('storage/' . $path));
+            } else {
+                if ($request->filled('apk_name'))        { $data['apk_name'] = $request->apk_name; Setting::set('apk_name', $request->apk_name); }
+                if ($request->filled('apk_version'))     { $data['apk_version'] = $request->apk_version; Setting::set('apk_version', $request->apk_version); }
+                if ($request->filled('apk_min_android')) { $data['apk_min_android'] = $request->apk_min_android; Setting::set('apk_min_android', $request->apk_min_android); }
             }
 
-            $file = $request->file('apk_file');
+            if ($request->filled('apk_changelog')) {
+                $data['apk_changelog'] = $request->apk_changelog;
+                Setting::set('apk_changelog', $request->apk_changelog);
+            }
 
-            // Extract metadata otomatis dari APK
-            $meta = ApkService::extractMetadata($file);
+            if (!empty($data)) {
+                $apkSetting->update($data);
+            }
 
-            // Simpan file
-            $path = $file->storeAs('apk', $file->getClientOriginalName(), 'public');
+        } catch (\Throwable $e) {
+            // Fallback: simpan ke Setting key-value saja jika kolom AppSetting belum ada
+            if ($request->hasFile('apk_file')) {
+                $file = $request->file('apk_file');
+                $path = $file->storeAs('apk', $file->getClientOriginalName(), 'public');
+                $size = $file->getSize();
 
-            $data['apk_file']        = $path;
-            $data['apk_size']        = $meta['apk_size'];
-            $data['apk_uploaded_at'] = now();
-
-            // Pakai metadata dari APK jika ada, fallback ke input manual
-            $data['apk_version']     = $meta['apk_version']     ?? $request->input('apk_version', $apkSetting->apk_version);
-            $data['apk_min_android'] = $meta['apk_min_android'] ?? $request->input('apk_min_android', $apkSetting->apk_min_android);
-            $data['apk_name']        = $request->input('apk_name') ?: ($meta['apk_name'] ?? $apkSetting->apk_name);
-        } else {
-            // Update info manual saja tanpa upload file
-            if ($request->filled('apk_name'))        $data['apk_name']        = $request->apk_name;
-            if ($request->filled('apk_version'))     $data['apk_version']     = $request->apk_version;
-            if ($request->filled('apk_min_android')) $data['apk_min_android'] = $request->apk_min_android;
-        }
-
-        if ($request->filled('apk_changelog')) {
-            $data['apk_changelog'] = $request->apk_changelog;
-        }
-
-        if (!empty($data)) {
-            $apkSetting->update($data);
-        }
-
-        // Juga update APK_DOWNLOAD_URL di env (opsional, untuk backward compat)
-        if (!empty($data['apk_file'])) {
-            Setting::set('apk_download_url', asset('storage/' . $data['apk_file']));
+                Setting::set('apk_file_path', $path);
+                Setting::set('apk_name', $request->input('apk_name', 'ICB CT Presensi'));
+                Setting::set('apk_version', $request->input('apk_version', '1.0.0'));
+                Setting::set('apk_min_android', $request->input('apk_min_android', 'Android 8.0+'));
+                Setting::set('apk_size', $size, 'number');
+                Setting::set('apk_download_url', asset('storage/' . $path));
+                Setting::set('apk_changelog', $request->input('apk_changelog', ''));
+            } else {
+                if ($request->filled('apk_name'))        Setting::set('apk_name', $request->apk_name);
+                if ($request->filled('apk_version'))     Setting::set('apk_version', $request->apk_version);
+                if ($request->filled('apk_min_android')) Setting::set('apk_min_android', $request->apk_min_android);
+                if ($request->filled('apk_changelog'))   Setting::set('apk_changelog', $request->apk_changelog);
+            }
         }
 
         return back()->with('success', 'Pengaturan APK berhasil disimpan!')->with('active_tab', 'apk');
@@ -260,15 +297,29 @@ class SettingController extends Controller
 
     public function deleteApk()
     {
-        $apkSetting = AppSetting::getInstance();
-        if ($apkSetting->apk_file && Storage::disk('public')->exists($apkSetting->apk_file)) {
-            Storage::disk('public')->delete($apkSetting->apk_file);
+        try {
+            $apkSetting = AppSetting::getInstance();
+            if ($apkSetting->apk_file && Storage::disk('public')->exists($apkSetting->apk_file)) {
+                Storage::disk('public')->delete($apkSetting->apk_file);
+            }
+            $apkSetting->update([
+                'apk_file' => null, 'apk_name' => null, 'apk_version' => null,
+                'apk_min_android' => null, 'apk_size' => null,
+                'apk_uploaded_at' => null, 'apk_changelog' => null,
+            ]);
+        } catch (\Throwable $e) {
+            // ignore
         }
-        $apkSetting->update([
-            'apk_file' => null, 'apk_name' => null, 'apk_version' => null,
-            'apk_min_android' => null, 'apk_size' => null,
-            'apk_uploaded_at' => null, 'apk_changelog' => null,
-        ]);
+
+        // Hapus dari Setting key-value juga
+        $path = Setting::get('apk_file_path', '');
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+        foreach (['apk_file_path','apk_name','apk_version','apk_min_android','apk_size','apk_download_url','apk_changelog'] as $key) {
+            Setting::set($key, '');
+        }
+
         return back()->with('success', 'APK berhasil dihapus.')->with('active_tab', 'apk');
     }
 
