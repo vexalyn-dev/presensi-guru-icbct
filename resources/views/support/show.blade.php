@@ -128,6 +128,22 @@
                 </a>
             </div>
             @endif
+
+            {{-- ClickUp Task link jika ada --}}
+            @if($ticket->clickup_task_url)
+            <div class="card p-5 border-2 border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-900/10">
+                <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 12.5L8.5 18l4-4.5L17 18l4-5.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                    <p class="text-xs font-bold text-purple-800 dark:text-purple-400">Terdaftar di ClickUp</p>
+                </div>
+                <a href="{{ $ticket->clickup_task_url }}" target="_blank"
+                   class="text-xs text-purple-600 dark:text-purple-400 underline underline-offset-2 hover:text-purple-800 break-all">
+                    {{ $ticket->clickup_task_url }}
+                </a>
+            </div>
+            @endif
         </div>
     </div>
 </div>

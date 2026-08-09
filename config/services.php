@@ -40,4 +40,10 @@ return [
     'mapbox' => [
         'token' => env('MAPBOX_ACCESS_TOKEN'),
     ],
+
+    'clickup' => [
+        'api_token' => env('CLICKUP_API_TOKEN', ''),
+        'list_id'   => env('CLICKUP_LIST_ID', ''),
+        'enabled'   => env('CLICKUP_ENABLED', false),
+    ],
 ];

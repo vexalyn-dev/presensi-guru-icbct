@@ -10,7 +10,7 @@ class SupportTicket extends Model
     protected $fillable = [
         'user_id', 'ticket_id', 'type', 'title', 'description',
         'category', 'priority', 'status', 'metadata', 'attachments',
-        'extra_fields', 'github_issue_url',
+        'extra_fields', 'github_issue_url', 'clickup_task_url',
     ];
 
     protected $casts = [

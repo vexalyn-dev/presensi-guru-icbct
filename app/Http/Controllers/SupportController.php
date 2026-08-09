@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SupportTicket;
 use App\Models\User;
 use App\Services\GitHubService;
+use App\Services\ClickUpService;
 use App\Helpers\NotificationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -151,12 +152,24 @@ class SupportController extends Controller
             $ticket->update(['github_issue_url' => $result['issue_url']]);
         }
 
+        // Kirim ke ClickUp
+        $clickup       = new ClickUpService();
+        $clickupResult = $clickup->createTask($ticket);
+
+        if ($clickupResult['success'] && $clickupResult['task_url']) {
+            $ticket->update(['clickup_task_url' => $clickupResult['task_url']]);
+        }
+
         // Kirim notifikasi ke semua admin & guru_piket
         $this->notifyAdmins($ticket);
 
-        // Selalu sukses (data sudah tersimpan lokal, GitHub best-effort)
+        // Selalu sukses (data sudah tersimpan lokal, GitHub & ClickUp best-effort)
+        $links = [];
+        if ($result['issue_url'])             $links[] = 'GitHub: ' . $result['issue_url'];
+        if ($clickupResult['task_url'] ?? '') $links[] = 'ClickUp: ' . $clickupResult['task_url'];
+
         $successMsg = '✅ Laporan berhasil dikirim! ID lokal: #' . $ticket->id
-                    . ($result['issue_url'] ? ' · GitHub: ' . $result['issue_url'] : '');
+                    . (!empty($links) ? ' · ' . implode(' · ', $links) : '');
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
