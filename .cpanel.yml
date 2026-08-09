@@ -4,3 +4,6 @@ deployment:
     - export DEPLOYPATH=/home/smkicbte/public_html/presensi-guru.smkicb-teknika.sch.id/
     - /bin/cp -R * $DEPLOYPATH
     - /bin/cp -R .env $DEPLOYPATH
+    - cd $DEPLOYPATH && /usr/local/bin/php artisan migrate --force --no-interaction
+    - cd $DEPLOYPATH && /usr/local/bin/php artisan config:clear
+    - cd $DEPLOYPATH && /usr/local/bin/php artisan view:clear
