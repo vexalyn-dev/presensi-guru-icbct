@@ -349,7 +349,7 @@
                 </svg>
             </div>
             <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">Unduhan Dimulai! 🎉</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2">File APK udah mulai diunduh ke perangkat lo.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2">File APK udah mulai diunduh ke perangkat kamu.</p>
             <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">Cek folder <span class="font-semibold text-navy-800 dark:text-slate-200">Downloads</span> terus install deh! 🙌</p>
             <button onclick="closeApkModal()" class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg">Oke, siap install!</button>
         </div>
