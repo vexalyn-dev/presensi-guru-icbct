@@ -223,76 +223,67 @@ class SettingController extends Controller
     public function updateApk(Request $request)
     {
         $request->validate([
-            'apk_file'        => 'nullable|file|mimes:apk|max:102400',
+            'apk_file'        => 'nullable|file|max:102400',  // hapus mimes:apk — MIME APK = application/zip
             'apk_name'        => 'nullable|string|max:100',
             'apk_version'     => 'nullable|string|max:20',
             'apk_min_android' => 'nullable|string|max:50',
             'apk_changelog'   => 'nullable|string|max:1000',
         ]);
 
-        try {
-            $apkSetting = AppSetting::getInstance();
-            $data = [];
+        // Cek ekstensi manual karena mimes:apk tidak reliable
+        if ($request->hasFile('apk_file')) {
+            $ext = strtolower($request->file('apk_file')->getClientOriginalExtension());
+            if ($ext !== 'apk') {
+                return back()->withErrors(['apk_file' => 'File harus berekstensi .apk'])->with('active_tab', 'apk');
+            }
+        }
 
-            if ($request->hasFile('apk_file')) {
-                // Hapus file lama
-                if ($apkSetting->apk_file && Storage::disk('public')->exists($apkSetting->apk_file)) {
-                    Storage::disk('public')->delete($apkSetting->apk_file);
-                }
+        $apkSetting = AppSetting::getInstance();
+        $data = [];
 
-                $file = $request->file('apk_file');
+        if ($request->hasFile('apk_file')) {
+            // Hapus file lama
+            if ($apkSetting->apk_file && Storage::disk('public')->exists($apkSetting->apk_file)) {
+                Storage::disk('public')->delete($apkSetting->apk_file);
+            }
+
+            $file = $request->file('apk_file');
+
+            try {
                 $meta = ApkService::extractMetadata($file);
-                $path = $file->storeAs('apk', $file->getClientOriginalName(), 'public');
-
-                $data['apk_file']        = $path;
-                $data['apk_size']        = $meta['apk_size'];
-                $data['apk_uploaded_at'] = now();
-                $data['apk_version']     = $meta['apk_version']     ?? $request->input('apk_version', $apkSetting->apk_version);
-                $data['apk_min_android'] = $meta['apk_min_android'] ?? $request->input('apk_min_android', $apkSetting->apk_min_android);
-                $data['apk_name']        = $request->input('apk_name') ?: ($meta['apk_name'] ?? $apkSetting->apk_name);
-
-                // Simpan juga ke Setting key-value sebagai backup
-                Setting::set('apk_file_path', $path);
-                Setting::set('apk_name', $data['apk_name'] ?? 'ICB CT Presensi');
-                Setting::set('apk_version', $data['apk_version'] ?? '1.0.0');
-                Setting::set('apk_min_android', $data['apk_min_android'] ?? 'Android 8.0+');
-                Setting::set('apk_size', $meta['apk_size'] ?? 0, 'number');
-                Setting::set('apk_download_url', asset('storage/' . $path));
-            } else {
-                if ($request->filled('apk_name'))        { $data['apk_name'] = $request->apk_name; Setting::set('apk_name', $request->apk_name); }
-                if ($request->filled('apk_version'))     { $data['apk_version'] = $request->apk_version; Setting::set('apk_version', $request->apk_version); }
-                if ($request->filled('apk_min_android')) { $data['apk_min_android'] = $request->apk_min_android; Setting::set('apk_min_android', $request->apk_min_android); }
+            } catch (\Throwable $e) {
+                $meta = ['apk_size' => $file->getSize(), 'apk_version' => null, 'apk_min_android' => null, 'apk_name' => null];
             }
 
-            if ($request->filled('apk_changelog')) {
-                $data['apk_changelog'] = $request->apk_changelog;
-                Setting::set('apk_changelog', $request->apk_changelog);
-            }
+            $path = $file->storeAs('apk', $file->getClientOriginalName(), 'public');
 
-            if (!empty($data)) {
-                $apkSetting->update($data);
-            }
+            $data['apk_file']        = $path;
+            $data['apk_size']        = $file->getSize(); // gunakan getSize() langsung, lebih reliable
+            $data['apk_uploaded_at'] = now();
+            $data['apk_version']     = $request->input('apk_version') ?: ($meta['apk_version'] ?? '1.0.0');
+            $data['apk_min_android'] = $request->input('apk_min_android') ?: ($meta['apk_min_android'] ?? 'Android 8.0+');
+            $data['apk_name']        = $request->input('apk_name') ?: ($meta['apk_name'] ?? 'ICB CT Presensi');
 
-        } catch (\Throwable $e) {
-            // Fallback: simpan ke Setting key-value saja jika kolom AppSetting belum ada
-            if ($request->hasFile('apk_file')) {
-                $file = $request->file('apk_file');
-                $path = $file->storeAs('apk', $file->getClientOriginalName(), 'public');
-                $size = $file->getSize();
+            // Simpan juga ke Setting key-value sebagai backup
+            Setting::set('apk_file_path', $path);
+            Setting::set('apk_name', $data['apk_name']);
+            Setting::set('apk_version', $data['apk_version']);
+            Setting::set('apk_min_android', $data['apk_min_android']);
+            Setting::set('apk_size', $data['apk_size'], 'number');
+            Setting::set('apk_download_url', asset('storage/' . $path));
+        } else {
+            if ($request->filled('apk_name'))        { $data['apk_name'] = $request->apk_name; Setting::set('apk_name', $request->apk_name); }
+            if ($request->filled('apk_version'))     { $data['apk_version'] = $request->apk_version; Setting::set('apk_version', $request->apk_version); }
+            if ($request->filled('apk_min_android')) { $data['apk_min_android'] = $request->apk_min_android; Setting::set('apk_min_android', $request->apk_min_android); }
+        }
 
-                Setting::set('apk_file_path', $path);
-                Setting::set('apk_name', $request->input('apk_name', 'ICB CT Presensi'));
-                Setting::set('apk_version', $request->input('apk_version', '1.0.0'));
-                Setting::set('apk_min_android', $request->input('apk_min_android', 'Android 8.0+'));
-                Setting::set('apk_size', $size, 'number');
-                Setting::set('apk_download_url', asset('storage/' . $path));
-                Setting::set('apk_changelog', $request->input('apk_changelog', ''));
-            } else {
-                if ($request->filled('apk_name'))        Setting::set('apk_name', $request->apk_name);
-                if ($request->filled('apk_version'))     Setting::set('apk_version', $request->apk_version);
-                if ($request->filled('apk_min_android')) Setting::set('apk_min_android', $request->apk_min_android);
-                if ($request->filled('apk_changelog'))   Setting::set('apk_changelog', $request->apk_changelog);
-            }
+        if ($request->filled('apk_changelog')) {
+            $data['apk_changelog'] = $request->apk_changelog;
+            Setting::set('apk_changelog', $request->apk_changelog);
+        }
+
+        if (!empty($data)) {
+            $apkSetting->update($data);
         }
 
         return back()->with('success', 'Pengaturan APK berhasil disimpan!')->with('active_tab', 'apk');
