@@ -942,11 +942,11 @@
                             <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-6 text-center hover:border-gold-400 transition-colors cursor-pointer"
                                  x-data="{ dragover: false, filename: '' }"
                                  @dragover.prevent="dragover = true" @dragleave="dragover = false"
-                                 @drop.prevent="dragover = false; filename = $event.dataTransfer.files[0]?.name; $refs.apkInput.files = $event.dataTransfer.files"
+                                 @drop.prevent="dragover = false; filename = $event.dataTransfer.files[0]?.name; $refs.apkInput.files = $event.dataTransfer.files; parseApkFilename($event.dataTransfer.files[0]?.name)"
                                  :class="dragover ? 'border-gold-400 bg-gold-50 dark:bg-gold-900/10' : ''">
                                 <input type="file" name="apk_file" accept=".apk" x-ref="apkInput"
                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                       @change="filename = $event.target.files[0]?.name">
+                                       @change="filename = $event.target.files[0]?.name; parseApkFilename($event.target.files[0]?.name)">
                                 <div class="pointer-events-none">
                                     <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-slate-400 mb-2"></i>
                                     <p class="text-sm font-semibold text-slate-600 dark:text-slate-300" x-text="filename || 'Drag & drop atau klik untuk pilih APK'"></p>
@@ -961,7 +961,7 @@
                                 <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">Nama Aplikasi <span class="text-[10px] font-normal text-slate-400">auto dari APK</span></label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><i data-lucide="type" class="w-4 h-4"></i></span>
-                                    <input type="text" name="apk_name" value="{{ old('apk_name', $apkSetting?->apk_name ?? 'ICB CT Presensi') }}" placeholder="ICB CT Presensi"
+                                    <input type="text" name="apk_name" id="apk_name_input" value="{{ old('apk_name', $apkSetting?->apk_name ?? 'ICB CT Presensi') }}" placeholder="ICB CT Presensi"
                                            class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-navy-800 dark:text-white focus:ring-2 focus:ring-gold-400 outline-none transition">
                                 </div>
                             </div>
@@ -969,7 +969,7 @@
                                 <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">Versi <span class="text-[10px] font-normal text-slate-400">auto dari APK</span></label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><i data-lucide="tag" class="w-4 h-4"></i></span>
-                                    <input type="text" name="apk_version" value="{{ old('apk_version', $apkSetting?->apk_version ?? '1.0.0') }}" placeholder="1.0.0"
+                                    <input type="text" name="apk_version" id="apk_version_input" value="{{ old('apk_version', $apkSetting?->apk_version ?? '1.0.0') }}" placeholder="1.0.0"
                                            class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-navy-800 dark:text-white focus:ring-2 focus:ring-gold-400 outline-none transition">
                                 </div>
                             </div>
@@ -977,7 +977,7 @@
                                 <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">Min. Android <span class="text-[10px] font-normal text-slate-400">auto dari APK</span></label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><i data-lucide="smartphone" class="w-4 h-4"></i></span>
-                                    <input type="text" name="apk_min_android" value="{{ old('apk_min_android', $apkSetting?->apk_min_android ?? 'Android 8.0+') }}" placeholder="Android 8.0+"
+                                    <input type="text" name="apk_min_android" id="apk_min_android_input" value="{{ old('apk_min_android', $apkSetting?->apk_min_android ?? 'Android 8.0+') }}" placeholder="Android 8.0+"
                                            class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-navy-800 dark:text-white focus:ring-2 focus:ring-gold-400 outline-none transition">
                                 </div>
                             </div>
@@ -1002,6 +1002,30 @@
         </div>
 
         <!-- Reset Confirmation Modal -->
+
+        <script>
+        // Auto-fill nama & versi dari nama file APK
+        function parseApkFilename(filename) {
+            if (!filename) return;
+            // Hapus ekstensi .apk
+            var base = filename.replace(/\.apk$/i, '');
+            // Coba parse versi: cari pola angka seperti 1.0.0 atau v1.2.3
+            var versionMatch = base.match(/[vV]?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/);
+            if (versionMatch) {
+                var ver = versionMatch[1];
+                document.getElementById('apk_version_input').value = ver;
+                // Hapus versi dari nama untuk ambil nama bersih
+                var cleanName = base.replace(/[-_\s]*[vV]?\d+\.\d+(?:\.\d+)?(?:\.\d+)?[-_\s]*/g, '').replace(/[-_]/g, ' ').trim();
+                if (cleanName) {
+                    document.getElementById('apk_name_input').value = cleanName || 'ICB CT Presensi';
+                }
+            } else {
+                // Tidak ada versi, pakai nama file sebagai nama app
+                var cleanName = base.replace(/[-_]/g, ' ').trim();
+                if (cleanName) document.getElementById('apk_name_input').value = cleanName;
+            }
+        }
+        </script>
         <div x-show="showResetModal" x-cloak @keydown.escape.window="showResetModal = false"
              @click.self="showResetModal = false"
              class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"

@@ -284,15 +284,30 @@
     <div id="apk-modal-box" style="background:#fff;width:100%;max-width:360px;border-radius:24px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.35);transform:translateY(30px) scale(0.96);opacity:0;transition:transform .3s cubic-bezier(0.22,1,0.36,1),opacity .25s ease;" class="dark:!bg-slate-900">
         <div class="h-1.5 bg-gradient-to-r from-navy-800 via-gold-400 to-amber-400"></div>
 
-        {{-- Panel: Belum tersedia --}}
+        {{-- Panel: Belum tersedia / Segera hadir --}}
         <div id="apk-panel-soon" class="p-8 text-center">
+            @if($apkSetting?->apk_file)
+            {{-- APK sudah tersedia tapi URL tidak diset -- fallback info --}}
+            <div class="w-16 h-16 bg-navy-100 dark:bg-navy-800/50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <i data-lucide="smartphone" class="w-8 h-8 text-navy-600 dark:text-gold-400"></i>
+            </div>
+            <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">APK Tersedia!</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-1">
+                <span class="font-semibold text-navy-800 dark:text-white">{{ $apkSetting->apk_name ?? 'ICB CT Presensi' }}</span>
+                · {{ $apkSetting->apk_version_label }}
+            </p>
+            <p class="text-xs text-slate-400 mb-6">{{ $apkSetting->apk_size_human }} · {{ $apkSetting->apk_min_android ?? 'Android 8.0+' }}</p>
+            @else
             <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-5">
                 <i data-lucide="construction" class="w-8 h-8 text-amber-500"></i>
             </div>
             <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">Bentar dulu ya! 🙏</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2">APK-nya lagi kita siapkan biar mantap banget sebelum rilis.</p>
             <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">Nantikan update-nya, ya! <span class="font-semibold text-navy-800 dark:text-slate-200">Gak bakal lama kok 🚀</span></p>
-            <button onclick="closeApkModal()" class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg">Siap, ditunggu!</button>
+            @endif
+            <button onclick="closeApkModal()" class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg">
+                {{ $apkSetting?->apk_file ? 'Tutup' : 'Siap, ditunggu!' }}
+            </button>
         </div>
 
         {{-- Panel: Loading --}}
