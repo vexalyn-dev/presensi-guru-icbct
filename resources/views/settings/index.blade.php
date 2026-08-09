@@ -880,6 +880,127 @@
             </div>
         </div>
 
+        {{-- ═══════════════════════════════════════════════════════════
+             TAB 6 — APLIKASI (APK Management)
+        ═══════════════════════════════════════════════════════════ --}}
+        <div x-show="activeTab === 'apk'"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+             style="display:none;">
+
+            <form action="{{ route('settings.apk') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="card overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-navy-700 to-navy-900 rounded-xl flex items-center justify-center shadow-md">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-gold-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-navy-800 dark:text-white">Manajemen APK</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Upload file APK — metadata diisi otomatis dari file</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-6">
+
+                        {{-- Status APK --}}
+                        @if($apkSetting?->apk_file)
+                        <div class="flex items-center gap-4 p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50">
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="package-check" class="w-6 h-6 text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-green-800 dark:text-green-300">APK Terpasang</p>
+                                <p class="text-xs text-green-600 dark:text-green-400 truncate">{{ $apkSetting->apk_name ?? 'ICB CT Presensi' }} · {{ $apkSetting->apk_version_label }} · {{ $apkSetting->apk_size_human }}</p>
+                                @if($apkSetting->apk_uploaded_at)
+                                <p class="text-[10px] text-green-500 mt-0.5">Diupload {{ $apkSetting->apk_uploaded_at->diffForHumans() }}</p>
+                                @endif
+                            </div>
+                            <form action="{{ route('settings.apk.delete') }}" method="POST" onsubmit="return confirm('Hapus APK ini?')" class="flex-shrink-0">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-100 hover:bg-red-200 text-red-600 dark:bg-red-900/30 dark:text-red-400 transition-colors">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Hapus
+                                </button>
+                            </form>
+                        </div>
+                        @else
+                        <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700">
+                            <i data-lucide="package-x" class="w-5 h-5 text-slate-400 flex-shrink-0"></i>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Belum ada APK yang diupload.</p>
+                        </div>
+                        @endif
+
+                        {{-- Upload --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
+                                Upload File APK <span class="text-[10px] font-normal text-slate-400 ml-1">(max 100MB · .apk) — metadata otomatis terisi</span>
+                            </label>
+                            <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-6 text-center hover:border-gold-400 transition-colors cursor-pointer"
+                                 x-data="{ dragover: false, filename: '' }"
+                                 @dragover.prevent="dragover = true" @dragleave="dragover = false"
+                                 @drop.prevent="dragover = false; filename = $event.dataTransfer.files[0]?.name; $refs.apkInput.files = $event.dataTransfer.files"
+                                 :class="dragover ? 'border-gold-400 bg-gold-50 dark:bg-gold-900/10' : ''">
+                                <input type="file" name="apk_file" accept=".apk" x-ref="apkInput"
+                                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                       @change="filename = $event.target.files[0]?.name">
+                                <div class="pointer-events-none">
+                                    <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-slate-400 mb-2"></i>
+                                    <p class="text-sm font-semibold text-slate-600 dark:text-slate-300" x-text="filename || 'Drag & drop atau klik untuk pilih APK'"></p>
+                                    <p class="text-xs text-slate-400 mt-1">Format: .apk · Maks 100MB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Info Manual --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">Nama Aplikasi <span class="text-[10px] font-normal text-slate-400">auto dari APK</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><i data-lucide="type" class="w-4 h-4"></i></span>
+                                    <input type="text" name="apk_name" value="{{ old('apk_name', $apkSetting?->apk_name ?? 'ICB CT Presensi') }}" placeholder="ICB CT Presensi"
+                                           class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-navy-800 dark:text-white focus:ring-2 focus:ring-gold-400 outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">Versi <span class="text-[10px] font-normal text-slate-400">auto dari APK</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><i data-lucide="tag" class="w-4 h-4"></i></span>
+                                    <input type="text" name="apk_version" value="{{ old('apk_version', $apkSetting?->apk_version ?? '1.0.0') }}" placeholder="1.0.0"
+                                           class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-navy-800 dark:text-white focus:ring-2 focus:ring-gold-400 outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">Min. Android <span class="text-[10px] font-normal text-slate-400">auto dari APK</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><i data-lucide="smartphone" class="w-4 h-4"></i></span>
+                                    <input type="text" name="apk_min_android" value="{{ old('apk_min_android', $apkSetting?->apk_min_android ?? 'Android 8.0+') }}" placeholder="Android 8.0+"
+                                           class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-navy-800 dark:text-white focus:ring-2 focus:ring-gold-400 outline-none transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-1.5">Changelog</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-slate-400"><i data-lucide="file-text" class="w-4 h-4"></i></span>
+                                    <textarea name="apk_changelog" rows="2" placeholder="Perubahan di versi ini..."
+                                              class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm text-navy-800 dark:text-white focus:ring-2 focus:ring-gold-400 outline-none transition resize-none">{{ old('apk_changelog', $apkSetting?->apk_changelog) }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-4 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+                        <button type="submit" class="flex items-center gap-2 px-6 py-2.5 bg-navy-800 hover:bg-navy-700 dark:bg-gold-400 dark:hover:bg-gold-300 text-white dark:text-navy-900 rounded-xl font-bold text-sm transition-all shadow-lg hover:-translate-y-0.5">
+                            <i data-lucide="save" class="w-4 h-4"></i> Simpan Pengaturan APK
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <!-- Reset Confirmation Modal -->
         <div x-show="showResetModal" x-cloak @keydown.escape.window="showResetModal = false"
              @click.self="showResetModal = false"
@@ -1328,10 +1449,6 @@
         if (window.lucide) lucide.createIcons();
     });
 </script>
-
-    {{-- ═══════════════════════════════════════════════════════════
-         TAB 6 — APLIKASI (APK Management)
-    ═══════════════════════════════════════════════════════════ --}}
 
 <style>
     .fade-in { animation: fadeIn 0.5s ease-out forwards; }
