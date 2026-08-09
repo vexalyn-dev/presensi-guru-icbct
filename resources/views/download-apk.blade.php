@@ -4,7 +4,8 @@
 @php
     $apkSetting = \App\Models\AppSetting::getInstance();
     // Fallback ke Setting key-value jika kolom APK belum ada (migration belum jalan)
-    if (!$apkSetting->apk_file && \App\Models\Setting::get('apk_file_path')) {
+    $hasApkCol = \Illuminate\Support\Facades\Schema::hasColumn('app_settings', 'apk_file');
+    if (!$hasApkCol || (!$apkSetting->apk_file && \App\Models\Setting::get('apk_file_path'))) {
         $apkSetting->apk_file        = \App\Models\Setting::get('apk_file_path');
         $apkSetting->apk_name        = \App\Models\Setting::get('apk_name');
         $apkSetting->apk_version     = \App\Models\Setting::get('apk_version');
@@ -12,6 +13,9 @@
         $apkSetting->apk_size        = (int) \App\Models\Setting::get('apk_size', 0);
         $apkSetting->apk_changelog   = \App\Models\Setting::get('apk_changelog');
     }
+    $apkDownloadUrl = $apkSetting->apk_file
+        ? asset('storage/' . $apkSetting->apk_file)
+        : (\App\Models\Setting::get('apk_download_url') ?: '');
 @endphp
 
 {{-- ════════════════════════════════════════════════════════ --}}
@@ -409,7 +413,7 @@
 </style>
 
 <script>
-var APK_URL = '{{ $apkSetting->apk_url ?? env("APK_DOWNLOAD_URL","") }}';
+var APK_URL = '{{ $apkDownloadUrl }}';
 
 // ── Slider dengan smooth transition ──
 var apkCurrent = 0;
@@ -504,11 +508,11 @@ document.getElementById('apk-btn').addEventListener('click', function(){
         setTimeout(function(){
             var a = document.createElement('a');
             a.href = APK_URL;
-            a.download = 'ICB-CT-Presensi.apk';
+            a.download = '{{ $apkSetting->apk_name ? str_replace(" ","-",$apkSetting->apk_name) : "ICB-CT-Presensi" }}.apk';
             document.body.appendChild(a);
             a.click(); a.remove();
             showApkModal('done');
-        }, 2000);
+        }, 1800);
     }
 });
 

@@ -77,24 +77,27 @@ class SettingController extends Controller
 
         $apkSetting = null;
         try {
-            $apkSetting = AppSetting::getInstance();
-            // Jika kolom apk_file belum ada (migration belum jalan), baca dari Setting key-value
-            if (!isset($apkSetting->apk_file)) {
-                $apkSetting->apk_file        = Setting::get('apk_file_path', null);
-                $apkSetting->apk_name        = Setting::get('apk_name', null);
-                $apkSetting->apk_version     = Setting::get('apk_version', null);
-                $apkSetting->apk_min_android = Setting::get('apk_min_android', null);
-                $apkSetting->apk_size        = Setting::get('apk_size', null);
-                $apkSetting->apk_changelog   = Setting::get('apk_changelog', null);
-                $apkSetting->apk_uploaded_at = null;
-            } elseif (!$apkSetting->apk_file && Setting::get('apk_file_path')) {
-                // Kolom ada tapi kosong, sync dari Setting key-value
-                $apkSetting->apk_file        = Setting::get('apk_file_path', null);
-                $apkSetting->apk_name        = Setting::get('apk_name', null);
-                $apkSetting->apk_version     = Setting::get('apk_version', null);
-                $apkSetting->apk_min_android = Setting::get('apk_min_android', null);
-                $apkSetting->apk_size        = (int) Setting::get('apk_size', 0);
+            $appSet = AppSetting::getInstance();
+            // Cek apakah kolom apk_file sudah ada di database
+            $hasApkColumns = \Illuminate\Support\Facades\Schema::hasColumn('app_settings', 'apk_file');
+            if (!$hasApkColumns) {
+                // Migration belum jalan — baca dari Setting key-value
+                $appSet->apk_file        = Setting::get('apk_file_path') ?: null;
+                $appSet->apk_name        = Setting::get('apk_name') ?: null;
+                $appSet->apk_version     = Setting::get('apk_version') ?: null;
+                $appSet->apk_min_android = Setting::get('apk_min_android') ?: null;
+                $appSet->apk_size        = (int) Setting::get('apk_size', 0);
+                $appSet->apk_changelog   = Setting::get('apk_changelog') ?: null;
+                $appSet->apk_uploaded_at = null;
+            } elseif (!$appSet->apk_file && Setting::get('apk_file_path')) {
+                // Kolom ada tapi kosong — sync dari Setting
+                $appSet->apk_file        = Setting::get('apk_file_path');
+                $appSet->apk_name        = Setting::get('apk_name');
+                $appSet->apk_version     = Setting::get('apk_version');
+                $appSet->apk_min_android = Setting::get('apk_min_android');
+                $appSet->apk_size        = (int) Setting::get('apk_size', 0);
             }
+            $apkSetting = $appSet;
         } catch (\Throwable $e) {
             $apkSetting = null;
         }
