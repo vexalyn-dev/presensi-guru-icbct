@@ -75,7 +75,12 @@ class SettingController extends Controller
             ],
         ];
 
-        $apkSetting = AppSetting::getInstance();
+        $apkSetting = null;
+        try {
+            $apkSetting = AppSetting::getInstance();
+        } catch (\Throwable $e) {
+            // DB tidak aktif atau kolom belum ada
+        }
 
         return view('settings.index', compact('settings', 'apkSetting'));
     }
