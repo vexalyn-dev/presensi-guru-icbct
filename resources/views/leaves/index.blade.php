@@ -192,11 +192,12 @@
 
     // ── Context Menu Klik Kanan ──
     let _ctxLeaveTarget = null;
-    const ctxMenu = document.getElementById('leave-context-menu');
 
     function showLeaveContextMenu(e, el) {
         e.preventDefault();
         _ctxLeaveTarget = el;
+        const ctxMenu = document.getElementById('leave-context-menu');
+        if (!ctxMenu) return;
         ctxMenu.style.display = 'block';
         let x = e.pageX, y = e.pageY;
         const menuW = ctxMenu.offsetWidth || 180;
@@ -208,10 +209,14 @@
     }
 
     document.addEventListener('click', () => {
+        const ctxMenu = document.getElementById('leave-context-menu');
         if (ctxMenu) ctxMenu.style.display = 'none';
     });
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && ctxMenu) ctxMenu.style.display = 'none';
+        if (e.key === 'Escape') {
+            const ctxMenu = document.getElementById('leave-context-menu');
+            if (ctxMenu) ctxMenu.style.display = 'none';
+        }
     });
 
     function ctxDeleteLeave() {
