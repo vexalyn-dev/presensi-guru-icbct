@@ -17,6 +17,7 @@
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            @if(auth()->user()->canAccessAdmin())
             <!-- ✅ Button Import - Navy/Gold Theme -->
             <form action="{{ route('holidays.fetch-national') }}" method="POST" class="inline">
                 @csrf
@@ -33,6 +34,7 @@
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 Tambah Libur
             </button>
+            @endif
         </div>
     </div>
 
@@ -218,10 +220,14 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right">
+                            @if(auth()->user()->canAccessAdmin())
                             <button onclick="openDeleteModal({{ json_encode(['id' => $holiday->id, 'name' => $holiday->name]) }})"
                                     class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all hover:-translate-y-0.5">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
+                            @else
+                            <span class="text-[10px] text-slate-400">-</span>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -235,11 +241,13 @@
                                     <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Belum ada hari libur</p>
                                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Mulai dengan menambahkan hari libur pertama</p>
                                 </div>
+                                @if(auth()->user()->canAccessAdmin())
                                 <button onclick="openAddModal()"
                                         class="px-4 py-2 bg-gold-400 hover:bg-gold-500 text-navy-900 rounded-lg text-xs font-bold transition-all flex items-center gap-2">
                                     <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                                     Tambah Libur
                                 </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
