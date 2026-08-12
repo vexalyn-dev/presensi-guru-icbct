@@ -130,7 +130,15 @@
                         <p class="text-sm text-slate-600 dark:text-slate-400">{{ $leave->reason }}</p>
                         @if($leave->admin_notes)
                         <div class="mt-2 p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                            <p class="text-xs text-slate-500 dark:text-slate-400"><strong>Catatan:</strong> {{ $leave->admin_notes }}</p>
+                            @php
+                                $approverRole2 = $leave->approvedBy?->role ?? '';
+                                $labelCatatan2 = match(true) {
+                                    in_array($approverRole2, ['admin','operator']) => 'Catatan Operator',
+                                    $approverRole2 === 'guru_piket' => 'Catatan Guru Piket',
+                                    default => 'Catatan Peninjau',
+                                };
+                            @endphp
+                            <p class="text-xs text-slate-500 dark:text-slate-400"><strong>{{ $labelCatatan2 }}:</strong> {{ $leave->admin_notes }}</p>
                         </div>
                         @endif
                     </div>

@@ -1,5 +1,4 @@
 @extends(activeLayout())
-@extends(activeLayout())
 
 @section('page-title', 'Detail Pengajuan')
 
@@ -261,8 +260,19 @@
                         <i data-lucide="message-square" class="w-5 h-5 text-white"></i>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-navy-800 dark:text-white">Catatan Admin</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Feedback dari peninjau</p>
+                        @php
+                            $approverRole = $leave->approvedBy?->role ?? '';
+                            $catatanLabel = match(true) {
+                                in_array($approverRole, ['admin','operator']) => 'Catatan Operator',
+                                $approverRole === 'guru_piket' => 'Catatan Guru Piket',
+                                default => 'Catatan Peninjau',
+                            };
+                            $approverName = $leave->approvedBy?->name ?? '';
+                        @endphp
+                        <h3 class="text-base font-bold text-navy-800 dark:text-white">{{ $catatanLabel }}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            {{ $approverName ? 'Dari: ' . $approverName : 'Feedback dari peninjau' }}
+                        </p>
                     </div>
                 </div>
                 <p class="text-sm text-slate-700 dark:text-slate-200">{{ $leave->admin_notes }}</p>

@@ -73,7 +73,15 @@
                         </div>
                         <p class="text-sm text-slate-600 dark:text-slate-400 truncate">{{ $leave->reason }}</p>
                         @if($leave->admin_notes)
-                        <p class="text-xs text-slate-500 dark:text-slate-500 mt-1 italic">Catatan: {{ $leave->admin_notes }}</p>
+                        @php
+                            $approverRolePiket = $leave->approvedBy?->role ?? '';
+                            $labelPiket = match(true) {
+                                in_array($approverRolePiket, ['admin','operator']) => 'Catatan Operator',
+                                $approverRolePiket === 'guru_piket' => 'Catatan Guru Piket',
+                                default => 'Catatan Peninjau',
+                            };
+                        @endphp
+                        <p class="text-xs text-slate-500 dark:text-slate-500 mt-1 italic">{{ $labelPiket }}: {{ $leave->admin_notes }}</p>
                         @endif
                     </div>
                 </div>

@@ -131,7 +131,7 @@
                         @if($leave->status === 'approved' && $leave->admin_notes)
                         <div class="mt-3 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                             <p class="text-xs text-green-700 dark:text-green-300">
-                                <strong>Catatan:</strong> {{ $leave->admin_notes }}
+                                <strong>Catatan Peninjau:</strong> {{ $leave->admin_notes }}
                             </p>
                         </div>
                         @endif
