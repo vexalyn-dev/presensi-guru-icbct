@@ -382,6 +382,8 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
     Route::delete('/apk',        [DeveloperController::class, 'deleteApk'])          ->name('apk.delete');
     Route::post('/maintenance',  [DeveloperController::class, 'toggleMaintenance'])  ->name('maintenance');
     Route::get('/clear-cache',   [DeveloperController::class, 'clearCache'])         ->name('clear-cache');
+    Route::post('/updates',      [DeveloperController::class, 'storeUpdate'])        ->name('updates.store');
+    Route::delete('/updates/{id}',[DeveloperController::class, 'deleteUpdate'])      ->name('updates.delete');
 });
 
 Route::get('/run-migrate-secret', function (Request $request) {

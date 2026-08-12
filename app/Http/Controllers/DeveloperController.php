@@ -6,6 +6,7 @@ use App\Models\AppSetting;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\LeaveRequest;
+use App\Models\DeveloperUpdate;
 use App\Services\ApkService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -39,7 +40,17 @@ class DeveloperController extends Controller
             'app_url'        => config('app.url'),
         ];
 
-        return view('developer.dashboard', compact('appSetting', 'stats', 'secret'));
+        $latestUpdate = null;
+        try {
+            $latestUpdate = DeveloperUpdate::latest_active();
+        } catch (\Throwable $e) {}
+
+        $updates = [];
+        try {
+            $updates = DeveloperUpdate::orderByDesc('id')->take(10)->get();
+        } catch (\Throwable $e) {}
+
+        return view('developer.dashboard', compact('appSetting', 'stats', 'secret', 'latestUpdate', 'updates'));
     }
 
     public function updateApk(string $secret, Request $request)
@@ -144,6 +155,41 @@ class DeveloperController extends Controller
 
         $status = $request->maintenance_mode ? 'AKTIF' : 'NONAKTIF';
         return back()->with('success', "Mode maintenance sekarang: {$status}");
+    }
+
+    public function storeUpdate(string $secret, Request $request)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $request->validate([
+            'version'    => 'required|string|max:20',
+            'title'      => 'required|string|max:200',
+            'content'    => 'required|string|max:3000',
+            'type'       => 'required|in:feature,fix,update,hotfix',
+            'show_modal' => 'nullable|boolean',
+        ]);
+
+        try {
+            DeveloperUpdate::create([
+                'version'    => $request->version,
+                'title'      => $request->title,
+                'content'    => $request->content,
+                'type'       => $request->type,
+                'show_modal' => $request->boolean('show_modal', true),
+                'is_active'  => true,
+            ]);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal menyimpan update: ' . $e->getMessage());
+        }
+
+        return back()->with('success', '✅ Update v' . $request->version . ' berhasil ditambahkan!');
+    }
+
+    public function deleteUpdate(string $secret, int $id)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+        try { DeveloperUpdate::findOrFail($id)->delete(); } catch (\Throwable $e) {}
+        return back()->with('success', '✅ Update berhasil dihapus.');
     }
 
     public function clearCache(string $secret)
