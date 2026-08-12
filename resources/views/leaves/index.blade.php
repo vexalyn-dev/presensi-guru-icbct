@@ -198,7 +198,6 @@
         e.preventDefault();
         _ctxLeaveTarget = el;
         ctxMenu.style.display = 'block';
-        // Posisi
         let x = e.pageX, y = e.pageY;
         const menuW = ctxMenu.offsetWidth || 180;
         const menuH = ctxMenu.offsetHeight || 100;
@@ -223,23 +222,12 @@
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = url;
-        form.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]')?.content}">
-                          <input type="hidden" name="_method" value="DELETE">`;
+        const token = document.querySelector('meta[name=csrf-token]')?.content || '';
+        form.innerHTML = '<input type="hidden" name="_token" value="' + token + '">'
+                       + '<input type="hidden" name="_method" value="DELETE">';
         document.body.appendChild(form);
         form.submit();
     }
-</script>
-
-{{-- Context Menu --}}
-<div id="leave-context-menu"
-     style="display:none;position:fixed;z-index:9999;min-width:160px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.15);overflow:hidden;"
-     class="dark:!bg-slate-800 dark:!border-slate-700">
-    <button onclick="ctxDeleteLeave()"
-            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium">
-        <i data-lucide="trash-2" class="w-4 h-4"></i>
-        Hapus Pengajuan
-    </button>
-</div>
 
     (() => {
         const list = document.getElementById('leave-requests-list');
@@ -366,4 +354,16 @@
         to   { opacity: 1; transform: translateY(0); }
     }
 </style>
+
+{{-- Context Menu Klik Kanan --}}
+<div id="leave-context-menu"
+     style="display:none;position:fixed;z-index:9999;min-width:160px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.15);overflow:hidden;"
+     class="dark:!bg-slate-800 dark:!border-slate-700">
+    <button onclick="ctxDeleteLeave()"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+        Hapus Pengajuan
+    </button>
+</div>
+
 @endsection
