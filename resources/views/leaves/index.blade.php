@@ -99,7 +99,10 @@
     <!-- Leave Requests List -->
     <div class="space-y-4" id="leave-requests-list" data-latest-url="{{ route($routeLatest) }}">
         @forelse($leaveRequests as $leave)
-        <div class="card p-5 hover:shadow-lg transition-all">
+        <div class="card p-5 hover:shadow-lg transition-all cursor-context-menu"
+             data-leave-id="{{ $leave->id }}"
+             data-delete-url="{{ route('teacher.leave.destroy', $leave) }}"
+             oncontextmenu="showLeaveContextMenu(event, this)">
             <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-4 flex-1">
                         <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($leave->user->name) }}"
@@ -187,6 +190,57 @@
         if (window.lucide) lucide.createIcons();
     });
 
+    // ── Context Menu Klik Kanan ──
+    let _ctxLeaveTarget = null;
+    const ctxMenu = document.getElementById('leave-context-menu');
+
+    function showLeaveContextMenu(e, el) {
+        e.preventDefault();
+        _ctxLeaveTarget = el;
+        ctxMenu.style.display = 'block';
+        // Posisi
+        let x = e.pageX, y = e.pageY;
+        const menuW = ctxMenu.offsetWidth || 180;
+        const menuH = ctxMenu.offsetHeight || 100;
+        if (x + menuW > window.innerWidth)  x = window.innerWidth - menuW - 8;
+        if (y + menuH > window.innerHeight) y = window.innerHeight - menuH - 8;
+        ctxMenu.style.left = x + 'px';
+        ctxMenu.style.top  = y + 'px';
+    }
+
+    document.addEventListener('click', () => {
+        if (ctxMenu) ctxMenu.style.display = 'none';
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && ctxMenu) ctxMenu.style.display = 'none';
+    });
+
+    function ctxDeleteLeave() {
+        if (!_ctxLeaveTarget) return;
+        const url = _ctxLeaveTarget.dataset.deleteUrl;
+        if (!url) return;
+        if (!confirm('Hapus pengajuan ini?')) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+        form.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]')?.content}">
+                          <input type="hidden" name="_method" value="DELETE">`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+
+{{-- Context Menu --}}
+<div id="leave-context-menu"
+     style="display:none;position:fixed;z-index:9999;min-width:160px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.15);overflow:hidden;"
+     class="dark:!bg-slate-800 dark:!border-slate-700">
+    <button onclick="ctxDeleteLeave()"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+        Hapus Pengajuan
+    </button>
+</div>
+
     (() => {
         const list = document.getElementById('leave-requests-list');
         if (!list) return;
@@ -248,7 +302,7 @@
                                 </div>
                             </div>
                             <p class="text-sm text-slate-600 dark:text-slate-400">${esc(leave.reason)}</p>
-                            ${leave.admin_notes ? `<div class="mt-2 p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg"><p class="text-xs text-slate-500 dark:text-slate-400"><strong>Catatan:</strong> ${esc(leave.admin_notes)}</p></div>` : ''}
+                            ${leave.admin_notes ? `<div class="mt-2 p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg"><p class="text-xs text-slate-500 dark:text-slate-400"><strong>${leave.approver_role_label || 'Catatan Peninjau'}:</strong> ${esc(leave.admin_notes)}</p></div>` : ''}
                         </div>
                     </div>
                     <div class="flex items-center gap-2 flex-shrink-0">

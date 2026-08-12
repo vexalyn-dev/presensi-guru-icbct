@@ -11,7 +11,7 @@ class LeaveApprovalController extends Controller
 {
     public function index()
     {
-        $leaves = LeaveRequest::with('user')
+        $leaves = LeaveRequest::with('user', 'approvedBy')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 

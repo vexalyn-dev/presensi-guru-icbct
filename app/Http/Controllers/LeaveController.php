@@ -62,6 +62,12 @@ class LeaveController extends Controller
                 'duration' => $leave->duration,
                 'reason' => $leave->reason,
                 'admin_notes' => $leave->admin_notes,
+                'approver_role_label' => match(true) {
+                    in_array($leave->approvedBy?->role ?? '', ['admin','operator']) => 'Catatan Operator',
+                    ($leave->approvedBy?->role ?? '') === 'guru_piket' => 'Catatan Guru Piket',
+                    !empty($leave->admin_notes) => 'Catatan Peninjau',
+                    default => null,
+                },
                 'show_url'    => route($isPiket ? 'piket.leave-approval.show'    : 'leaves.show',    $leave),
                 'approve_url' => route($isPiket ? 'piket.leave-approval.approve' : 'leaves.approve', $leave),
                 'reject_url'  => route($isPiket ? 'piket.leave-approval.reject'  : 'leaves.reject',  $leave),
