@@ -663,31 +663,6 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Warna Utama</label>
-                            <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600">
-                                <input type="color" name="primary_color" x-model="primaryColor" @input="updateColorPreview('primary', $event.target.value)"
-                                       value="{{ old('primary_color', $settings['appearance']['primary_color'] ?? '#0F172A') }}" class="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200 dark:border-slate-600 p-0 overflow-hidden">
-                                <div class="flex-1">
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Kode HEX</p>
-                                    <input type="text" readonly x-model="primaryColor" class="w-full bg-transparent text-sm font-mono font-semibold text-navy-800 dark:text-white border-none p-0 focus:ring-0">
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Warna Aksen</label>
-                            <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600">
-                                <input type="color" name="accent_color" x-model="accentColor" @input="updateColorPreview('accent', $event.target.value)"
-                                       value="{{ old('accent_color', $settings['appearance']['accent_color'] ?? '#FACC15') }}" class="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200 dark:border-slate-600 p-0 overflow-hidden">
-                                <div class="flex-1">
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Kode HEX</p>
-                                    <input type="text" readonly x-model="accentColor" class="w-full bg-transparent text-sm font-mono font-semibold text-navy-800 dark:text-white border-none p-0 focus:ring-0">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="flex justify-end pt-5 border-t border-slate-200 dark:border-slate-700">
                         <button type="submit" class="px-8 py-3 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i> Terapkan Branding
