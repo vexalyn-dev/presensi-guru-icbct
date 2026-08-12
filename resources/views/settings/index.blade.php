@@ -77,12 +77,7 @@
                 <i data-lucide="map-pin" class="w-4 h-4"></i>
                 <span>Peta & GPS</span>
             </button>
-            <button @click="activeTab = 'apk'"
-                    :class="activeTab === 'apk' ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-lg' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'"
-                    class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex-shrink-0">
-                <i data-lucide="smartphone" class="w-4 h-4"></i>
-                <span>Aplikasi</span>
-            </button>
+            {{-- Tab Aplikasi disembunyikan - dipindah ke Developer Dashboard (/dev-panel/vexalyn-dev-2026) --}}
         </div>
     </div>
 

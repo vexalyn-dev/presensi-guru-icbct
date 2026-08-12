@@ -40,6 +40,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\DeveloperController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -369,6 +371,17 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     Route::get('/notifications/api/unread',    [App\Http\Controllers\Teacher\NotificationController::class, 'getUnread'])   ->name('notifications.api.unread');
     Route::post('/notifications/{id}/read',    [App\Http\Controllers\Teacher\NotificationController::class, 'markAsRead'])  ->name('notifications.read');
     Route::post('/notifications/read-all',     [App\Http\Controllers\Teacher\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+});
+
+// ============================================================
+// Developer Dashboard — akses via URL secret
+// ============================================================
+Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
+    Route::get('/',              [DeveloperController::class, 'dashboard'])          ->name('index');
+    Route::post('/apk',          [DeveloperController::class, 'updateApk'])          ->name('apk');
+    Route::delete('/apk',        [DeveloperController::class, 'deleteApk'])          ->name('apk.delete');
+    Route::post('/maintenance',  [DeveloperController::class, 'toggleMaintenance'])  ->name('maintenance');
+    Route::get('/clear-cache',   [DeveloperController::class, 'clearCache'])         ->name('clear-cache');
 });
 
 Route::get('/run-migrate-secret', function (Request $request) {
