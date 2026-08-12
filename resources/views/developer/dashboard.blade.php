@@ -1,418 +1,474 @@
 <!DOCTYPE html>
-<html lang="id" id="devHtml" class="light">
+<html lang="id" id="devHtml">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Dev Panel · ICB CT</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+@vite(['resources/css/app.css', 'resources/js/app.js'])
+<script src="https://unpkg.com/lucide@1.7.0/dist/umd/lucide.min.js" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',system-ui,sans-serif}
-html{scroll-behavior:smooth}
-:root{
-  --bg:#f8f7ff;--bg-card:#fff;--bg-card2:#f3f0ff;--bg-input:#f5f3ff;
-  --border:rgba(124,58,237,.14);--border2:rgba(124,58,237,.25);
-  --txt:#1a0533;--txt2:#4b5563;--muted:#9ca3af;
-  --purple:#7c3aed;--purple2:#a855f7;--accent:#ede9fe;
-  --shadow:rgba(124,58,237,.12);
-}
-.dark{
-  --bg:#080614;--bg-card:#0f0c1e;--bg-card2:#16122b;--bg-input:#1a1630;
-  --border:rgba(168,85,247,.18);--border2:rgba(168,85,247,.35);
-  --txt:#f0e8ff;--txt2:#a78bfa;--muted:#5b4f8a;
-  --purple:#a855f7;--purple2:#c084fc;--accent:rgba(124,58,237,.2);
-  --shadow:rgba(0,0,0,.4);
-}
-body{background:var(--bg);color:var(--txt);transition:background .3s,color .3s;min-height:100vh}
-.card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:1.25rem;transition:all .2s}
-.card:hover{box-shadow:0 8px 32px var(--shadow);transform:translateY(-1px)}
-.inp{background:var(--bg-input);border:1.5px solid var(--border);border-radius:.75rem;padding:10px 14px;color:var(--txt);font-size:13px;width:100%;outline:none;transition:border .2s}
-.inp:focus{border-color:var(--purple)}
-.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:.75rem;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .2s}
-.btn-p{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
-.btn-p:hover{box-shadow:0 8px 24px rgba(124,58,237,.4);transform:translateY(-1px)}
-.btn-g{background:var(--bg-card2);border:1.5px solid var(--border);color:var(--txt2)}
-.btn-g:hover{border-color:var(--purple);color:var(--purple)}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700}
-.section-title{font-size:18px;font-weight:800;color:var(--txt);margin-bottom:4px}
-.section-sub{font-size:12px;color:var(--muted)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:640px){.grid2{grid-template-columns:1fr}.hide-sm{display:none}}
-/* slider */
+[x-cloak]{display:none!important}
+body{font-family:'Inter',sans-serif}
+/* Override navy/gold with purple */
+.dev-purple{--tw-bg-opacity:1;background-color:rgb(124 58 237/var(--tw-bg-opacity))}
+/* Sidebar nav items */
+.dev-nav-item{position:relative;overflow:hidden;transition:background .22s ease,color .22s ease,transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease}
+.dev-nav-item::before{content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.07) 50%,transparent 100%);transition:left .55s cubic-bezier(.4,0,.2,1);pointer-events:none;z-index:0}
+.dev-nav-item:hover::before{left:160%}
+.dev-nav-item::after{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:0 3px 3px 0;background:rgba(192,132,252,.7);transform:scaleY(0);transform-origin:center;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.dev-nav-item:hover::after{transform:scaleY(1)}
+.dev-nav-item:hover:not(.dev-active){transform:translateX(3px)}
+.dev-active{background:rgb(124 58 237);color:#fff!important}
+.dark .dev-active{background:rgb(168 85 247)}
+/* Slider */
 .dslide{position:absolute;inset:0;opacity:0;transform:translateX(28px);transition:opacity .65s cubic-bezier(.16,1,.3,1),transform .65s cubic-bezier(.16,1,.3,1)}
 .dslide.active{opacity:1;transform:translateX(0)}
 .dslide.exit{opacity:0;transform:translateX(-20px);transition:opacity .4s ease-in,transform .4s ease-in}
-/* orb */
-.orb{position:absolute;border-radius:50%;filter:blur(55px);pointer-events:none;animation:orb 7s ease-in-out infinite}
+/* Orb */
+.orb{position:absolute;border-radius:50%;filter:blur(55px);pointer-events:none}
 @keyframes orb{0%,100%{opacity:.35}50%{opacity:.65}}
-/* loading */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes lbar{0%{width:0}100%{width:100%}}
-/* main anim */
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.fu{animation:fadeUp .5s ease forwards}
-.fu1{animation-delay:.05s;opacity:0}
-.fu2{animation-delay:.12s;opacity:0}
-.fu3{animation-delay:.2s;opacity:0}
-.fu4{animation-delay:.28s;opacity:0}
-.fu5{animation-delay:.36s;opacity:0}
-/* maintenance toggle */
-.tog-track{width:46px;height:26px;border-radius:99px;transition:background .3s;position:relative;cursor:pointer}
-.tog-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:all .3s;box-shadow:0 2px 5px rgba(0,0,0,.2)}
-.tog-track.on .tog-thumb{left:23px}
-.tog-track.on{background:#ef4444}
-.tog-track.off{background:var(--border2)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#a78bfa;border-radius:3px}
 </style>
 </head>
-<body>
 
 {{-- ══ LOADING SCREEN ══ --}}
-<div id="devLoader" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:var(--bg)">
-  <div style="position:relative;width:64px;height:64px">
-    <div style="position:absolute;inset:0;border-radius:50%;border:3px solid var(--border);border-top-color:#7c3aed;animation:spin .9s linear infinite"></div>
+<body class="bg-slate-50 dark:bg-slate-950 h-full">
+<div id="devLoader" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-5 bg-slate-50 dark:bg-slate-950">
+  <div class="relative w-16 h-16">
+    <div style="position:absolute;inset:0;border-radius:50%;border:3px solid #e9d5ff;border-top-color:#7c3aed;animation:spin .9s linear infinite"></div>
     <div style="position:absolute;top:9px;left:9px;right:9px;bottom:9px;border-radius:50%;border:3px solid transparent;border-bottom-color:#a855f7;animation:spin .7s linear infinite reverse"></div>
-    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-      <i data-lucide="code-2" style="width:22px;height:22px;color:#7c3aed"></i>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <i data-lucide="code-2" class="w-6 h-6 text-purple-600"></i>
     </div>
   </div>
-  <div style="text-align:center">
-    <p style="font-size:14px;font-weight:700;color:var(--txt)" id="loaderMsg">Memuat Dev Panel…</p>
-    <p style="font-size:11px;color:var(--muted);margin-top:3px">ICB CT · Vexalyn Dev</p>
+  <div class="text-center">
+    <p class="text-sm font-bold text-slate-800 dark:text-white" id="loaderMsg">Memuat Dev Panel…</p>
+    <p class="text-xs text-slate-400 mt-1">ICB CT · Vexalyn Dev</p>
   </div>
-  <div style="width:200px;height:3px;background:var(--bg-card2);border-radius:99px;overflow:hidden">
-    <div id="loaderBar" style="height:100%;width:0;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:99px;transition:width .08s linear"></div>
+  <div class="w-48 h-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full overflow-hidden">
+    <div id="loaderBar" class="h-full bg-gradient-to-r from-purple-600 to-purple-400 rounded-full" style="width:0;transition:width .08s linear"></div>
   </div>
 </div>
 
 {{-- ══ WELCOME MODAL ══ --}}
-<div id="devModal" style="display:none;position:fixed;inset:0;z-index:8888;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:16px">
-  <div id="devModalBox" style="background:var(--bg-card);border:1.5px solid var(--border2);border-radius:1.5rem;max-width:420px;width:100%;overflow:hidden;transform:translateY(30px) scale(.95);opacity:0;transition:all .45s cubic-bezier(.16,1,.3,1)">
-    <div style="height:4px;background:linear-gradient(90deg,#7c3aed,#a855f7,#c084fc)"></div>
-    <div style="padding:32px 28px">
-      <div style="width:56px;height:56px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 8px 24px rgba(124,58,237,.35)">
-        <i data-lucide="code-2" style="width:28px;height:28px;color:#fff"></i>
+<div id="devModal" class="fixed inset-0 z-[8888] bg-black/55 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div id="devModalBox" class="bg-white dark:bg-slate-800 border border-purple-100 dark:border-purple-900/40 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl" style="transform:translateY(30px) scale(.95);opacity:0;transition:all .45s cubic-bezier(.16,1,.3,1)">
+    <div class="h-1.5 bg-gradient-to-r from-purple-700 via-purple-500 to-violet-400"></div>
+    <div class="p-8">
+      <div class="w-14 h-14 bg-gradient-to-br from-purple-700 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-purple-400/30">
+        <i data-lucide="code-2" class="w-7 h-7 text-white"></i>
       </div>
-      <h2 style="font-size:1.3rem;font-weight:800;color:var(--txt);text-align:center;margin-bottom:6px" id="modalTitle">Selamat Datang, Developer! 👋</h2>
-      <p style="font-size:13px;color:var(--txt2);text-align:center;margin-bottom:20px;line-height:1.6" id="modalSub">Kamu mengakses <strong style="color:var(--purple)">Developer Dashboard</strong> ICB CT via URL rahasia.</p>
+      <h2 class="text-xl font-extrabold text-slate-800 dark:text-white text-center mb-2" id="modalTitle">Selamat Datang, Developer! 👋</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 text-center leading-relaxed mb-5" id="modalSub">Kamu mengakses <strong class="text-purple-600">Developer Dashboard</strong> ICB CT via URL rahasia.</p>
       @if($latestUpdate)
-      <div style="background:var(--accent);border:1.5px solid var(--border2);border-radius:1rem;padding:14px 16px;margin-bottom:18px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span class="badge" style="background:rgba(124,58,237,.2);color:var(--purple);border:1px solid var(--border2);text-transform:uppercase">{{ $latestUpdate->type }}</span>
-          <span style="font-size:12px;font-weight:700;color:var(--txt)">v{{ $latestUpdate->version }}</span>
-          <span style="font-size:11px;color:var(--muted);margin-left:auto">{{ $latestUpdate->created_at->diffForHumans() }}</span>
+      <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/40 rounded-2xl p-4 mb-5">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-800/40 text-purple-700 dark:text-purple-300">{{ $latestUpdate->type }}</span>
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-200">v{{ $latestUpdate->version }}</span>
+          <span class="text-[10px] text-slate-400 ml-auto">{{ $latestUpdate->created_at->diffForHumans() }}</span>
         </div>
-        <p style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:4px">{{ $latestUpdate->title }}</p>
-        <p style="font-size:12px;color:var(--txt2);line-height:1.55;white-space:pre-line">{{ \Illuminate\Support\Str::limit($latestUpdate->content,140) }}</p>
+        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">{{ $latestUpdate->title }}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-line">{{ \Illuminate\Support\Str::limit($latestUpdate->content, 140) }}</p>
       </div>
       @endif
-      <button onclick="closeModal()" class="btn btn-p" style="width:100%;justify-content:center">
-        <i data-lucide="check" style="width:16px;height:16px"></i>
-        <span id="modalBtn">Masuk ke Dashboard</span>
+      <button onclick="closeModal()" id="modalBtn"
+        class="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-700 to-purple-500 hover:from-purple-800 hover:to-purple-600 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-purple-400/25 hover:-translate-y-0.5">
+        <i data-lucide="check" class="w-4 h-4"></i> Masuk ke Dashboard
       </button>
     </div>
   </div>
 </div>
 
-{{-- ══ TOPBAR ══ --}}
-<header id="topbar" style="position:sticky;top:0;z-index:100;background:rgba(248,247,255,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px">
-  <div style="max-width:1100px;margin:0 auto;height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="width:34px;height:34px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <i data-lucide="code-2" style="width:17px;height:17px;color:#fff"></i>
+{{-- ══ APP SHELL — sidebar + content ══ --}}
+<div class="flex h-screen overflow-hidden" id="appShell" style="opacity:0;transition:opacity .4s ease">
+
+  {{-- ── SIDEBAR ── --}}
+  <aside id="devSidebar" class="w-64 bg-slate-900 dark:bg-slate-950 border-r border-slate-800 flex flex-col fixed inset-y-0 left-0 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+    {{-- Logo --}}
+    <div class="h-16 flex items-center gap-3 px-5 border-b border-slate-800">
+      <div class="w-9 h-9 bg-gradient-to-br from-purple-700 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-700/30 flex-shrink-0">
+        <i data-lucide="code-2" class="w-4 h-4 text-white"></i>
       </div>
-      <div style="line-height:1.2">
-        <p style="font-size:13px;font-weight:800;color:var(--txt)">Dev Panel</p>
-        <p style="font-size:10px;color:var(--muted)">ICB CT · Vexalyn Dev</p>
+      <div class="min-w-0">
+        <p class="text-sm font-bold text-white leading-none truncate">Dev Panel</p>
+        <p class="text-[10px] text-slate-500 mt-0.5">ICB CT · Vexalyn Dev</p>
+      </div>
+      <button onclick="closeSidebar()" class="ml-auto lg:hidden p-1 text-slate-500 hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    {{-- Nav --}}
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <p class="text-[9px] font-bold text-slate-600 uppercase tracking-widest px-3 mb-2">MENU</p>
+      @foreach([
+        ['id'=>'sec-dashboard','icon'=>'layout-dashboard','label'=>'Dashboard'],
+        ['id'=>'sec-apk','icon'=>'smartphone','label'=>'APK Management'],
+        ['id'=>'sec-maintenance','icon'=>'construction','label'=>'Maintenance Mode'],
+        ['id'=>'sec-updates','icon'=>'rocket','label'=>'Rilis Update'],
+      ] as $nav)
+      <button onclick="showSection('{{ $nav['id'] }}')" id="nav-{{ $nav['id'] }}"
+        class="dev-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+        <i data-lucide="{{ $nav['icon'] }}" class="w-4 h-4 flex-shrink-0"></i>
+        <span>{{ $nav['label'] }}</span>
+      </button>
+      @endforeach
+
+      <div class="border-t border-slate-800 pt-3 mt-3">
+        <p class="text-[9px] font-bold text-slate-600 uppercase tracking-widest px-3 mb-2">TOOLS</p>
+        <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirm('Clear cache?')"
+           class="dev-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+          <i data-lucide="refresh-cw" class="w-4 h-4 text-teal-400 flex-shrink-0"></i>
+          <span>Clear Cache</span>
+        </a>
+        <a href="{{ url('/run-migrate-secret?key=vexalyn19052009') }}" target="_blank"
+           class="dev-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+          <i data-lucide="database" class="w-4 h-4 text-blue-400 flex-shrink-0"></i>
+          <span>Run Migrate</span>
+        </a>
+        <a href="https://github.com/vexalyn-dev/presensi-guru-icbct" target="_blank"
+           class="dev-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
+          <i data-lucide="github" class="w-4 h-4 flex-shrink-0"></i>
+          <span>GitHub Repo</span>
+        </a>
+      </div>
+    </nav>
+
+    {{-- Sidebar footer --}}
+    <div class="p-4 border-t border-slate-800">
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-purple-900/20 border border-purple-800/30">
+        <div class="w-8 h-8 bg-gradient-to-br from-purple-700 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+          <i data-lucide="user" class="w-4 h-4 text-white"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-bold text-white truncate">Vio Atmajaya</p>
+          <p class="text-[10px] text-slate-500 truncate">vexalyndev.my.id</p>
+        </div>
+        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-700/50 text-purple-300">DEV</span>
       </div>
     </div>
-    <nav style="display:flex;align-items:center;gap:2px" class="hide-sm">
-      @foreach(['dashboard'=>'Dashboard','section-apk'=>'APK','section-maintenance'=>'Maintenance','section-updates'=>'Updates'] as $sid=>$lbl)
-      <button onclick="document.getElementById('{{$sid}}').scrollIntoView({behavior:'smooth',block:'start'})"
-        style="padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;color:var(--txt2);cursor:pointer;border:none;background:transparent;transition:all .15s"
-        onmouseover="this.style.background='var(--accent)';this.style.color='var(--purple)'"
-        onmouseout="this.style.background='transparent';this.style.color='var(--txt2)'">{{$lbl}}</button>
-      @endforeach
-    </nav>
-    <div style="display:flex;align-items:center;gap:8px">
-      {{-- Theme --}}
-      <button id="themBtn" onclick="cycleTheme()" title="Toggle theme"
-        style="width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt2);transition:all .2s">
-        <i id="themIco" data-lucide="sun" style="width:15px;height:15px"></i>
-      </button>
-      {{-- Lang --}}
-      <button id="langBtn" onclick="toggleLang()"
-        style="height:34px;padding:0 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-card);cursor:pointer;font-size:11px;font-weight:700;color:var(--txt2);transition:all .2s">
-        <span id="langLabel">ID</span>
-      </button>
-      {{-- Profile --}}
-      <div style="position:relative">
-        <button onclick="document.getElementById('profMenu').style.display=document.getElementById('profMenu').style.display==='block'?'none':'block'"
-          style="display:flex;align-items:center;gap:7px;height:34px;padding:0 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-card);cursor:pointer;transition:all .2s">
-          <div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center">
-            <i data-lucide="user" style="width:12px;height:12px;color:#fff"></i>
-          </div>
-          <span style="font-size:12px;font-weight:700;color:var(--txt)" class="hide-sm">Vio</span>
-          <i data-lucide="chevron-down" style="width:11px;height:11px;color:var(--muted)"></i>
+  </aside>
+
+  {{-- Overlay mobile --}}
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-40 lg:hidden hidden" onclick="closeSidebar()"></div>
+
+  {{-- ── MAIN AREA ── --}}
+  <div class="flex-1 flex flex-col lg:ml-64 min-h-screen overflow-hidden">
+
+    {{-- Topbar --}}
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-purple-100 dark:border-slate-800 px-5 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button onclick="openSidebar()" class="lg:hidden p-2 hover:bg-purple-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+          <i data-lucide="menu" class="w-5 h-5 text-slate-600 dark:text-slate-400"></i>
         </button>
-        <div id="profMenu" style="display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--bg-card);border:1.5px solid var(--border);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 16px 40px var(--shadow);z-index:200">
-          <div style="padding:10px 12px;border-bottom:1px solid var(--border);margin-bottom:6px">
-            <p style="font-size:12px;font-weight:700;color:var(--txt)">Vio Atmajaya Saputra</p>
-            <p style="font-size:10px;color:var(--muted)">vexalyndev.my.id</p>
-          </div>
-          @foreach([['external-link','Profil Developer','https://vexalyndev.my.id'],['layout-dashboard','Dashboard App',url('/dashboard')],['settings','Settings',url('/settings')],['github','GitHub','https://github.com/vexalyn-dev']] as [$ico,$lbl,$href])
-          <a href="{{$href}}" target="_blank" style="display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;color:var(--txt2);text-decoration:none;transition:all .15s"
-             onmouseover="this.style.background='var(--accent)';this.style.color='var(--purple)'"
-             onmouseout="this.style.background='transparent';this.style.color='var(--txt2)'">
-            <i data-lucide="{{$ico}}" style="width:13px;height:13px"></i>{{$lbl}}
-          </a>
-          @endforeach
+        <div>
+          <h2 class="text-base font-bold text-slate-800 dark:text-white" id="pageTitle">Dashboard</h2>
+          <p class="text-[10px] text-slate-400 font-medium" id="pageDate">{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
         </div>
       </div>
-      <span class="badge hide-sm" style="background:var(--accent);color:var(--purple);border:1px solid var(--border2)">
-        <i data-lucide="shield-check" style="width:11px;height:11px"></i> SECRET
-      </span>
-    </div>
+
+      <div class="flex items-center gap-2">
+        {{-- Theme --}}
+        <button id="themBtn" onclick="cycleTheme()"
+          class="w-9 h-9 flex items-center justify-center rounded-lg border border-purple-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-purple-50 dark:hover:bg-slate-700 transition-all">
+          <i id="themIco" data-lucide="sun" class="w-4 h-4"></i>
+        </button>
+        {{-- Lang --}}
+        <button onclick="toggleLang()"
+          class="h-9 px-3 rounded-lg border border-purple-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-purple-50 dark:hover:bg-slate-700 transition-all">
+          <span id="langLabel">ID</span>
+        </button>
+        {{-- Profile dropdown --}}
+        <div class="relative" x-data="{open:false}" @click.outside="open=false">
+          <button @click="open=!open"
+            class="flex items-center gap-2 h-9 px-3 rounded-lg border border-purple-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-slate-700 transition-all">
+            <div class="w-6 h-6 bg-gradient-to-br from-purple-700 to-purple-500 rounded-lg flex items-center justify-center">
+              <i data-lucide="user" class="w-3 h-3 text-white"></i>
+            </div>
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 hidden sm:block">Vio</span>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+          </button>
+          <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            class="absolute right-0 top-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl shadow-slate-900/10 min-w-[200px] overflow-hidden z-50 p-2">
+            <div class="px-3 py-2.5 border-b border-slate-100 dark:border-slate-700 mb-1">
+              <p class="text-xs font-bold text-slate-800 dark:text-white">Vio Atmajaya Saputra</p>
+              <p class="text-[10px] text-slate-400">vexalyndev.my.id</p>
+            </div>
+            <a href="https://vexalyndev.my.id" target="_blank"
+              class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-400 transition-all font-medium">
+              <i data-lucide="external-link" class="w-4 h-4"></i> Profil Developer
+            </a>
+            <a href="{{ url()->previous() }}"
+              class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all font-medium">
+              <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+            </a>
+          </div>
+        </div>
+        {{-- Secret badge --}}
+        <span class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/40 text-purple-700 dark:text-purple-400 text-[11px] font-bold">
+          <i data-lucide="shield-check" class="w-3 h-3"></i> SECRET
+        </span>
+      </div>
+    </header>
+
+    {{-- Scroll area --}}
+    <div class="flex-1 overflow-y-auto p-6">
+
+{{-- ═══ SECTION: DASHBOARD ═══ --}}
+<div id="sec-dashboard" class="dev-section space-y-6">
+
+  {{-- Alerts --}}
+  @if(session('success'))
+  <div class="flex items-center gap-3 p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 text-green-700 dark:text-green-400">
+    <i data-lucide="check-circle-2" class="w-5 h-5 flex-shrink-0"></i>
+    <span class="text-sm font-semibold">{{ session('success') }}</span>
   </div>
-</header>
-
-{{-- ══ MAIN ══ --}}
-<main style="max-width:1100px;margin:0 auto;padding:32px 20px;display:flex;flex-direction:column;gap:32px" id="mainWrap" class="fu">
-
-@if(session('success'))
-<div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:12px;background:rgba(34,197,94,.1);border:1.5px solid rgba(34,197,94,.3);color:#15803d" class="fu fu1">
-  <i data-lucide="check-circle-2" style="width:17px;height:17px;flex-shrink:0"></i>
-  <span style="font-size:13px;font-weight:600">{{ session('success') }}</span>
-</div>
-@endif
-@if($errors->any())
-<div style="padding:14px 18px;border-radius:12px;background:rgba(239,68,68,.1);border:1.5px solid rgba(239,68,68,.3)">
-  @foreach($errors->all() as $e)<p style="font-size:12px;color:#dc2626">• {{$e}}</p>@endforeach
-</div>
-@endif
-
-{{-- ── DASHBOARD ── --}}
-<div id="dashboard" class="fu fu1" style="display:flex;flex-direction:column;gap:20px">
+  @endif
+  @if($errors->any())
+  <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40">
+    @foreach($errors->all() as $e)<p class="text-xs text-red-600">• {{$e}}</p>@endforeach
+  </div>
+  @endif
 
   {{-- Welcome Card --}}
-  <div style="position:relative;overflow:hidden;border-radius:1.5rem;padding:32px 36px;background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 55%,#9333ea 100%);min-height:160px">
-    <div class="orb" style="width:220px;height:220px;background:rgba(192,132,252,.28);top:-80px;right:-60px"></div>
-    <div class="orb" style="width:130px;height:130px;background:rgba(124,58,237,.35);bottom:-40px;left:35%;animation-delay:3s"></div>
-    <div style="position:relative;z-index:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px">
+  <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900 via-purple-700 to-violet-600 p-7 shadow-xl shadow-purple-900/30">
+    <div class="orb w-56 h-56 bg-purple-400/20" style="top:-80px;right:-60px;animation:orb 7s ease-in-out infinite"></div>
+    <div class="orb w-36 h-36 bg-violet-400/20" style="bottom:-40px;left:30%;animation:orb 9s ease-in-out infinite 2s"></div>
+    <div class="relative z-10 flex flex-wrap items-center justify-between gap-5">
       <div>
-        <div style="display:inline-flex;align-items:center;gap:8px;padding:4px 12px;border-radius:99px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.75);font-size:11px;font-weight:700;margin-bottom:14px;border:1px solid rgba(255,255,255,.15)">
-          <i data-lucide="shield-check" style="width:12px;height:12px"></i> DEVELOPER ACCESS
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-white/75 text-[11px] font-bold mb-4 backdrop-blur-sm">
+          <i data-lucide="shield-check" class="w-3 h-3"></i> DEVELOPER ACCESS
         </div>
-        <h1 style="font-size:2rem;font-weight:900;color:#fff;line-height:1.15;margin-bottom:8px">Selamat datang,<br><span style="color:#e9d5ff" id="welcomeName">Vio Atmajaya</span> 👋</h1>
-        <p style="font-size:13px;color:rgba(255,255,255,.6)" id="welcomeDate">{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
+        <h1 class="text-3xl font-black text-white leading-tight mb-2" id="wcTitle">
+          Selamat datang,<br><span class="text-purple-200">Vio Atmajaya</span> 👋
+        </h1>
+        <p class="text-sm text-white/60" id="wcDate">{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
       </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        @foreach([['Total User',$stats['total_users'],'users'],['Guru',$stats['total_teachers'],'graduation-cap'],['Pending',$stats['pending_leaves'],'clock']] as [$l,$v,$ic])
-        <div style="background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:14px 18px;text-align:center;min-width:90px">
-          <i data-lucide="{{$ic}}" style="width:15px;height:15px;color:rgba(255,255,255,.65);margin:0 auto 7px;display:block"></i>
-          <p style="font-size:1.7rem;font-weight:900;color:#fff;line-height:1">{{$v}}</p>
-          <p style="font-size:10px;color:rgba(255,255,255,.55);margin-top:3px">{{$l}}</p>
+      <div class="flex gap-3 flex-wrap">
+        @foreach([
+          ['Total User',$stats['total_users'],'users'],
+          ['Guru',$stats['total_teachers'],'graduation-cap'],
+          ['Operator',$stats['total_operators'],'shield'],
+          ['Pending',$stats['pending_leaves'],'clock'],
+        ] as [$l,$v,$ic])
+        <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 text-center min-w-[80px]">
+          <i data-lucide="{{ $ic }}" class="w-4 h-4 text-white/60 mx-auto mb-1.5 block"></i>
+          <p class="text-2xl font-black text-white leading-none">{{ $v }}</p>
+          <p class="text-[10px] text-white/50 mt-1">{{ $l }}</p>
         </div>
         @endforeach
       </div>
     </div>
   </div>
 
-  {{-- Banner Slider --}}
-  <div style="position:relative;border-radius:1.25rem;overflow:hidden;height:190px">
-    @php $slides=[
-      ['bg'=>'linear-gradient(135deg,#0f0c1a 0%,#1e1b4b 60%,#312e81 100%)','badge'=>'System','ic'=>'server','color'=>'#818cf8','title'=>'PHP '.$stats['php_version'].' · Laravel '.$stats['laravel_version'],'sub'=>'Env: '.strtoupper($stats['env']).' · Debug: '.($stats['debug']?'ON':'OFF')],
-      ['bg'=>'linear-gradient(135deg,#180830 0%,#4c1d95 60%,#7e22ce 100%)','badge'=>'APK','ic'=>'smartphone','color'=>'#c084fc','title'=>($appSetting->apk_name??'ICB CT Presensi').' '.(($appSetting->apk_version_label)??''),'sub'=>'Ukuran: '.($appSetting->apk_size_human??'-').' · Min: '.($appSetting->apk_min_android??'-')],
-      ['bg'=>'linear-gradient(135deg,#0a1628 0%,#0f2847 60%,#1e3a5c 100%)','badge'=>'Stats','ic'=>'bar-chart-3','color'=>'#38bdf8','title'=>$stats['total_users'].' Total Pengguna Aktif','sub'=>$stats['total_teachers'].' Guru · '.$stats['total_operators'].' Operator · '.$stats['pending_leaves'].' Pending Izin'],
-      ['bg'=>'linear-gradient(135deg,#0d1117 0%,#161b22 50%,#21262d 100%)','badge'=>'Server','ic'=>'clock','color'=>'#4ade80','title'=>now()->format('H:i:s').' WIB','sub'=>now()->locale('id')->isoFormat('dddd, D MMMM YYYY')],
-    ]; @endphp
-    @foreach($slides as $i=>$sl)
-    <div class="dslide {{$i===0?'active':''}}" style="background:{{$sl['bg']}}">
-      <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 36px;gap:24px">
-        <div style="flex:1;min-width:0">
-          <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;background:rgba(255,255,255,.1);color:{{$sl['color']}};font-size:10px;font-weight:700;margin-bottom:12px;border:1px solid rgba(255,255,255,.1)">
-            <i data-lucide="{{$sl['ic']}}" style="width:10px;height:10px"></i>{{$sl['badge']}}
+  {{-- Banner Slider (Developer Slide only) --}}
+  <div class="relative overflow-hidden rounded-2xl shadow-xl" style="height:210px">
+    <div class="dslide active absolute inset-0 overflow-hidden" style="background:linear-gradient(135deg,#0D0618 0%,#160D2E 45%,#2A1455 100%)">
+      <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl" style="background:rgba(139,92,246,0.12)"></div>
+      <div class="absolute -bottom-16 -left-16 w-56 h-56 rounded-full blur-3xl" style="background:rgba(168,85,247,0.08)"></div>
+      <div class="relative z-10 h-full flex items-center justify-between px-6 sm:px-12">
+        <div class="max-w-[210px] sm:max-w-sm">
+          <div class="inline-flex items-center gap-1.5 mb-3 sm:mb-4">
+            <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.45)">
+              <i data-lucide="code-2" class="w-2.5 h-2.5 sm:w-3 sm:h-3" style="color:#C4B5FD"></i>
+            </div>
+            <span class="text-[10px] sm:text-xs font-bold tracking-wide uppercase" style="color:#C4B5FD;letter-spacing:.06em">Developer</span>
           </div>
-          <h3 style="font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:6px;line-height:1.2">{{$sl['title']}}</h3>
-          <p style="font-size:12px;color:rgba(255,255,255,.5)">{{$sl['sub']}}</p>
+          <div class="flex items-center gap-2.5 mb-2 sm:mb-3">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.4)">
+              <img src="{{ asset('images/logo-dev-banner.png') }}" alt="Vexalyn Dev" class="w-5 h-5 sm:w-7 sm:h-7 object-contain" style="filter:invert(1) brightness(2)">
+            </div>
+            <div>
+              <p class="text-sm sm:text-base font-extrabold leading-none" style="color:#E9D5FF">Vexalyn Dev</p>
+              <p class="text-[9px] sm:text-[10px] mt-0.5" style="color:rgba(196,181,253,0.6)">vexalyndev.my.id</p>
+            </div>
+          </div>
+          <p class="text-[10px] sm:text-xs leading-relaxed mb-3 sm:mb-4" style="color:rgba(255,255,255,0.5)">Vio Atmajaya Saputra — Developer ICB CT Presensi Guru</p>
+          <a href="https://vexalyndev.my.id" target="_blank"
+             class="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all hover:-translate-y-0.5 active:scale-95"
+             style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.45);color:#DDD6FE">
+            <i data-lucide="external-link" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i> Cek Profile Developer
+          </a>
         </div>
-        <div style="width:72px;height:72px;background:rgba(255,255,255,.07);border-radius:18px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.1);flex-shrink:0">
-          <i data-lucide="{{$sl['ic']}}" style="width:32px;height:32px;color:{{$sl['color']}}"></i>
+        <div class="hidden sm:flex items-center justify-center w-36 h-36 md:w-44 md:h-44 flex-shrink-0">
+          <svg viewBox="0 0 180 180" fill="none" class="w-full h-full opacity-75">
+            <rect x="40" y="50" width="100" height="80" rx="10" fill="#8B5CF6" fill-opacity=".12" stroke="#8B5CF6" stroke-width="2.2"/>
+            <path d="M60 70 L72 80 L60 90" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M120 70 L108 80 L120 90" stroke="#A78BFA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M100 67 L80 93" stroke="#C4B5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="90" cy="38" r="15" fill="#8B5CF6" fill-opacity=".18" stroke="#8B5CF6" stroke-width="2"/>
+          </svg>
         </div>
       </div>
     </div>
-    @endforeach
-    <div style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:10;background:rgba(0,0,0,.25);backdrop-filter:blur(8px);padding:5px 10px;border-radius:99px;border:1px solid rgba(255,255,255,.1)">
-      @for($i=0;$i<4;$i++)
-      <button class="sdot" data-idx="{{$i}}" style="width:{{$i===0?'18px':'6px'}};height:6px;border-radius:99px;background:{{$i===0?'#fff':'rgba(255,255,255,.3)'}};border:none;cursor:pointer;transition:all .3s;padding:0"></button>
-      @endfor
+    {{-- Dots tengah --}}
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:5px 8px">
+      <div style="width:20px;height:4px;border-radius:99px;background:rgba(255,255,255,.9);box-shadow:0 0 6px rgba(255,255,255,.5)"></div>
     </div>
   </div>
 
-  {{-- System Info + Quick Actions --}}
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="hide-sm" style="grid-template-columns:1fr">
-    <div class="card" style="padding:20px">
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
-        <i data-lucide="server" style="width:15px;height:15px;color:var(--purple)"></i>
-        <p style="font-size:13px;font-weight:700;color:var(--txt)">System Info</p>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        @foreach([['PHP',$stats['php_version'],'#a78bfa'],['Laravel',$stats['laravel_version'],'#67e8f9'],['Env',strtoupper($stats['env']),'#4ade80'],['Debug',$stats['debug']?'ON':'OFF',$stats['debug']?'#fb923c':'#4ade80'],['URL',parse_url($stats['app_url'],PHP_URL_HOST)??$stats['app_url'],'#f472b6'],['Time',now()->format('H:i').' WIB','#818cf8']] as [$k,$v,$c])
-        <div style="padding:10px 12px;border-radius:10px;background:var(--bg-card2)">
-          <p style="font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">{{$k}}</p>
-          <p style="font-size:13px;font-weight:700;color:{{$c}};word-break:break-all">{{$v}}</p>
-        </div>
-        @endforeach
-      </div>
+  {{-- System Info --}}
+  <div class="card p-5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm">
+    <div class="flex items-center gap-2 mb-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+      <i data-lucide="server" class="w-4 h-4 text-purple-600"></i>
+      <p class="text-sm font-bold text-slate-800 dark:text-white">System Info</p>
     </div>
-    <div class="card" style="padding:20px">
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
-        <i data-lucide="zap" style="width:15px;height:15px;color:#facc15"></i>
-        <p style="font-size:13px;font-weight:700;color:var(--txt)">Quick Actions</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      @foreach([['PHP',$stats['php_version']],['Laravel',$stats['laravel_version']],['Env',strtoupper($stats['env'])],['Debug',$stats['debug']?'ON':'OFF'],['URL',parse_url($stats['app_url'],PHP_URL_HOST)??'-'],['Time',now()->format('H:i').' WIB']] as [$k,$v])
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-1">{{$k}}</p>
+        <p class="text-sm font-bold text-purple-600 dark:text-purple-400 truncate">{{$v}}</p>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:9px">
-        @foreach([[route('developer.clear-cache',$secret),'refresh-cw','#34d399','Clear Cache','confirm("Clear cache?")'],
-                  [url('/run-migrate-secret?key=vexalyn19052009'),'database','#60a5fa','Run Migrate','confirm("Run migrate?")'],
-                  [url('/dashboard'),'layout-dashboard','#a78bfa','Dashboard',null],
-                  [url('/settings'),'settings','#9ca3af','Settings',null],
-                  ['https://github.com/vexalyn-dev','github','#e2e8f0','GitHub',null]] as [$href,$ic,$c,$lbl,$conf])
-        <a href="{{$href}}" {{ $conf?"onclick=\"return $conf\"":'' }} target="{{ str_starts_with($href,'http')?'_blank':'' }}"
-           class="btn btn-g" style="text-decoration:none;font-size:12px;padding:8px 14px">
-          <i data-lucide="{{$ic}}" style="width:13px;height:13px;color:{{$c}}"></i>{{$lbl}}
-        </a>
-        @endforeach
-      </div>
+      @endforeach
     </div>
   </div>
 </div>
 
-{{-- ── APK ── --}}
-<div id="section-apk" class="fu fu2" style="display:flex;flex-direction:column;gap:16px">
-  <div style="display:flex;align-items:center;gap:12px">
-    <div style="width:38px;height:38px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:11px;display:flex;align-items:center;justify-content:center">
-      <i data-lucide="smartphone" style="width:19px;height:19px;color:#fff"></i>
+{{-- ═══ SECTION: APK ═══ --}}
+<div id="sec-apk" class="dev-section hidden space-y-6">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 bg-gradient-to-br from-purple-700 to-purple-500 rounded-xl flex items-center justify-center shadow-md shadow-purple-400/20">
+      <i data-lucide="smartphone" class="w-5 h-5 text-white"></i>
     </div>
-    <div><p class="section-title">APK Management</p><p class="section-sub">Upload & kelola APK mobile ICB CT</p></div>
+    <div>
+      <h2 class="text-lg font-extrabold text-slate-800 dark:text-white">APK Management</h2>
+      <p class="text-xs text-slate-400">Upload & kelola APK mobile ICB CT</p>
+    </div>
   </div>
 
   @if($appSetting?->apk_file)
-  <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:1rem;background:rgba(34,197,94,.08);border:1.5px solid rgba(34,197,94,.25)">
-    <div style="width:42px;height:42px;background:rgba(34,197,94,.15);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      <i data-lucide="package-check" style="width:21px;height:21px;color:#16a34a"></i>
+  <div class="flex items-center gap-4 p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40">
+    <div class="w-11 h-11 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+      <i data-lucide="package-check" class="w-6 h-6 text-green-600 dark:text-green-400"></i>
     </div>
-    <div style="flex:1;min-width:0">
-      <p style="font-size:13px;font-weight:700;color:#15803d">APK Terpasang</p>
-      <p style="font-size:12px;color:#16a34a;margin-top:2px">{{ $appSetting->apk_name ?? 'ICB CT Presensi' }} · {{ $appSetting->apk_version_label ?? 'v1.0.0' }} · {{ $appSetting->apk_size_human ?? '-' }}</p>
-      @if($appSetting->apk_uploaded_at)
-      <p style="font-size:10px;color:rgba(21,128,61,.6);margin-top:2px">Diupload {{ $appSetting->apk_uploaded_at->diffForHumans() }}</p>
-      @endif
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-bold text-green-800 dark:text-green-300">APK Terpasang</p>
+      <p class="text-xs text-green-600 dark:text-green-400">{{ $appSetting->apk_name ?? 'ICB CT Presensi' }} · {{ $appSetting->apk_version_label ?? 'v1.0.0' }} · {{ $appSetting->apk_size_human ?? '-' }}</p>
+      @if($appSetting->apk_uploaded_at)<p class="text-[10px] text-green-500/70 mt-0.5">Diupload {{ $appSetting->apk_uploaded_at->diffForHumans() }}</p>@endif
     </div>
     <form action="{{ route('developer.apk.delete',$secret) }}" method="POST" onsubmit="return confirm('Hapus APK?')">
       @csrf @method('DELETE')
-      <button type="submit" class="btn btn-g" style="color:#dc2626;border-color:rgba(220,38,38,.3);font-size:12px;padding:8px 14px">
-        <i data-lucide="trash-2" style="width:13px;height:13px"></i> Hapus
+      <button type="submit" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-100 hover:bg-red-200 text-red-600 dark:bg-red-900/30 dark:text-red-400 transition-colors">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Hapus
       </button>
     </form>
   </div>
   @else
-  <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:1rem;background:var(--bg-card2);border:1.5px dashed var(--border)">
-    <i data-lucide="package-x" style="width:17px;height:17px;color:var(--muted)"></i>
-    <p style="font-size:13px;color:var(--muted)">Belum ada APK yang diupload.</p>
+  <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-dashed border-slate-200 dark:border-slate-700">
+    <i data-lucide="package-x" class="w-5 h-5 text-slate-400 flex-shrink-0"></i>
+    <p class="text-sm text-slate-400">Belum ada APK yang diupload.</p>
   </div>
   @endif
 
-  <form action="{{ route('developer.apk',$secret) }}" method="POST" enctype="multipart/form-data" class="card" style="padding:24px;display:flex;flex-direction:column;gap:16px">
+  <form action="{{ route('developer.apk',$secret) }}" method="POST" enctype="multipart/form-data"
+        class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 space-y-5 shadow-sm">
     @csrf
     <div id="apkZone" onclick="document.getElementById('apkFile').click()"
-         style="border:2px dashed var(--border);border-radius:1rem;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative"
-         ondragover="event.preventDefault();this.style.borderColor='var(--purple)'"
-         ondragleave="this.style.borderColor='var(--border)'"
-         ondrop="event.preventDefault();handleApk(event.dataTransfer.files[0])">
-      <input type="file" name="apk_file" accept=".apk" id="apkFile" style="display:none" onchange="handleApk(this.files[0])">
-      <i data-lucide="upload-cloud" style="width:32px;height:32px;color:var(--muted);margin:0 auto 10px;display:block"></i>
-      <p style="font-size:13px;font-weight:600;color:var(--txt2)" id="apkZoneTxt">Drag & drop atau klik untuk pilih .apk</p>
-      <p style="font-size:11px;color:var(--muted);margin-top:4px">Format: .apk · Maks 100MB</p>
+         class="relative border-2 border-dashed border-slate-200 dark:border-slate-600 hover:border-purple-400 rounded-2xl p-7 text-center transition-colors cursor-pointer"
+         ondragover="event.preventDefault();this.classList.add('border-purple-500')"
+         ondragleave="this.classList.remove('border-purple-500')"
+         ondrop="event.preventDefault();this.classList.remove('border-purple-500');handleApk(event.dataTransfer.files[0])">
+      <input type="file" name="apk_file" accept=".apk" id="apkFile" class="hidden" onchange="handleApk(this.files[0])">
+      <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600 mb-2.5"></i>
+      <p class="text-sm font-semibold text-slate-500 dark:text-slate-400" id="apkZoneTxt">Drag & drop atau klik untuk pilih .apk</p>
+      <p class="text-xs text-slate-400 mt-1">Format: .apk · Maks 100MB — metadata auto-detect</p>
     </div>
-    <div class="grid2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       @foreach([['apk_name','apkName','type','Nama Aplikasi','ICB CT Presensi'],['apk_version','apkVer','tag','Versi','1.0.0'],['apk_min_android','apkAndroid','smartphone','Min. Android','Android 8.0+'],['apk_changelog','apkLog','file-text','Changelog','Perubahan...']] as [$n,$id,$ic,$lbl,$ph])
       <div>
-        <p style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">{{$lbl}}</p>
-        <div style="position:relative">
-          <i data-lucide="{{$ic}}" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted)"></i>
-          <input type="text" name="{{$n}}" id="{{$id}}" placeholder="{{$ph}}" value="{{ old($n, $appSetting?->$n ?? '') }}" class="inp" style="padding-left:36px">
+        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wide">{{ $lbl }}</label>
+        <div class="relative">
+          <i data-lucide="{{ $ic }}" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
+          <input type="text" name="{{ $n }}" id="{{ $id }}" placeholder="{{ $ph }}" value="{{ old($n, $appSetting?->$n ?? '') }}"
+                 class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition">
         </div>
       </div>
       @endforeach
     </div>
-    <div style="display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--border)">
-      <button type="submit" class="btn btn-p"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan APK</button>
+    <div class="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-700">
+      <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-700 to-purple-500 hover:from-purple-800 hover:to-purple-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-purple-400/20 hover:-translate-y-0.5">
+        <i data-lucide="save" class="w-4 h-4"></i> Simpan APK
+      </button>
       @if($appSetting?->apk_url)
-      <a href="{{ $appSetting->apk_url }}" target="_blank" class="btn btn-g" style="text-decoration:none;font-size:13px">
-        <i data-lucide="download" style="width:14px;height:14px"></i> Download
+      <a href="{{ $appSetting->apk_url }}" target="_blank" class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-semibold transition-all">
+        <i data-lucide="download" class="w-4 h-4"></i> Download
       </a>
       @endif
     </div>
   </form>
 </div>
 
-{{-- ── MAINTENANCE ── --}}
-<div id="section-maintenance" class="fu fu3" style="display:flex;flex-direction:column;gap:16px">
-  <div style="display:flex;align-items:center;gap:12px">
-    <div style="width:38px;height:38px;background:linear-gradient(135deg,#d97706,#f59e0b);border-radius:11px;display:flex;align-items:center;justify-content:center">
-      <i data-lucide="construction" style="width:19px;height:19px;color:#fff"></i>
+{{-- ═══ SECTION: MAINTENANCE ═══ --}}
+<div id="sec-maintenance" class="dev-section hidden space-y-6">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-400 rounded-xl flex items-center justify-center shadow-md shadow-amber-400/20">
+      <i data-lucide="construction" class="w-5 h-5 text-white"></i>
     </div>
-    <div style="flex:1">
-      <p class="section-title">Mode Maintenance</p>
-      <p class="section-sub">Tampilkan halaman maintenance ke guru — admin tetap bisa akses</p>
+    <div class="flex-1">
+      <h2 class="text-lg font-extrabold text-slate-800 dark:text-white">Mode Maintenance</h2>
+      <p class="text-xs text-slate-400">Tampilkan halaman maintenance ke guru — admin tetap bisa akses</p>
     </div>
     @php $mOn = \App\Models\AppSetting::getInstance()->maintenance_mode ?? false; @endphp
-    <span class="badge" style="{{ $mOn ? 'background:rgba(220,38,38,.15);color:#dc2626;border:1px solid rgba(220,38,38,.3)':'background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.3)' }}">
+    <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold {{ $mOn ? 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/40' : 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/40' }}">
       {{ $mOn ? '● AKTIF' : '○ NONAKTIF' }}
     </span>
   </div>
-  <form action="{{ route('developer.maintenance',$secret) }}" method="POST" class="card" style="padding:24px;display:flex;flex-direction:column;gap:16px">
+
+  <form action="{{ route('developer.maintenance',$secret) }}" method="POST"
+        class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 space-y-5 shadow-sm">
     @csrf
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:.875rem;background:var(--bg-card2)">
+    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
       <div>
-        <p style="font-size:13px;font-weight:600;color:var(--txt)">Aktifkan Maintenance Mode</p>
-        <p style="font-size:11px;color:var(--muted);margin-top:2px">Admin & Operator tetap bisa login dan akses semua fitur</p>
+        <p class="text-sm font-semibold text-slate-800 dark:text-white">Aktifkan Maintenance Mode</p>
+        <p class="text-xs text-slate-400 mt-0.5">Admin & Operator tetap bisa login dan akses semua fitur</p>
       </div>
-      <label style="cursor:pointer" onclick="toggleMaintUI()">
+      <label class="cursor-pointer" onclick="toggleMaintUI()">
         <input type="hidden" name="maintenance_mode" id="maintVal" value="{{ $mOn?'1':'0' }}">
-        <div class="tog-track {{ $mOn?'on':'off' }}" id="maintTrack">
-          <div class="tog-thumb"></div>
+        <div id="maintTrack" class="relative w-11 h-6 rounded-full transition-colors {{ $mOn?'bg-red-500':'bg-slate-300 dark:bg-slate-600' }}">
+          <div id="maintThumb" class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all {{ $mOn?'left-[22px]':'left-0.5' }}"></div>
         </div>
       </label>
     </div>
     <div>
-      <p style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Pesan Maintenance</p>
-      <textarea name="maintenance_message" rows="2" placeholder="Sistem sedang dalam pemeliharaan, silakan coba beberapa saat lagi…" class="inp" style="resize:none">{{ \App\Models\AppSetting::getInstance()->maintenance_message }}</textarea>
+      <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wide">Pesan Maintenance</label>
+      <textarea name="maintenance_message" rows="2" placeholder="Sistem sedang dalam pemeliharaan…"
+                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition resize-none">{{ \App\Models\AppSetting::getInstance()->maintenance_message }}</textarea>
     </div>
-    <div>
-      <button type="submit" class="btn btn-p"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan Status</button>
-    </div>
+    <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-700 to-purple-500 hover:from-purple-800 hover:to-purple-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-purple-400/20 hover:-translate-y-0.5">
+      <i data-lucide="save" class="w-4 h-4"></i> Simpan Status
+    </button>
   </form>
 </div>
 
-{{-- ── UPDATES ── --}}
-<div id="section-updates" class="fu fu4" style="display:flex;flex-direction:column;gap:16px">
-  <div style="display:flex;align-items:center;gap:12px">
-    <div style="width:38px;height:38px;background:linear-gradient(135deg,#0ea5e9,#38bdf8);border-radius:11px;display:flex;align-items:center;justify-content:center">
-      <i data-lucide="rocket" style="width:19px;height:19px;color:#fff"></i>
+{{-- ═══ SECTION: UPDATES ═══ --}}
+<div id="sec-updates" class="dev-section hidden space-y-6">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 bg-gradient-to-br from-sky-600 to-sky-400 rounded-xl flex items-center justify-center shadow-md shadow-sky-400/20">
+      <i data-lucide="rocket" class="w-5 h-5 text-white"></i>
     </div>
-    <div><p class="section-title">Rilis Update</p><p class="section-sub">Tulis changelog — muncul di modal user saat pertama masuk</p></div>
+    <div>
+      <h2 class="text-lg font-extrabold text-slate-800 dark:text-white">Rilis Update</h2>
+      <p class="text-xs text-slate-400">Tulis changelog — tampil ke user lewat modal sambutan</p>
+    </div>
   </div>
-  <form action="{{ route('developer.updates.store',$secret) }}" method="POST" class="card" style="padding:24px;display:flex;flex-direction:column;gap:14px">
+
+  <form action="{{ route('developer.updates.store',$secret) }}" method="POST"
+        class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 space-y-4 shadow-sm">
     @csrf
-    <div class="grid2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <p style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Versi</p>
-        <input type="text" name="version" placeholder="2.3.1" class="inp" required>
+        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wide">Versi</label>
+        <input type="text" name="version" placeholder="2.3.1" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition" required>
       </div>
       <div>
-        <p style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Tipe</p>
-        <select name="type" class="inp" style="cursor:pointer">
+        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wide">Tipe</label>
+        <select name="type" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition cursor-pointer">
           <option value="feature">✨ Feature</option>
           <option value="fix">🔧 Fix</option>
           <option value="update">⬆️ Update</option>
@@ -421,206 +477,117 @@ body{background:var(--bg);color:var(--txt);transition:background .3s,color .3s;m
       </div>
     </div>
     <div>
-      <p style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Judul Update</p>
-      <input type="text" name="title" placeholder="Perbaikan bug + fitur baru" class="inp" required>
+      <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wide">Judul Update</label>
+      <input type="text" name="title" placeholder="Perbaikan bug + fitur baru" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition" required>
     </div>
     <div>
-      <p style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Detail Perubahan</p>
-      <textarea name="content" rows="4" placeholder="• Perbaiki bug saat login&#10;• Tambah fitur export Excel&#10;• Update UI halaman presensi" class="inp" style="resize:vertical" required></textarea>
+      <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wide">Detail Perubahan</label>
+      <textarea name="content" rows="4" placeholder="• Perbaiki bug&#10;• Tambah fitur baru&#10;• Update UI" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition resize-y" required></textarea>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <input type="checkbox" name="show_modal" value="1" checked style="accent-color:#7c3aed;width:15px;height:15px">
-        <span style="font-size:12px;color:var(--txt2)">Tampilkan ke user lewat modal</span>
+    <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="checkbox" name="show_modal" value="1" checked class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500" style="accent-color:#7c3aed">
+        <span class="text-xs text-slate-500 dark:text-slate-400">Tampilkan ke user lewat modal</span>
       </label>
-      <button type="submit" class="btn btn-p"><i data-lucide="plus" style="width:15px;height:15px"></i> Tambah</button>
+      <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-700 to-purple-500 hover:from-purple-800 hover:to-purple-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-purple-400/20 hover:-translate-y-0.5">
+        <i data-lucide="plus" class="w-4 h-4"></i> Tambah
+      </button>
     </div>
   </form>
 
+  {{-- List updates --}}
   @if(count($updates)>0)
-  <div style="display:flex;flex-direction:column;gap:8px">
+  <div class="space-y-3">
     @foreach($updates as $u)
-    @php $tc=['feature'=>['#a78bfa','rgba(139,92,246,.12)','rgba(139,92,246,.3)'],'fix'=>['#4ade80','rgba(34,197,94,.1)','rgba(34,197,94,.25)'],'hotfix'=>['#f87171','rgba(239,68,68,.1)','rgba(239,68,68,.25)'],'update'=>['#60a5fa','rgba(96,165,250,.1)','rgba(96,165,250,.25)']][$u->type]??['#9ca3af','rgba(156,163,175,.1)','rgba(156,163,175,.25)']; @endphp
-    <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:1rem;background:var(--bg-card);border:1.5px solid var(--border)">
-      <span style="padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;flex-shrink:0;background:{{$tc[1]}};color:{{$tc[0]}};border:1px solid {{$tc[2]}};text-transform:uppercase;margin-top:2px">{{$u->type}}</span>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
-          <span style="font-size:12px;font-weight:700;color:var(--txt)">v{{$u->version}}</span>
-          <span style="font-size:12px;color:var(--txt2)">{{$u->title}}</span>
-          @if($u->show_modal)<span style="font-size:9px;color:#a78bfa;background:rgba(139,92,246,.1);padding:2px 7px;border-radius:99px;border:1px solid rgba(139,92,246,.2)">modal</span>@endif
+    @php $tc=['feature'=>['text-purple-600 dark:text-purple-400','bg-purple-100 dark:bg-purple-900/20','border-purple-200 dark:border-purple-800/40'],'fix'=>['text-green-600 dark:text-green-400','bg-green-100 dark:bg-green-900/20','border-green-200 dark:border-green-800/40'],'hotfix'=>['text-red-600 dark:text-red-400','bg-red-100 dark:bg-red-900/20','border-red-200 dark:border-red-800/40'],'update'=>['text-blue-600 dark:text-blue-400','bg-blue-100 dark:bg-blue-900/20','border-blue-200 dark:border-blue-800/40']][$u->type]??['text-slate-500','bg-slate-100 dark:bg-slate-800','border-slate-200 dark:border-slate-700']; @endphp
+    <div class="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+      <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase flex-shrink-0 mt-0.5 {{ $tc[0] }} {{ $tc[1] }} border {{ $tc[2] }}">{{ $u->type }}</span>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1 flex-wrap">
+          <span class="text-sm font-bold text-slate-800 dark:text-white">v{{ $u->version }}</span>
+          <span class="text-sm text-slate-500 dark:text-slate-400">{{ $u->title }}</span>
+          @if($u->show_modal)<span class="text-[10px] text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/20 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-800/40">modal</span>@endif
         </div>
-        <p style="font-size:11px;color:var(--muted)">{{ \Illuminate\Support\Str::limit($u->content,80) }} · {{$u->created_at->diffForHumans()}}</p>
+        <p class="text-xs text-slate-400 dark:text-slate-500">{{ \Illuminate\Support\Str::limit($u->content,80) }} · {{ $u->created_at->diffForHumans() }}</p>
       </div>
       <form action="{{ route('developer.updates.delete',[$secret,$u->id]) }}" method="POST" onsubmit="return confirm('Hapus?')">
         @csrf @method('DELETE')
-        <button type="submit" style="padding:6px 8px;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;cursor:pointer;transition:all .2s;display:flex;align-items:center"
-                onmouseover="this.style.background='rgba(239,68,68,.2)'" onmouseout="this.style.background='rgba(239,68,68,.1)'">
-          <i data-lucide="trash-2" style="width:13px;height:13px"></i>
+        <button type="submit" class="p-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex-shrink-0">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
         </button>
       </form>
     </div>
     @endforeach
   </div>
   @else
-  <div class="card" style="padding:28px;text-align:center">
-    <i data-lucide="inbox" style="width:32px;height:32px;color:var(--muted);margin:0 auto 10px;display:block"></i>
-    <p style="font-size:13px;color:var(--muted)">Belum ada update.</p>
+  <div class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-10 text-center shadow-sm">
+    <i data-lucide="inbox" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i>
+    <p class="text-sm text-slate-400">Belum ada update yang ditambahkan.</p>
   </div>
   @endif
 </div>
 
-<div style="text-align:center;padding:16px 0;border-top:1px solid var(--border)" class="fu fu5">
-  <p style="font-size:11px;color:var(--muted)">ICB CT Developer Panel · <a href="https://vexalyndev.my.id" target="_blank" style="color:var(--purple);text-decoration:none;font-weight:600">Vexalyn Dev</a> · {{ now()->year }}</p>
-</div>
-</main>
+    </div>{{-- end scroll --}}
+  </div>{{-- end main area --}}
+</div>{{-- end app shell --}}
 
 <script>
 // ── i18n ──
-const T = {
-  id:{ welcome:'Selamat datang,', date:'{{ now()->locale("id")->isoFormat("dddd, D MMMM YYYY") }}', modalTitle:'Selamat Datang, Developer! 👋', modalSub:'Kamu mengakses <strong style="color:var(--purple)">Developer Dashboard</strong> ICB CT via URL rahasia.', modalBtn:'Masuk ke Dashboard', loaderMsg:'Memuat Dev Panel…' },
-  en:{ welcome:'Welcome,', date:'{{ now()->isoFormat("dddd, D MMMM YYYY") }}', modalTitle:'Welcome, Developer! 👋', modalSub:'You\'re accessing <strong style="color:var(--purple)">Developer Dashboard</strong> ICB CT via secret URL.', modalBtn:'Enter Dashboard', loaderMsg:'Loading Dev Panel…' }
-};
-let lang = localStorage.getItem('devLang') || 'id';
-
-function applyLang() {
-  document.getElementById('langLabel').textContent = lang.toUpperCase();
-  document.getElementById('welcomeDate').textContent = T[lang].date;
-  document.getElementById('modalTitle').textContent  = T[lang].modalTitle;
-  document.getElementById('modalSub').innerHTML      = T[lang].modalSub;
-  document.getElementById('modalBtn').textContent    = T[lang].modalBtn;
-  document.getElementById('loaderMsg').textContent   = T[lang].loaderMsg;
-}
-function toggleLang() { lang = lang === 'id' ? 'en' : 'id'; localStorage.setItem('devLang',lang); applyLang(); }
+const i18n={id:{date:'{{ now()->locale("id")->isoFormat("dddd, D MMMM YYYY") }}',loader:'Memuat Dev Panel…',modal:'Masuk ke Dashboard'},en:{date:'{{ now()->isoFormat("dddd, D MMMM YYYY") }}',loader:'Loading Dev Panel…',modal:'Enter Dashboard'}};
+let lang=localStorage.getItem('devLang')||'id';
+function applyLang(){document.getElementById('langLabel').textContent=lang.toUpperCase();document.getElementById('wcDate').textContent=i18n[lang].date;document.getElementById('pageDate').textContent=i18n[lang].date;document.getElementById('loaderMsg').textContent=i18n[lang].loader;const mb=document.getElementById('modalBtn');if(mb)mb.childNodes[mb.childNodes.length-1].textContent=' '+i18n[lang].modal;}
+function toggleLang(){lang=lang==='id'?'en':'id';localStorage.setItem('devLang',lang);applyLang();}
 
 // ── Theme ──
-const themes = ['light','dark','system'];
-let themeIdx = themes.indexOf(localStorage.getItem('devTheme') || 'system');
-const themeIcons = { light:'sun', dark:'moon', system:'monitor' };
+const thms=['light','dark','system'],thIcons={light:'sun',dark:'moon',system:'monitor'};
+let tIdx=thms.indexOf(localStorage.getItem('devTheme')||'light');
+function applyTheme(){const t=thms[tIdx];localStorage.setItem('devTheme',t);const h=document.getElementById('devHtml');const dark=(t==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches)||(t==='dark');h.classList.toggle('dark',dark);const ico=thIcons[t];const ei=document.getElementById('themIco');if(ei){ei.setAttribute('data-lucide',ico);lucide.createIcons();}}
+function cycleTheme(){tIdx=(tIdx+1)%3;applyTheme();}
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(localStorage.getItem('devTheme')==='system')applyTheme();});
 
-function applyTheme() {
-  const t = themes[themeIdx];
-  localStorage.setItem('devTheme', t);
-  const html = document.getElementById('devHtml');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  html.className = (t === 'system') ? (prefersDark ? 'dark' : 'light') : t;
-  // Topbar bg hack for dark
-  document.getElementById('topbar').style.background = html.classList.contains('dark')
-    ? 'rgba(8,6,20,.88)' : 'rgba(248,247,255,.88)';
-  const ico = themeIcons[t];
-  document.getElementById('themIco').setAttribute('data-lucide', ico);
-  lucide.createIcons();
+// ── Loading ──
+const lMsgs={id:['Memuat Dev Panel…','Menyiapkan data…','Hampir selesai…','Siap! ✓'],en:['Loading Dev Panel…','Preparing data…','Almost done…','Ready! ✓']};
+let lp=0;
+const lb=document.getElementById('loaderBar');
+const lm=document.getElementById('loaderMsg');
+const lt=setInterval(()=>{lp+=Math.random()*22+8;if(lp>100)lp=100;lb.style.width=lp+'%';const msgs=lMsgs[lang];lm.textContent=msgs[Math.floor((lp/100)*(msgs.length-1))];if(lp>=100){clearInterval(lt);setTimeout(showApp,400);}},110);
+
+function showApp(){const ld=document.getElementById('devLoader');ld.style.transition='opacity .5s ease';ld.style.opacity='0';setTimeout(()=>{ld.style.display='none';const sh=document.getElementById('appShell');sh.style.opacity='1';if(window.lucide)lucide.createIcons();showModal();},500);}
+
+// ── Modal ──
+function showModal(){const m=document.getElementById('devModal');const b=document.getElementById('devModalBox');m.classList.remove('hidden');m.style.display='flex';requestAnimationFrame(()=>requestAnimationFrame(()=>{b.style.transform='translateY(0) scale(1)';b.style.opacity='1';if(window.lucide)lucide.createIcons();}));}
+function closeModal(){const b=document.getElementById('devModalBox');b.style.transform='translateY(20px) scale(.95)';b.style.opacity='0';setTimeout(()=>{document.getElementById('devModal').style.display='none';document.getElementById('devModal').classList.add('hidden');},350);}
+document.getElementById('devModal').addEventListener('click',e=>{if(e.target===document.getElementById('devModal'))closeModal();});
+
+// ── Sidebar ──
+function openSidebar(){document.getElementById('devSidebar').classList.remove('-translate-x-full');document.getElementById('sidebarOverlay').classList.remove('hidden');}
+function closeSidebar(){document.getElementById('devSidebar').classList.add('-translate-x-full');document.getElementById('sidebarOverlay').classList.add('hidden');}
+
+// ── Section navigation ──
+const sections=['sec-dashboard','sec-apk','sec-maintenance','sec-updates'];
+const secTitles={'sec-dashboard':'Dashboard','sec-apk':'APK Management','sec-maintenance':'Maintenance Mode','sec-updates':'Rilis Update'};
+function showSection(id){
+  sections.forEach(s=>{
+    const el=document.getElementById(s);
+    if(el){el.classList.toggle('hidden',s!==id);}
+    const nav=document.getElementById('nav-'+s);
+    if(nav){nav.classList.toggle('dev-active',s===id);nav.classList.toggle('text-white',s===id);nav.classList.toggle('text-slate-400',s!==id);}
+  });
+  document.getElementById('pageTitle').textContent=secTitles[id]||'Dashboard';
+  window.scrollTo({top:0,behavior:'smooth'});
+  closeSidebar();
 }
-function cycleTheme() { themeIdx = (themeIdx + 1) % 3; applyTheme(); }
-
-// ── Profile menu close on outside click ──
-document.addEventListener('click', e => {
-  const pm = document.getElementById('profMenu');
-  if (pm && !pm.parentElement.contains(e.target)) pm.style.display = 'none';
-});
-
-// ── Loading screen ──
-const loaderMsgs = { id:['Memuat Dev Panel…','Menyiapkan data…','Hampir selesai…','Siap!'], en:['Loading Dev Panel…','Preparing data…','Almost ready…','Done!'] };
-let lp = 0;
-const loaderBar = document.getElementById('loaderBar');
-const loaderMsg = document.getElementById('loaderMsg');
-const lTimer = setInterval(() => {
-  lp += Math.random() * 22 + 8;
-  if (lp > 100) lp = 100;
-  loaderBar.style.width = lp + '%';
-  const msgs = loaderMsgs[lang];
-  const mi = Math.floor((lp/100) * (msgs.length - 1));
-  loaderMsg.textContent = msgs[mi];
-  if (lp >= 100) { clearInterval(lTimer); showApp(); }
-}, 120);
-
-function showApp() {
-  const loader = document.getElementById('devLoader');
-  loader.style.transition = 'opacity .5s ease';
-  loader.style.opacity = '0';
-  setTimeout(() => {
-    loader.style.display = 'none';
-    document.getElementById('mainWrap').style.opacity = '1';
-    showModal();
-  }, 500);
-}
-
-function showModal() {
-  const m = document.getElementById('devModal');
-  const b = document.getElementById('devModalBox');
-  m.style.display = 'flex';
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    b.style.transform = 'translateY(0) scale(1)';
-    b.style.opacity = '1';
-    lucide.createIcons();
-  }));
-}
-function closeModal() {
-  const b = document.getElementById('devModalBox');
-  b.style.transform = 'translateY(20px) scale(.95)';
-  b.style.opacity = '0';
-  setTimeout(() => { document.getElementById('devModal').style.display = 'none'; }, 350);
-}
-document.getElementById('devModal').addEventListener('click', e => { if (e.target === document.getElementById('devModal')) closeModal(); });
-
-// ── Slider ──
-let sIdx = 0;
-const slides = document.querySelectorAll('.dslide');
-const dots   = document.querySelectorAll('.sdot');
-let sTimer;
-function gotoSlide(i) {
-  if (i === sIdx) return;
-  slides[sIdx].classList.add('exit');
-  slides[sIdx].classList.remove('active');
-  setTimeout(() => slides[sIdx < slides.length ? sIdx : 0].classList.remove('exit'), 500);
-  dots[sIdx].style.width = '6px';
-  dots[sIdx].style.background = 'rgba(255,255,255,.3)';
-  sIdx = (i + slides.length) % slides.length;
-  slides[sIdx].classList.add('active');
-  dots[sIdx].style.width = '18px';
-  dots[sIdx].style.background = '#fff';
-}
-function startSlider() { clearInterval(sTimer); sTimer = setInterval(() => gotoSlide(sIdx + 1), 3500); }
-dots.forEach(d => d.addEventListener('click', () => { gotoSlide(+d.dataset.idx); startSlider(); }));
-startSlider();
+// set active on load
+showSection('sec-dashboard');
 
 // ── APK auto-fill ──
-function handleApk(file) {
-  if (!file) return;
-  document.getElementById('apkZoneTxt').textContent = file.name;
-  document.getElementById('apkZone').style.borderColor = 'var(--purple)';
-  const base = file.name.replace(/\.apk$/i, '');
-  const vm = base.match(/[vV]?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/);
-  if (vm) {
-    document.getElementById('apkVer').value = vm[1];
-    const nm = base.replace(/[-_\s]*[vV]?\d+\.\d+(?:\.\d+)?(?:\.\d+)?[-_\s]*/g,'').replace(/[-_]/g,' ').trim();
-    if (nm) document.getElementById('apkName').value = nm;
-  } else {
-    const nm = base.replace(/[-_]/g,' ').trim();
-    if (nm) document.getElementById('apkName').value = nm;
-  }
-}
+function handleApk(file){if(!file)return;document.getElementById('apkZoneTxt').textContent=file.name;document.getElementById('apkZone').classList.add('border-purple-500');const base=file.name.replace(/\.apk$/i,'');const vm=base.match(/[vV]?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/);if(vm){document.getElementById('apkVer').value=vm[1];const nm=base.replace(/[-_\s]*[vV]?\d+\.\d+(?:\.\d+)?(?:\.\d+)?[-_\s]*/g,'').replace(/[-_]/g,' ').trim();if(nm)document.getElementById('apkName').value=nm;}else{const nm=base.replace(/[-_]/g,' ').trim();if(nm)document.getElementById('apkName').value=nm;}}
 
-// ── Maintenance toggle UI ──
-function toggleMaintUI() {
-  const t = document.getElementById('maintTrack');
-  const v = document.getElementById('maintVal');
-  const isOn = t.classList.contains('on');
-  t.classList.toggle('on', !isOn);
-  t.classList.toggle('off', isOn);
-  v.value = isOn ? '0' : '1';
-}
+// ── Maintenance toggle ──
+function toggleMaintUI(){const t=document.getElementById('maintTrack');const th=document.getElementById('maintThumb');const v=document.getElementById('maintVal');const on=t.classList.contains('bg-red-500');t.classList.toggle('bg-red-500',!on);t.classList.toggle('bg-slate-300',on);t.classList.toggle('dark:bg-slate-600',on);th.classList.toggle('left-[22px]',!on);th.classList.toggle('left-0.5',on);v.value=on?'0':'1';}
 
 // ── Init ──
-window.addEventListener('load', () => {
-  applyTheme();
-  applyLang();
-  lucide.createIcons();
-  document.getElementById('mainWrap').style.opacity = '0';
-  document.getElementById('mainWrap').style.transition = 'opacity .4s ease';
-});
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  if (localStorage.getItem('devTheme') === 'system') applyTheme();
-});
+document.addEventListener('DOMContentLoaded',()=>{applyTheme();applyLang();if(window.lucide)lucide.createIcons();});
 </script>
 </body>
 </html>
