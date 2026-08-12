@@ -157,7 +157,12 @@ class SupportController extends Controller
         $clickupResult = $clickup->createTask($ticket);
 
         if ($clickupResult['success'] && $clickupResult['task_url']) {
-            $ticket->update(['clickup_task_url' => $clickupResult['task_url']]);
+            try {
+                $ticket->update(['clickup_task_url' => $clickupResult['task_url']]);
+            } catch (\Throwable $e) {
+                // Kolom belum ada (migration belum jalan) — skip saja, tidak error
+                \Log::info('ClickUp task created but clickup_task_url column not found yet: ' . $clickupResult['task_url']);
+            }
         }
 
         // Kirim notifikasi ke semua admin & guru_piket
