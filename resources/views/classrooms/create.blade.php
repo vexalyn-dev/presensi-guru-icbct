@@ -170,7 +170,7 @@
                                 </label>
                                 <input type="text" name="code" :value="generatedCode" readonly
                                        class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono font-bold text-navy-800 dark:text-gold-400 cursor-not-allowed">
-                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Kode kelas digenerate dari Tingkat + Jurusan (contoh: X-RPL, XI-TKJ)</p>
+                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Kode kelas digenerate otomatis dari Nama Kelas (contoh: "XI FARMASI" → <span class="font-mono font-bold">XI-FARMASI</span>)</p>
                             </div>
                         </div>
                     </template>
@@ -447,9 +447,8 @@
                 },
 
                 get generatedCode() {
-                    if (this.level && this.major) {
-                        let cleanMajor = this.major.toUpperCase().trim().replace(/[\s,]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-                        return `${this.level}-${cleanMajor}`;
+                    if (this.className) {
+                        return this.className.toUpperCase().trim().replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
                     }
                     return 'Akan digenerate otomatis...';
                 },
