@@ -434,8 +434,8 @@
             <!-- Sheet wrapper -->
             <div
                 class="absolute bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center sm:p-6 pointer-events-none">
-                <div class="pointer-events-auto w-full sm:max-w-md bg-white dark:bg-slate-900 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col"
-                    style="max-height:92dvh; max-height:92vh;" x-transition:enter="transition ease-out duration-300"
+                <div class="pointer-events-auto w-full sm:max-w-md bg-white dark:bg-slate-900 rounded-t-[1.75rem] sm:rounded-[2rem] shadow-2xl flex flex-col"
+                    style="max-height:96dvh; max-height:96vh;" x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="translate-y-full opacity-0 sm:translate-y-4 sm:scale-95"
                     x-transition:enter-end="translate-y-0 opacity-100 sm:scale-100"
                     x-transition:leave="transition ease-in duration-200"
@@ -523,7 +523,7 @@
                                             </template>
                                             <span x-show="!s.d" x-text="i+1"></span>
                                         </div>
-                                        <span class="text-[10px] font-semibold hidden sm:block"
+                                        <span class="text-[10px] font-semibold"
                                             :class="s.d?'text-emerald-600 dark:text-emerald-400':'text-slate-400 dark:text-slate-500'"
                                             x-text="s.l"></span>
                                         <div x-show="i<2" class="flex-1 h-px transition-colors"
@@ -611,7 +611,7 @@
                                                 @click.stop @keydown.escape="openKelas=false">
                                         </div>
                                     </div>
-                                    <div class="max-h-48 overflow-y-auto overscroll-contain py-1">
+                                    <div class="max-h-52 overflow-y-auto overscroll-contain py-1" style="-webkit-overflow-scrolling:touch;">
                                         <template
                                             x-for="cls in sharedSpaceClasses.filter(c => !searchKelas || c.name.toLowerCase().includes(searchKelas.toLowerCase()) || (c.code && c.code.toLowerCase().includes(searchKelas.toLowerCase())))"
                                             :key="cls.id">
@@ -719,7 +719,7 @@
                                                 @click.stop @keydown.escape="openMapel=false">
                                         </div>
                                     </div>
-                                    <div class="max-h-48 overflow-y-auto overscroll-contain py-1">
+                                    <div class="max-h-52 overflow-y-auto overscroll-contain py-1" style="-webkit-overflow-scrolling:touch;">
                                         <template
                                             x-for="subject in sharedSpaceSubjects.filter(s => !searchMapel || s.name.toLowerCase().includes(searchMapel.toLowerCase()))"
                                             :key="subject.id">
@@ -804,7 +804,8 @@
                                     class="grid grid-cols-6 gap-1.5 sm:gap-2">
                                     <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="'g'+jam">
                                         <button type="button" @click="sharedSpacePeriod = jam"
-                                            class="relative flex flex-col items-center justify-center rounded-xl font-bold transition-all duration-150 active:scale-90 select-none py-2.5"
+                                            class="relative flex flex-col items-center justify-center rounded-xl font-bold transition-all duration-150 active:scale-90 select-none py-3"
+                                            style="min-height:3.25rem; touch-action:manipulation;"
                                             :class="sharedSpacePeriod==jam
                                                     ? 'bg-emerald-500 text-white shadow-md scale-105 ring-2 ring-white dark:ring-slate-900'
                                                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600'">
@@ -969,7 +970,7 @@
 
                     <!-- Footer -->
                     <div class="flex-shrink-0 px-5 py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sm:rounded-b-[2rem]"
-                        style="padding-bottom:calc(1rem + env(safe-area-inset-bottom))">
+                        style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));">
                         <template x-if="mode === 'in'">
                             <button @click="submitSharedSpaceAttendance()"
                                 :disabled="!sharedSpaceSelectedClass || !sharedSpaceSelectedSubject || !sharedSpacePeriod"
