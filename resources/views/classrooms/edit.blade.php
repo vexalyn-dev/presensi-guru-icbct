@@ -271,65 +271,6 @@
                                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Pilih tipe ruangan untuk identifikasi</p>
                             </div>
 
-                            <!-- Tingkat Kelas -->
-                            <div>
-                                <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
-                                    Tingkat Kelas <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative" x-data="customSelect('level', '{{ old('level', $classroom->level) }}', '{{ old('level', $classroom->level) === 'X' ? 'X (Sepuluh)' : (old('level', $classroom->level) === 'XI' ? 'XI (Sebelas)' : (old('level', $classroom->level) === 'XII' ? 'XII (Dua Belas)' : '')) }}')">
-                                    <button type="button" @click="open = !open"
-                                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600 flex items-center justify-between group">
-                                        <div class="flex items-center gap-3">
-                                            <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
-                                            <span class="text-slate-700 dark:text-slate-300" x-text="selectedLabel || 'Pilih Tingkat Kelas'"></span>
-                                        </div>
-                                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{'rotate-180': open}"></i>
-                                    </button>
-
-                                    <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                         class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden" x-cloak>
-                                        <div class="p-1.5 space-y-1">
-                                            <button type="button" @click="selectOption({value: 'X', label: 'X (Sepuluh)'}); open = false"
-                                                    class="w-full px-3 py-2.5 rounded-lg text-left text-sm transition-all flex items-center gap-3 group hover:bg-navy-50 dark:hover:bg-navy-900/20 text-slate-700 dark:text-slate-300">
-                                                <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                                                    <span class="text-blue-600 dark:text-blue-400 font-bold text-xs">X</span>
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p class="font-medium">X (Sepuluh)</p>
-                                                    <p class="text-[10px] text-slate-500">Tingkat kelas 10</p>
-                                                </div>
-                                                <i data-lucide="check" class="w-4 h-4 text-navy-800 dark:text-gold-400" x-show="selectedValue === 'X'"></i>
-                                            </button>
-                                            <button type="button" @click="selectOption({value: 'XI', label: 'XI (Sebelas)'}); open = false"
-                                                    class="w-full px-3 py-2.5 rounded-lg text-left text-sm transition-all flex items-center gap-3 group hover:bg-navy-50 dark:hover:bg-navy-900/20 text-slate-700 dark:text-slate-300">
-                                                <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                                                    <span class="text-green-600 dark:text-green-400 font-bold text-xs">XI</span>
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p class="font-medium">XI (Sebelas)</p>
-                                                    <p class="text-[10px] text-slate-500">Tingkat kelas 11</p>
-                                                </div>
-                                                <i data-lucide="check" class="w-4 h-4 text-navy-800 dark:text-gold-400" x-show="selectedValue === 'XI'"></i>
-                                            </button>
-                                            <button type="button" @click="selectOption({value: 'XII', label: 'XII (Dua Belas)'}); open = false"
-                                                    class="w-full px-3 py-2.5 rounded-lg text-left text-sm transition-all flex items-center gap-3 group hover:bg-navy-50 dark:hover:bg-navy-900/20 text-slate-700 dark:text-slate-300">
-                                                <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                                                    <span class="text-purple-600 dark:text-purple-400 font-bold text-xs">XII</span>
-                                                </div>
-                                                <div class="flex-1">
-                                                    <p class="font-medium">XII (Dua Belas)</p>
-                                                    <p class="text-[10px] text-slate-500">Tingkat kelas 12</p>
-                                                </div>
-                                                <i data-lucide="check" class="w-4 h-4 text-navy-800 dark:text-gold-400" x-show="selectedValue === 'XII'"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <input type="hidden" name="level" :value="selectedValue" required>
-                                </div>
-                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Pilih tingkat kelas untuk pengelompokan</p>
-                            </div>
-
                             <!-- Kode Ruangan (Auto-generate) -->
                             <div>
                                 <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">

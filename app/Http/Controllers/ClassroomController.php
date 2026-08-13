@@ -35,10 +35,9 @@ class ClassroomController extends Controller
             'type'          => 'required|in:regular,shared',
             'name'          => 'required|string|max:255',
             'major'         => 'nullable|string|max:255',
-            'level'         => 'required|in:X,XI,XII',
+            'level'         => 'required_if:type,regular|nullable|in:X,XI,XII',
             'location_type' => 'required_if:type,shared|nullable|string|max:50',
             'code'          => 'required|string|max:100|unique:classrooms,code',
-
             'description'   => 'nullable|string|max:500',
             'is_active'     => 'nullable|boolean',
         ]);
@@ -76,10 +75,9 @@ class ClassroomController extends Controller
             'type'          => 'required|in:regular,shared',
             'name'          => 'required|string|max:255',
             'major'         => 'nullable|string|max:255',
-            'level'         => 'required|in:X,XI,XII',
+            'level'         => 'required_if:type,regular|nullable|in:X,XI,XII',
             'location_type' => 'required_if:type,shared|nullable|string|max:50',
             'code'          => 'required|string|max:100|unique:classrooms,code,' . $classroom->id,
-
             'description'   => 'nullable|string|max:500',
             'is_active'     => 'nullable|boolean',
         ]);
