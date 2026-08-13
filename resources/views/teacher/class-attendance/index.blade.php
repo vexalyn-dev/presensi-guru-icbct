@@ -425,7 +425,7 @@
         <!-- ══════════════════════════════════════════════════════════════════ -->
         <!--  Shared Space Modal (Tetap sama seperti sebelumnya)              -->
         <!-- ══════════════════════════════════════════════════════════════════ -->
-        <div x-show="showSharedSpaceModal" x-cloak class="fixed inset-0 z-[999]" style="display:none;"
+        <div x-show="showSharedSpaceModal" x-cloak class="fixed inset-0 z-[999]"
             @keydown.escape.window="showSharedSpaceModal=false">
 
             <!-- Blurred backdrop -->
@@ -1006,11 +1006,10 @@
         </div>
 
         <!-- Dynamic Class Selection Modal -->
-        <div x-show="showClassSelection" x-transition:enter="transition ease-out duration-200"
+        <div x-show="showClassSelection" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-            style="display: none;">
+            x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6"
                 @click.away="showClassSelection = false">
                 <div class="flex items-center justify-between mb-4">
