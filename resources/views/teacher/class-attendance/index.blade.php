@@ -431,21 +431,20 @@
             <!-- Blurred backdrop -->
             <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showSharedSpaceModal = false"></div>
 
-            <!-- Sheet wrapper -->
-            <div
-                class="absolute bottom-0 left-0 right-0 sm:inset-0 sm:flex sm:items-center sm:justify-center sm:p-6 pointer-events-none">
-                <div class="pointer-events-auto w-full sm:max-w-md bg-white dark:bg-slate-900 rounded-t-[1.75rem] sm:rounded-[2rem] shadow-2xl flex flex-col"
-                    style="max-height:96dvh; max-height:96vh;" x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="translate-y-full opacity-0 sm:translate-y-4 sm:scale-95"
+            <!-- Full-screen on mobile, centered card on desktop -->
+            <div class="absolute inset-0 sm:inset-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-md flex flex-col pointer-events-none">
+                <div class="pointer-events-auto w-full flex-1 sm:flex-none bg-white dark:bg-slate-900 sm:rounded-[2rem] shadow-2xl flex flex-col"
+                    style="height:100%; sm:max-height:90vh;"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="translate-y-full opacity-0 sm:translate-y-0 sm:scale-95 sm:opacity-0"
                     x-transition:enter-end="translate-y-0 opacity-100 sm:scale-100"
                     x-transition:leave="transition ease-in duration-200"
                     x-transition:leave-start="translate-y-0 opacity-100 sm:scale-100"
-                    x-transition:leave-end="translate-y-full opacity-0 sm:translate-y-4 sm:scale-95" @click.stop>
+                    x-transition:leave-end="translate-y-full opacity-0 sm:translate-y-0 sm:scale-95 sm:opacity-0" @click.stop>
 
-                    <!-- Drag pill for mobile -->
-                    <div
-                        class="flex-shrink-0 flex justify-center pt-3 pb-0 sm:hidden rounded-t-[2rem] bg-white dark:bg-slate-900">
-                        <div class="w-10 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></div>
+                    <!-- Drag pill (mobile only) -->
+                    <div class="flex-shrink-0 flex justify-center pt-3 pb-1 sm:hidden">
+                        <div class="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
                     </div>
 
                     <!-- Header -->
@@ -487,13 +486,6 @@
                                     </p>
                                 </div>
                             </div>
-                            <button @click="showSharedSpaceModal=false"
-                                class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg>
-                            </button>
                         </div>
                     </div>
 
@@ -969,8 +961,8 @@
                     </div><!-- /scrollable body -->
 
                     <!-- Footer -->
-                    <div class="flex-shrink-0 px-5 py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sm:rounded-b-[2rem]"
-                        style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));">
+                    <div class="flex-shrink-0 px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sm:rounded-b-[2rem]"
+                        style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 1.25rem));">
                         <template x-if="mode === 'in'">
                             <button @click="submitSharedSpaceAttendance()"
                                 :disabled="!sharedSpaceSelectedClass || !sharedSpaceSelectedSubject || !sharedSpacePeriod"
