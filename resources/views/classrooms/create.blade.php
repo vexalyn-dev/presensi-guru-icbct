@@ -444,6 +444,12 @@
                 locationType: '',
                 
                 init() {
+                    window.addEventListener('update-select-level', (e) => {
+                        this.level = e.detail;
+                    });
+                    window.addEventListener('update-select-location_type', (e) => {
+                        this.locationType = e.detail;
+                    });
                     this.$watch('classType', () => {
                         this.$nextTick(() => {
                             if (window.lucide) lucide.createIcons();
@@ -452,9 +458,12 @@
                 },
 
                 get generatedCode() {
-                    if (this.level && this.major) {
-                        let cleanMajor = this.major.toUpperCase().trim().replace(/[\s,]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-                        return `${this.level}-${cleanMajor}`;
+                    if (this.major) {
+                        let cleanMajor = this.major.toUpperCase().trim();
+                        if (this.level) {
+                            return `${this.level}-${cleanMajor}`;
+                        }
+                        return cleanMajor;
                     }
                     return 'Akan digenerate otomatis...';
                 },
@@ -472,23 +481,18 @@
             };
         }
 
-        function customSelect(name) {
+        function customSelect(name, defaultValue, defaultLabel) {
             return {
                 open: false,
-                selectedValue: '',
-                selectedLabel: '',
+                selectedValue: defaultValue || '',
+                selectedLabel: defaultLabel || '',
 
                 selectOption(option) {
                     this.selectedValue = option.value;
                     this.selectedLabel = option.label;
                     this.open = false;
                     
-                    // Update parent scope properties
-                    if (name === 'level') {
-                        this.$parent.level = option.value;
-                    } else if (name === 'location_type') {
-                        this.$parent.locationType = option.value;
-                    }
+                    window.dispatchEvent(new CustomEvent('update-select-' + name, { detail: option.value }));
                 }
             };
         }
