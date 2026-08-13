@@ -155,9 +155,6 @@ class ClassAttendanceController extends Controller
             $checkIn    = Carbon::parse("{$dateStr} {$checkInStr}");
             $duration   = (int) max(0, round($checkIn->diffInMinutes($now)));
 
-            if ($duration < 30) {
-                return $this->respond($isAjax, false, "Durasi mengajar terlalu singkat untuk kelas {$classroom->name}! Minimal 30 menit (baru {$duration} menit).", 422);
-            }
 
             $existingAttendance->update(['check_out_time' => $currentTime]);
 

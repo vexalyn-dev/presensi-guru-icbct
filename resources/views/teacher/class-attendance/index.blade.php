@@ -173,7 +173,6 @@
             </div>
 
             <!-- Aturan Scan Info -->
-            @if(($scanBeforeStart ?? 0) > 0)
             <div class="mt-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                 <div class="flex items-start gap-2">
                     <svg class="w-3.5 h-3.5 mt-0.5 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -182,14 +181,12 @@
                     <div class="text-xs text-blue-700 dark:text-blue-300">
                         <p class="font-bold mb-1">Aturan Scan:</p>
                         <ul class="space-y-0.5 list-disc list-inside">
-                            <li>Hanya bisa scan untuk jadwal hari ini</li>
-                            <li>Bisa scan <strong>{{ $scanBeforeStart ?? 15 }} menit</strong> sebelum jam mulai</li>
-                            <li>Tidak bisa scan jika jam sudah lewat</li>
+                            <li>Presensi dapat dilakukan kapan saja untuk jadwal mengajar hari ini</li>
+                            <li>Tidak ada batasan waktu minimal atau maksimal untuk scan masuk & keluar kelas</li>
                         </ul>
                     </div>
                 </div>
             </div>
-            @endif
         </div>
 
         <!-- QR Scanner -->

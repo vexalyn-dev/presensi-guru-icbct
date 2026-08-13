@@ -45,10 +45,7 @@ class ClassAttendanceController extends Controller
 
         return view('teacher.class-attendance.index', compact(
             'schedules', 'totalClasses', 'completedClasses', 'inProgressClasses'
-        ) + [
-            'gracePeriodSetting' => (int) \App\Models\Setting::get('class_switch_grace_period', 5),
-            'scanBeforeStart'    => (int) \App\Models\Setting::get('scan_before_start', 15),
-        ]);
+        ));
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -275,57 +272,65 @@ class ClassAttendanceController extends Controller
             return $this->handleSharedSpaceCheckIn($classroom, $user, $now, $today, $request);
         }
 
-        // ── Grace period antar kelas (hanya untuk mode IN) ───────────────────
-        if ($mode === 'in') {
-            $gracePeriod = (int) \App\Models\Setting::get('class_switch_grace_period', 5);
+        // ── Cari jadwal hari ini ─────────────────────────────────────────────
+        $isMultiClassroom = ($classroom->major && (str_contains($classroom->major, ',') || str_contains($classroom->major, ' ')))
+            || str_contains($classroom->name, ',')
+            || str_contains($classroom->name, '&');
 
-            if ($gracePeriod > 0) {
-                $lastAttendance = ClassAttendance::where('user_id', $user->id)
-                    ->whereDate('date', $today)
-                    ->whereNotNull('check_out_time')
-                    ->orderBy('check_out_time', 'desc')
-                    ->first();
+        $schedulesQuery = TeachingSchedule::where('user_id', $user->id)
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_active', true)
+            ->with(['classroom', 'subject']);
 
-                if ($lastAttendance) {
-                    $minutesSinceOut = (int) \Carbon\Carbon::parse($lastAttendance->check_out_time)->diffInMinutes($now);
-
-                    if ($minutesSinceOut < $gracePeriod) {
-                        $remaining = $gracePeriod - $minutesSinceOut;
-                        $this->logScan($user, $classroom, $mode, 'failed',
-                            "Grace period: baru {$minutesSinceOut} menit sejak keluar kelas terakhir", $request);
-
-                        return response()->json([
-                            'success'          => false,
-                            'warning'          => true,
-                            'message'          => "Tunggu {$gracePeriod} menit antar kelas. Sisa waktu: {$remaining} menit",
-                            'remaining_seconds' => $remaining * 60,
-                            'grace_period'     => $gracePeriod,
-                        ], 429);
+        if (!$isSharedSpace) {
+            if ($isMultiClassroom) {
+                // Jika kelas ber-jurusan banyak / gabungan (misal: RPL, FARMASI),
+                // cari jadwal guru hari ini yang classroom_id nya sesuai ATAU berada di tingkat yang cocok
+                $schedulesQuery->where(function ($q) use ($classroomId, $classroom) {
+                    $q->where('classroom_id', $classroomId);
+                    if ($classroom->level) {
+                        $q->orWhereHas('classroom', function ($cQ) use ($classroom) {
+                            $cQ->where('level', $classroom->level);
+                        });
                     }
-                }
+                });
+            } else {
+                $schedulesQuery->where('classroom_id', $classroomId);
             }
         }
 
-        // ── Cari jadwal hari ini ─────────────────────────────────────────────
-        $schedules = TeachingSchedule::where('user_id', $user->id)
-            ->where('day_of_week', $dayOfWeek)
-            ->where('is_active', true)
-            ->when(!$isSharedSpace, fn ($q) => $q->where('classroom_id', $classroomId))
-            ->with(['classroom', 'subject'])
-            ->get();
+        $schedules = $schedulesQuery->get();
 
         if ($schedules->isEmpty()) {
-            $this->logScan($user, $classroom, $mode, 'failed',
-                'Tidak ada jadwal mengajar di lokasi ini hari ini', $request);
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda tidak memiliki jadwal mengajar hari ini.',
-            ], 422);
+            // Fallback: cari semua jadwal aktif guru hari ini agar guru tetap dapat memilih
+            $allTodaySchedules = TeachingSchedule::where('user_id', $user->id)
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_active', true)
+                ->with(['classroom', 'subject'])
+                ->get();
+
+            if ($allTodaySchedules->isNotEmpty()) {
+                $schedules = $allTodaySchedules;
+            } else {
+                $this->logScan($user, $classroom, $mode, 'failed',
+                    'Tidak ada jadwal mengajar di lokasi ini hari ini', $request);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki jadwal mengajar hari ini.',
+                ], 422);
+            }
         }
 
         // Guru memilih jadwal spesifik dari pilihan multiple
         if ($request->filled('schedule_id')) {
             $picked = $schedules->where('id', $request->schedule_id)->first();
+            if (!$picked) {
+                $picked = TeachingSchedule::where('user_id', $user->id)
+                    ->where('id', $request->schedule_id)
+                    ->where('is_active', true)
+                    ->with(['classroom', 'subject'])
+                    ->first();
+            }
             if (!$picked) {
                 return response()->json(['success' => false, 'message' => 'Jadwal yang dipilih tidak valid.'], 422);
             }
@@ -333,8 +338,8 @@ class ClassAttendanceController extends Controller
             return response()->json($res, $res['success'] ? 200 : 422);
         }
 
-        // Multiple jadwal → minta guru memilih
-        if ($schedules->count() > 1) {
+        // Multiple jadwal atau kelas gabungan (multi-classroom) → minta guru memilih
+        if (($schedules->count() > 1 || $isMultiClassroom) && !$request->filled('schedule_id')) {
             return response()->json([
                 'success'   => true,
                 'message'   => $classroom->name,
@@ -349,53 +354,9 @@ class ClassAttendanceController extends Controller
             ]);
         }
 
-        // Single jadwal — coba auto-match waktu berdasarkan scan_before_start setting
-        $single         = $schedules->first();
-        $scanBeforeMin  = (int) \App\Models\Setting::get('scan_before_start', 15);
-
-        $activeSchedule = $schedules->first(function ($s) use ($now, $scanBeforeMin) {
-            return $now->between(
-                Carbon::parse($s->start_time)->subMinutes($scanBeforeMin),
-                Carbon::parse($s->end_time)->addMinutes(17)  // +2 menit toleransi keluar
-            );
-        });
-
-        if (!$activeSchedule) {
-            // Fallback: gunakan jadwal terdekat dan beri pesan informatif
-            $nearest = $schedules->sortBy(fn ($s) => abs(Carbon::parse($s->start_time)->diffInMinutes($now)))->first();
-
-            $scheduleStart = Carbon::parse($nearest->start_time);
-            $scheduleEnd   = Carbon::parse($nearest->end_time);
-
-            if ($now->lt($scheduleStart->copy()->subMinutes($scanBeforeMin))) {
-                $message = "Terlalu cepat! Jadwal {$nearest->classroom->name} mulai pukul {$scheduleStart->format('H:i')}. Bisa scan {$scanBeforeMin} menit sebelumnya.";
-            } else {
-                $message = "Waktu scan sudah lewat. Jadwal {$nearest->classroom->name} berakhir pukul {$scheduleEnd->format('H:i')}";
-            }
-
-            // Jika selisih ≤ 60 menit dari jadwal aktif, izinkan dengan catatan
-            $diffMinutes = abs($scheduleStart->diffInMinutes($now));
-            if ($diffMinutes <= 60) {
-                $this->logScan($user, $classroom, $mode, 'warning',
-                    "Scan di luar window waktu ({$diffMinutes} menit), diproses dengan fallback", $request);
-                $res = $this->processAttendanceForSchedule($nearest, $user, $now, $mode, $classroom, $request);
-                return response()->json($res, $res['success'] ? 200 : 422);
-            }
-
-            $this->logScan($user, $classroom, $mode, 'failed', $message, $request);
-            return response()->json([
-                'success'    => false,
-                'message'    => $message,
-                'error_type' => $now->lt($scheduleStart->copy()->subMinutes($scanBeforeMin)) ? 'too_early' : 'class_ended',
-                'data'       => [
-                    'can_scan_at'   => $scheduleStart->copy()->subMinutes($scanBeforeMin)->format('H:i'),
-                    'class_start'   => $scheduleStart->format('H:i'),
-                    'class_end'     => $scheduleEnd->format('H:i'),
-                ],
-            ], 422);
-        }
-
-        $res = $this->processAttendanceForSchedule($activeSchedule, $user, $now, $mode, $classroom, $request);
+        // Single jadwal — langsung proses tanpa batas waktu
+        $single = $schedules->first();
+        $res    = $this->processAttendanceForSchedule($single, $user, $now, $mode, $classroom, $request);
         return response()->json($res, $res['success'] ? 200 : 422);
     }
 
@@ -692,12 +653,6 @@ class ClassAttendanceController extends Controller
         $checkIn    = Carbon::parse("{$dateStr} {$checkInStr}");
         $duration   = (int) max(0, round($checkIn->diffInMinutes($now)));
 
-        if ($duration < 30) {
-            return response()->json([
-                'success' => false,
-                'message' => "Durasi mengajar terlalu singkat! Minimal 30 menit (baru {$duration} menit).",
-            ], 422);
-        }
 
         $attendance->check_out_time = $now;
         $attendance->save();
@@ -826,14 +781,6 @@ class ClassAttendanceController extends Controller
             $checkIn    = Carbon::parse("{$dateStr} {$checkInStr}");
             $duration   = (int) max(0, round($checkIn->diffInMinutes($now)));
 
-            if ($duration < 30) {
-                $this->logScan($user, $scannedClassroom, 'out', 'failed',
-                    "Durasi terlalu singkat ({$duration} menit) di kelas {$scheduleClassroomName}", $request);
-                return [
-                    'success' => false,
-                    'message' => "Durasi mengajar terlalu singkat untuk kelas {$scheduleClassroomName}! Minimal 30 menit (baru {$duration} menit).",
-                ];
-            }
 
             $attendance->check_out_time = $now;
             // Tandai kelas sangat singkat (< 10 menit)

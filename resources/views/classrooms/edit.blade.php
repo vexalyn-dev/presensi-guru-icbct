@@ -111,9 +111,9 @@
                                     Jurusan / Kompetensi Keahlian <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="major" x-model="major"
-                                       placeholder="CONTOH: RPL, TKJ, FAR, AKL"
+                                       placeholder="CONTOH: RPL, FARMASI atau RPL 1, RPL 2"
                                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
-                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Kode jurusan (RPL, TKJ, Farmasi, Akuntansi, dll). Kode kelas akan otomatis digenerate.</p>
+                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Bisa diisi lebih dari 1 jurusan (contoh: RPL, FARMASI). Kode kelas akan otomatis digenerate.</p>
                             </div>
 
                             <!-- Tingkat Kelas -->
@@ -444,7 +444,8 @@
 
                 get generatedCode() {
                     if (this.level && this.major) {
-                        return `${this.level}-${this.major.toUpperCase()}`;
+                        let cleanMajor = this.major.toUpperCase().trim().replace(/[\s,]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                        return `${this.level}-${cleanMajor}`;
                     }
                     return 'Akan digenerate otomatis...';
                 },

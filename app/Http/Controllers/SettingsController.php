@@ -97,8 +97,8 @@ class SettingsController extends Controller
             'attendance_start_time'        => 'required',
             'attendance_end_time'          => 'required',
             'attendance_late_grace_period' => 'required|integer|min:0|max:120',
-            'class_switch_grace_period'    => 'required|integer|min:0|max:30',
-            'scan_before_start'            => 'required|integer|min:0|max:60',
+            'class_switch_grace_period'    => 'nullable|integer|min:0|max:30',
+            'scan_before_start'            => 'nullable|integer|min:0|max:60',
             'location_latitude'  => 'nullable|numeric|between:-90,90',
             'location_longitude' => 'nullable|numeric|between:-180,180',
             'location_radius'    => 'required|integer|min:10|max:5000',
@@ -108,7 +108,7 @@ class SettingsController extends Controller
         $appSettings->attendance_start_time        = $validated['attendance_start_time'];
         $appSettings->attendance_end_time          = $validated['attendance_end_time'];
         $appSettings->attendance_late_grace_period = $validated['attendance_late_grace_period'];
-        $appSettings->class_switch_grace_period    = $validated['class_switch_grace_period'];
+        $appSettings->class_switch_grace_period    = $validated['class_switch_grace_period'] ?? 0;
         $appSettings->location_latitude  = $validated['location_latitude'] ?? $appSettings->location_latitude;
         $appSettings->location_longitude = $validated['location_longitude'] ?? $appSettings->location_longitude;
         $appSettings->location_radius    = $validated['location_radius'];
@@ -123,8 +123,8 @@ class SettingsController extends Controller
         Setting::set('attendance_start_time',        $validated['attendance_start_time'],        'string',  'attendance');
         Setting::set('attendance_end_time',          $validated['attendance_end_time'],          'string',  'attendance');
         Setting::set('attendance_late_grace_period', $validated['attendance_late_grace_period'], 'integer', 'attendance');
-        Setting::set('class_switch_grace_period',    $validated['class_switch_grace_period'],    'number',  'attendance');
-        Setting::set('scan_before_start',            $validated['scan_before_start'],            'number',  'attendance');
+        Setting::set('class_switch_grace_period',    $validated['class_switch_grace_period'] ?? 0, 'number',  'attendance');
+        Setting::set('scan_before_start',            $validated['scan_before_start'] ?? 0,         'number',  'attendance');
 
         Artisan::call('config:clear');
 

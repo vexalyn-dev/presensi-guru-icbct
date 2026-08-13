@@ -34,10 +34,10 @@ class ClassroomController extends Controller
         $validated = $request->validate([
             'type'          => 'required|in:regular,shared',
             'name'          => 'required|string|max:255',
-            'major'         => 'required_if:type,regular|nullable|string|max:50',
+            'major'         => 'required_if:type,regular|nullable|string|max:255',
             'level'         => 'required|in:X,XI,XII',
             'location_type' => 'required_if:type,shared|nullable|string|max:50',
-            'code'          => 'required|string|max:50|unique:classrooms,code',
+            'code'          => 'required|string|max:100|unique:classrooms,code',
 
             'description'   => 'nullable|string|max:500',
             'is_active'     => 'nullable|boolean',
@@ -75,10 +75,10 @@ class ClassroomController extends Controller
         $validated = $request->validate([
             'type'          => 'required|in:regular,shared',
             'name'          => 'required|string|max:255',
-            'major'         => 'required_if:type,regular|nullable|string|max:50',
+            'major'         => 'required_if:type,regular|nullable|string|max:255',
             'level'         => 'required|in:X,XI,XII',
             'location_type' => 'required_if:type,shared|nullable|string|max:50',
-            'code'          => 'required|string|max:50|unique:classrooms,code,' . $classroom->id,
+            'code'          => 'required|string|max:100|unique:classrooms,code,' . $classroom->id,
 
             'description'   => 'nullable|string|max:500',
             'is_active'     => 'nullable|boolean',
