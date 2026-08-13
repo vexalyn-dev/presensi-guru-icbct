@@ -105,17 +105,6 @@
                     <!-- Fields untuk Kelas Reguler -->
                     <template x-if="classType === 'regular'">
                         <div class="space-y-5">
-                            <!-- Jurusan -->
-                            <div>
-                                <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
-                                    Jurusan / Kompetensi Keahlian <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" name="major" x-model="major"
-                                       placeholder="CONTOH: RPL, FARMASI atau RPL 1, RPL 2"
-                                       class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
-                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Bisa diisi lebih dari 1 jurusan (contoh: RPL, FARMASI). Kode kelas akan otomatis digenerate.</p>
-                            </div>
-
                             <!-- Tingkat Kelas -->
                             <div>
                                 <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
@@ -449,12 +438,9 @@
                 },
 
                 get generatedCode() {
-                    if (this.major) {
-                        let cleanMajor = this.major.toUpperCase().trim();
-                        if (this.level) {
-                            return `${this.level}-${cleanMajor}`;
-                        }
-                        return cleanMajor;
+                    if (this.level && this.major) {
+                        let cleanMajor = this.major.toUpperCase().trim().replace(/[\s,]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                        return `${this.level}-${cleanMajor}`;
                     }
                     return 'Akan digenerate otomatis...';
                 },

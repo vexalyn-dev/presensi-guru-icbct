@@ -273,64 +273,26 @@ class ClassAttendanceController extends Controller
         }
 
         // ── Cari jadwal hari ini ─────────────────────────────────────────────
-        $isMultiClassroom = ($classroom->major && (str_contains($classroom->major, ',') || str_contains($classroom->major, ' ')))
-            || str_contains($classroom->name, ',')
-            || str_contains($classroom->name, '&');
-
         $schedulesQuery = TeachingSchedule::where('user_id', $user->id)
             ->where('day_of_week', $dayOfWeek)
             ->where('is_active', true)
+            ->where('classroom_id', $classroomId)
             ->with(['classroom', 'subject']);
-
-        if (!$isSharedSpace) {
-            if ($isMultiClassroom) {
-                // Jika kelas ber-jurusan banyak / gabungan (misal: RPL, FARMASI),
-                // cari jadwal guru hari ini yang classroom_id nya sesuai ATAU berada di tingkat yang cocok
-                $schedulesQuery->where(function ($q) use ($classroomId, $classroom) {
-                    $q->where('classroom_id', $classroomId);
-                    if ($classroom->level) {
-                        $q->orWhereHas('classroom', function ($cQ) use ($classroom) {
-                            $cQ->where('level', $classroom->level);
-                        });
-                    }
-                });
-            } else {
-                $schedulesQuery->where('classroom_id', $classroomId);
-            }
-        }
 
         $schedules = $schedulesQuery->get();
 
         if ($schedules->isEmpty()) {
-            // Fallback: cari semua jadwal aktif guru hari ini agar guru tetap dapat memilih
-            $allTodaySchedules = TeachingSchedule::where('user_id', $user->id)
-                ->where('day_of_week', $dayOfWeek)
-                ->where('is_active', true)
-                ->with(['classroom', 'subject'])
-                ->get();
-
-            if ($allTodaySchedules->isNotEmpty()) {
-                $schedules = $allTodaySchedules;
-            } else {
-                $this->logScan($user, $classroom, $mode, 'failed',
-                    'Tidak ada jadwal mengajar di lokasi ini hari ini', $request);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki jadwal mengajar hari ini.',
-                ], 422);
-            }
+            $this->logScan($user, $classroom, $mode, 'failed',
+                'Tidak ada jadwal mengajar di lokasi ini hari ini', $request);
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki jadwal mengajar di kelas ini hari ini.',
+            ], 422);
         }
 
         // Guru memilih jadwal spesifik dari pilihan multiple
         if ($request->filled('schedule_id')) {
             $picked = $schedules->where('id', $request->schedule_id)->first();
-            if (!$picked) {
-                $picked = TeachingSchedule::where('user_id', $user->id)
-                    ->where('id', $request->schedule_id)
-                    ->where('is_active', true)
-                    ->with(['classroom', 'subject'])
-                    ->first();
-            }
             if (!$picked) {
                 return response()->json(['success' => false, 'message' => 'Jadwal yang dipilih tidak valid.'], 422);
             }
@@ -338,8 +300,8 @@ class ClassAttendanceController extends Controller
             return response()->json($res, $res['success'] ? 200 : 422);
         }
 
-        // Multiple jadwal atau kelas gabungan (multi-classroom) → minta guru memilih
-        if (($schedules->count() > 1 || $isMultiClassroom) && !$request->filled('schedule_id')) {
+        // Multiple jadwal → minta guru memilih
+        if ($schedules->count() > 1) {
             return response()->json([
                 'success'   => true,
                 'message'   => $classroom->name,
@@ -354,7 +316,7 @@ class ClassAttendanceController extends Controller
             ]);
         }
 
-        // Single jadwal — langsung proses tanpa batas waktu
+        // Single jadwal — langsung proses
         $single = $schedules->first();
         $res    = $this->processAttendanceForSchedule($single, $user, $now, $mode, $classroom, $request);
         return response()->json($res, $res['success'] ? 200 : 422);
