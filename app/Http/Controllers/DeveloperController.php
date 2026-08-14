@@ -192,11 +192,47 @@ class DeveloperController extends Controller
         return back()->with('success', '✅ Update berhasil dihapus.');
     }
 
-    public function clearCache(string $secret)
+    public function cardPreview(string $secret, ?int $ticketId = null)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $ticket = null;
+        if ($ticketId) {
+            $ticket = \App\Models\SupportTicket::with('user')->find($ticketId);
+        } else {
+            $ticket = \App\Models\SupportTicket::with('user')->latest()->first();
+        }
+
+        if (!$ticket) {
+            // Buat dummy ticket untuk preview
+            $ticket = new \App\Models\SupportTicket([
+                'ticket_id'   => 'HD-PREVIEW-001',
+                'type'        => 'question',
+                'title'       => 'Tidak bisa melakukan presensi',
+                'description' => 'Saya tidak bisa melakukan presensi karena QR Code kelas tidak terbaca. Sudah dicoba beberapa kali tapi tetap gagal.',
+                'priority'    => 'critical',
+                'status'      => 'new',
+            ]);
+            $ticket->id = 0;
+        }
+
+        $generator = new \App\Services\HelpdeskCardGenerator();
+        $cardPath  = $generator->regenerate($ticket);
+
+        if ($cardPath) {
+            if ($ticket->id > 0) {
+                $ticket->update(['card_image_path' => $cardPath]);
+            }
+            $fullPath = \Illuminate\Support\Facades\Storage::disk('public')->path($cardPath);
+            return response()->file($fullPath, ['Content-Type' => 'image/png']);
+        }
+
+        return response()->json(['error' => 'Gagal generate card. Cek log Laravel.'], 500);
+    }
     {
         if (!$this->verifySecret($secret)) abort(404);
         Artisan::call('optimize:clear');
-        return back()->with('success', '✅ Cache berhasil dibersihkan.');
+        return back()->with('success', ' Cache berhasil dibersihkan.');
     }
 
     private function getApkSetting(): AppSetting

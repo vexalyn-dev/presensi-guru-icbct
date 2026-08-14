@@ -6,6 +6,7 @@ use App\Models\SupportTicket;
 use App\Models\User;
 use App\Services\GitHubService;
 use App\Services\ClickUpService;
+use App\Services\HelpdeskCardGenerator;
 use App\Helpers\NotificationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -186,6 +187,20 @@ class SupportController extends Controller
 
         // Kirim notifikasi ke semua admin & guru_piket
         $this->notifyAdmins($ticket);
+
+        // Generate card image (best-effort, tidak memblokir request jika gagal)
+        try {
+            $generator = new HelpdeskCardGenerator();
+            $cardPath  = $generator->generate($ticket);
+            if ($cardPath) {
+                $ticket->update(['card_image_path' => $cardPath]);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Helpdesk card generation failed', [
+                'ticket' => $ticket->id,
+                'reason' => $e->getMessage(),
+            ]);
+        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([

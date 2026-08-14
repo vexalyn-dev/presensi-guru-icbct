@@ -384,6 +384,7 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
     Route::get('/clear-cache',   [DeveloperController::class, 'clearCache'])         ->name('clear-cache');
     Route::post('/updates',      [DeveloperController::class, 'storeUpdate'])        ->name('updates.store');
     Route::delete('/updates/{id}',[DeveloperController::class, 'deleteUpdate'])      ->name('updates.delete');
+    Route::get('/card-preview/{ticketId?}', [DeveloperController::class, 'cardPreview'])->name('card-preview');
 });
 
 Route::get('/run-migrate-secret', function (Request $request) {
