@@ -219,35 +219,18 @@ class DeveloperController extends Controller
                     'status'      => 'new',
                 ]);
                 $ticket->id = 0;
+                $ticket->setRelation('user', new \App\Models\User([
+                    'name' => 'Vexalyn Dev',
+                    'role' => 'guru'
+                ]));
+                $ticket->created_at = now();
             }
 
-            $generator = new \App\Services\HelpdeskCardGenerator();
-            
-            ob_start();
-            $cardPath  = $generator->regenerate($ticket);
-            $output = ob_get_clean();
+            return view('developer.helpdesk-card', compact('ticket'));
 
-            if ($output) {
-                return response($output, 200, ['Content-Type' => 'text/plain']);
-            }
-
-            if ($cardPath) {
-                if ($ticket->id > 0) {
-                    try { $ticket->update(['card_image_path' => $cardPath]); } catch (\Throwable $e) {}
-                }
-                $fullPath = Storage::disk('public')->path($cardPath);
-                
-                if (ob_get_length()) {
-                    ob_clean();
-                }
-                
-                return response()->file($fullPath, [
-                    'Content-Type' => 'image/png',
-                    'Cache-Control' => 'no-cache'
-                ]);
-            }
-
-            throw new \Exception('Path hasil generate card bernilai null.');
+        } catch (\Throwable $e) {
+            return response('Error: ' . $e->getMessage(), 500);
+        }
         } catch (\Throwable $e) {
             return response()->json([
                 'error'   => $e->getMessage(),
