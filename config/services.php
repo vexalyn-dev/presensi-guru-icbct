@@ -50,4 +50,9 @@ return [
     'whatsapp' => [
         'support_number' => env('SUPPORT_WA_NUMBER', '6281234567890'),
     ],
+
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN', ''),
+        'url'   => env('FONNTE_URL', 'https://api.fonnte.com/send'),
+    ],
 ];

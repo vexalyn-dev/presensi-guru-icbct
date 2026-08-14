@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\GitHubService;
 use App\Services\ClickUpService;
 use App\Services\HelpdeskCardGenerator;
+use App\Services\FonnteService;
 use App\Helpers\NotificationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -188,15 +189,41 @@ class SupportController extends Controller
         // Kirim notifikasi ke semua admin & guru_piket
         $this->notifyAdmins($ticket);
 
-        // Generate card image (best-effort, tidak memblokir request jika gagal)
+        // Generate card image & kirim via Fonnte (best-effort, tidak memblokir jika gagal)
         try {
             $generator = new HelpdeskCardGenerator();
             $cardPath  = $generator->generate($ticket);
             if ($cardPath) {
                 $ticket->update(['card_image_path' => $cardPath]);
+
+                // ── Kirim gambar kartu ke nomor admin via Fonnte ─────────────
+                $rawPhone  = config('services.whatsapp.support_number', env('SUPPORT_WA_NUMBER', ''));
+                $adminPhone = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$rawPhone));
+
+                if ($adminPhone) {
+                    // Buat URL absolut yang bisa diakses publik dari internet
+                    // Format: https://presensi-guru.smkicb-teknika.sch.id/storage/helpdesk/...
+                    $cardUrl = rtrim(config('app.url'), '/') . '/storage/' . $cardPath;
+                    $prioLabel  = \App\Models\SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
+                    $typeLabel  = \App\Models\SupportTicket::typeLabels()[$ticket->type]['label']         ?? ucfirst($ticket->type);
+                    $reporter   = $ticket->user?->name ?? 'Pengguna';
+
+                    $caption  = "🎫 *TIKET BARU — PUSAT BANTUAN*\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━\n";
+                    $caption .= "🆔 ID: *{$ticket->ticket_id}*\n";
+                    $caption .= "👤 Dari: *{$reporter}*\n";
+                    $caption .= "📋 Tipe: *{$typeLabel}*\n";
+                    $caption .= "📌 Judul: *{$ticket->title}*\n";
+                    $caption .= "⚡ Prioritas: *{$prioLabel}*\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━\n";
+                    $caption .= "💬 Detail: {$ticket->description}";
+
+                    $fonnte = new FonnteService();
+                    $fonnte->sendImage($adminPhone, $cardUrl, $caption);
+                }
             }
         } catch (\Throwable $e) {
-            \Log::warning('Helpdesk card generation failed', [
+            \Log::warning('Helpdesk card/Fonnte failed', [
                 'ticket' => $ticket->id,
                 'reason' => $e->getMessage(),
             ]);
