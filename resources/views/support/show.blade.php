@@ -87,7 +87,7 @@
                 <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Informasi Tiket</p>
                 <div class="space-y-3 text-sm">
                     <div class="flex justify-between"><span class="text-slate-500">Jenis</span><span class="font-semibold text-navy-800 dark:text-white">{{ $typeLabels[$ticket->type]['label'] ?? '' }}</span></div>
-                    <div class="flex justify-between"><span class="text-slate-500">Kategori</span><span class="font-semibold text-navy-800 dark:text-white">{{ $ticket->category ?? '�' }}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Kategori</span><span class="font-semibold text-navy-800 dark:text-white">{{ $ticket->category ?? '-' }}</span></div>
                     <div class="flex justify-between"><span class="text-slate-500">Dibuat</span><span class="font-semibold text-navy-800 dark:text-white">{{ $ticket->created_at->format('d M Y H:i') }}</span></div>
                     <div class="flex justify-between"><span class="text-slate-500">Diperbarui</span><span class="font-semibold text-navy-800 dark:text-white">{{ $ticket->updated_at->diffForHumans() }}</span></div>
                     @if($ticket->vexalyn_sent_at)
