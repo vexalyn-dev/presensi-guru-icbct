@@ -52,7 +52,7 @@
 
                             <!-- QR Code -->
                             <div id="qr-code-container" class="flex items-center justify-center">
-                                {!! QrCode::size(300)->generate($classroom->qr_data) !!}
+                                {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(300)->generate($classroom->qr_data) !!}
                             </div>
                         </div>
 
