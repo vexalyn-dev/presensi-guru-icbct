@@ -43,7 +43,7 @@ class SupportController extends Controller
     public function index(Request $request)
     {
         return view('support.index', [
-            'activeType' => $request->get('type', 'bug'),
+            'activeType' => $request->input('type', 'bug'),
             'typeLabels' => SupportTicket::typeLabels(),
         ]);
     }
@@ -94,7 +94,7 @@ class SupportController extends Controller
                 $path = $file->store('support-attachments/' . now()->format('Y/m'), 'public');
                 $uploadedFiles[] = [
                     'name' => $file->getClientOriginalName(),
-                    'url'  => Storage::disk('public')->url($path),
+                    'url'  => asset('storage/' . $path),
                     'type' => $file->getMimeType(),
                     'size' => $file->getSize(),
                 ];
@@ -213,6 +213,26 @@ class SupportController extends Controller
                     // Fallback: kirim teks saja jika kartu gagal digenerate
                     $fonnte->sendText($adminPhone, $caption);
                 }
+
+                // Kirim lampiran/attachment (gambar/file tambahan dari guru) sebagai pesan terpisah
+                if (!empty($ticket->attachments)) {
+                    foreach ($ticket->attachments as $attachment) {
+                        if (!empty($attachment['url'])) {
+                            $attachmentUrl = $attachment['url'];
+                            
+                            // Jika link relatif, ubah ke absolute agar Fonnte bisa fetch
+                            if (str_starts_with($attachmentUrl, '/')) {
+                                $attachmentUrl = rtrim(config('app.url'), '/') . $attachmentUrl;
+                            }
+                            
+                            $fonnte->sendImage(
+                                $adminPhone, 
+                                $attachmentUrl, 
+                                "📎 *LAMPIRAN DARI PENGGUNA* (Tiket #{$ticket->ticket_id})\n📄 File: {$attachment['name']}"
+                            );
+                        }
+                    }
+                }
             }
         } catch (\Throwable $e) {
             \Log::warning('Fonnte notification failed', [
@@ -312,7 +332,7 @@ class SupportController extends Controller
             if (!empty($ticket->attachments)) {
                 foreach ($ticket->attachments as $file) {
                     if (!empty($file['url'])) {
-                        $path = str_replace(Storage::disk('public')->url(''), '', $file['url']);
+                        $path = ltrim(str_replace(asset('storage'), '', $file['url']), '/');
                         if (Storage::disk('public')->exists($path)) {
                             Storage::disk('public')->delete($path);
                         }
@@ -335,7 +355,7 @@ class SupportController extends Controller
         if (!empty($ticket->attachments)) {
             foreach ($ticket->attachments as $file) {
                 if (!empty($file['url'])) {
-                    $path = str_replace(Storage::disk('public')->url(''), '', $file['url']);
+                    $path = ltrim(str_replace(asset('storage'), '', $file['url']), '/');
                     if (Storage::disk('public')->exists($path)) {
                         Storage::disk('public')->delete($path);
                     }

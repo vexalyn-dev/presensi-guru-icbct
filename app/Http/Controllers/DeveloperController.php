@@ -219,7 +219,7 @@ class DeveloperController extends Controller
                     'status'      => 'new',
                 ]);
                 $ticket->id = 0;
-                $ticket->setRelation('user', new \App\Models\User([
+                $ticket->setRelation('user', new User([
                     'name' => 'Vexalyn Dev',
                     'role' => 'guru'
                 ]));
