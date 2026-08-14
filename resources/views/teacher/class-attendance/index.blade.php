@@ -430,25 +430,33 @@
                  x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150"
                  x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.stop>
-                <!-- Header -->
-                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-navy-800 dark:bg-navy-900">
-                            <i data-lucide="building-2" class="w-5 h-5 text-gold-400"></i>
+                <!-- Header — gradient navy premium -->
+                <div class="relative px-5 py-5 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 overflow-hidden">
+                    <div class="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-gold-400/10 blur-xl"></div>
+                    <div class="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-white/5 blur-lg"></div>
+                    <div class="relative flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gold-400/20 border border-gold-400/30 flex items-center justify-center backdrop-blur-sm">
+                                <i data-lucide="building-2" class="w-5 h-5 text-gold-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-white" x-text="mode==='in' ? 'Presensi Masuk' : 'Presensi Keluar'"></p>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="w-1.5 h-1.5 rounded-full animate-pulse" :class="mode==='in'?'bg-green-400':'bg-red-400'"></span>
+                                    <p class="text-xs text-white/60 truncate" x-text="sharedSpaceLocation || 'Ruangan Bersama'"></p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-800 dark:text-white" x-text="mode==='in' ? 'Presensi Masuk' : 'Presensi Keluar'"></p>
-                            <p class="text-xs text-slate-400 truncate" x-text="sharedSpaceLocation || 'Ruangan Bersama'"></p>
-                        </div>
+                        <button @click="showSharedSpaceModal=false"
+                                class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition-all">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
                     </div>
-                    <button @click="showSharedSpaceModal=false" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
                 </div>
                 <!-- Body -->
-                <div class="px-5 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div class="px-6 pt-5 pb-6 space-y-5 max-h-[72vh] overflow-y-auto">
                     <!-- MODE IN -->
-                    <div x-show="mode==='in'" class="space-y-4">
+                    <div x-show="mode==='in'" class="space-y-5">
                         <!-- Kelas -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5 uppercase tracking-wide">Kelas <span class="text-red-400">*</span></label>
@@ -541,12 +549,14 @@
                             </div>
                         </div>
                         <!-- Simpan -->
+                        <div class="pt-2 border-t border-slate-100 dark:border-slate-700 mt-2">
                         <button @click="submitSharedSpaceAttendance()"
                                 :disabled="!sharedSpaceSelectedClass||!sharedSpaceSelectedSubject||!sharedSpacePeriod"
                                 class="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-lg shadow-navy-800/30 dark:shadow-gold-400/30 hover:shadow-xl hover:-translate-y-0.5 active:scale-[.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0">
                             <i data-lucide="log-in" class="w-4 h-4"></i>
                             Simpan Presensi Masuk
                         </button>
+                        </div>
                     </div>
                     <!-- MODE OUT -->
                     <div x-show="mode==='out'">
