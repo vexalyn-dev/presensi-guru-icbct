@@ -166,16 +166,6 @@
                                 </div>
                             @endif
 
-                            <!-- Foto profil guru di tengah QR — CSS overlay, QR tetap bisa di-scan -->
-                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-[3px] border-white shadow-lg overflow-hidden bg-white"
-                                     style="box-shadow: 0 0 0 2px rgba(0,0,0,0.08), 0 3px 10px rgba(0,0,0,0.22);">
-                                    <img src="{{ auth()->user()->photo_url }}"
-                                         alt="{{ auth()->user()->name }}"
-                                         class="w-full h-full object-cover"
-                                         onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff&size=80'">
-                                </div>
-                            </div>
                         </div>
                         <div class="mt-4 flex items-center justify-center gap-2">
                             <div id="qr-status-dot" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>

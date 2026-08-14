@@ -21,7 +21,7 @@
         .nav-item { position: relative; overflow: hidden; transition: background .22s ease, color .22s ease, transform .18s cubic-bezier(.34,1.56,.64,1); }
         .nav-item::before { content:''; position:absolute; top:0; left:-120%; width:60%; height:100%; background:linear-gradient(105deg,transparent,rgba(255,255,255,.07),transparent); transition:left .55s cubic-bezier(.4,0,.2,1); pointer-events:none; z-index:0; }
         .nav-item:hover::before { left:160%; }
-        .nav-item::after { content:''; position:absolute; left:0; top:20%; bottom:20%; width:3px; border-radius:0 3px 3px 0; background:rgba(167,139,250,.7); transform:scaleY(0); transform-origin:center; transition:transform .2s cubic-bezier(.34,1.56,.64,1); }
+        .nav-item::after { content:''; position:absolute; left:0; top:20%; bottom:20%; width:3px; border-radius:0 3px 3px 0; background:rgba(250,204,21,.7); transform:scaleY(0); transform-origin:center; transition:transform .2s cubic-bezier(.34,1.56,.64,1); }
         .nav-item:hover::after { transform:scaleY(1); }
         .nav-item.active-dev::after { display:none; }
         .card { background:white; border:1px solid rgb(226 232 240); border-radius:.75rem; }
@@ -56,18 +56,18 @@
 {{-- ══ LOADING SCREEN ══ --}}
 <div id="devLoader" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-5 bg-slate-50 dark:bg-slate-950">
     <div class="relative w-16 h-16">
-        <div style="position:absolute;inset:0;border-radius:50%;border:3px solid #e9d5ff;border-top-color:#7c3aed;animation:dev-spin .9s linear infinite"></div>
-        <div style="position:absolute;top:9px;left:9px;right:9px;bottom:9px;border-radius:50%;border:3px solid transparent;border-bottom-color:#a855f7;animation:dev-spin .7s linear infinite reverse"></div>
+        <div style="position:absolute;inset:0;border-radius:50%;border:3px solid #e2e4f0;border-top-color:#0F172A;animation:dev-spin .9s linear infinite"></div>
+        <div style="position:absolute;top:9px;left:9px;right:9px;bottom:9px;border-radius:50%;border:3px solid transparent;border-bottom-color:#FACC15;animation:dev-spin .7s linear infinite reverse"></div>
         <div class="absolute inset-0 flex items-center justify-center">
-            <i data-lucide="code-2" class="w-6 h-6 text-purple-600 dark:text-purple-400"></i>
+            <i data-lucide="code-2" class="w-6 h-6 text-navy-800 dark:text-gold-400"></i>
         </div>
     </div>
     <div class="text-center">
         <p class="text-sm font-bold text-slate-800 dark:text-white" id="devLoaderMsg">Memuat Dev Panel…</p>
         <p class="text-xs text-slate-400 mt-1">ICB CT · Vexalyn Dev</p>
     </div>
-    <div class="w-48 h-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full overflow-hidden">
-        <div id="devLoaderBar" class="h-full bg-gradient-to-r from-purple-700 to-purple-400 rounded-full" style="width:0;transition:width .08s linear"></div>
+    <div class="w-48 h-1.5 bg-navy-100 dark:bg-navy-900/30 rounded-full overflow-hidden">
+        <div id="devLoaderBar" class="h-full bg-gradient-to-r from-navy-800 to-gold-400 rounded-full" style="width:0;transition:width .08s linear"></div>
     </div>
 </div>
 
@@ -76,19 +76,19 @@
 <div id="devModal" class="fixed inset-0 z-[8888] bg-black/55 backdrop-blur-sm hidden items-center justify-center p-4">
     <div id="devModalBox" class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-700"
          style="transform:translateY(30px) scale(.95);opacity:0;transition:all .45s cubic-bezier(.16,1,.3,1)">
-        <div class="h-1.5 bg-gradient-to-r from-purple-900 via-purple-500 to-violet-400"></div>
+        <div class="h-1.5 bg-gradient-to-r from-navy-900 via-navy-700 to-slate-700"></div>
         <div class="p-8">
-            <div class="w-14 h-14 bg-gradient-to-br from-purple-800 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-purple-400/30">
+            <div class="w-14 h-14 bg-gradient-to-br from-navy-800 to-navy-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-navy-800/30">
                 <i data-lucide="code-2" class="w-7 h-7 text-white"></i>
             </div>
             <h2 class="text-xl font-extrabold text-slate-800 dark:text-white text-center mb-2">Selamat Datang, Developer! 👋</h2>
             <p class="text-sm text-slate-500 dark:text-slate-400 text-center leading-relaxed mb-5">
-                Kamu mengakses <strong class="text-purple-700 dark:text-purple-400">Developer Dashboard</strong> ICB CT.
+                Kamu mengakses <strong class="text-navy-800 dark:text-gold-400">Developer Dashboard</strong> ICB CT.
             </p>
             @if($latestUpdate)
-            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/40 rounded-2xl p-4 mb-5">
+            <div class="bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800/40 rounded-2xl p-4 mb-5">
                 <div class="flex items-center gap-2 mb-2">
-                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-800/40 text-purple-700 dark:text-purple-300">{{ $latestUpdate->type }}</span>
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-navy-100 dark:bg-navy-800/40 text-navy-700 dark:text-gold-400">{{ $latestUpdate->type }}</span>
                     <span class="text-xs font-bold text-slate-700 dark:text-slate-200">v{{ $latestUpdate->version }}</span>
                     <span class="text-[10px] text-slate-400 ml-auto">{{ $latestUpdate->created_at->diffForHumans() }}</span>
                 </div>
@@ -97,7 +97,7 @@
             </div>
             @endif
             <button onclick="closeDevModal()"
-                class="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-800 to-purple-600 hover:from-purple-900 hover:to-purple-700 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-purple-400/25 hover:-translate-y-0.5 active:scale-95">
+                class="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-navy-800 to-navy-900 hover:from-navy-900 hover:to-slate-900 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-navy-800/25 hover:-translate-y-0.5 active:scale-95">
                 <i data-lucide="check" class="w-4 h-4"></i> Masuk ke Dashboard
             </button>
         </div>
@@ -118,7 +118,7 @@
 
     {{-- Logo --}}
     <div class="flex items-center gap-3 h-16 px-5 border-b border-slate-200 dark:border-slate-800">
-        <div class="w-9 h-9 bg-gradient-to-br from-purple-700 to-purple-500 rounded-lg flex items-center justify-center shadow-lg shadow-purple-700/30">
+        <div class="w-9 h-9 bg-gradient-to-br from-navy-800 to-navy-600 rounded-lg flex items-center justify-center shadow-lg shadow-navy-800/30">
             <i data-lucide="code-2" class="w-5 h-5 text-white"></i>
         </div>
         <div>
@@ -132,7 +132,7 @@
         <div>
             <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Menu</p>
             <button onclick="devShowSection('sec-dashboard')" id="devnav-sec-dashboard"
-                class="nav-item active-dev w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-purple-700 text-white shadow-lg shadow-purple-700/30">
+                class="nav-item active-dev w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-purple-700 text-white shadow-lg shadow-navy-800/30">
                 <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span>
             </button>
             <button onclick="devShowSection('sec-apk')" id="devnav-sec-apk"
@@ -187,19 +187,19 @@
             <button @click="darkMode = !darkMode; spinAnim = true; setTimeout(() => spinAnim = false, 500)"
                     class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 cursor-pointer focus:outline-none">
                 <i data-lucide="sun"  x-show="!darkMode" class="w-5 h-5 text-slate-600 transition-transform" :class="spinAnim ? 'rotate-12' : ''"></i>
-                <i data-lucide="moon" x-show="darkMode"  x-cloak class="w-5 h-5 text-purple-400 transition-transform" :class="spinAnim ? '-rotate-12' : ''"></i>
+                <i data-lucide="moon" x-show="darkMode"  x-cloak class="w-5 h-5 text-gold-400 transition-transform" :class="spinAnim ? '-rotate-12' : ''"></i>
             </button>
 
             {{-- Profile Dropdown — dev only --}}
             <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                 <button @click.stop="open = !open"
                         class="flex items-center gap-2.5 p-1.5 pr-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all hover:scale-105">
-                    <div class="w-8 h-8 bg-gradient-to-br from-purple-700 to-purple-500 rounded-full flex items-center justify-center shadow-sm">
+                    <div class="w-8 h-8 bg-gradient-to-br from-navy-800 to-navy-600 rounded-full flex items-center justify-center shadow-sm">
                         <i data-lucide="user" class="w-4 h-4 text-white"></i>
                     </div>
                     <div class="hidden md:block text-left">
                         <p class="text-[11px] font-semibold text-slate-800 dark:text-white leading-tight">Vio Atmajaya</p>
-                        <p class="text-[9px] text-purple-600 dark:text-purple-400 font-medium">Developer</p>
+                        <p class="text-[9px] text-navy-800 dark:text-gold-400 font-medium">Developer</p>
                     </div>
                     <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
                 </button>
@@ -213,14 +213,14 @@
                      x-transition:leave-end="opacity-0 translate-y-1 scale-95"
                      class="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
                     {{-- Header --}}
-                    <div class="p-4 bg-gradient-to-br from-purple-800 to-purple-900">
+                    <div class="p-4 bg-gradient-to-br from-navy-800 to-navy-900">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
                                 <i data-lucide="user" class="w-5 h-5 text-white"></i>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-semibold text-white truncate">Vio Atmajaya Saputra</p>
-                                <p class="text-xs text-purple-200 truncate">vexalyndev.my.id</p>
+                                <p class="text-xs text-gold-400/80 truncate">vexalyndev.my.id</p>
                             </div>
                         </div>
                     </div>
@@ -242,7 +242,7 @@
             </div>
 
             {{-- Secret badge --}}
-            <span class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/40 text-purple-700 dark:text-purple-400 text-[11px] font-bold">
+            <span class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800/40 text-navy-800 dark:text-gold-400 text-[11px] font-bold">
                 <i data-lucide="shield-check" class="w-3 h-3"></i> SECRET
             </span>
         </div>
@@ -351,9 +351,9 @@
             if (nav) {
                 if (s === id) {
                     nav.className = nav.className.replace(/text-slate-600|hover:bg-slate-100|dark:text-slate-400|dark:hover:bg-slate-800/g,'').trim();
-                    nav.classList.add('active-dev','bg-purple-700','text-white','shadow-lg','shadow-purple-700/30');
+                    nav.classList.add('active-dev','bg-purple-700','text-white','shadow-lg','shadow-navy-800/30');
                 } else {
-                    nav.classList.remove('active-dev','bg-purple-700','text-white','shadow-lg','shadow-purple-700/30');
+                    nav.classList.remove('active-dev','bg-purple-700','text-white','shadow-lg','shadow-navy-800/30');
                     nav.classList.add('text-slate-600','hover:bg-slate-100','dark:text-slate-400','dark:hover:bg-slate-800');
                 }
             }
