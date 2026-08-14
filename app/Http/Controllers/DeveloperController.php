@@ -229,9 +229,6 @@ class DeveloperController extends Controller
             return view('developer.helpdesk-card', compact('ticket'));
 
         } catch (\Throwable $e) {
-            return response('Error: ' . $e->getMessage(), 500);
-        }
-        } catch (\Throwable $e) {
             return response()->json([
                 'error'   => $e->getMessage(),
                 'file'    => $e->getFile(),
