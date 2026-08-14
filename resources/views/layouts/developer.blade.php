@@ -7,41 +7,98 @@
     <title>Dev Panel · ICB CT</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://unpkg.com/lucide@1.7.0/dist/umd/lucide.min.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-outfit { font-family: 'Outfit', sans-serif; }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .fade-in  { animation: fadeIn .4s ease-out; }
-        .slide-up { animation: slideUp .4s ease-out; }
-        @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        /* Nav item — same as app.blade.php */
-        .nav-item { position: relative; overflow: hidden; transition: background .22s ease, color .22s ease, transform .18s cubic-bezier(.34,1.56,.64,1); }
-        .nav-item::before { content:''; position:absolute; top:0; left:-120%; width:60%; height:100%; background:linear-gradient(105deg,transparent,rgba(255,255,255,.07),transparent); transition:left .55s cubic-bezier(.4,0,.2,1); pointer-events:none; z-index:0; }
-        .nav-item:hover::before { left:160%; }
-        .nav-item::after { content:''; position:absolute; left:0; top:20%; bottom:20%; width:3px; border-radius:0 3px 3px 0; background:rgba(250,204,21,.7); transform:scaleY(0); transform-origin:center; transition:transform .2s cubic-bezier(.34,1.56,.64,1); }
-        .nav-item:hover::after { transform:scaleY(1); }
-        .nav-item.active-dev::after { display:none; }
-        .card { background:white; border:1px solid rgb(226 232 240); border-radius:.75rem; }
-        .dark .card { background:rgb(30 41 59); border-color:rgb(51 65 85); }
-        /* Loading */
-        @keyframes dev-spin { to { transform: rotate(360deg); } }
-        /* Dev orb */
-        .dev-orb { position:absolute; border-radius:50%; filter:blur(55px); pointer-events:none; animation:devOrb 7s ease-in-out infinite; }
-        @keyframes devOrb { 0%,100%{opacity:.35} 50%{opacity:.65} }
-        /* Slider */
-        .dslide { position:absolute; inset:0; opacity:0; transform:translateX(28px); transition:opacity .65s cubic-bezier(.16,1,.3,1), transform .65s cubic-bezier(.16,1,.3,1); }
-        .dslide.active { opacity:1; transform:translateX(0); }
-        .dslide.exit   { opacity:0; transform:translateX(-20px); transition:opacity .4s ease-in, transform .4s ease-in; }
+        
+        /* Premium Backgrounds */
+        .bg-mesh-light {
+            background-color: #f8fafc;
+            background-image: radial-gradient(at 40% 20%, hsla(270,100%,96%,1) 0px, transparent 50%),
+                              radial-gradient(at 80% 0%, hsla(240,100%,96%,1) 0px, transparent 50%),
+                              radial-gradient(at 0% 50%, hsla(280,100%,96%,1) 0px, transparent 50%);
+        }
+        .dark .bg-mesh-dark {
+            background-color: #030712;
+            background-image: radial-gradient(at 10% 20%, rgba(88, 28, 135, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 90% 10%, rgba(67, 56, 202, 0.15) 0px, transparent 50%),
+                              radial-gradient(at 50% 80%, rgba(124, 58, 237, 0.1) 0px, transparent 50%);
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
+        }
+        .dark .glass-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Nav Item Animations */
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+        .nav-item:hover::before { left: 100%; }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 3px;
+            background: linear-gradient(to bottom, #8b5cf6, #3b82f6);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+            border-radius: 0 4px 4px 0;
+        }
+        .nav-item.active-dev::after { transform: scaleY(1); }
+
+        /* General Animations */
+        .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        
+        /* Floating Animation */
+        .float-anim { animation: floating 6s ease-in-out infinite; }
+        @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+        /* Loader */
+        .loader-ring {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: #8b5cf6; border-right-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300"
+<body class="h-full bg-mesh-light dark:bg-mesh-dark text-slate-800 dark:text-slate-200 transition-colors duration-500 selection:bg-purple-500/30"
       x-data="{
           sidebarOpen: false,
           darkMode: (() => { try { return localStorage.getItem('devTheme') === 'dark'; } catch(e){ return false; } })(),
-          spinAnim: false
       }"
       :class="{ 'dark': darkMode }"
       x-init="
@@ -54,51 +111,50 @@
       ">
 
 {{-- ══ LOADING SCREEN ══ --}}
-<div id="devLoader" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-5 bg-slate-50 dark:bg-slate-950">
-    <div class="relative w-16 h-16">
-        <div style="position:absolute;inset:0;border-radius:50%;border:3px solid #e2e4f0;border-top-color:#0F172A;animation:dev-spin .9s linear infinite"></div>
-        <div style="position:absolute;top:9px;left:9px;right:9px;bottom:9px;border-radius:50%;border:3px solid transparent;border-bottom-color:#FACC15;animation:dev-spin .7s linear infinite reverse"></div>
-        <div class="absolute inset-0 flex items-center justify-center">
-            <i data-lucide="code-2" class="w-6 h-6 text-navy-800 dark:text-gold-400"></i>
+<div id="devLoader" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#030712] transition-opacity duration-700">
+    <div class="relative flex items-center justify-center mb-8">
+        <div class="loader-ring absolute"></div>
+        <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30 animate-pulse">
+            <i data-lucide="code-2" class="w-6 h-6 text-white"></i>
         </div>
     </div>
-    <div class="text-center">
-        <p class="text-sm font-bold text-slate-800 dark:text-white" id="devLoaderMsg">Memuat Dev Panel…</p>
-        <p class="text-xs text-slate-400 mt-1">ICB CT · Vexalyn Dev</p>
-    </div>
-    <div class="w-48 h-1.5 bg-navy-100 dark:bg-navy-900/30 rounded-full overflow-hidden">
-        <div id="devLoaderBar" class="h-full bg-gradient-to-r from-navy-800 to-gold-400 rounded-full" style="width:0;transition:width .08s linear"></div>
+    <h2 class="text-xl font-outfit font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 mb-2">Vexalyn Dev</h2>
+    <p class="text-sm text-slate-500 tracking-widest uppercase mb-6" id="devLoaderMsg">Initializing Workspace...</p>
+    <div class="w-48 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+        <div id="devLoaderBar" class="h-full bg-gradient-to-r from-purple-600 to-blue-600 rounded-full" style="width:0;transition:width 0.1s ease"></div>
     </div>
 </div>
 
 {{-- ══ WELCOME MODAL ══ --}}
 @isset($latestUpdate)
-<div id="devModal" class="fixed inset-0 z-[8888] bg-black/55 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div id="devModalBox" class="bg-white dark:bg-slate-800 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-700"
-         style="transform:translateY(30px) scale(.95);opacity:0;transition:all .45s cubic-bezier(.16,1,.3,1)">
-        <div class="h-1.5 bg-gradient-to-r from-navy-900 via-navy-700 to-slate-700"></div>
-        <div class="p-8">
-            <div class="w-14 h-14 bg-gradient-to-br from-navy-800 to-navy-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-navy-800/30">
-                <i data-lucide="code-2" class="w-7 h-7 text-white"></i>
+<div id="devModal" class="fixed inset-0 z-[8888] bg-slate-900/40 dark:bg-black/60 backdrop-blur-md hidden items-center justify-center p-4">
+    <div id="devModalBox" class="glass-card rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl relative"
+         style="transform:translateY(40px) scale(0.95); opacity:0; transition:all 0.5s cubic-bezier(0.16,1,0.3,1)">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-blue-600/5 z-0"></div>
+        <div class="relative z-10 p-8 text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-purple-500/30 transform rotate-3">
+                <i data-lucide="rocket" class="w-8 h-8 text-white -rotate-3"></i>
             </div>
-            <h2 class="text-xl font-extrabold text-slate-800 dark:text-white text-center mb-2">Selamat Datang, Developer! 👋</h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 text-center leading-relaxed mb-5">
-                Kamu mengakses <strong class="text-navy-800 dark:text-gold-400">Developer Dashboard</strong> ICB CT.
-            </p>
+            <h2 class="text-2xl font-outfit font-bold text-slate-800 dark:text-white mb-2">Workspace Ready</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">ICB CT Developer Environment loaded successfully.</p>
+            
             @if($latestUpdate)
-            <div class="bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800/40 rounded-2xl p-4 mb-5">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-navy-100 dark:bg-navy-800/40 text-navy-700 dark:text-gold-400">{{ $latestUpdate->type }}</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200">v{{ $latestUpdate->version }}</span>
-                    <span class="text-[10px] text-slate-400 ml-auto">{{ $latestUpdate->created_at->diffForHumans() }}</span>
+            <div class="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-4 mb-6 text-left">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">{{ $latestUpdate->type }}</span>
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200">v{{ $latestUpdate->version }}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400">{{ $latestUpdate->created_at->diffForHumans() }}</span>
                 </div>
-                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">{{ $latestUpdate->title }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-line">{{ \Illuminate\Support\Str::limit($latestUpdate->content, 140) }}</p>
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1">{{ $latestUpdate->title }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{{ $latestUpdate->content }}</p>
             </div>
             @endif
+            
             <button onclick="closeDevModal()"
-                class="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-navy-800 to-navy-900 hover:from-navy-900 hover:to-slate-900 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-navy-800/25 hover:-translate-y-0.5 active:scale-95">
-                <i data-lucide="check" class="w-4 h-4"></i> Masuk ke Dashboard
+                class="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg">
+                Enter Dashboard
             </button>
         </div>
     </div>
@@ -109,162 +165,148 @@
 <div x-show="sidebarOpen" @click="sidebarOpen = false"
      x-transition:enter="transition-opacity duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
      x-transition:leave="transition-opacity duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-     class="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"></div>
+     class="fixed inset-0 bg-slate-900/40 dark:bg-black/40 z-40 lg:hidden backdrop-blur-sm"></div>
 
-{{-- ══ SIDEBAR — identik app.blade.php, warna purple ══ --}}
+{{-- ══ SIDEBAR ══ --}}
 <aside id="sidebar"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-       class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-300 ease-out">
-
-    {{-- Logo --}}
-    <div class="flex items-center gap-3 h-16 px-5 border-b border-slate-200 dark:border-slate-800">
-        <div class="w-9 h-9 bg-gradient-to-br from-navy-800 to-navy-600 rounded-lg flex items-center justify-center shadow-lg shadow-navy-800/30">
-            <i data-lucide="code-2" class="w-5 h-5 text-white"></i>
-        </div>
-        <div>
-            <h1 class="font-bold text-base text-slate-800 dark:text-white leading-tight">Dev Panel</h1>
-            <p class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">ICB CT · Vexalyn Dev</p>
+       class="fixed inset-y-0 left-0 z-50 w-72 flex flex-col glass-card border-r-0 lg:border-r border-slate-200/50 dark:border-slate-800/50 transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1)">
+    
+    {{-- Logo Area --}}
+    <div class="h-24 flex items-center px-8 border-b border-slate-200/50 dark:border-slate-800/50">
+        <div class="flex items-center gap-4">
+            <div class="relative flex-shrink-0">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl blur opacity-50"></div>
+                <div class="relative w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center">
+                    <i data-lucide="code-2" class="w-6 h-6 text-white"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="font-outfit font-bold text-lg text-slate-800 dark:text-white leading-none mb-1">Dev Panel</h1>
+                <p class="text-[10px] font-semibold text-purple-600 dark:text-purple-400 tracking-widest uppercase">Workspace</p>
+            </div>
         </div>
     </div>
 
     {{-- Navigation --}}
-    <nav class="flex-1 px-3 py-6 space-y-6 overflow-y-auto no-scrollbar">
+    <nav class="flex-1 px-4 py-8 space-y-8 overflow-y-auto no-scrollbar">
         <div>
-            <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Menu</p>
-            <button onclick="devShowSection('sec-dashboard')" id="devnav-sec-dashboard"
-                class="nav-item active-dev w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-purple-700 text-white shadow-lg shadow-navy-800/30">
-                <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span>
-            </button>
-            <button onclick="devShowSection('sec-apk')" id="devnav-sec-apk"
-                class="nav-item w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-                <i data-lucide="smartphone" class="w-4 h-4"></i><span>APK Management</span>
-            </button>
-            <button onclick="devShowSection('sec-maint')" id="devnav-sec-maint"
-                class="nav-item w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-                <i data-lucide="construction" class="w-4 h-4"></i><span>Maintenance Mode</span>
-            </button>
-            <button onclick="devShowSection('sec-updates')" id="devnav-sec-updates"
-                class="nav-item w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-                <i data-lucide="rocket" class="w-4 h-4"></i><span>Rilis Update</span>
-            </button>
+            <p class="px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase mb-4">Main Menu</p>
+            <div class="space-y-1.5">
+                <button onclick="devShowSection('sec-dashboard')" id="devnav-sec-dashboard"
+                    class="nav-item active-dev w-full flex items-center gap-3.5 px-4 py-3.5 text-sm font-semibold rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span>
+                </button>
+                <button onclick="devShowSection('sec-apk')" id="devnav-sec-apk"
+                    class="nav-item w-full flex items-center gap-3.5 px-4 py-3.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200">
+                    <i data-lucide="smartphone" class="w-5 h-5"></i><span>APK Manager</span>
+                </button>
+                <button onclick="devShowSection('sec-maint')" id="devnav-sec-maint"
+                    class="nav-item w-full flex items-center gap-3.5 px-4 py-3.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200">
+                    <i data-lucide="shield-alert" class="w-5 h-5"></i><span>System State</span>
+                </button>
+                <button onclick="devShowSection('sec-updates')" id="devnav-sec-updates"
+                    class="nav-item w-full flex items-center gap-3.5 px-4 py-3.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200">
+                    <i data-lucide="rocket" class="w-5 h-5"></i><span>Releases</span>
+                </button>
+            </div>
         </div>
+        
         <div>
-            <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Tools</p>
-            <a href="{{ isset($secret) ? route('developer.clear-cache', $secret) : '#' }}" onclick="return confirm('Clear semua cache?')"
-               class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-                <i data-lucide="refresh-cw" class="w-4 h-4 text-teal-500"></i><span>Clear Cache</span>
-            </a>
-            <a href="{{ url('/run-migrate-secret?key=vexalyn19052009') }}" target="_blank"
-               class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-                <i data-lucide="database" class="w-4 h-4 text-blue-500"></i><span>Run Migrate</span>
-            </a>
-            <a href="https://github.com/vexalyn-dev/presensi-guru-icbct" target="_blank"
-               class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-                <i data-lucide="github" class="w-4 h-4"></i><span>GitHub Repo</span>
-            </a>
+            <p class="px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 tracking-widest uppercase mb-4">Quick Links</p>
+            <div class="space-y-1.5">
+                <a href="{{ isset($secret) ? route('developer.clear-cache', $secret) : '#' }}" onclick="return confirm('Clear application cache?')"
+                   class="nav-item flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-teal-600 dark:hover:text-teal-400 transition-colors group">
+                    <i data-lucide="zap" class="w-4.5 h-4.5 group-hover:fill-teal-500/20"></i><span>Flush Cache</span>
+                </a>
+                <a href="{{ url('/run-migrate-secret?key=vexalyn19052009') }}" target="_blank"
+                   class="nav-item flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+                    <i data-lucide="database" class="w-4.5 h-4.5 group-hover:fill-blue-500/20"></i><span>Run Migrations</span>
+                </a>
+                <a href="https://github.com/vexalyn-dev/presensi-guru-icbct" target="_blank"
+                   class="nav-item flex items-center gap-3.5 px-4 py-3 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white transition-colors group">
+                   <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    <span>Repository</span>
+                </a>
+            </div>
         </div>
     </nav>
+    
+    {{-- User Profile Area --}}
+    <div class="p-4 mt-auto border-t border-slate-200/50 dark:border-slate-800/50">
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-100/50 dark:bg-slate-800/50">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-outfit font-bold shadow-md">
+                VA
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-slate-800 dark:text-white truncate">Vio Atmajaya</p>
+                <p class="text-[10px] text-slate-500 truncate">Lead Developer</p>
+            </div>
+            <a href="{{ url()->previous() === url()->current() ? url('/') : url()->previous() }}" title="Exit Panel"
+               class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors text-slate-400">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </a>
+        </div>
+    </div>
 </aside>
 
-{{-- ══ MAIN ══ --}}
-<div class="lg:ml-64 min-h-screen flex flex-col transition-all duration-300">
+{{-- ══ MAIN CONTENT AREA ══ --}}
+<div class="lg:ml-72 min-h-screen flex flex-col relative z-10">
 
-    {{-- Topbar — identik app.blade.php tapi tanpa notif, profile dev only --}}
-    <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-5 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-4">
+    {{-- Topbar --}}
+    <header class="sticky top-0 z-30 h-20 px-6 sm:px-10 flex items-center justify-between glass-card border-x-0 border-t-0 rounded-none border-b border-slate-200/50 dark:border-slate-800/50">
+        <div class="flex items-center gap-5">
             <button @click="sidebarOpen = true"
-                    class="lg:hidden flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 flex-shrink-0">
-                <i data-lucide="menu" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    class="lg:hidden flex h-10 w-10 items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:bg-slate-50">
+                <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
             <div>
-                <h2 class="text-base font-bold text-slate-800 dark:text-white" id="devPageTitle">@yield('page-title', 'Dashboard')</h2>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium" id="devRealtimeClock">Memuat...</p>
+                <h2 class="text-lg font-outfit font-bold text-slate-800 dark:text-white" id="devPageTitle">@yield('page-title', 'Dashboard')</h2>
+                <div class="flex items-center gap-2 mt-0.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium" id="devRealtimeClock">Loading time...</p>
+                </div>
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
-            {{-- Dark Mode Toggle — identik app.blade.php --}}
-            <button @click="darkMode = !darkMode; spinAnim = true; setTimeout(() => spinAnim = false, 500)"
-                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 cursor-pointer focus:outline-none">
-                <i data-lucide="sun"  x-show="!darkMode" class="w-5 h-5 text-slate-600 transition-transform" :class="spinAnim ? 'rotate-12' : ''"></i>
-                <i data-lucide="moon" x-show="darkMode"  x-cloak class="w-5 h-5 text-gold-400 transition-transform" :class="spinAnim ? '-rotate-12' : ''"></i>
-            </button>
-
-            {{-- Profile Dropdown — dev only --}}
-            <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                <button @click.stop="open = !open"
-                        class="flex items-center gap-2.5 p-1.5 pr-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all hover:scale-105">
-                    <div class="w-8 h-8 bg-gradient-to-br from-navy-800 to-navy-600 rounded-full flex items-center justify-center shadow-sm">
-                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
-                    </div>
-                    <div class="hidden md:block text-left">
-                        <p class="text-[11px] font-semibold text-slate-800 dark:text-white leading-tight">Vio Atmajaya</p>
-                        <p class="text-[9px] text-navy-800 dark:text-gold-400 font-medium">Developer</p>
-                    </div>
-                    <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
-                </button>
-
-                <div x-show="open" x-cloak
-                     x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0 translate-y-1 scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                     x-transition:leave="transition ease-in duration-150"
-                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-                     class="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
-                    {{-- Header --}}
-                    <div class="p-4 bg-gradient-to-br from-navy-800 to-navy-900">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="user" class="w-5 h-5 text-white"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-white truncate">Vio Atmajaya Saputra</p>
-                                <p class="text-xs text-gold-400/80 truncate">vexalyndev.my.id</p>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Menu items --}}
-                    <div class="py-2">
-                        <a href="https://vexalyndev.my.id" target="_blank"
-                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all hover:pl-5">
-                            <i data-lucide="external-link" class="w-4 h-4"></i>
-                            <span>Profil Developer</span>
-                        </a>
-                        <hr class="my-2 border-slate-200 dark:border-slate-700">
-                        <a href="{{ url()->previous() === url()->current() ? url('/') : url()->previous() }}"
-                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:pl-5">
-                            <i data-lucide="log-out" class="w-4 h-4"></i>
-                            <span>Keluar</span>
-                        </a>
-                    </div>
-                </div>
+        <div class="flex items-center gap-4">
+            {{-- Environment Badge --}}
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-500/20">
+                <i data-lucide="activity" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 tracking-wider">PRODUCTION</span>
             </div>
 
-            {{-- Secret badge --}}
-            <span class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800/40 text-navy-800 dark:text-gold-400 text-[11px] font-bold">
-                <i data-lucide="shield-check" class="w-3 h-3"></i> SECRET
-            </span>
+            {{-- Theme Toggle --}}
+            <button @click="darkMode = !darkMode"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm transition-all hover:scale-105 active:scale-95">
+                <i data-lucide="sun"  x-show="!darkMode" class="w-5 h-5"></i>
+                <i data-lucide="moon" x-show="darkMode"  x-cloak class="w-5 h-5"></i>
+            </button>
         </div>
     </header>
 
-    {{-- Session alerts — identik app.blade.php --}}
-    <main class="flex-1 p-5 lg:p-6 overflow-x-hidden">
+    {{-- Session Alerts --}}
+    <main class="flex-1 p-6 sm:p-10 max-w-7xl mx-auto w-full">
         @if(session('success') || session('error'))
-        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4000)" x-show="show"
+        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show"
              x-transition:leave="transition ease-in duration-300"
              x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2">
+             x-transition:leave-end="opacity-0 -translate-y-4"
+             class="mb-8">
             @if(session('success'))
-            <div class="mb-5 flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl slide-up">
-                <i data-lucide="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0"></i>
-                <p class="text-sm text-green-800 dark:text-green-200">{{ session('success') }}</p>
+            <div class="flex items-center gap-4 p-4 bg-emerald-50/80 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl backdrop-blur-sm slide-up shadow-sm">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                </div>
+                <p class="text-sm font-medium text-emerald-800 dark:text-emerald-200">{{ session('success') }}</p>
             </div>
             @endif
             @if(session('error'))
-            <div class="mb-5 flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl slide-up">
-                <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0"></i>
-                <p class="text-sm text-red-800 dark:text-red-200">{{ session('error') }}</p>
+            <div class="flex items-center gap-4 p-4 bg-red-50/80 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl backdrop-blur-sm slide-up shadow-sm">
+                <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+                </div>
+                <p class="text-sm font-medium text-red-800 dark:text-red-200">{{ session('error') }}</p>
             </div>
             @endif
         </div>
@@ -274,124 +316,107 @@
     </main>
 </div>
 
-{{-- ══ SCRIPTS — identik app.blade.php ══ --}}
 <script>
     function initIcons() {
         if (!window.lucide || typeof lucide.createIcons !== 'function') return;
-        try {
-            const opts = {};
-            if (lucide.icons && typeof lucide.icons === 'object') opts.icons = lucide.icons;
-            lucide.createIcons(opts);
-        } catch(e) { console.warn('Lucide:', e); }
+        try { lucide.createIcons(); } catch(e) {}
     }
 
     function updateDevClock() {
         const now = new Date();
         const el = document.getElementById('devRealtimeClock');
-        if (el) el.textContent = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+        if (el) {
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' });
+            const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            el.textContent = `${dateStr} • ${timeStr}`;
+        }
     }
 
-    // Loading screen
-    const devLMsgs = ['Memuat Dev Panel…','Menyiapkan data…','Hampir selesai…','Siap! ✓'];
+    // Modern Loading Screen Logic
     let devLP = 0;
     const devLB = document.getElementById('devLoaderBar');
+    const devMsg = document.getElementById('devLoaderMsg');
+    const msgs = ['Authenticating...', 'Fetching metrics...', 'Rendering UI...', 'Ready'];
+    
     const devLT = setInterval(() => {
-        devLP += Math.random() * 22 + 8;
+        devLP += Math.random() * 15 + 5;
         if (devLP > 100) devLP = 100;
-        devLB.style.width = devLP + '%';
-        document.getElementById('devLoaderMsg').textContent = devLMsgs[Math.floor((devLP/100) * (devLMsgs.length-1))];
-        if (devLP >= 100) { clearInterval(devLT); setTimeout(devShowApp, 350); }
-    }, 110);
-
-    function devShowApp() {
-        const ld = document.getElementById('devLoader');
-        ld.style.transition = 'opacity .5s ease';
-        ld.style.opacity = '0';
-        setTimeout(() => {
-            ld.style.display = 'none';
-            initIcons();
-            updateDevClock();
-            setInterval(updateDevClock, 60000);
-            // Show welcome modal
-            const modal = document.getElementById('devModal');
-            if (modal) {
-                const box = document.getElementById('devModalBox');
-                modal.classList.remove('hidden');
-                modal.style.display = 'flex';
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                    box.style.transform = 'translateY(0) scale(1)';
-                    box.style.opacity = '1';
-                    initIcons();
-                }));
-            }
-        }, 500);
-    }
+        if(devLB) devLB.style.width = devLP + '%';
+        if(devMsg) devMsg.textContent = msgs[Math.floor((devLP/100) * (msgs.length-1))];
+        
+        if (devLP >= 100) { 
+            clearInterval(devLT); 
+            setTimeout(() => {
+                const ld = document.getElementById('devLoader');
+                if(ld) {
+                    ld.style.opacity = '0';
+                    setTimeout(() => {
+                        ld.style.display = 'none';
+                        initIcons();
+                        updateDevClock();
+                        setInterval(updateDevClock, 1000);
+                        
+                        const modal = document.getElementById('devModal');
+                        if (modal) {
+                            const box = document.getElementById('devModalBox');
+                            modal.classList.remove('hidden');
+                            modal.style.display = 'flex';
+                            requestAnimationFrame(() => requestAnimationFrame(() => {
+                                box.style.transform = 'translateY(0) scale(1)';
+                                box.style.opacity = '1';
+                            }));
+                        }
+                    }, 700);
+                }
+            }, 400); 
+        }
+    }, 120);
 
     function closeDevModal() {
         const box = document.getElementById('devModalBox');
-        box.style.transform = 'translateY(20px) scale(.95)';
-        box.style.opacity = '0';
-        setTimeout(() => {
-            const m = document.getElementById('devModal');
-            m.style.display = 'none';
-            m.classList.add('hidden');
-        }, 350);
+        if(box) {
+            box.style.transform = 'translateY(30px) scale(0.95)';
+            box.style.opacity = '0';
+            setTimeout(() => {
+                const m = document.getElementById('devModal');
+                if(m) { m.style.display = 'none'; m.classList.add('hidden'); }
+            }, 500);
+        }
     }
-    const _dm = document.getElementById('devModal');
-    if (_dm) _dm.addEventListener('click', e => { if(e.target === _dm) closeDevModal(); });
 
-    // Section navigation
+    // Navigation Logic
     const devSections = ['sec-dashboard','sec-apk','sec-maint','sec-updates'];
-    const devTitles = {'sec-dashboard':'Dashboard','sec-apk':'APK Management','sec-maint':'Maintenance Mode','sec-updates':'Rilis Update'};
+    const devTitles = {'sec-dashboard':'Dashboard Overview','sec-apk':'Application Packages','sec-maint':'System State','sec-updates':'Release Management'};
+    
     function devShowSection(id) {
         devSections.forEach(s => {
             const el = document.getElementById(s);
-            if (el) el.classList.toggle('hidden', s !== id);
+            if (el) {
+                if(s === id) {
+                    el.classList.remove('hidden');
+                    // Retrigger animation
+                    el.style.animation = 'none';
+                    el.offsetHeight; 
+                    el.style.animation = null;
+                    el.classList.add('fade-in-up');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('fade-in-up');
+                }
+            }
+            
             const nav = document.getElementById('devnav-' + s);
             if (nav) {
                 if (s === id) {
-                    nav.className = nav.className.replace(/text-slate-600|hover:bg-slate-100|dark:text-slate-400|dark:hover:bg-slate-800/g,'').trim();
-                    nav.classList.add('active-dev','bg-purple-700','text-white','shadow-lg','shadow-navy-800/30');
+                    nav.className = "nav-item active-dev w-full flex items-center gap-3.5 px-4 py-3.5 text-sm font-semibold rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 shadow-sm";
                 } else {
-                    nav.classList.remove('active-dev','bg-purple-700','text-white','shadow-lg','shadow-navy-800/30');
-                    nav.classList.add('text-slate-600','hover:bg-slate-100','dark:text-slate-400','dark:hover:bg-slate-800');
+                    nav.className = "nav-item w-full flex items-center gap-3.5 px-4 py-3.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200";
                 }
             }
         });
         const pt = document.getElementById('devPageTitle');
         if (pt) pt.textContent = devTitles[id] || 'Dashboard';
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // APK auto-fill
-    function handleApk(file) {
-        if (!file) return;
-        document.getElementById('apkZoneTxt').textContent = file.name;
-        document.getElementById('apkZone').classList.add('border-purple-500');
-        const base = file.name.replace(/\.apk$/i, '');
-        const vm = base.match(/[vV]?(\d+\.\d+(?:\.\d+)?(?:\.\d+)?)/);
-        if (vm) {
-            document.getElementById('apkVer').value = vm[1];
-            const nm = base.replace(/[-_\s]*[vV]?\d+\.\d+(?:\.\d+)?(?:\.\d+)?[-_\s]*/g,'').replace(/[-_]/g,' ').trim();
-            if (nm) document.getElementById('apkName').value = nm;
-        } else {
-            const nm = base.replace(/[-_]/g,' ').trim();
-            if (nm) document.getElementById('apkName').value = nm;
-        }
-    }
-
-    // Maintenance toggle
-    function toggleMaintUI() {
-        const t = document.getElementById('maintTrack');
-        const th = document.getElementById('maintThumb');
-        const v = document.getElementById('maintVal');
-        const on = t.classList.contains('bg-red-500');
-        t.classList.toggle('bg-red-500', !on);
-        t.classList.toggle('bg-slate-300', on);
-        t.classList.toggle('dark:bg-slate-600', on);
-        th.classList.toggle('left-[22px]', !on);
-        th.classList.toggle('left-0.5', on);
-        v.value = on ? '0' : '1';
     }
 
     document.addEventListener('DOMContentLoaded', () => {

@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('page-title', 'Jadwal Guru')
+@section('page-title', 'Jadwal Kerja Guru')
 
 @section('content')
     <div class="fade-in space-y-6">
 
-        <!-- Premium Header -->
+        <!-- Premium Header & Toggle View -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div
@@ -13,11 +13,27 @@
                     <i data-lucide="calendar-clock" class="w-6 h-6 text-white dark:text-navy-900"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl sm:text-3xl font-bold text-navy-800 dark:text-white tracking-tight">Jadwal Mengajar
-                        Guru</h1>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Kelola jadwal harian dan jam kerja setiap
-                        guru</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-navy-800 dark:text-white tracking-tight">Jadwal Kerja Guru</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Kelola jam kerja harian setiap guru</p>
                 </div>
+            </div>
+
+            {{-- ── TOGGLE VIEW (LIST / GRID) ── --}}
+            <div class="relative flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 self-start sm:self-auto select-none" style="min-width:120px;">
+                {{-- Sliding pill indicator --}}
+                <div id="toggle-indicator"></div>
+                <button id="btn-list" onclick="setView('list')"
+                        class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 flex-1 justify-center"
+                        title="Tampilan List">
+                    <i data-lucide="list" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">List</span>
+                </button>
+                <button id="btn-grid" onclick="setView('grid')"
+                        class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 flex-1 justify-center"
+                        title="Tampilan Grid">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Grid</span>
+                </button>
             </div>
         </div>
 
@@ -67,8 +83,78 @@
             </div>
         </div>
 
-        <!-- Teacher List - 3x3 Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{-- ════════════════════════════════════════
+             LIST VIEW
+             ════════════════════════════════════════ --}}
+        <div id="view-list" class="space-y-4">
+            @forelse($teachers as $teacher)
+                @php
+                    $activeSchedules = $teacher->schedules->where('is_active', true)->sortBy('day_of_week');
+                @endphp
+                <div class="card p-5 hover:shadow-xl transition-all duration-300 group">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 {{ $activeSchedules->isNotEmpty() ? 'mb-4 pb-4 border-b border-slate-100 dark:border-slate-800' : '' }}">
+                        <div class="flex items-center gap-4">
+                            <img src="{{ $teacher->photo_url }}"
+                                 class="w-14 h-14 rounded-2xl object-cover border-2 border-slate-200 dark:border-slate-700 group-hover:border-gold-400 dark:group-hover:border-gold-500 transition-colors shadow-md flex-shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base font-bold text-navy-800 dark:text-white truncate mb-1">{{ $teacher->name }}</h3>
+                                <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                    <i data-lucide="book-open" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                                    <span class="truncate">{{ $teacher->subject ?: 'Belum ada mata pelajaran' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="{{ route('schedules.edit', $teacher) }}"
+                           class="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2.5 bg-navy-800 dark:bg-gold-400 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-xs font-bold transition-all shadow-md">
+                            <i data-lucide="{{ $activeSchedules->isEmpty() ? 'plus' : 'edit-2' }}" class="w-3.5 h-3.5"></i>
+                            <span>{{ $activeSchedules->isEmpty() ? 'Buat Jadwal' : 'Edit Jadwal' }}</span>
+                        </a>
+                    </div>
+
+                    @if($activeSchedules->isEmpty())
+                        <div class="flex items-center justify-center py-4 px-3 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-dashed border-slate-200 dark:border-slate-600">
+                            <div class="text-center">
+                                <i data-lucide="calendar-off" class="w-5 h-5 text-slate-300 dark:text-slate-500 mx-auto mb-1"></i>
+                                <p class="text-xs text-slate-400 dark:text-slate-500">Belum ada jadwal kerja</p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                            @foreach($activeSchedules as $schedule)
+                                <div class="p-2.5 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700/50 hover:border-gold-300 dark:hover:border-gold-600 transition-colors">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <div class="w-6 h-6 rounded-md bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                            <span class="text-[8px] font-bold text-white dark:text-navy-900 uppercase">
+                                                {{ substr(\App\Models\TeacherSchedule::getDayName($schedule->day_of_week), 0, 3) }}
+                                            </span>
+                                        </div>
+                                        <span class="text-xs font-bold text-navy-800 dark:text-white">
+                                            {{ \App\Models\TeacherSchedule::getDayName($schedule->day_of_week) }}
+                                        </span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                                        {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
+                                    </p>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div class="card p-12 text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="calendar-off" class="w-10 h-10 text-slate-400 dark:text-slate-500"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-navy-800 dark:text-white mb-2">Belum Ada Guru</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">Tidak ada guru aktif untuk ditampilkan.</p>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- ════════════════════════════════════════
+             GRID VIEW
+             ════════════════════════════════════════ --}}
+        <div id="view-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($teachers as $teacher)
                 <div
                     class="card p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group h-full flex flex-col">
@@ -156,12 +242,109 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
+            var saved = localStorage.getItem('schedules_admin_view') || 'grid';
+            applyView(saved, false);
         });
+
+        function setView(v) {
+            var current = localStorage.getItem('schedules_admin_view') || 'grid';
+            if (current === v) return;
+            localStorage.setItem('schedules_admin_view', v);
+            applyView(v, true);
+        }
+
+        function applyView(v, animate) {
+            var listEl  = document.getElementById('view-list');
+            var gridEl  = document.getElementById('view-grid');
+            var btnList = document.getElementById('btn-list');
+            var btnGrid = document.getElementById('btn-grid');
+            var indicator = document.getElementById('toggle-indicator');
+
+            if (indicator) {
+                if (v === 'grid') {
+                    indicator.style.transform = 'translateX(100%)';
+                } else {
+                    indicator.style.transform = 'translateX(0%)';
+                }
+            }
+
+            [btnList, btnGrid].forEach(btn => {
+                if (btn) btn.classList.remove('text-navy-800', 'dark:text-white', 'text-slate-500', 'dark:text-slate-400');
+            });
+            var activeBtn   = v === 'list' ? btnList : btnGrid;
+            var inactiveBtn = v === 'list' ? btnGrid : btnList;
+            if (activeBtn) activeBtn.classList.add('text-navy-800', 'dark:text-white');
+            if (inactiveBtn) inactiveBtn.classList.add('text-slate-500', 'dark:text-slate-400');
+
+            if (!listEl || !gridEl) return;
+
+            if (!animate) {
+                if (v === 'grid') {
+                    listEl.style.display = 'none';
+                    gridEl.style.display = 'grid';
+                } else {
+                    gridEl.style.display = 'none';
+                    listEl.style.display = 'flex';
+                    listEl.style.flexDirection = 'column';
+                }
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            var outEl = v === 'grid' ? listEl : gridEl;
+            var inEl  = v === 'grid' ? gridEl : listEl;
+            var inFrom = v === 'grid' ? 'translateX(32px)' : 'translateX(-32px)';
+
+            outEl.style.transition = 'opacity 0.22s ease, transform 0.22s cubic-bezier(0.4,0,1,1)';
+            outEl.style.opacity    = '0';
+            outEl.style.transform  = v === 'grid' ? 'translateX(-24px)' : 'translateX(24px)';
+            outEl.style.pointerEvents = 'none';
+
+            setTimeout(function() {
+                outEl.style.display   = 'none';
+                outEl.style.opacity   = '';
+                outEl.style.transform = '';
+                outEl.style.transition = '';
+                outEl.style.pointerEvents = '';
+
+                inEl.style.display    = v === 'grid' ? 'grid' : 'flex';
+                if (v === 'list') inEl.style.flexDirection = 'column';
+                inEl.style.opacity    = '0';
+                inEl.style.transform  = inFrom;
+                inEl.style.transition = 'none';
+
+                void inEl.offsetWidth;
+
+                inEl.style.transition = 'opacity 0.28s ease, transform 0.32s cubic-bezier(0.22,1,0.36,1)';
+                inEl.style.opacity    = '1';
+                inEl.style.transform  = 'translateX(0)';
+
+                var cards = inEl.querySelectorAll('.card, [class*="card"]');
+                cards.forEach(function(card, i) {
+                    card.style.opacity   = '0';
+                    card.style.transform = 'translateY(16px) scale(0.97)';
+                    card.style.transition = 'none';
+                    setTimeout(function() {
+                        card.style.transition = 'opacity 0.3s ease, transform 0.35s cubic-bezier(0.22,1,0.36,1)';
+                        card.style.opacity   = '1';
+                        card.style.transform = 'translateY(0) scale(1)';
+                    }, i * 45);
+                });
+
+                if (window.lucide) lucide.createIcons();
+
+                setTimeout(function() {
+                    inEl.style.transition = '';
+                    inEl.style.opacity    = '';
+                    inEl.style.transform  = '';
+                }, 400);
+            }, 230);
+        }
     </script>
 
     <style>
         .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+            animation: fadeIn 0.45s ease-out forwards;
         }
 
         @keyframes fadeIn {
@@ -175,5 +358,33 @@
                 transform: translateY(0);
             }
         }
+
+        /* Toggle button group */
+        #toggle-indicator {
+            position: absolute;
+            top: 4px; left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(15,23,42,0.12);
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .dark #toggle-indicator {
+            background: #334155;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        #btn-list, #btn-grid {
+            position: relative;
+            z-index: 1;
+            transition: color 0.2s ease;
+        }
+        #btn-list:active, #btn-grid:active {
+            transform: scale(0.94);
+        }
+
+        #view-grid { display: none; }
     </style>
 @endsection
