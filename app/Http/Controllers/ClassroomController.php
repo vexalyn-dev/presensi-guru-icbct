@@ -175,6 +175,7 @@ class ClassroomController extends Controller
         try {
             $qrImage = QrCode::format('svg')
                 ->size(300)
+                ->color(10, 37, 64)
                 ->errorCorrection('H')
                 ->generate($data);
 

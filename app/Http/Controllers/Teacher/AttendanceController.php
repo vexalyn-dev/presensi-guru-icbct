@@ -86,7 +86,7 @@ class AttendanceController extends Controller
         $qrData = json_encode($this->buildDailyAttendanceQrData($user), JSON_UNESCAPED_SLASHES);
         $svg = QrCode::size(300)
             ->backgroundColor(255, 255, 255)
-            ->color(0, 0, 0)
+            ->color(10, 37, 64)
             ->generate($qrData);
 
         return 'data:image/svg+xml;base64,' . base64_encode($svg);

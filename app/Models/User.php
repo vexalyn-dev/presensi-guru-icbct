@@ -534,6 +534,7 @@ class User extends Authenticatable
                 'size' => '400x400',
                 'margin' => '2',
                 'format' => 'jpeg',
+                'color' => '10-37-64',
                 'data' => $qrData
             ]);
 
@@ -547,6 +548,7 @@ class User extends Authenticatable
             // Fallback ke SVG native jika internet/API mati
             $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
                 ->size(400)
+                ->color(10, 37, 64)
                 ->errorCorrection('H')
                 ->margin(2)
                 ->generate($qrData);
