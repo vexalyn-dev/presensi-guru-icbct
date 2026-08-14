@@ -146,24 +146,8 @@ class SupportController extends Controller
                 ->with('error', 'Laporan gagal disimpan. Hubungi admin.');
         }
 
-        $waUrl = null;
-
-        // Jika tipe 'question', lempar langsung ke WhatsApp dan JANGAN hubungkan ke GitHub & ClickUp
-        if ($type === 'question') {
-            $rawPhone = config('services.whatsapp.support_number', env('SUPPORT_WA_NUMBER', '6281234567890'));
-            $phone = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$rawPhone));
-
-            $user = auth()->user();
-            $prioLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? ucfirst($ticket->priority);
-
-            $waText  = "*[PERTANYAAN PUSAT BANTUAN]*\n\n";
-            $waText .= "👤 *Dari:* " . ($user->name ?? 'Pengguna') . " (" . ucfirst($user->role ?? 'User') . ")\n";
-            $waText .= "📌 *Judul:* " . $validated['title'] . "\n";
-            $waText .= "⚡ *Prioritas:* " . $prioLabel . "\n\n";
-            $waText .= "💬 *Pertanyaan / Detail:*\n" . $validated['description'];
-
-            $waUrl = "https://wa.me/{$phone}?text=" . urlencode($waText);
-        } else {
+        // Question type: TIDAK dikirim ke GitHub & ClickUp, hanya via Fonnte ke admin
+        if ($type !== 'question') {
             // Kirim ke GitHub Issues
             $github = new GitHubService();
             $result = $github->createIssue($ticket);
@@ -180,7 +164,6 @@ class SupportController extends Controller
                 try {
                     $ticket->update(['clickup_task_url' => $clickupResult['task_url']]);
                 } catch (\Throwable $e) {
-                    // Kolom belum ada (migration belum jalan) — skip saja, tidak error
                     \Log::info('ClickUp task created but clickup_task_url column not found yet: ' . $clickupResult['task_url']);
                 }
             }
@@ -189,41 +172,50 @@ class SupportController extends Controller
         // Kirim notifikasi ke semua admin & guru_piket
         $this->notifyAdmins($ticket);
 
-        // Generate card image & kirim via Fonnte (best-effort, tidak memblokir jika gagal)
+        // Kirim notifikasi ke admin via Fonnte (gambar kartu atau teks fallback)
         try {
-            $generator = new HelpdeskCardGenerator();
-            $cardPath  = $generator->generate($ticket);
-            if ($cardPath) {
-                $ticket->update(['card_image_path' => $cardPath]);
+            $rawPhone   = config('services.whatsapp.support_number', env('SUPPORT_WA_NUMBER', ''));
+            $adminPhone = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$rawPhone));
 
-                // ── Kirim gambar kartu ke nomor admin via Fonnte ─────────────
-                $rawPhone  = config('services.whatsapp.support_number', env('SUPPORT_WA_NUMBER', ''));
-                $adminPhone = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$rawPhone));
+            if ($adminPhone) {
+                $prioLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
+                $typeLabel = SupportTicket::typeLabels()[$ticket->type]['label'] ?? ucfirst($ticket->type);
+                $reporter  = $ticket->user?->name ?? 'Pengguna';
+                $fonnte    = new FonnteService();
 
-                if ($adminPhone) {
-                    // Buat URL absolut yang bisa diakses publik dari internet
-                    // Format: https://presensi-guru.smkicb-teknika.sch.id/storage/helpdesk/...
+                // Coba generate card dulu
+                $cardPath = null;
+                try {
+                    $generator = new HelpdeskCardGenerator();
+                    $cardPath  = $generator->generate($ticket);
+                    if ($cardPath) {
+                        $ticket->update(['card_image_path' => $cardPath]);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('Card generation failed, will send text only', ['reason' => $e->getMessage()]);
+                }
+
+                $caption  = "🎫 *TIKET BARU — PUSAT BANTUAN*\n";
+                $caption .= "━━━━━━━━━━━━━━━━━\n";
+                $caption .= "🆔 ID: *{$ticket->ticket_id}*\n";
+                $caption .= "👤 Dari: *{$reporter}*\n";
+                $caption .= "📋 Tipe: *{$typeLabel}*\n";
+                $caption .= "📌 Judul: *{$ticket->title}*\n";
+                $caption .= "⚡ Prioritas: *{$prioLabel}*\n";
+                $caption .= "━━━━━━━━━━━━━━━━━\n";
+                $caption .= "💬 Detail: {$ticket->description}";
+
+                if ($cardPath) {
+                    // Kirim gambar kartu
                     $cardUrl = rtrim(config('app.url'), '/') . '/storage/' . $cardPath;
-                    $prioLabel  = \App\Models\SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
-                    $typeLabel  = \App\Models\SupportTicket::typeLabels()[$ticket->type]['label']         ?? ucfirst($ticket->type);
-                    $reporter   = $ticket->user?->name ?? 'Pengguna';
-
-                    $caption  = "🎫 *TIKET BARU — PUSAT BANTUAN*\n";
-                    $caption .= "━━━━━━━━━━━━━━━━━\n";
-                    $caption .= "🆔 ID: *{$ticket->ticket_id}*\n";
-                    $caption .= "👤 Dari: *{$reporter}*\n";
-                    $caption .= "📋 Tipe: *{$typeLabel}*\n";
-                    $caption .= "📌 Judul: *{$ticket->title}*\n";
-                    $caption .= "⚡ Prioritas: *{$prioLabel}*\n";
-                    $caption .= "━━━━━━━━━━━━━━━━━\n";
-                    $caption .= "💬 Detail: {$ticket->description}";
-
-                    $fonnte = new FonnteService();
                     $fonnte->sendImage($adminPhone, $cardUrl, $caption);
+                } else {
+                    // Fallback: kirim teks saja jika kartu gagal digenerate
+                    $fonnte->sendText($adminPhone, $caption);
                 }
             }
         } catch (\Throwable $e) {
-            \Log::warning('Helpdesk card/Fonnte failed', [
+            \Log::warning('Fonnte notification failed', [
                 'ticket' => $ticket->id,
                 'reason' => $e->getMessage(),
             ]);
@@ -232,15 +224,11 @@ class SupportController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success'  => true,
-                'message'  => $type === 'question' ? '✅ Pertanyaan tersimpan! Mengalihkan ke WhatsApp...' : '✅ Laporan berhasil dikirim!',
+                'message'  => '✅ Pertanyaan / Laporan berhasil dikirim!',
                 'redirect' => $this->supportRoute('history'),
-                'wa_url'   => $waUrl,
             ]);
         }
 
-        if ($type === 'question' && $waUrl) {
-            return redirect()->away($waUrl);
-        }
 
         $links = [];
         if (isset($result) && !empty($result['issue_url']))             $links[] = 'GitHub: ' . $result['issue_url'];
