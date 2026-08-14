@@ -204,30 +204,56 @@ class DeveloperController extends Controller
         }
 
         if (!$ticket) {
-            // Buat dummy ticket untuk preview
             $ticket = new \App\Models\SupportTicket([
                 'ticket_id'   => 'HD-PREVIEW-001',
                 'type'        => 'question',
                 'title'       => 'Tidak bisa melakukan presensi',
-                'description' => 'Saya tidak bisa melakukan presensi karena QR Code kelas tidak terbaca. Sudah dicoba beberapa kali tapi tetap gagal.',
+                'description' => 'Saya tidak bisa melakukan presensi karena QR Code kelas tidak terbaca.',
                 'priority'    => 'critical',
                 'status'      => 'new',
             ]);
             $ticket->id = 0;
         }
 
+        // ?debug=1 untuk lihat info template
+        if (request()->get('debug')) {
+            $tp = public_path('images/card-laporan.png');
+            return response()->json([
+                'template_exists' => file_exists($tp),
+                'template_size'   => file_exists($tp) ? filesize($tp) : 0,
+                'template_dims'   => file_exists($tp) ? getimagesize($tp) : null,
+                'gd_available'    => function_exists('imagecreatefrompng'),
+                'font_regular'    => file_exists(public_path('fonts/Inter-Regular.ttf')),
+                'font_bold'       => file_exists(public_path('fonts/Inter-Bold.ttf')),
+                'ticket_id'       => $ticket->id,
+            ]);
+        }
+
+        // Hapus cache lama agar selalu regenerate
+        $filename = 'helpdesk-' . ($ticket->ticket_id ?: 'T' . $ticket->id) . '.png';
+        Storage::disk('public')->delete('helpdesk/' . $filename);
+
         $generator = new \App\Services\HelpdeskCardGenerator();
-        $cardPath  = $generator->regenerate($ticket);
+        $cardPath  = $generator->generate($ticket);
 
         if ($cardPath) {
             if ($ticket->id > 0) {
-                $ticket->update(['card_image_path' => $cardPath]);
+                try { $ticket->update(['card_image_path' => $cardPath]); } catch (\Throwable $e) {}
             }
-            $fullPath = Storage::disk('public')->path($cardPath);
-            return response()->file($fullPath, ['Content-Type' => 'image/png']);
+            return response()->file(
+                Storage::disk('public')->path($cardPath),
+                ['Content-Type' => 'image/png', 'Cache-Control' => 'no-cache']
+            );
         }
 
-        return response()->json(['error' => 'Gagal generate card. Cek log Laravel.'], 500);
+        // Tampilkan log error
+        $lines = file_exists(storage_path('logs/laravel.log'))
+            ? array_slice(file(storage_path('logs/laravel.log')), -40)
+            : ['Log tidak ditemukan'];
+
+        return response('<pre style="font-size:12px">Gagal generate card. Log:<br>' .
+            htmlspecialchars(implode('', $lines)) . '</pre>', 500)
+            ->header('Content-Type', 'text/html');
     }
 
     public function clearCache(string $secret)

@@ -177,16 +177,25 @@ class HelpdeskCardGenerator
 
     private function render(SupportTicket $ticket, string $relPath): ?string
     {
-        // Load template
-        $img = imagecreatefrompng($this->templatePath);
-        if (!$img) {
+        // Load template — handle both RGB and RGBA PNG
+        $tmpImg = imagecreatefrompng($this->templatePath);
+        if (!$tmpImg) {
             Log::error('HelpdeskCardGenerator: gagal membaca template PNG');
             return null;
         }
 
-        // Aktifkan alpha blending agar teks tidak menghancurkan transparansi
-        imagealphablending($img, true);
+        // Convert ke true-color canvas agar teks bisa di-render di atas dengan benar
+        $w = imagesx($tmpImg);
+        $h = imagesy($tmpImg);
+        $img = imagecreatetruecolor($w, $h);
+        imagealphablending($img, false);
         imagesavealpha($img, true);
+        // Fill background putih (untuk template tanpa transparansi)
+        $white = imagecolorallocate($img, 255, 255, 255);
+        imagefill($img, 0, 0, $white);
+        imagealphablending($img, true);
+        imagecopy($img, $tmpImg, 0, 0, 0, 0, $w, $h);
+        imagedestroy($tmpImg);
 
         // Load font (gunakan built-in GD font jika tidak ada TTF)
         $fontDir  = public_path('fonts');
