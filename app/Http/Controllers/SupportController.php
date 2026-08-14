@@ -273,9 +273,14 @@ class SupportController extends Controller
                 }
 
                 if ($cardPath) {
-                    // Kirim gambar kartu
-                    $cardUrl = rtrim(config('app.url'), '/') . '/storage/' . $cardPath;
-                    $fonnte->sendImage($adminPhone, $cardUrl, $caption);
+                    // Kirim gambar kartu langsung via file upload (tidak butuh URL publik)
+                    $absoluteCardPath = \Storage::disk('public')->path($cardPath);
+                    if (file_exists($absoluteCardPath)) {
+                        $fonnte->sendImageFile($adminPhone, $absoluteCardPath, $caption);
+                    } else {
+                        \Log::warning('notifyFonnte: card file not found, falling back to text', ['path' => $absoluteCardPath]);
+                        $fonnte->sendText($adminPhone, $caption);
+                    }
                 } else {
                     // Fallback: kirim teks saja jika kartu gagal digenerate
                     $fonnte->sendText($adminPhone, $caption);
@@ -285,32 +290,27 @@ class SupportController extends Controller
                 if (!empty($ticket->attachments)) {
                     foreach ($ticket->attachments as $attachment) {
                         if (!empty($attachment['url'])) {
-                            // Dapatkan path relatif file dari URL asli
-                            $parsedUrl = parse_url($attachment['url']);
-                            $path = $parsedUrl['path'] ?? '';
-                            
-                            // Ambil bagian setelah '/storage/'
-                            $storagePos = strpos($path, '/storage/');
-                            if ($storagePos !== false) {
-                                $relativePath = substr($path, $storagePos + 9); // +9 untuk skip '/storage/'
+                            // Ekstrak relative path dari URL untuk mendapatkan path lokal
+                            $parsedUrl    = parse_url($attachment['url']);
+                            $urlPath      = $parsedUrl['path'] ?? '';
+                            $storagePos   = strpos($urlPath, '/storage/');
+                            $relativePath = ($storagePos !== false)
+                                ? substr($urlPath, $storagePos + 9)
+                                : ltrim($urlPath, '/');
+
+                            // Decode URL encoding agar path file di filesystem benar
+                            $relativePath = urldecode($relativePath);
+                            $absolutePath = \Storage::disk('public')->path($relativePath);
+
+                            if (file_exists($absolutePath)) {
+                                $fonnte->sendImageFile(
+                                    $adminPhone,
+                                    $absolutePath,
+                                    "📎 *LAMPIRAN DARI PENGGUNA* (Tiket #{$ticket->ticket_id})\n📄 File: {$attachment['name']}"
+                                );
                             } else {
-                                $relativePath = ltrim($path, '/');
+                                \Log::warning('notifyFonnte: attachment file not found', ['path' => $absolutePath]);
                             }
-
-                            // Raw URL Encode setiap segmen dari relative path untuk mencegah spasi/karakter spesial merusak URL
-                            $segments = explode('/', $relativePath);
-                            $encodedSegments = array_map('rawurlencode', $segments);
-                            $encodedRelativePath = implode('/', $encodedSegments);
-                            
-                            // Gabungkan dengan APP_URL
-                            $attachmentUrl = rtrim(config('app.url'), '/') . '/storage/' . $encodedRelativePath;
-
-                            // Kirim ke Fonnte
-                            $fonnte->sendImage(
-                                $adminPhone, 
-                                $attachmentUrl, 
-                                "📎 *LAMPIRAN DARI PENGGUNA* (Tiket #{$ticket->ticket_id})\n📄 File: {$attachment['name']}"
-                            );
                         }
                     }
                 }
