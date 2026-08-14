@@ -8,1810 +8,410 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * Generate PNG card laporan Pusat Bantuan menggunakan PHP GD.
- *
- * Template:
- * public/images/card-laporan.png
- *
- * Ukuran desain utama:
- * 612 × 408 px
- *
- * Generator menggunakan koordinat berbasis 612 × 408,
- * tetapi tetap mendukung template dengan ukuran berbeda
- * melalui automatic scaling.
+ * Template: public/images/card-laporan.png
  */
 class HelpdeskCardGenerator
 {
-    /*
-    |--------------------------------------------------------------------------
-    | BASE TEMPLATE SIZE
-    |--------------------------------------------------------------------------
-    |
-    | Semua koordinat desain dibuat berdasarkan ukuran ini.
-    | Kalau template card-laporan.png memiliki ukuran 612x408,
-    | scale = 1.
-    |
-    | Kalau suatu saat template berubah menjadi 1224x816,
-    | generator otomatis melakukan scale 2x.
-    |
-    */
-
-    private const BASE_WIDTH = 612;
-    private const BASE_HEIGHT = 408;
-
-    /*
-    |--------------------------------------------------------------------------
-    | TEXT POSITIONS
-    |--------------------------------------------------------------------------
-    |
-    | Semua koordinat di bawah dibuat khusus untuk template
-    | card-laporan.png ukuran 612 × 408.
-    |
-    | x/y adalah posisi teks.
-    | maxW = batas lebar teks.
-    | maxH = batas tinggi untuk teks multiline.
-    |
-    */
-
+    // ─── Konfigurasi posisi teks di atas template ──────────────────────────
+    // Semua koordinat dalam piksel, relatif terhadap pojok kiri atas gambar.
+    // Ukuran template asli: 1332 × 750 px (landscape)
     private const POSITIONS = [
-
-        /*
-        |--------------------------------------------------------------------------
-        | HEADER
-        |--------------------------------------------------------------------------
-        */
-
         'ticket_id' => [
-            'x' => 465,
-            'y' => 63,
-            'maxW' => 112,
-            'size' => 10,
-            'color' => 'navy',
+            'x'    => 1040,
+            'y'    => 148,
+            'maxW' => 260,
+            'size' => 22,
+            'color'=> 'navy',
             'bold' => true,
         ],
-
-        /*
-        |--------------------------------------------------------------------------
-        | LEFT PANEL - PELAPOR
-        |--------------------------------------------------------------------------
-        */
-
         'pelapor' => [
-            'x' => 79,
-            'y' => 122,
-            'maxW' => 125,
-            'size' => 10,
-            'color' => 'dark',
+            'x'    => 330,
+            'y'    => 268,
+            'maxW' => 240,
+            'size' => 18,
+            'color'=> 'dark',
             'bold' => true,
         ],
-
         'role' => [
-            'x' => 80,
-            'y' => 138,
-            'maxW' => 120,
-            'size' => 7,
-            'color' => 'gray',
+            'x'    => 380,
+            'y'    => 312,
+            'maxW' => 200,
+            'size' => 14,
+            'color'=> 'gray',
             'bold' => false,
         ],
-
-        /*
-        |--------------------------------------------------------------------------
-        | LEFT PANEL - SUBJEK
-        |--------------------------------------------------------------------------
-        */
-
         'subjek' => [
-            'x' => 79,
-            'y' => 178,
-            'maxW' => 125,
-            'size' => 8,
-            'color' => 'dark',
-            'bold' => true,
+            'x'    => 330,
+            'y'    => 422,
+            'maxW' => 240,
+            'size' => 16,
+            'color'=> 'dark',
+            'bold' => false,
         ],
-
-        /*
-        |--------------------------------------------------------------------------
-        | LEFT PANEL - PRIORITAS
-        |--------------------------------------------------------------------------
-        |
-        | Template sudah menyediakan pill kosong.
-        | Kita hanya mengisi teksnya.
-        |
-        */
-
         'prioritas' => [
-            'x' => 84,
-            'y' => 222,
-            'maxW' => 90,
-            'size' => 7,
-            'color' => 'priority',
+            'x'    => 330,
+            'y'    => 537,
+            'maxW' => 220,
+            'size' => 16,
+            'color'=> 'priority',
             'bold' => true,
         ],
-
-        /*
-        |--------------------------------------------------------------------------
-        | LEFT PANEL - WAKTU DIBUAT
-        |--------------------------------------------------------------------------
-        */
-
         'waktu_dibuat' => [
-            'x' => 80,
-            'y' => 268,
-            'maxW' => 125,
-            'size' => 7,
-            'color' => 'dark',
+            'x'    => 330,
+            'y'    => 651,
+            'maxW' => 240,
+            'size' => 15,
+            'color'=> 'dark',
             'bold' => false,
         ],
-
-        /*
-        |--------------------------------------------------------------------------
-        | LEFT PANEL - STATUS
-        |--------------------------------------------------------------------------
-        |
-        | Template sudah menyediakan pill kosong.
-        |
-        */
-
         'status' => [
-            'x' => 84,
-            'y' => 316,
-            'maxW' => 105,
-            'size' => 7,
-            'color' => 'dark',
-            'bold' => true,
-        ],
-
-        /*
-        |--------------------------------------------------------------------------
-        | RIGHT PANEL - DETAIL
-        |--------------------------------------------------------------------------
-        */
-
-        'detail' => [
-            'x' => 244,
-            'y' => 132,
-            'maxW' => 325,
-            'maxH' => 185,
-            'size' => 8,
-            'color' => 'dark',
+            'x'    => 330,
+            'y'    => 742,
+            'maxW' => 240,
+            'size' => 16,
+            'color'=> 'dark',
             'bold' => false,
-            'lineH' => 15,
+        ],
+        'detail' => [
+            'x'    => 570,
+            'y'    => 310,
+            'maxW' => 720,
+            'maxH' => 390,
+            'size' => 15,
+            'color'=> 'dark',
+            'bold' => false,
+            'lineH'=> 26,
             'wrap' => true,
         ],
-
-        /*
-        |--------------------------------------------------------------------------
-        | FOOTER TIME
-        |--------------------------------------------------------------------------
-        |
-        | Template footer memiliki:
-        |
-        | clock icon → dotted line → [TIME] → WIB
-        |
-        | Kita hanya mengisi bagian TIME.
-        |
-        */
-
         'footer_time' => [
-            'x' => 409,
-            'y' => 385,
-            'maxW' => 40,
-            'size' => 6,
-            'color' => 'navy',
+            'x'    => 1052,
+            'y'    => 726,
+            'maxW' => 280,
+            'size' => 15,
+            'color'=> 'white',
             'bold' => false,
         ],
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | COLORS
-    |--------------------------------------------------------------------------
-    */
-
+    // Palet warna teks
     private const COLORS = [
-
-        'navy' => [
-            0x10,
-            0x37,
-            0x6C,
-        ],
-
-        'dark' => [
-            0x1E,
-            0x29,
-            0x3B,
-        ],
-
-        'gray' => [
-            0x64,
-            0x74,
-            0x8B,
-        ],
-
-        'white' => [
-            0xFF,
-            0xFF,
-            0xFF,
-        ],
-
-        'red' => [
-            0xDC,
-            0x26,
-            0x26,
-        ],
-
-        'orange' => [
-            0xEA,
-            0x58,
-            0x0C,
-        ],
-
-        'amber' => [
-            0xD9,
-            0x77,
-            0x06,
-        ],
-
-        'green' => [
-            0x16,
-            0xA3,
-            0x4A,
-        ],
+        'navy'   => [0x10, 0x37, 0x6C],   // navy gelap
+        'dark'   => [0x1E, 0x29, 0x3B],   // slate-800
+        'gray'   => [0x64, 0x74, 0x8B],   // slate-500
+        'white'  => [0xFF, 0xFF, 0xFF],
+        'red'    => [0xDC, 0x26, 0x26],
+        'orange' => [0xEA, 0x58, 0x0C],
+        'amber'  => [0xD9, 0x77, 0x06],
+        'green'  => [0x16, 0xA3, 0x4A],
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | PATHS
-    |--------------------------------------------------------------------------
-    */
-
+    // Path template
     private string $templatePath;
 
-    /**
-     * Folder output:
-     *
-     * storage/app/public/helpdesk/
-     */
+    // Folder output (storage/app/public/helpdesk/)
     private string $outputDir = 'helpdesk';
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONSTRUCTOR
-    |--------------------------------------------------------------------------
-    */
 
     public function __construct()
     {
         $this->templatePath = public_path('images/card-laporan.png');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GENERATE
-    |--------------------------------------------------------------------------
-    */
-
     /**
      * Generate card untuk satu tiket.
-     *
-     * Return:
-     * helpdesk/{filename}.png
-     *
-     * atau null jika gagal.
+     * Kembalikan storage-relative path (helpdesk/{filename}.png) atau null jika gagal.
      */
     public function generate(SupportTicket $ticket): ?string
     {
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK TEMPLATE
-        |--------------------------------------------------------------------------
-        */
-
+        // ── Cek template ada ────────────────────────────────────────────────
         if (!file_exists($this->templatePath)) {
-
-            Log::error(
-                'HelpdeskCardGenerator: template tidak ditemukan',
-                [
-                    'path' => $this->templatePath,
-                ]
-            );
-
+            Log::error('HelpdeskCardGenerator: template tidak ditemukan', [
+                'path' => $this->templatePath,
+            ]);
             return null;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK GD
-        |--------------------------------------------------------------------------
-        */
-
+        // ── Cek GD tersedia ─────────────────────────────────────────────────
         if (!function_exists('imagecreatefrompng')) {
-
-            Log::error(
-                'HelpdeskCardGenerator: PHP GD extension tidak aktif'
-            );
-
+            Log::error('HelpdeskCardGenerator: PHP GD extension tidak aktif');
             return null;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | OUTPUT FILENAME
-        |--------------------------------------------------------------------------
-        */
-
-        $filename = 'helpdesk-'
-            . ($ticket->ticket_id ?: 'T' . $ticket->id)
-            . '.png';
-
-        $relPath = $this->outputDir . '/' . $filename;
-
-        /*
-        |--------------------------------------------------------------------------
-        | USE EXISTING IMAGE
-        |--------------------------------------------------------------------------
-        |
-        | Jangan generate ulang kalau file sudah tersedia.
-        |
-        */
+        // ── Jika sudah digenerate sebelumnya, kembalikan path lama ──────────
+        $filename  = 'helpdesk-' . ($ticket->ticket_id ?: 'T' . $ticket->id) . '.png';
+        $relPath   = $this->outputDir . '/' . $filename;
 
         if (Storage::disk('public')->exists($relPath)) {
             return $relPath;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | RENDER
-        |--------------------------------------------------------------------------
-        */
-
         try {
-
-            return $this->render(
-                $ticket,
-                $relPath
-            );
-
+            return $this->render($ticket, $relPath);
         } catch (\Throwable $e) {
-
-            Log::error(
-                'HelpdeskCardGenerator: gagal generate card',
-                [
-                    'ticket_id' => $ticket->id,
-                    'reason' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]
-            );
-
+            Log::error('HelpdeskCardGenerator: gagal generate card', [
+                'ticket_id' => $ticket->id,
+                'reason'    => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
+            ]);
             return null;
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | REGENERATE
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Hapus image lama lalu generate ulang.
+     * Generate ulang (hapus cache lama dan buat baru).
      */
     public function regenerate(SupportTicket $ticket): ?string
     {
-        $filename = 'helpdesk-'
-            . ($ticket->ticket_id ?: 'T' . $ticket->id)
-            . '.png';
-
-        $relPath = $this->outputDir . '/' . $filename;
+        $filename = 'helpdesk-' . ($ticket->ticket_id ?: 'T' . $ticket->id) . '.png';
+        $relPath  = $this->outputDir . '/' . $filename;
 
         if (Storage::disk('public')->exists($relPath)) {
-
-            Storage::disk('public')->delete(
-                $relPath
-            );
+            Storage::disk('public')->delete($relPath);
         }
 
         return $this->generate($ticket);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RENDER
-    |--------------------------------------------------------------------------
-    */
+    // ────────────────────────────────────────────────────────────────────────
+    // PRIVATE
+    // ────────────────────────────────────────────────────────────────────────
 
-    private function render(
-        SupportTicket $ticket,
-        string $relPath
-    ): ?string {
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOAD TEMPLATE
-        |--------------------------------------------------------------------------
-        */
-
-        $tmpImg = imagecreatefrompng(
-            $this->templatePath
-        );
-
+    private function render(SupportTicket $ticket, string $relPath): ?string
+    {
+        // Load template — handle both RGB and RGBA PNG
+        $tmpImg = imagecreatefrompng($this->templatePath);
         if (!$tmpImg) {
-
-            Log::error(
-                'HelpdeskCardGenerator: gagal membaca template PNG'
-            );
-
+            Log::error('HelpdeskCardGenerator: gagal membaca template PNG');
             return null;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DETECT TEMPLATE SIZE
-        |--------------------------------------------------------------------------
-        */
+        // Convert ke true-color canvas agar teks bisa di-render di atas dengan benar
+        $w = imagesx($tmpImg);
+        $h = imagesy($tmpImg);
+        $img = imagecreatetruecolor($w, $h);
+        imagealphablending($img, false);
+        imagesavealpha($img, true);
+        // Fill background putih (untuk template tanpa transparansi)
+        $white = imagecolorallocate($img, 255, 255, 255);
+        imagefill($img, 0, 0, $white);
+        imagealphablending($img, true);
+        imagecopy($img, $tmpImg, 0, 0, 0, 0, $w, $h);
+        imagedestroy($tmpImg);
 
-        $templateWidth = imagesx($tmpImg);
-        $templateHeight = imagesy($tmpImg);
-
-        /*
-        |--------------------------------------------------------------------------
-        | AUTOMATIC SCALE
-        |--------------------------------------------------------------------------
-        |
-        | Desain dibuat berdasarkan 612 × 408.
-        |
-        | Kalau actual template:
-        |
-        | 612 × 408
-        | scale = 1
-        |
-        | Kalau:
-        |
-        | 1224 × 816
-        | scale = 2
-        |
-        */
-
-        $scaleX = $templateWidth / self::BASE_WIDTH;
-        $scaleY = $templateHeight / self::BASE_HEIGHT;
-
-        /*
-        |--------------------------------------------------------------------------
-        | TRUE COLOR CANVAS
-        |--------------------------------------------------------------------------
-        */
-
-        $img = imagecreatetruecolor(
-            $templateWidth,
-            $templateHeight
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | ALPHA
-        |--------------------------------------------------------------------------
-        */
-
-        imagealphablending(
-            $img,
-            false
-        );
-
-        imagesavealpha(
-            $img,
-            true
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | WHITE BACKGROUND
-        |--------------------------------------------------------------------------
-        */
-
-        $white = imagecolorallocate(
-            $img,
-            255,
-            255,
-            255
-        );
-
-        imagefill(
-            $img,
-            0,
-            0,
-            $white
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | COPY TEMPLATE
-        |--------------------------------------------------------------------------
-        */
-
-        imagealphablending(
-            $img,
-            true
-        );
-
-        imagecopy(
-            $img,
-            $tmpImg,
-            0,
-            0,
-            0,
-            0,
-            $templateWidth,
-            $templateHeight
-        );
-
-        imagedestroy(
-            $tmpImg
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | FONT
-        |--------------------------------------------------------------------------
-        */
-
-        $fontDir = public_path('fonts');
-
+        // Load font (gunakan built-in GD font jika tidak ada TTF)
+        $fontDir  = public_path('fonts');
         $fontBold = $fontDir . '/Inter-Bold.ttf';
-        $fontReg = $fontDir . '/Inter-Regular.ttf';
+        $fontReg  = $fontDir . '/Inter-Regular.ttf';
 
-        $hasTTF =
-            function_exists('imagettftext')
-            && function_exists('imagettfbbox')
+        $hasTTF = function_exists('imagettftext')
             && file_exists($fontBold)
             && file_exists($fontReg);
 
-        /*
-        |--------------------------------------------------------------------------
-        | PREPARE DATA
-        |--------------------------------------------------------------------------
-        */
+        // Persiapan data
+        $data = $this->prepareData($ticket);
 
-        $data = $this->prepareData(
-            $ticket
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | RENDER DYNAMIC FIELDS
-        |--------------------------------------------------------------------------
-        */
-
+        // ── Tulis setiap field ───────────────────────────────────────────────
         foreach (self::POSITIONS as $field => $cfg) {
+            if (!isset($data[$field])) continue;
 
-            if (
-                !array_key_exists(
-                    $field,
-                    $data
-                )
-            ) {
-                continue;
-            }
-
-            $text = (string) $data[$field];
-
-            /*
-            |--------------------------------------------------------------------------
-            | SCALE POSITION
-            |--------------------------------------------------------------------------
-            */
-
-            $x = (int) round(
-                $cfg['x'] * $scaleX
-            );
-
-            $y = (int) round(
-                $cfg['y'] * $scaleY
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | SCALE WIDTH
-            |--------------------------------------------------------------------------
-            */
-
-            $maxW = isset($cfg['maxW'])
-                ? (int) round(
-                    $cfg['maxW'] * $scaleX
-                )
-                : 9999;
-
-            /*
-            |--------------------------------------------------------------------------
-            | SCALE HEIGHT
-            |--------------------------------------------------------------------------
-            */
-
-            $maxH = isset($cfg['maxH'])
-                ? (int) round(
-                    $cfg['maxH'] * $scaleY
-                )
-                : 9999;
-
-            /*
-            |--------------------------------------------------------------------------
-            | FONT SIZE
-            |--------------------------------------------------------------------------
-            */
-
-            $averageScale = (
-                $scaleX + $scaleY
-            ) / 2;
-
-            $size = max(
-                6,
-                (int) round(
-                    $cfg['size'] * $averageScale
-                )
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | LINE HEIGHT
-            |--------------------------------------------------------------------------
-            */
-
-            $lineH = isset($cfg['lineH'])
-                ? (int) round(
-                    $cfg['lineH'] * $scaleY
-                )
-                : (int) round(
-                    $size * 1.6
-                );
-
-            /*
-            |--------------------------------------------------------------------------
-            | COLOR
-            |--------------------------------------------------------------------------
-            */
-
-            $color = $this->resolveColor(
-                $img,
-                $cfg['color'] ?? 'dark',
-                $ticket->priority ?? 'medium'
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | TTF RENDERING
-            |--------------------------------------------------------------------------
-            */
+            $text  = (string) $data[$field];
+            $size  = $cfg['size'];
+            $bold  = $cfg['bold'] ?? false;
+            $color = $this->resolveColor($img, $cfg['color'], $ticket->priority ?? 'medium');
 
             if ($hasTTF) {
-
-                $font = (
-                    $cfg['bold'] ?? false
-                )
-                    ? $fontBold
-                    : $fontReg;
-
-                /*
-                |--------------------------------------------------------------------------
-                | MULTI-LINE DETAIL
-                |--------------------------------------------------------------------------
-                */
-
+                $font = $bold ? $fontBold : $fontReg;
                 if ($cfg['wrap'] ?? false) {
-
                     $this->drawWrappedText(
-                        $img,
-                        $text,
-                        $font,
-                        $size,
-                        $x,
-                        $y,
-                        $maxW,
-                        $maxH,
-                        $lineH,
+                        $img, $text, $font, $size,
+                        $cfg['x'], $cfg['y'],
+                        $cfg['maxW'], $cfg['maxH'] ?? 9999,
+                        $cfg['lineH'] ?? ($size * 1.6),
                         $color
                     );
-
-                    continue;
+                } else {
+                    $text = $this->truncateText($text, $font, $size, $cfg['maxW']);
+                    imagettftext($img, $size, 0, $cfg['x'], $cfg['y'], $color, $font, $text);
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | SINGLE LINE
-                |--------------------------------------------------------------------------
-                */
-
-                $text = $this->truncateText(
-                    $text,
-                    $font,
-                    $size,
-                    $maxW
-                );
-
-                imagettftext(
-                    $img,
-                    $size,
-                    0,
-                    $x,
-                    $y,
-                    $color,
-                    $font,
-                    $text
-                );
-
-                continue;
+            } else {
+                // Fallback GD bitmap font (ukuran 1-5)
+                $gdSize = max(1, min(5, (int) round($size / 4)));
+                $text   = $this->truncateBitmap($text, $gdSize, $cfg['maxW']);
+                imagestring($img, $gdSize, $cfg['x'], $cfg['y'] - 10, $text, $color);
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | FALLBACK GD BITMAP FONT
-            |--------------------------------------------------------------------------
-            */
-
-            $gdSize = max(
-                1,
-                min(
-                    5,
-                    (int) round($size / 4)
-                )
-            );
-
-            $text = $this->truncateBitmap(
-                $text,
-                $gdSize,
-                $maxW
-            );
-
-            imagestring(
-                $img,
-                $gdSize,
-                $x,
-                max(0, $y - 10),
-                $text,
-                $color
-            );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | SAVE OUTPUT DIRECTORY
-        |--------------------------------------------------------------------------
-        */
-
-        $dir = Storage::disk(
-            'public'
-        )->path(
-                $this->outputDir
-            );
-
+        // ── Simpan ke storage ─────────────────────────────────────────────
+        $dir = Storage::disk('public')->path($this->outputDir);
         if (!is_dir($dir)) {
-
-            mkdir(
-                $dir,
-                0755,
-                true
-            );
+            mkdir($dir, 0755, true);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | OUTPUT PATH
-        |--------------------------------------------------------------------------
-        */
-
-        $outPath = Storage::disk(
-            'public'
-        )->path(
-                $relPath
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | SAVE PNG
-        |--------------------------------------------------------------------------
-        */
-
-        $saved = imagepng(
-            $img,
-            $outPath,
-            9
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | CLEANUP
-        |--------------------------------------------------------------------------
-        */
-
-        imagedestroy(
-            $img
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | SAVE FAILED
-        |--------------------------------------------------------------------------
-        */
+        $outPath = Storage::disk('public')->path($relPath);
+        $saved   = imagepng($img, $outPath, 9);
+        imagedestroy($img);
 
         if (!$saved) {
-
-            Log::error(
-                'HelpdeskCardGenerator: gagal menyimpan PNG',
-                [
-                    'path' => $outPath,
-                ]
-            );
-
+            Log::error('HelpdeskCardGenerator: gagal menyimpan PNG', ['path' => $outPath]);
             return null;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | LOG SUCCESS
-        |--------------------------------------------------------------------------
-        */
-
-        Log::info(
-            'HelpdeskCardGenerator: card berhasil dibuat',
-            [
-                'ticket' => $ticket->id,
-                'path' => $relPath,
-                'width' => $templateWidth,
-                'height' => $templateHeight,
-            ]
-        );
+        Log::info('HelpdeskCardGenerator: card berhasil dibuat', [
+            'ticket'  => $ticket->id,
+            'path'    => $relPath,
+        ]);
 
         return $relPath;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | PREPARE DATA
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Siapkan semua data yang akan dirender.
+     * Siapkan data yang akan dirender dari SupportTicket.
      */
-    private function prepareData(
-        SupportTicket $ticket
-    ): array {
-
-        /*
-        |--------------------------------------------------------------------------
-        | USER
-        |--------------------------------------------------------------------------
-        */
-
-        $user = $ticket->user;
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRIORITY LABEL
-        |--------------------------------------------------------------------------
-        */
-
-        $priorityLabel =
-            SupportTicket::priorityLabels()[
-                $ticket->priority
-            ]['label']
-            ?? strtoupper(
-                $ticket->priority
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | STATUS LABEL
-        |--------------------------------------------------------------------------
-        */
-
-        $statusLabel =
-            SupportTicket::statusLabels()[
-                $ticket->status
-            ]['label']
-            ?? ucfirst(
-                $ticket->status
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | ROLE LABEL
-        |--------------------------------------------------------------------------
-        */
-
-        $roleLabel = match (
-        $user?->role ?? ''
-        ) {
-
-            'admin',
-            'operator'
-            => 'Operator',
-
-            'guru_piket'
-            => 'Guru Piket',
-
-            'guru'
-            => 'Guru',
-
-            default
-            => ucfirst(
-                $user?->role
-                ?? 'Pengguna'
-            ),
+    private function prepareData(SupportTicket $ticket): array
+    {
+        $user          = $ticket->user;
+        $priorityLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
+        $statusLabel   = SupportTicket::statusLabels()[$ticket->status]['label']   ?? ucfirst($ticket->status);
+        $roleLabel     = match($user?->role ?? '') {
+            'admin', 'operator' => 'Operator',
+            'guru_piket'        => 'Guru Piket',
+            'guru'              => 'Guru',
+            default             => ucfirst($user?->role ?? 'Pengguna'),
         };
 
-        /*
-        |--------------------------------------------------------------------------
-        | CREATED AT
-        |--------------------------------------------------------------------------
-        |
-        | Gunakan waktu tiket dibuat.
-        |
-        */
-
+        // Gunakan waktu dibuat tiket, bukan waktu sekarang
         $createdAt = $ticket->created_at
-            ? \Carbon\Carbon::parse(
-                $ticket->created_at
-            )->setTimezone(
-                    'Asia/Jakarta'
-                )
-            : now()->setTimezone(
-                'Asia/Jakarta'
-            );
+            ? \Carbon\Carbon::parse($ticket->created_at)->setTimezone('Asia/Jakarta')
+            : now()->setTimezone('Asia/Jakarta');
 
-        /*
-        |--------------------------------------------------------------------------
-        | TIME FORMAT
-        |--------------------------------------------------------------------------
-        |
-        | Kiri:
-        |
-        | 14 Agu 2026 • 16:46
-        |
-        | Footer:
-        |
-        | 16:46
-        |
-        */
+        // Format waktu: "14 Agustus 2026 • 16:46 WIB"
+        $waktu = $createdAt->locale('id')->isoFormat('D MMMM YYYY') . ' • ' . $createdAt->format('H:i') . ' WIB';
 
-        $waktu = $createdAt
-            ->locale('id')
-            ->isoFormat('D MMM YYYY')
-            . ' • '
-            . $createdAt->format('H:i');
-
-        $footerTime =
-            $createdAt->format('H:i');
-
-        /*
-        |--------------------------------------------------------------------------
-        | TICKET ID
-        |--------------------------------------------------------------------------
-        */
+        // Footer time: sama, format lengkap
+        $footerTime = $createdAt->locale('id')->isoFormat('D MMMM YYYY') . ' • ' . $createdAt->format('H:i') . ' WIB';
 
         $ticketId = $ticket->ticket_id
-            ?: 'HD-'
-            . $createdAt->format('md')
-            . '-'
-            . str_pad(
-                (string) $ticket->id,
-                3,
-                '0',
-                STR_PAD_LEFT
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | RETURN DATA
-        |--------------------------------------------------------------------------
-        */
+            ?? ('#' . str_pad($ticket->id, 6, '0', STR_PAD_LEFT));
 
         return [
-
-            'ticket_id' =>
-                $this->sanitize(
-                    $ticketId,
-                    100
-                ),
-
-            'pelapor' =>
-                $this->sanitize(
-                    $user?->name
-                    ?? 'Pengguna',
-                    100
-                ),
-
-            'role' =>
-                $this->sanitize(
-                    $roleLabel,
-                    50
-                ),
-
-            'subjek' =>
-                $this->sanitize(
-                    $ticket->title
-                    ?? 'Tanpa subjek',
-                    300
-                ),
-
-            'prioritas' =>
-                strtoupper(
-                    $this->sanitize(
-                        $priorityLabel,
-                        50
-                    )
-                ),
-
-            'waktu_dibuat' =>
-                $this->sanitize(
-                    $waktu,
-                    100
-                ),
-
-            'status' =>
-                $this->sanitize(
-                    $statusLabel,
-                    100
-                ),
-
-            'detail' =>
-                $this->sanitize(
-                    $ticket->description
-                    ?? '',
-                    2000
-                ),
-
-            'footer_time' =>
-                $this->sanitize(
-                    $footerTime,
-                    20
-                ),
+            'ticket_id'    => $ticketId,
+            'pelapor'      => $this->sanitize($user?->name ?? 'Pengguna'),
+            'role'         => $roleLabel,
+            'subjek'       => $this->sanitize($ticket->title),
+            'prioritas'    => strtoupper($priorityLabel),
+            'waktu_dibuat' => $waktu,
+            'status'       => $statusLabel,
+            'detail'       => $this->sanitize($ticket->description),
+            'footer_time'  => $footerTime,
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SANITIZE
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Sanitasi teks sebelum dirender ke image.
+     * Sanitize teks agar aman untuk dirender (hapus tag, strip HTML, batasi panjang).
      */
-    private function sanitize(
-        string $text,
-        int $maxLen = 2000
-    ): string {
-
-        /*
-        |--------------------------------------------------------------------------
-        | REMOVE HTML
-        |--------------------------------------------------------------------------
-        */
-
-        $text = strip_tags(
-            $text
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | DECODE HTML ENTITY
-        |--------------------------------------------------------------------------
-        */
-
-        $text = html_entity_decode(
-            $text,
-            ENT_QUOTES | ENT_HTML5,
-            'UTF-8'
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | REMOVE CONTROL CHARACTERS
-        |--------------------------------------------------------------------------
-        |
-        | Newline dan carriage return tetap dipertahankan.
-        |
-        */
-
-        $text = preg_replace(
-            '/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/',
-            '',
-            $text
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | NORMALIZE WHITESPACE
-        |--------------------------------------------------------------------------
-        */
-
-        $text = preg_replace(
-            '/[ \t]+/u',
-            ' ',
-            $text
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | TRIM
-        |--------------------------------------------------------------------------
-        */
-
-        $text = trim(
-            $text
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | LIMIT LENGTH
-        |--------------------------------------------------------------------------
-        */
-
-        return mb_substr(
-            $text,
-            0,
-            $maxLen,
-            'UTF-8'
-        );
+    private function sanitize(string $text, int $maxLen = 2000): string
+    {
+        $text = strip_tags($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // Hapus karakter kontrol kecuali newline
+        $text = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/', '', $text);
+        return mb_substr($text, 0, $maxLen);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RESOLVE COLOR
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Resolve warna teks.
+     * Resolve warna GD dari nama alias atau warna dinamis prioritas.
      */
-    private function resolveColor(
-        $img,
-        string $colorName,
-        string $priority
-    ): int {
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRIORITY COLOR
-        |--------------------------------------------------------------------------
-        */
-
+    private function resolveColor($img, string $colorName, string $priority): int
+    {
         if ($colorName === 'priority') {
-
-            $c = match (
-            strtolower($priority)
-            ) {
-
-                'critical',
-                'kritis'
-                => self::COLORS['red'],
-
-                'high',
-                'tinggi'
-                => self::COLORS['orange'],
-
-                'medium',
-                'normal'
-                => self::COLORS['amber'],
-
-                'low',
-                'rendah'
-                => self::COLORS['green'],
-
-                default
-                => self::COLORS['navy'],
+            $c = match($priority) {
+                'critical' => self::COLORS['red'],
+                'high'     => self::COLORS['orange'],
+                'medium'   => self::COLORS['amber'],
+                default    => self::COLORS['green'],
             };
-
         } else {
-
-            $c =
-                self::COLORS[$colorName]
-                ?? self::COLORS['dark'];
+            $c = self::COLORS[$colorName] ?? self::COLORS['dark'];
         }
 
-        return imagecolorallocate(
-            $img,
-            $c[0],
-            $c[1],
-            $c[2]
-        );
+        return imagecolorallocate($img, $c[0], $c[1], $c[2]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DRAW WRAPPED TEXT
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Render text multiline dengan word wrapping.
-     *
-     * Tidak akan keluar dari area detail.
+     * Gambar teks dengan word-wrap otomatis dalam area tertentu.
+     * Jika melebihi tinggi, potong dengan "...".
      */
     private function drawWrappedText(
-        $img,
-        string $text,
-        string $font,
-        float $size,
-        int $x,
-        int $y,
-        int $maxW,
-        int $maxH,
-        float $lineH,
-        int $color
+        $img, string $text, string $font, float $size,
+        int $x, int $y, int $maxW, int $maxH, float $lineH, int $color
     ): void {
+        $words   = preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $lines   = [];
+        $current = '';
 
-        /*
-        |--------------------------------------------------------------------------
-        | NORMALIZE NEWLINES
-        |--------------------------------------------------------------------------
-        */
+        foreach ($words as $word) {
+            $test = $current === '' ? $word : "$current $word";
+            $box  = imagettfbbox($size, 0, $font, $test);
+            $tw   = abs($box[4] - $box[0]);
 
-        $text = str_replace(
-            ["\r\n", "\r"],
-            "\n",
-            $text
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | SPLIT PARAGRAPH
-        |--------------------------------------------------------------------------
-        */
-
-        $paragraphs = preg_split(
-            "/\n/u",
-            $text
-        );
-
-        $lines = [];
-
-        /*
-        |--------------------------------------------------------------------------
-        | BUILD LINES
-        |--------------------------------------------------------------------------
-        */
-
-        foreach (
-            $paragraphs as $paragraph
-        ) {
-
-            $paragraph = trim(
-                $paragraph
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | EMPTY LINE
-            |--------------------------------------------------------------------------
-            */
-
-            if ($paragraph === '') {
-
-                $lines[] = '';
-
-                continue;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | SPLIT WORDS
-            |--------------------------------------------------------------------------
-            */
-
-            $words = preg_split(
-                '/\s+/u',
-                $paragraph,
-                -1,
-                PREG_SPLIT_NO_EMPTY
-            );
-
-            $current = '';
-
-            /*
-            |--------------------------------------------------------------------------
-            | WORD WRAP
-            |--------------------------------------------------------------------------
-            */
-
-            foreach (
-                $words as $word
-            ) {
-
-                $test =
-                    $current === ''
-                    ? $word
-                    : $current . ' ' . $word;
-
-                $box = imagettfbbox(
-                    $size,
-                    0,
-                    $font,
-                    $test
-                );
-
-                $tw = abs(
-                    $box[4] - $box[0]
-                );
-
-                /*
-                |--------------------------------------------------------------------------
-                | NEW LINE
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    $tw > $maxW
-                    && $current !== ''
-                ) {
-
-                    $lines[] =
-                        $current;
-
-                    $current =
-                        $word;
-
-                    continue;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | WORD ITSELF TOO LONG
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    $tw > $maxW
-                    && $current === ''
-                ) {
-
-                    $lines[] =
-                        $this->fitLongWord(
-                            $word,
-                            $font,
-                            $size,
-                            $maxW
-                        );
-
-                    $current = '';
-
-                    continue;
-                }
-
-                $current =
-                    $test;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | FINAL CURRENT LINE
-            |--------------------------------------------------------------------------
-            */
-
-            if ($current !== '') {
-
-                $lines[] =
-                    $current;
+            if ($tw > $maxW && $current !== '') {
+                $lines[]  = $current;
+                $current  = $word;
+            } else {
+                $current = $test;
             }
         }
+        if ($current !== '') $lines[] = $current;
 
-        /*
-        |--------------------------------------------------------------------------
-        | MAX LINES
-        |--------------------------------------------------------------------------
-        */
-
-        $maxLines = max(
-            1,
-            (int) floor(
-                $maxH / $lineH
-            )
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | TRUNCATE IF TOO MANY LINES
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            count($lines)
-            > $maxLines
-        ) {
-
-            $lines = array_slice(
-                $lines,
-                0,
-                $maxLines
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | ADD ELLIPSIS
-            |--------------------------------------------------------------------------
-            */
-
-            $lastIndex =
-                $maxLines - 1;
-
-            $last =
-                $lines[$lastIndex];
-
-            $lines[$lastIndex] =
-                $this->fitEllipsis(
-                    $last,
-                    $font,
-                    $size,
-                    $maxW
-                );
+        // Hitung berapa baris yang muat
+        $maxLines = (int) floor($maxH / $lineH);
+        if (count($lines) > $maxLines) {
+            $lines = array_slice($lines, 0, $maxLines);
+            // Tambah "..." di akhir baris terakhir
+            $last  = $lines[$maxLines - 1];
+            while ($last !== '' && ($tw = abs(
+                (function() use ($font, $size, $last) {
+                    $b = imagettfbbox($size, 0, $font, $last . '...');
+                    return abs($b[4] - $b[0]);
+                })()
+            )) > $maxW) {
+                $last = mb_substr($last, 0, -1, 'UTF-8');
+            }
+            $lines[$maxLines - 1] = $last . '...';
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | DRAW LINES
-        |--------------------------------------------------------------------------
-        */
 
         $curY = $y;
-
-        foreach (
-            $lines as $line
-        ) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | STOP IF OUTSIDE AREA
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                ($curY - $y)
-                > $maxH
-            ) {
-                break;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | EMPTY LINE
-            |--------------------------------------------------------------------------
-            */
-
-            if ($line === '') {
-
-                $curY += $lineH;
-
-                continue;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | DRAW
-            |--------------------------------------------------------------------------
-            */
-
-            imagettftext(
-                $img,
-                $size,
-                0,
-                $x,
-                (int) $curY,
-                $color,
-                $font,
-                $line
-            );
-
+        foreach ($lines as $line) {
+            imagettftext($img, $size, 0, $x, (int) $curY, $color, $font, $line);
             $curY += $lineH;
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | FIT LONG WORD
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Memotong kata yang sendiri lebih panjang dari area.
+     * Truncate single-line text agar tidak melebihi maxW pixel.
      */
-    private function fitLongWord(
-        string $text,
-        string $font,
-        float $size,
-        int $maxW
-    ): string {
+    private function truncateText(string $text, string $font, float $size, int $maxW): string
+    {
+        $box = imagettfbbox($size, 0, $font, $text);
+        if (abs($box[4] - $box[0]) <= $maxW) return $text;
 
-        $result = '';
-
-        $length = mb_strlen(
-            $text,
-            'UTF-8'
-        );
-
-        for (
-            $i = 0;
-            $i < $length;
-            $i++
-        ) {
-
-            $char =
-                mb_substr(
-                    $text,
-                    $i,
-                    1,
-                    'UTF-8'
-                );
-
-            $test =
-                $result . $char;
-
-            $box = imagettfbbox(
-                $size,
-                0,
-                $font,
-                $test
-            );
-
-            $width = abs(
-                $box[4] - $box[0]
-            );
-
-            if ($width > $maxW) {
-                break;
-            }
-
-            $result = $test;
-        }
-
-        return $result !== ''
-            ? $result
-            : '...';
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | FIT ELLIPSIS
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Pastikan "..." juga tetap berada dalam max width.
-     */
-    private function fitEllipsis(
-        string $text,
-        string $font,
-        float $size,
-        int $maxW
-    ): string {
-
-        $ellipsis = '...';
-
-        /*
-        |--------------------------------------------------------------------------
-        | ALREADY FIT
-        |--------------------------------------------------------------------------
-        */
-
-        $box = imagettfbbox(
-            $size,
-            0,
-            $font,
-            $text . $ellipsis
-        );
-
-        if (
-            abs(
-                $box[4] - $box[0]
-            ) <= $maxW
-        ) {
-
-            return $text . $ellipsis;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | REMOVE CHARACTER UNTIL FIT
-        |--------------------------------------------------------------------------
-        */
-
-        while (
-            mb_strlen(
-                $text,
-                'UTF-8'
-            ) > 0
-        ) {
-
-            $text =
-                mb_substr(
-                    $text,
-                    0,
-                    -1,
-                    'UTF-8'
-                );
-
-            $candidate =
-                rtrim($text)
-                . $ellipsis;
-
-            $box = imagettfbbox(
-                $size,
-                0,
-                $font,
-                $candidate
-            );
-
-            if (
-                abs(
-                    $box[4] - $box[0]
-                ) <= $maxW
-            ) {
-
-                return $candidate;
+        while (mb_strlen($text, 'UTF-8') > 0) {
+            $text = mb_substr($text, 0, -1, 'UTF-8');
+            $box  = imagettfbbox($size, 0, $font, $text . '...');
+            if (abs($box[4] - $box[0]) <= $maxW) {
+                return $text . '...';
             }
         }
-
-        return $ellipsis;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | TRUNCATE SINGLE LINE
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Truncate text satu baris.
-     */
-    private function truncateText(
-        string $text,
-        string $font,
-        float $size,
-        int $maxW
-    ): string {
-
-        /*
-        |--------------------------------------------------------------------------
-        | EMPTY
-        |--------------------------------------------------------------------------
-        */
-
-        if ($text === '') {
-            return '';
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK WIDTH
-        |--------------------------------------------------------------------------
-        */
-
-        $box = imagettfbbox(
-            $size,
-            0,
-            $font,
-            $text
-        );
-
-        $width = abs(
-            $box[4] - $box[0]
-        );
-
-        if ($width <= $maxW) {
-            return $text;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | TRUNCATE
-        |--------------------------------------------------------------------------
-        */
-
-        while (
-            mb_strlen(
-                $text,
-                'UTF-8'
-            ) > 0
-        ) {
-
-            $text =
-                mb_substr(
-                    $text,
-                    0,
-                    -1,
-                    'UTF-8'
-                );
-
-            $candidate =
-                rtrim($text)
-                . '...';
-
-            $box = imagettfbbox(
-                $size,
-                0,
-                $font,
-                $candidate
-            );
-
-            $width = abs(
-                $box[4] - $box[0]
-            );
-
-            if ($width <= $maxW) {
-                return $candidate;
-            }
-        }
-
         return '...';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | TRUNCATE BITMAP
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Fallback ketika font TTF tidak tersedia.
+     * Truncate untuk bitmap font GD (perkiraan lebar per karakter).
      */
-    private function truncateBitmap(
-        string $text,
-        int $gdSize,
-        int $maxW
-    ): string {
-
-        /*
-        |--------------------------------------------------------------------------
-        | APPROXIMATE CHARACTER WIDTH
-        |--------------------------------------------------------------------------
-        */
-
-        $charW = [
-            1 => 6,
-            2 => 7,
-            3 => 8,
-            4 => 9,
-            5 => 10,
-        ][$gdSize] ?? 8;
-
-        /*
-        |--------------------------------------------------------------------------
-        | MAX CHARACTERS
-        |--------------------------------------------------------------------------
-        */
-
-        $max =
-            max(
-                3,
-                (int) floor(
-                    $maxW / $charW
-                )
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | ALREADY FIT
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            mb_strlen(
-                $text,
-                'UTF-8'
-            ) <= $max
-        ) {
-
-            return $text;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | TRUNCATE
-        |--------------------------------------------------------------------------
-        */
-
-        return mb_substr(
-            $text,
-            0,
-            max(1, $max - 3),
-            'UTF-8'
-        ) . '...';
+    private function truncateBitmap(string $text, int $gdSize, int $maxW): string
+    {
+        $charW = [1=>6, 2=>7, 3=>8, 4=>9, 5=>10][$gdSize] ?? 8;
+        $max   = (int) floor($maxW / $charW);
+        if (mb_strlen($text, 'UTF-8') <= $max) return $text;
+        return mb_substr($text, 0, $max - 3, 'UTF-8') . '...';
     }
 }
