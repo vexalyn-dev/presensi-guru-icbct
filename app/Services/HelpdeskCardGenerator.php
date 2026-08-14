@@ -17,10 +17,10 @@ class HelpdeskCardGenerator
     // Ukuran template asli: 666 × 375 px (landscape)
     private const POSITIONS = [
         'ticket_id' => [
-            'x'    => 580,
-            'y'    => 44,
-            'maxW' => 75,
-            'size' => 9,
+            'x'    => 590,
+            'y'    => 56,
+            'maxW' => 115,
+            'size' => 12,
             'color'=> 'navy',
             'bold' => true,
         ],
@@ -76,11 +76,11 @@ class HelpdeskCardGenerator
             'wrap' => true,
         ],
         'footer_time' => [
-            'x'    => 548,
-            'y'    => 362,
-            'maxW' => 50,
+            'x'    => 570,
+            'y'    => 368,
+            'maxW' => 80,
             'size' => 8,
-            'color'=> 'dark',
+            'color'=> 'white',
             'bold' => true,
         ],
     ];
@@ -269,7 +269,7 @@ class HelpdeskCardGenerator
             ? \Carbon\Carbon::parse($ticket->created_at)->setTimezone('Asia/Jakarta')
             : now()->setTimezone('Asia/Jakarta');
 
-        $waktu = $createdAt->locale('id')->isoFormat('D MMMM YYYY, HH:mm') . ' WIB';
+        $waktu = $createdAt->locale('id')->isoFormat('D MMMM YYYY, HH:mm');
 
         $ticketId = $ticket->ticket_id
             ?? ('#' . str_pad($ticket->id, 6, '0', STR_PAD_LEFT));
@@ -282,7 +282,7 @@ class HelpdeskCardGenerator
             'waktu_dibuat' => $waktu,
             'status'       => $statusLabel,
             'detail'       => $this->sanitize($ticket->description),
-            'footer_time'  => $createdAt->format('H:i') . ' WIB',
+            'footer_time'  => $createdAt->format('H:i') . ' WIB',   // tetap WIB di footer bar
         ];
     }
 
