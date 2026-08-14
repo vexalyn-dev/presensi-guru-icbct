@@ -334,8 +334,21 @@
         </div>
 
         @if($teachers->hasPages())
-            <div class="p-4 border-t border-slate-200 dark:border-slate-700">
-                {{ $teachers->links() }}
+            <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+                <nav class="flex items-center gap-1">
+                    @foreach ($teachers->linkCollection() as $link)
+                        @if ($link['url'])
+                            <a href="{{ $link['url'] }}"
+                               class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $link['active'] ? 'bg-navy-800 text-white dark:bg-gold-500 dark:text-navy-900' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                                {!! $link['label'] !!}
+                            </a>
+                        @else
+                            <span class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed">
+                                {!! $link['label'] !!}
+                            </span>
+                        @endif
+                    @endforeach
+                </nav>
             </div>
         @endif
     </div>

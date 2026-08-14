@@ -144,45 +144,68 @@ class SupportController extends Controller
                 ->with('error', 'Laporan gagal disimpan. Hubungi admin.');
         }
 
-        // Kirim ke GitHub Issues
-        $github = new GitHubService();
-        $result = $github->createIssue($ticket);
+        $waUrl = null;
 
-        if ($result['success']) {
-            $ticket->update(['github_issue_url' => $result['issue_url']]);
-        }
+        // Jika tipe 'question', lempar langsung ke WhatsApp dan JANGAN hubungkan ke GitHub & ClickUp
+        if ($type === 'question') {
+            $rawPhone = config('services.whatsapp.support_number', env('SUPPORT_WA_NUMBER', '6281234567890'));
+            $phone = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$rawPhone));
 
-        // Kirim ke ClickUp
-        $clickup       = new ClickUpService();
-        $clickupResult = $clickup->createTask($ticket);
+            $user = auth()->user();
+            $prioLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? ucfirst($ticket->priority);
 
-        if ($clickupResult['success'] && $clickupResult['task_url']) {
-            try {
-                $ticket->update(['clickup_task_url' => $clickupResult['task_url']]);
-            } catch (\Throwable $e) {
-                // Kolom belum ada (migration belum jalan) — skip saja, tidak error
-                \Log::info('ClickUp task created but clickup_task_url column not found yet: ' . $clickupResult['task_url']);
+            $waText  = "*[PERTANYAAN PUSAT BANTUAN]*\n\n";
+            $waText .= "👤 *Dari:* " . ($user->name ?? 'Pengguna') . " (" . ucfirst($user->role ?? 'User') . ")\n";
+            $waText .= "📌 *Judul:* " . $validated['title'] . "\n";
+            $waText .= "⚡ *Prioritas:* " . $prioLabel . "\n\n";
+            $waText .= "💬 *Pertanyaan / Detail:*\n" . $validated['description'];
+
+            $waUrl = "https://wa.me/{$phone}?text=" . urlencode($waText);
+        } else {
+            // Kirim ke GitHub Issues
+            $github = new GitHubService();
+            $result = $github->createIssue($ticket);
+
+            if ($result['success']) {
+                $ticket->update(['github_issue_url' => $result['issue_url']]);
+            }
+
+            // Kirim ke ClickUp
+            $clickup       = new ClickUpService();
+            $clickupResult = $clickup->createTask($ticket);
+
+            if ($clickupResult['success'] && $clickupResult['task_url']) {
+                try {
+                    $ticket->update(['clickup_task_url' => $clickupResult['task_url']]);
+                } catch (\Throwable $e) {
+                    // Kolom belum ada (migration belum jalan) — skip saja, tidak error
+                    \Log::info('ClickUp task created but clickup_task_url column not found yet: ' . $clickupResult['task_url']);
+                }
             }
         }
 
         // Kirim notifikasi ke semua admin & guru_piket
         $this->notifyAdmins($ticket);
 
-        // Selalu sukses (data sudah tersimpan lokal, GitHub & ClickUp best-effort)
-        $links = [];
-        if ($result['issue_url'])             $links[] = 'GitHub: ' . $result['issue_url'];
-        if ($clickupResult['task_url'] ?? '') $links[] = 'ClickUp: ' . $clickupResult['task_url'];
-
-        $successMsg = '✅ Laporan berhasil dikirim! ID lokal: #' . $ticket->id
-                    . (!empty($links) ? ' · ' . implode(' · ', $links) : '');
-
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success'  => true,
-                'message'  => '✅ Laporan berhasil dikirim!',
+                'message'  => $type === 'question' ? '✅ Pertanyaan tersimpan! Mengalihkan ke WhatsApp...' : '✅ Laporan berhasil dikirim!',
                 'redirect' => $this->supportRoute('history'),
+                'wa_url'   => $waUrl,
             ]);
         }
+
+        if ($type === 'question' && $waUrl) {
+            return redirect()->away($waUrl);
+        }
+
+        $links = [];
+        if (isset($result) && !empty($result['issue_url']))             $links[] = 'GitHub: ' . $result['issue_url'];
+        if (isset($clickupResult) && !empty($clickupResult['task_url'])) $links[] = 'ClickUp: ' . $clickupResult['task_url'];
+
+        $successMsg = '✅ Laporan berhasil dikirim! ID lokal: #' . $ticket->id
+                    . (!empty($links) ? ' · ' . implode(' · ', $links) : '');
 
         return redirect()->to($this->supportRoute('history'))->with('success', $successMsg);
     }

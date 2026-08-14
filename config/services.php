@@ -46,4 +46,8 @@ return [
         'list_id'   => env('CLICKUP_LIST_ID', ''),
         'enabled'   => env('CLICKUP_ENABLED', false),
     ],
+
+    'whatsapp' => [
+        'support_number' => env('SUPPORT_WA_NUMBER', '6281234567890'),
+    ],
 ];

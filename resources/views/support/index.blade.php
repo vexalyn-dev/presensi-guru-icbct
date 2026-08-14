@@ -1,4 +1,4 @@
-﻿@extends(activeLayout())
+@extends(activeLayout())
 @section('page-title', 'Pusat Bantuan')
 @php
     $user = auth()->user();
@@ -98,6 +98,17 @@
             <input type="hidden" name="meta_language"   id="meta_language">
             <input type="hidden" name="meta_url"        id="meta_url">
             <input type="hidden" name="meta_user_agent" id="meta_user_agent">
+
+            {{-- WA Direct Notice for Pertanyaan --}}
+            <div id="wa-notice" class="hidden p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-3 text-sm text-green-800 dark:text-green-300 font-medium">
+                <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="message-square" class="w-4 h-4 text-green-600 dark:text-green-400"></i>
+                </div>
+                <div>
+                    <p class="font-bold">Diteruskan Langsung ke WhatsApp</p>
+                    <p class="text-xs text-green-700 dark:text-green-400 mt-0.5">Pertanyaan kamu akan langsung diteruskan ke WhatsApp Developer (tanpa terhubung ke ClickUp & GitHub).</p>
+                </div>
+            </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div class="sm:col-span-2">
@@ -458,9 +469,12 @@ function setType(t) {
     var showId = t === 'feature' ? 'feature-fields' : t === 'maintenance' ? 'maintenance-fields' : t === 'bug' ? 'bug-fields' : null;
     if (showId) document.getElementById(showId).classList.remove('hidden');
 
-    // Show/hide category
+    // Show/hide category & WA notice
     var catField = document.getElementById('category-field');
     var catInput = document.getElementById('category-input');
+    var waNotice = document.getElementById('wa-notice');
+    var submitBtn = document.getElementById('submit-btn');
+
     if (t === 'bug') {
         catField.classList.remove('hidden');
     } else {
@@ -468,11 +482,26 @@ function setType(t) {
         if (catInput) catInput.value = '';
     }
 
+    if (t === 'question') {
+        if (waNotice) waNotice.classList.remove('hidden');
+        if (submitBtn) {
+            submitBtn.className = 'inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95';
+            submitBtn.innerHTML = '<i data-lucide="message-square" class="w-4 h-4"></i> Tanya via WhatsApp';
+        }
+    } else {
+        if (waNotice) waNotice.classList.add('hidden');
+        if (submitBtn) {
+            submitBtn.className = 'inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95';
+            submitBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Kirim Laporan';
+        }
+    }
+
     // Update placeholders
     var titles = { bug:'Mis: Tombol simpan tidak berfungsi...', feature:'Mis: Fitur export laporan ke PDF...', maintenance:'Mis: Pembersihan database mingguan...', question:'Mis: Cara mengatur jadwal mengajar?' };
     var descs  = { bug:'Jelaskan bug yang terjadi secara detail...', feature:'Jelaskan fitur yang Anda inginkan...', maintenance:'Jelaskan kebutuhan maintenance...', question:'Tulis pertanyaan Anda di sini...' };
     document.getElementById('title-input').placeholder = titles[t] || 'Judul laporan...';
     document.getElementById('desc-input').placeholder  = descs[t]  || 'Deskripsi...';
+    if (window.lucide) lucide.createIcons();
 }
 
 function handleSubmit() {
@@ -502,6 +531,9 @@ function handleSubmit() {
         if (ct.includes('application/json')) {
             return res.json().then(function(data) {
                 if (data.success) {
+                    if (data.wa_url) {
+                        window.open(data.wa_url, '_blank');
+                    }
                     showSupportOverlay('success', data.message || 'Laporan berhasil dikirim!', data.redirect || null);
                 } else {
                     showSupportOverlay('error', data.message || 'Gagal mengirim laporan.');
