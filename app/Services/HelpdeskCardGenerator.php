@@ -17,66 +17,58 @@ class HelpdeskCardGenerator
     // Ukuran template asli: 666 × 375 px (landscape)
     private const POSITIONS = [
         'ticket_id' => [
-            'x'    => 470,
-            'y'    => 45,
-            'maxW' => 160,
-            'size' => 11,
+            'x'    => 580,
+            'y'    => 44,
+            'maxW' => 75,
+            'size' => 9,
             'color'=> 'navy',
             'bold' => true,
         ],
         'pelapor' => [
             'x'    => 82,
             'y'    => 128,
-            'maxW' => 115,
+            'maxW' => 130,
             'size' => 10,
             'color'=> 'dark',
             'bold' => true,
         ],
-        'role' => [
-            'x'    => 82,
-            'y'    => 143,
-            'maxW' => 115,
-            'size' => 8,
-            'color'=> 'gray',
-            'bold' => false,
-        ],
         'subjek' => [
             'x'    => 82,
-            'y'    => 178,
-            'maxW' => 115,
+            'y'    => 174,
+            'maxW' => 130,
             'size' => 9,
             'color'=> 'dark',
             'bold' => false,
         ],
         'prioritas' => [
             'x'    => 82,
-            'y'    => 224,
-            'maxW' => 100,
+            'y'    => 220,
+            'maxW' => 130,
             'size' => 9,
             'color'=> 'priority',
             'bold' => true,
         ],
         'waktu_dibuat' => [
             'x'    => 82,
-            'y'    => 268,
-            'maxW' => 115,
+            'y'    => 266,
+            'maxW' => 130,
             'size' => 8,
             'color'=> 'dark',
             'bold' => false,
         ],
         'status' => [
             'x'    => 82,
-            'y'    => 313,
-            'maxW' => 115,
+            'y'    => 312,
+            'maxW' => 130,
             'size' => 9,
             'color'=> 'dark',
             'bold' => false,
         ],
         'detail' => [
-            'x'    => 208,
-            'y'    => 125,
-            'maxW' => 440,
-            'maxH' => 185,
+            'x'    => 236,
+            'y'    => 145,
+            'maxW' => 405,
+            'maxH' => 175,
             'size' => 9,
             'color'=> 'dark',
             'bold' => false,
@@ -84,12 +76,12 @@ class HelpdeskCardGenerator
             'wrap' => true,
         ],
         'footer_time' => [
-            'x'    => 318,
-            'y'    => 360,
-            'maxW' => 100,
+            'x'    => 548,
+            'y'    => 362,
+            'maxW' => 50,
             'size' => 8,
-            'color'=> 'white',
-            'bold' => false,
+            'color'=> 'dark',
+            'bold' => true,
         ],
     ];
 
@@ -271,16 +263,13 @@ class HelpdeskCardGenerator
         $user          = $ticket->user;
         $priorityLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
         $statusLabel   = SupportTicket::statusLabels()[$ticket->status]['label']   ?? ucfirst($ticket->status);
-        $roleLabel     = match($user?->role ?? '') {
-            'admin', 'operator' => 'Operator',
-            'guru_piket'        => 'Guru Piket',
-            'guru'              => 'Guru',
-            default             => ucfirst($user?->role ?? 'Pengguna'),
-        };
 
-        $waktu = now()->setTimezone('Asia/Jakarta')
-                      ->locale('id')
-                      ->isoFormat('D MMMM YYYY • HH:mm') . ' WIB';
+        // Gunakan waktu dibuat tiket, bukan waktu sekarang
+        $createdAt = $ticket->created_at
+            ? \Carbon\Carbon::parse($ticket->created_at)->setTimezone('Asia/Jakarta')
+            : now()->setTimezone('Asia/Jakarta');
+
+        $waktu = $createdAt->locale('id')->isoFormat('D MMMM YYYY, HH:mm') . ' WIB';
 
         $ticketId = $ticket->ticket_id
             ?? ('#' . str_pad($ticket->id, 6, '0', STR_PAD_LEFT));
@@ -288,13 +277,12 @@ class HelpdeskCardGenerator
         return [
             'ticket_id'    => $ticketId,
             'pelapor'      => $this->sanitize($user?->name ?? 'Pengguna'),
-            'role'         => $roleLabel,
             'subjek'       => $this->sanitize($ticket->title),
             'prioritas'    => strtoupper($priorityLabel),
             'waktu_dibuat' => $waktu,
             'status'       => $statusLabel,
             'detail'       => $this->sanitize($ticket->description),
-            'footer_time'  => now()->setTimezone('Asia/Jakarta')->format('H:i') . ' WIB',
+            'footer_time'  => $createdAt->format('H:i') . ' WIB',
         ];
     }
 
