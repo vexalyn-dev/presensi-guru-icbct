@@ -537,6 +537,10 @@ class ClassAttendanceController extends Controller
         $this->logScan($user, $classroom, 'in', 'success',
             "Scan masuk di {$classroom->name} untuk kelas {$selectedClassroom->name} jam ke-{$request->period}", $request);
 
+        // Auto-create presensi harian jika belum ada
+        $isLateShared = $now->gt(Carbon::createFromTime(8, 0));
+        $this->autoCreateDailyAttendance($user, $now, $isLateShared, $request);
+
         NotificationHelper::send(
             $user,
             'class_attendance',
@@ -702,6 +706,9 @@ class ClassAttendanceController extends Controller
                 ]);
             } catch (\Exception $e) { Log::warning('ActivityLog scanIn failed: ' . $e->getMessage()); }
 
+            // Auto-create presensi harian jika belum ada (scan kelas pertama = absen harian)
+            $this->autoCreateDailyAttendance($user, $now, $isLate, $request);
+
             return [
                 'success' => true,
                 'message' => "✅ Scan masuk berhasil di kelas {$scheduleClassroomName}",
@@ -795,6 +802,47 @@ class ClassAttendanceController extends Controller
         }
 
         return ['success' => false, 'message' => 'Mode tidak valid.'];
+    }
+
+    /**
+     * Auto-create presensi harian saat guru scan kelas pertama kali hari ini.
+     * Hanya buat jika belum ada attendance hari ini atau belum check_in.
+     */
+    private function autoCreateDailyAttendance(User $user, Carbon $now, bool $isLate, Request $request): void
+    {
+        try {
+            $today = $now->toDateString();
+
+            $daily = \App\Models\Attendance::firstOrCreate(
+                ['user_id' => $user->id, 'date' => $today],
+                ['status' => 'Hadir']
+            );
+
+            // Hanya isi check_in jika belum ada
+            if (!$daily->check_in) {
+                $startTimeStr = \App\Models\Setting::get('attendance_start_time', '06:30');
+                $graceMinutes = (int) \App\Models\Setting::get('attendance_late_grace_period', 5);
+                try {
+                    $lateThreshold = Carbon::createFromFormat('H:i', $startTimeStr)->addMinutes($graceMinutes);
+                    $isLateDaily   = $now->format('H:i') > $lateThreshold->format('H:i');
+                } catch (\Throwable $e) {
+                    $isLateDaily = $isLate;
+                }
+
+                $daily->update([
+                    'check_in'           => $now->format('H:i:s'),
+                    'status'             => $isLateDaily ? 'Terlambat' : 'Hadir',
+                    'check_in_latitude'  => $request->input('latitude'),
+                    'check_in_longitude' => $request->input('longitude'),
+                    'scan_method'        => 'auto_class_scan',
+                    'notes'              => 'Otomatis dari scan presensi kelas',
+                ]);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('autoCreateDailyAttendance failed: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+            ]);
+        }
     }
 
     /**
