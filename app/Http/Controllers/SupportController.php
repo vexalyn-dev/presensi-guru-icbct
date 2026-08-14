@@ -172,7 +172,72 @@ class SupportController extends Controller
         // Kirim notifikasi ke semua admin & guru_piket
         $this->notifyAdmins($ticket);
 
-        // Kirim notifikasi ke admin via Fonnte (gambar kartu atau teks fallback)
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success'      => true,
+                'message'      => 'Laporan berhasil disimpan.',
+                'ticket_id'    => $ticket->id,
+                'ticket_code'  => $ticket->ticket_id ?? ('#' . str_pad($ticket->id, 6, '0', STR_PAD_LEFT)),
+                'created_at'   => $ticket->created_at ? $ticket->created_at->setTimezone('Asia/Jakarta')->locale('id')->isoFormat('D MMMM YYYY • HH:mm') . ' WIB' : now()->setTimezone('Asia/Jakarta')->locale('id')->isoFormat('D MMMM YYYY • HH:mm') . ' WIB',
+                'status'       => SupportTicket::statusLabels()[$ticket->status]['label'] ?? ucfirst($ticket->status),
+                'priority'     => SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority),
+                'type'         => SupportTicket::typeLabels()[$ticket->type]['label'] ?? ucfirst($ticket->type),
+                'user_name'    => $ticket->user->name ?? 'Pengguna',
+                'user_role'    => match($ticket->user->role ?? '') {
+                    'admin', 'operator' => 'Operator',
+                    'guru_piket'        => 'Guru Piket',
+                    'guru'              => 'Guru',
+                    default             => ucfirst($ticket->user->role ?? 'Pengguna'),
+                },
+                'title'        => $ticket->title,
+                'description'  => $ticket->description,
+                'redirect'     => $this->supportRoute('history'),
+            ]);
+        }
+
+        // Fallback non-AJAX: Kirim notifikasi WhatsApp via Fonnte langsung (text/GD fallback)
+        $this->notifyFonnte($ticket);
+
+        $links = [];
+        if (isset($result) && !empty($result['issue_url']))             $links[] = 'GitHub: ' . $result['issue_url'];
+        if (isset($clickupResult) && !empty($clickupResult['task_url'])) $links[] = 'ClickUp: ' . $clickupResult['task_url'];
+
+        $successMsg = '✅ Laporan berhasil dikirim! ID lokal: #' . $ticket->id
+                    . (!empty($links) ? ' · ' . implode(' · ', $links) : '');
+
+        return redirect()->to($this->supportRoute('history'))->with('success', $successMsg);
+    }
+
+    /** Upload generated ticket card image from frontend & trigger Fonnte notification */
+    public function uploadCard(Request $request, SupportTicket $ticket)
+    {
+        $cardPath = null;
+        if ($request->hasFile('card_image')) {
+            try {
+                $file = $request->file('card_image');
+                $filename = 'helpdesk-T' . $ticket->id . '-' . time() . '.png';
+                $path = $file->storeAs('helpdesk', $filename, 'public');
+                if ($path) {
+                    $cardPath = $path;
+                    $ticket->update(['card_image_path' => $cardPath]);
+                }
+            } catch (\Throwable $e) {
+                \Log::error('uploadCard failed to save image', ['reason' => $e->getMessage()]);
+            }
+        }
+
+        // Kirim ke WhatsApp Fonnte (baik dengan gambar baru, atau fallback teks)
+        $this->notifyFonnte($ticket, $cardPath);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifikasi WhatsApp berhasil dikirim!',
+        ]);
+    }
+
+    /** Kirim notifikasi Fonnte ke admin (Gambar Kartu & Lampiran) */
+    private function notifyFonnte(SupportTicket $ticket, ?string $cardPath = null)
+    {
         try {
             $rawPhone   = config('services.whatsapp.support_number', env('SUPPORT_WA_NUMBER', ''));
             $adminPhone = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$rawPhone));
@@ -183,18 +248,7 @@ class SupportController extends Controller
                 $reporter  = $ticket->user?->name ?? 'Pengguna';
                 $fonnte    = new FonnteService();
 
-                // Coba generate card dulu
-                $cardPath = null;
-                try {
-                    $generator = new HelpdeskCardGenerator();
-                    $cardPath  = $generator->generate($ticket);
-                    if ($cardPath) {
-                        $ticket->update(['card_image_path' => $cardPath]);
-                    }
-                } catch (\Throwable $e) {
-                    \Log::warning('Card generation failed, will send text only', ['reason' => $e->getMessage()]);
-                }
-
+                // Caption teks lengkap
                 $caption  = "🎫 *TIKET BARU — PUSAT BANTUAN*\n";
                 $caption .= "━━━━━━━━━━━━━━━━━\n";
                 $caption .= "🆔 ID: *{$ticket->ticket_id}*\n";
@@ -204,6 +258,19 @@ class SupportController extends Controller
                 $caption .= "⚡ Prioritas: *{$prioLabel}*\n";
                 $caption .= "━━━━━━━━━━━━━━━━━\n";
                 $caption .= "💬 Detail: {$ticket->description}";
+
+                // Jika cardPath tidak dikirimkan, coba fallback ke generator PHP GD jika ada
+                if (!$cardPath) {
+                    try {
+                        $generator = new HelpdeskCardGenerator();
+                        $cardPath  = $generator->generate($ticket);
+                        if ($cardPath) {
+                            $ticket->update(['card_image_path' => $cardPath]);
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('GD Card generation failed', ['reason' => $e->getMessage()]);
+                    }
+                }
 
                 if ($cardPath) {
                     // Kirim gambar kartu
@@ -218,13 +285,27 @@ class SupportController extends Controller
                 if (!empty($ticket->attachments)) {
                     foreach ($ticket->attachments as $attachment) {
                         if (!empty($attachment['url'])) {
-                            $attachmentUrl = $attachment['url'];
+                            // Dapatkan path relatif file dari URL asli
+                            $parsedUrl = parse_url($attachment['url']);
+                            $path = $parsedUrl['path'] ?? '';
                             
-                            // Jika link relatif, ubah ke absolute agar Fonnte bisa fetch
-                            if (str_starts_with($attachmentUrl, '/')) {
-                                $attachmentUrl = rtrim(config('app.url'), '/') . $attachmentUrl;
+                            // Ambil bagian setelah '/storage/'
+                            $storagePos = strpos($path, '/storage/');
+                            if ($storagePos !== false) {
+                                $relativePath = substr($path, $storagePos + 9); // +9 untuk skip '/storage/'
+                            } else {
+                                $relativePath = ltrim($path, '/');
                             }
+
+                            // Raw URL Encode setiap segmen dari relative path untuk mencegah spasi/karakter spesial merusak URL
+                            $segments = explode('/', $relativePath);
+                            $encodedSegments = array_map('rawurlencode', $segments);
+                            $encodedRelativePath = implode('/', $encodedSegments);
                             
+                            // Gabungkan dengan APP_URL
+                            $attachmentUrl = rtrim(config('app.url'), '/') . '/storage/' . $encodedRelativePath;
+
+                            // Kirim ke Fonnte
                             $fonnte->sendImage(
                                 $adminPhone, 
                                 $attachmentUrl, 
@@ -240,24 +321,6 @@ class SupportController extends Controller
                 'reason' => $e->getMessage(),
             ]);
         }
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success'  => true,
-                'message'  => '✅ Pertanyaan / Laporan berhasil dikirim!',
-                'redirect' => $this->supportRoute('history'),
-            ]);
-        }
-
-
-        $links = [];
-        if (isset($result) && !empty($result['issue_url']))             $links[] = 'GitHub: ' . $result['issue_url'];
-        if (isset($clickupResult) && !empty($clickupResult['task_url'])) $links[] = 'ClickUp: ' . $clickupResult['task_url'];
-
-        $successMsg = '✅ Laporan berhasil dikirim! ID lokal: #' . $ticket->id
-                    . (!empty($links) ? ' · ' . implode(' · ', $links) : '');
-
-        return redirect()->to($this->supportRoute('history'))->with('success', $successMsg);
     }
 
     /** Kirim notifikasi laporan baru ke semua admin & guru_piket */

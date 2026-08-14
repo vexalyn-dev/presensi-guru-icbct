@@ -6,6 +6,16 @@
 @endphp
 
 @section('content')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+@php
+    $appSettings = \App\Models\Setting::first();
+    $logoUrl = ($appSettings && $appSettings->app_logo) ? asset('storage/' . $appSettings->app_logo) : '';
+@endphp
+<script>
+    var APP_LOGO_URL = @json($logoUrl);
+    var UPLOAD_CARD_ROUTE_TEMPLATE = @json(route('support.upload-card', ['ticket' => 'PLACEHOLDER']));
+</script>
 <div class="space-y-6 fade-in">
 
     {{-- Header --}}
@@ -518,7 +528,7 @@ function handleSubmit() {
     // Tampilkan overlay loading
     showSupportOverlay('loading');
 
-    // Submit form via AJAX supaya bisa tangkap redirect
+    // Submit form via AJAX
     var formData = new FormData(form);
     fetch(form.action, {
         method: 'POST',
@@ -531,10 +541,22 @@ function handleSubmit() {
         if (ct.includes('application/json')) {
             return res.json().then(function(data) {
                 if (data.success) {
-                    if (data.wa_url) {
-                        window.open(data.wa_url, '_blank');
+                    // Update label loading untuk visualisasi user
+                    var lbl = document.getElementById('sov-label');
+                    if (lbl) lbl.textContent = 'Membuat kartu tiket...';
+
+                    // Generate Card Image client-side via html2canvas
+                    try {
+                        generateAndUploadCard(data, function() {
+                            showSupportOverlay('success', 'Laporan berhasil dikirim!', data.redirect || null);
+                        });
+                    } catch (e) {
+                        console.error('html2canvas generation failed, sending fallback notification', e);
+                        // Jika gagal, trigger fallback notification
+                        triggerFallbackNotification(data.ticket_id, function() {
+                            showSupportOverlay('success', 'Laporan berhasil dikirim!', data.redirect || null);
+                        });
                     }
-                    showSupportOverlay('success', data.message || 'Laporan berhasil dikirim!', data.redirect || null);
                 } else {
                     showSupportOverlay('error', data.message || 'Gagal mengirim laporan.');
                 }
@@ -542,10 +564,253 @@ function handleSubmit() {
         }
         showSupportOverlay('success', 'Laporan berhasil dikirim!', res.url);
     })
-    .catch(function() {
+    .catch(function(err) {
+        console.error(err);
         hideSupportOverlay();
         form.submit();
     });
+}
+
+function generateAndUploadCard(data, callback) {
+    // Tentukan warna prioritas
+    var priorityColor = 'bg-[#22c55e]';
+    if (data.priority.toLowerCase() === 'critical' || data.priority.toLowerCase() === 'kritis') {
+        priorityColor = 'bg-[#ef4444]';
+    } else if (data.priority.toLowerCase() === 'high' || data.priority.toLowerCase() === 'tinggi') {
+        priorityColor = 'bg-[#f97316]';
+    } else if (data.priority.toLowerCase() === 'medium' || data.priority.toLowerCase() === 'sedang') {
+        priorityColor = 'bg-[#eab308]';
+    }
+
+    // Bangun wrapper sementara untuk rendering kartu
+    var wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed';
+    wrapper.style.left = '-9999px';
+    wrapper.style.top = '-9999px';
+    wrapper.style.width = '1100px';
+    wrapper.style.height = '750px';
+    wrapper.style.zIndex = '-9999';
+    wrapper.style.backgroundColor = '#ffffff';
+
+    // Salin persis HTML helpdesk-card.blade.php
+    wrapper.innerHTML = `
+        <div id="capture-ticket-card" class="w-[1100px] h-[750px] bg-white rounded-3xl border-4 border-slate-900/10 overflow-hidden relative shadow-2xl" style="font-family: 'Inter', sans-serif;">
+            
+            <!-- HEADER KARTU -->
+            <div class="flex justify-between items-center px-10 pt-10 pb-6 bg-white">
+                <!-- Kiri: Logo & Judul -->
+                <div class="flex items-center gap-6">
+                    <div class="w-24 h-24 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-200 p-2 shadow-sm">
+                        ${APP_LOGO_URL ? '<img src="' + APP_LOGO_URL + '" class="w-full h-full object-contain">' : '<span class="text-xs text-gray-400 text-center font-medium">Logo<br>Sekolah</span>'}
+                    </div>
+                    <!-- Teks Judul -->
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-1.5 h-10 bg-blue-900 rounded-full"></div>
+                            <h1 class="text-[32px] font-extrabold text-[#112a64] tracking-tight">PERTANYAAN PUSAT BANTUAN</h1>
+                        </div>
+                        <p class="text-gray-500 text-lg ml-4 mt-1 font-medium">Pusat Bantuan • Sistem Informasi ICB Cinta Teknika</p>
+                    </div>
+                </div>
+
+                <!-- Kanan: ID Tiket -->
+                <div class="flex items-stretch border-2 border-[#112a64] rounded-2xl overflow-hidden shadow-sm bg-white">
+                    <div class="bg-[#112a64] text-white px-5 flex items-center justify-center">
+                        <i class="fa-solid fa-ticket-alt text-3xl transform -rotate-45"></i>
+                    </div>
+                    <div class="bg-white px-6 py-2 flex flex-col justify-center">
+                        <span class="text-gray-500 text-sm font-bold uppercase tracking-wider">ID TIKET</span>
+                        <span class="text-[#112a64] font-extrabold text-2xl leading-none">${data.ticket_code}</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-gray-200 mx-10 mb-8">
+
+            <!-- BODY / ISI TIKET -->
+            <div class="grid grid-cols-12 gap-8 px-10 pb-24 bg-white">
+                
+                <!-- Kolom Kiri (Sidebar Info) -->
+                <div class="col-span-4 flex flex-col space-y-6 bg-white">
+                    
+                    <!-- Pelapor -->
+                    <div class="flex items-start gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
+                            <i class="fa-regular fa-user text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[#112a64] font-extrabold text-sm mb-1 uppercase">PELAPOR</p>
+                            <p class="text-gray-900 font-bold text-lg leading-none">${data.user_name}</p>
+                            <div class="border-b-2 border-dashed border-gray-300 my-2"></div>
+                            <p class="text-gray-500 font-medium">Role: <span class="text-gray-900 font-bold">${data.user_role}</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Subjek -->
+                    <div class="flex items-start gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
+                            <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[#112a64] font-extrabold text-sm mb-1 uppercase">SUBJEK</p>
+                            <p class="text-gray-900 font-bold text-base">${data.title}</p>
+                            <div class="border-b-2 border-dashed border-gray-300 mt-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Prioritas -->
+                    <div class="flex items-start gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
+                            <i class="fa-regular fa-flag text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[#112a64] font-extrabold text-sm mb-2 uppercase">PRIORITAS</p>
+                            <span class="${priorityColor} text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-sm uppercase">${data.priority}</span>
+                            <div class="border-b-2 border-dashed border-gray-300 mt-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Waktu Dibuat -->
+                    <div class="flex items-start gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
+                            <i class="fa-regular fa-calendar text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[#112a64] font-extrabold text-sm mb-1 uppercase">WAKTU DIBUAT</p>
+                            <p class="text-gray-900 font-bold text-base">${data.created_at}</p>
+                            <div class="border-b-2 border-dashed border-gray-300 mt-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="flex items-start gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
+                            <i class="fa-regular fa-clock text-2xl"></i>
+                        </div>
+                        <div class="flex-1 pt-1">
+                            <p class="text-[#112a64] font-extrabold text-sm mb-2 uppercase">STATUS</p>
+                            <span class="bg-[#ffd166] text-gray-900 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm flex items-center inline-flex gap-2">
+                                <span class="w-2 h-2 rounded-full bg-yellow-600"></span>
+                                ${data.status}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kolom Kanan (Detail Pertanyaan) -->
+                <div class="col-span-8 flex flex-col h-[420px] bg-white">
+                    <div class="border-2 border-[#f0f4f8] rounded-3xl h-full flex flex-col bg-white overflow-hidden shadow-sm">
+                        <!-- Judul Box -->
+                        <div class="flex items-center gap-3 px-6 py-5 bg-white border-b border-gray-100">
+                            <i class="fa-regular fa-comment-dots text-3xl text-[#112a64]"></i>
+                            <h2 class="text-xl font-bold text-[#112a64]">PERTANYAAN / DETAIL</h2>
+                        </div>
+                        <!-- Area Teks Bergaris -->
+                        <div class="flex-1 px-8 pt-2 pb-8 bg-white/50 rounded-b-3xl">
+                            <div class="notebook-lines h-full min-h-[300px] w-full relative pt-1" style="background-image: repeating-linear-gradient(transparent, transparent 39px, #e5e7eb 39px, #e5e7eb 40px); background-attachment: local; line-height: 40px;">
+                                <p class="text-gray-900 font-semibold text-[17px] leading-[40px] whitespace-pre-wrap">${data.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- FOOTER BAWAH -->
+            <div class="absolute bottom-0 w-full h-[60px] flex items-center z-10 bg-white border-t border-gray-200">
+                <!-- Bagian Kiri Biru Gelap -->
+                <div class="bg-[#112a64] h-full w-[45%] flex items-center pl-8 text-white z-20 shadow-lg relative" style="clip-path: polygon(0 0, 95% 0, 90% 100%, 0% 100%);">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                        <div>
+                            <p class="font-bold text-lg leading-tight">Pusat Bantuan</p>
+                            <p class="text-xs text-gray-300">Sistem Informasi ICB Cinta Teknika</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ornamen Garis Miring Biru -->
+                <div class="bg-[#244388] h-full w-[8%] -ml-12 z-10" style="clip-path: polygon(0 0, 95% 0, 90% 100%, 0% 100%);"></div>
+                <div class="bg-[#3a5ba8] h-full w-[4%] -ml-4 z-0" style="clip-path: polygon(0 0, 95% 0, 90% 100%, 0% 100%);"></div>
+
+                <!-- Bagian Kanan Putih -->
+                <div class="flex-1 flex justify-end items-center pr-8 gap-6 h-full text-sm font-bold text-[#112a64]">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-regular fa-clock text-lg"></i>
+                        <span>${data.created_at}</span>
+                    </div>
+                    <div class="h-6 w-px bg-gray-300"></div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-[#ffd166]"></span>
+                        <span>${data.status}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(wrapper);
+
+    // Jalankan html2canvas setelah loading DOM
+    setTimeout(function() {
+        var captureEl = document.getElementById('capture-ticket-card');
+        html2canvas(captureEl, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        }).then(function(canvas) {
+            // Hapus wrapper sementara dari DOM
+            document.body.removeChild(wrapper);
+
+            // Ubah canvas ke blob
+            canvas.toBlob(function(blob) {
+                // Upload Blob via AJAX
+                var uploadData = new FormData();
+                uploadData.append('card_image', blob, 'ticket-card.png');
+
+                // Dapatkan route dinamis support.upload-card dari template
+                var uploadUrl = UPLOAD_CARD_ROUTE_TEMPLATE.replace('PLACEHOLDER', data.ticket_id);
+
+                fetch(uploadUrl, {
+                    method: 'POST',
+                    body: uploadData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function(uploadRes) {
+                    return uploadRes.json();
+                })
+                .then(function(uploadResult) {
+                    callback();
+                })
+                .catch(function(err) {
+                    console.error('Error uploading card image:', err);
+                    callback();
+                });
+            }, 'image/png');
+        })
+        .catch(function(err) {
+            console.error('html2canvas render error:', err);
+            document.body.removeChild(wrapper);
+            triggerFallbackNotification(data.ticket_id, callback);
+        });
+    }, 500); // Beri jeda 500ms agar font & CSS ter-render sempurna
+}
+
+function triggerFallbackNotification(ticketId, callback) {
+    var uploadUrl = UPLOAD_CARD_ROUTE_TEMPLATE.replace('PLACEHOLDER', ticketId);
+    fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(function() { callback(); })
+    .catch(function() { callback(); });
 }
 
 

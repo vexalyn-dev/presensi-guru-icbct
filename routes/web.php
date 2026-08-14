@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AttendanceController;
@@ -105,6 +105,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/download-apk', function () {
         return view('download-apk');
     })->name('download-apk');
+
+    // Upload generated ticket card image
+    Route::post('/support/upload-card/{ticket}', [SupportController::class, 'uploadCard'])->name('support.upload-card');
 });
 
 // Admin Routes
@@ -389,7 +392,7 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
 
 Route::get('/run-migrate-secret', function (Request $request) {
     // Lu cuma bisa akses kalo bawa key yang bener
-    if ($request->get('key') !== 'vexalyn19052009') {
+    if ($request->input('key') !== 'vexalyn19052009') {
         abort(404); // Bikin seolah-olah halaman emang gak ada
     }
 
@@ -405,7 +408,7 @@ Route::get('/sapu-jagat', function () {
 
 Route::get('/git-pull-rahasia', function (Request $request) {
     // Validasi key rahasia biar aman dari orang Iseng
-    if ($request->get('key') !== 'vexalyn19052009') {
+    if ($request->input('key') !== 'vexalyn19052009') {
         abort(404);
     }
 
