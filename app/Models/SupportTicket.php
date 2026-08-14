@@ -72,3 +72,4 @@ class SupportTicket extends Model
         if (!$this->card_image_path) return null;
         return asset('storage/' . $this->card_image_path);
     }
+}

@@ -173,7 +173,7 @@ class DeveloperController extends Controller
             DeveloperUpdate::create([
                 'version'    => $request->version,
                 'title'      => $request->title,
-                'content'    => $request->content,
+                'content'    => $request->input('content'),
                 'type'       => $request->type,
                 'show_modal' => $request->boolean('show_modal', true),
                 'is_active'  => true,
@@ -223,12 +223,14 @@ class DeveloperController extends Controller
             if ($ticket->id > 0) {
                 $ticket->update(['card_image_path' => $cardPath]);
             }
-            $fullPath = \Illuminate\Support\Facades\Storage::disk('public')->path($cardPath);
+            $fullPath = Storage::disk('public')->path($cardPath);
             return response()->file($fullPath, ['Content-Type' => 'image/png']);
         }
 
         return response()->json(['error' => 'Gagal generate card. Cek log Laravel.'], 500);
     }
+
+    public function clearCache(string $secret)
     {
         if (!$this->verifySecret($secret)) abort(404);
         Artisan::call('optimize:clear');
