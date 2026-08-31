@@ -275,11 +275,23 @@ class SupportController extends Controller
                 $caption .= "*📝 Subject*\n";
                 $caption .= "{$ticket->title}\n\n";
                 $caption .= "*⚠️ Priority*\n";
-                $caption .= "{$prioEmoji} *{$prioLabel}*\n\n";
+                $caption .= "{$prioEmoji} *".strtoupper($prioLabel)."*\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
                 $caption .= "*📄 Report Details*\n\n";
-                $caption .= "> " . wordwrap($ticket->description, 40, "\n> ") . "\n\n";
+                $caption .= $ticket->description . "\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+
+                // Lampiran section
+                if (!empty($ticket->attachments)) {
+                    $caption .= "*📎 Lampiran*\n\n";
+                    foreach ($ticket->attachments as $attachment) {
+                        if (!empty($attachment['url'])) {
+                            $caption .= "🔗 {$attachment['url']}\n\n";
+                        }
+                    }
+                    $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                }
+
                 $caption .= "*🔄 Ticket Status*\n\n";
                 $caption .= "`◉ MENUNGGU PENANGANAN`\n\n";
                 $caption .= "*Tiket kamu sudah kami terima. Saya akan segera mengecek laporan ini dan menghubungi kamu kembali.*\n\n";
