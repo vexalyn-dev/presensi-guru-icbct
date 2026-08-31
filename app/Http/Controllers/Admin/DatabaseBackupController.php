@@ -61,16 +61,16 @@ class DatabaseBackupController extends Controller
             $pass     = $dbConfig['password'] ?? '';
             $dbname   = $dbConfig['database'];
 
-            $escapedPass = $pass !== '' ? "-p" . escapeshellarg($pass) : '';
+            $escapedPass = $pass !== '' ? "-p" . \escapeshellarg($pass) : '';
 
             $cmd = sprintf(
                 'mysqldump --no-tablespaces -h%s -u%s %s %s --single-transaction --quick --lock-tables=false %s > "%s"',
-                escapeshellarg($host),
-                escapeshellarg($user),
+                \escapeshellarg($host),
+                \escapeshellarg($user),
                 $escapedPass,
-                escapeshellarg($dbname),
-                implode(' ', array_map('escapeshellarg', $tableList)),
-                escapeshellarg($filepath)
+                \escapeshellarg($dbname),
+                implode(' ', array_map('\escapeshellarg', $tableList)),
+                \escapeshellarg($filepath)
             );
 
             $output  = [];
