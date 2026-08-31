@@ -290,22 +290,9 @@ class SupportController extends Controller
                 if (!empty($ticket->attachments)) {
                     foreach ($ticket->attachments as $attachment) {
                         if (!empty($attachment['url'])) {
-                            $parsedUrl    = parse_url($attachment['url']);
-                            $urlPath      = $parsedUrl['path'] ?? '';
-                            $storagePos   = strpos($urlPath, '/storage/');
-                            $relativePath = ($storagePos !== false)
-                                ? substr($urlPath, $storagePos + 9)
-                                : ltrim($urlPath, '/');
-
-                            $relativePath = urldecode($relativePath);
-                            $absolutePath = \Storage::disk('public')->path($relativePath);
-
-                            if (file_exists($absolutePath)) {
-                                // Kirim gambar + caption
-                                $fonnte->sendImageFile($adminPhone, $absolutePath, $caption);
-                            } else {
-                                \Log::warning('notifyFonnte: attachment file not found', ['path' => $absolutePath]);
-                            }
+                            // Kirim gambar pakai URL + caption
+                            $fonnte->sendImage($adminPhone, $attachment['url'], $caption);
+                            break; // Hanya kirim 1 gambar pertama
                         }
                     }
                 } else {
