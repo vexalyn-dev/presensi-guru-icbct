@@ -49,16 +49,17 @@ class DatabaseBackupController extends Controller
         try {
             if ($includeAll) {
                 $tables = DB::select('SHOW TABLES');
-                $tableList = array_column($tables, 'Tables_in_' . DB::config('database'));
+                $dbName = config('database.default');
+                $tableList = array_column($tables, "Tables_in_{$dbName}");
             } else {
                 $tableList = $this->getTablesWithoutExcludes();
             }
 
-            $config = DB::getConfig();
-            $host   = $config['host'] ?? '127.0.0.1';
-            $user   = $config['username'];
-            $pass   = $config['password'] ?? '';
-            $dbname = $config['database'];
+            $dbConfig = config('database.connections.' . config('database.default'));
+            $host     = $dbConfig['host'] ?? '127.0.0.1';
+            $user     = $dbConfig['username'];
+            $pass     = $dbConfig['password'] ?? '';
+            $dbname   = $dbConfig['database'];
 
             $escapedPass = $pass !== '' ? "-p" . escapeshellarg($pass) : '';
 
@@ -127,11 +128,11 @@ class DatabaseBackupController extends Controller
     private function getTablesWithoutExcludes(): array
     {
         $allTables = DB::select('SHOW TABLES');
-        $dbName    = DB::config('database');
-        $key       = "Tables_in_{$dbName}";
+        $dbName = config('database.connections.' . config('database.default'));
+        $tableKey = 'Tables_in_' . $dbName['database'];
 
         return array_values(array_filter(
-            array_map(fn($t) => $t->{$key}, $allTables),
+            array_map(fn($t) => $t->{$tableKey}, $allTables),
             fn($t) => !in_array($t, $this->excludeTables)
         ));
     }
