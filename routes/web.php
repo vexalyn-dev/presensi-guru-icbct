@@ -353,14 +353,6 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     // Pengaturan (read-only view)
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings');
 
-    // Backup Database
-    Route::prefix('database-backup')->name('database-backup.')->group(function () {
-        Route::get('/', [App\Http\Controllers\Admin\DatabaseBackupController::class, 'index'])->name('index');
-        Route::post('/create', [App\Http\Controllers\Admin\DatabaseBackupController::class, 'create'])->name('create');
-        Route::get('/download/{filename}', [App\Http\Controllers\Admin\DatabaseBackupController::class, 'download'])->name('download');
-        Route::delete('/destroy/{filename}', [App\Http\Controllers\Admin\DatabaseBackupController::class, 'destroy'])->name('destroy');
-    });
-
     // Profil
     Route::get('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'update'])->name('profile.update');
