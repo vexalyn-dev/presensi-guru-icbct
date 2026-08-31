@@ -404,6 +404,7 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
     Route::get('/card-preview/{ticketId?}', [DeveloperController::class, 'cardPreview'])->name('card-preview');
     Route::post('/deploy',       [DeveloperController::class, 'deploy'])           ->name('deploy');
     Route::get('/optimize',      [DeveloperController::class, 'optimize'])         ->name('optimize');
+    Route::get('/composer-dump', [DeveloperController::class, 'composerDump'])     ->name('composer-dump');
 });
 
 Route::get('/run-migrate-secret', function (Request $request) {
