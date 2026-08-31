@@ -277,7 +277,7 @@ class SupportController extends Controller
                 $caption .= "*👤 FROM* : *{$roleLabel}*\n\n";
                 $caption .= "*📂 TYPE* : *{$typeLabel}*\n\n";
                 $caption .= "*📝 SUBJECT* : *{$ticket->title}*\n\n";
-                $caption .= "*⚠️ PRIORITY* : {$prioEmoji} *{$prioColor}*" . strtoupper($prioLabel) . "*\n\n";
+                $caption .= "*⚠️ PRIORITY* : {$prioEmoji} *".strtoupper($prioLabel)."*\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
                 $caption .= "*📄 REPORT DETAILS*\n\n";
                 $caption .= $ticket->description . "\n\n";
