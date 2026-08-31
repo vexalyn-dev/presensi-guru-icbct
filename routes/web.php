@@ -246,14 +246,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/export/csv', [ActivityLogController::class, 'export'])->name('export');
     });
 
-    // Database Backup
-    Route::prefix('database-backup')->name('database-backup.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'index'])->name('index');
-        Route::post('/create', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'create'])->name('create');
-        Route::get('/download/{filename}', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'download'])->name('download');
-        Route::delete('/destroy/{filename}', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'destroy'])->name('destroy');
-    });
-
     // Manual Class Attendance - dipindah ke grup admin dengan prefix
 });
 
@@ -277,6 +269,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Maintenance Mode Toggle
     Route::post('/maintenance/toggle', [\App\Http\Controllers\Admin\MaintenanceModeController::class, 'toggle'])->name('maintenance.toggle');
+
+    // Database Backup
+    Route::prefix('database-backup')->name('database-backup.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'index'])->name('index');
+        Route::post('/create', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'create'])->name('create');
+        Route::get('/download/{filename}', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'download'])->name('download');
+        Route::delete('/destroy/{filename}', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'destroy'])->name('destroy');
+    });
 });
 
 // ============================================================
