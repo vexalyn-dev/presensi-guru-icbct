@@ -297,36 +297,6 @@ class DeveloperController extends Controller
         return back()->with('success', 'Optimasi & caching selesai.');
     }
 
-    public function composerDump(string $secret)
-    {
-        if (!$this->verifySecret($secret)) abort(404);
-
-        chdir(base_path());
-
-        // Download composer.phar jika belum ada
-        if (!file_exists(base_path('composer.phar'))) {
-            $installer = file_get_contents('https://getcomposer.org/installer');
-            if ($installer === false) {
-                return back()->with('error', 'Gagal download Composer installer.');
-            }
-            file_put_contents(base_path('composer.phar'), $installer);
-        }
-
-        // Jalankan dump-autoload
-        exec('php composer.phar dump-autoload --optimize 2>&1', $output, $code);
-
-        if ($code !== 0) {
-            return back()->with('error', 'Composer dump-autoload gagal: ' . implode("\n", array_slice($output, -5)));
-        }
-
-        // Bersihkan cache setelah autoload di-regenerate
-        Artisan::call('config:clear');
-        Artisan::call('route:clear');
-        Artisan::call('view:clear');
-
-        return back()->with('success', '✅ Composer autoload berhasil di-refresh! Class Resend sekarang tersedia.');
-    }
-
     private function getApkSetting(): AppSetting
     {
         $s = AppSetting::getInstance();
