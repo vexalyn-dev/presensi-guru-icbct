@@ -246,18 +246,38 @@ class SupportController extends Controller
                 $prioLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
                 $typeLabel = SupportTicket::typeLabels()[$ticket->type]['label'] ?? ucfirst($ticket->type);
                 $reporter  = $ticket->user?->name ?? 'Pengguna';
+                $roleMap   = [
+                    'admin'    => 'Admin',
+                    'operator' => 'Operator',
+                    'guru_piket' => 'Guru Piket',
+                    'guru'     => 'Guru',
+                ];
+                $roleLabel = $roleMap[$ticket->user?->role] ?? ucfirst($ticket->user?->role ?? 'Pengguna');
                 $fonnte    = new FonnteService();
 
-                // Caption teks lengkap
-                $caption  = "🎫 *TIKET BARU — PUSAT BANTUAN*\n";
-                $caption .= "━━━━━━━━━━━━━━━━━\n";
-                $caption .= "🆔 ID: *{$ticket->ticket_id}*\n";
-                $caption .= "👤 Dari: *{$reporter}*\n";
-                $caption .= "📋 Tipe: *{$typeLabel}*\n";
-                $caption .= "📌 Judul: *{$ticket->title}*\n";
-                $caption .= "⚡ Prioritas: *{$prioLabel}*\n";
-                $caption .= "━━━━━━━━━━━━━━━━━\n";
-                $caption .= "💬 Detail: {$ticket->description}";
+                // Format pesan baru sesuai requested
+                $caption  = "*✦ VEXALYN*\n";
+                $caption .= "*SUPPORT CENTER*\n\n";
+                $caption .= "*🎫 New Support Ticket*\n";
+                $caption .= "`#{$ticket->ticket_id}`\n\n";
+                $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                $caption .= "*👤 From*\n";
+                $caption .= "{$roleLabel}\n\n";
+                $caption .= "*📂 Type*\n";
+                $caption .= "{$typeLabel}\n\n";
+                $caption .= "*📝 Subject*\n";
+                $caption .= "{$ticket->title}\n\n";
+                $caption .= "*⚠️ Priority*\n";
+                $caption .= "`{$prioLabel}`\n\n";
+                $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                $caption .= "*📄 Report Details*\n\n";
+                $caption .= "> " . wordwrap($ticket->description, 40, "\n> ") . "\n\n";
+                $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                $caption .= "*🔄 Ticket Status*\n\n";
+                $caption .= "`◉ MENUNGGU PENANGANAN`\n\n";
+                $caption .= "*Tiket kamu sudah kami terima. Saya akan segera mengecek laporan ini dan menghubungi kamu kembali.*\n\n";
+                $caption .= "— *Vexalyn Support Center*\n\n";
+                $caption .= "*🙏 Terima kasih sudah menghubungi kami!*";
 
                 // Jika cardPath tidak dikirimkan, coba fallback ke generator PHP GD jika ada
                 if (!$cardPath) {

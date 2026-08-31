@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Events\ModelCreated;
 
 class SupportTicket extends Model
 {
@@ -18,6 +19,23 @@ class SupportTicket extends Model
         'attachments' => 'array',
         'extra_fields'=> 'array',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (SupportTicket $ticket) {
+            if (empty($ticket->ticket_id)) {
+                $ticket->ticket_id = static::generateTicketId();
+            }
+        });
+    }
+
+    public static function generateTicketId(): string
+    {
+        $year = date('Y');
+        $max  = static::whereYear('created_at', $year)->max('id');
+        $num  = str_pad(($max ?? 0) + 1, 4, '0', STR_PAD_LEFT);
+        return "TK-{$year}-{$num}";
+    }
 
     public function user(): BelongsTo
     {
