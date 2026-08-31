@@ -211,6 +211,13 @@
                     <span>Download APK</span>
                 </a>
 
+                <a href="{{ route('piket.database-backup.index') }}"
+                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                          {{ request()->routeIs('piket.database-backup*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
+                    <i data-lucide="database-backup" class="w-4 h-4"></i>
+                    <span>Backup Database</span>
+                </a>
+
             </nav>
         </aside>
 

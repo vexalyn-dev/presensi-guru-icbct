@@ -246,6 +246,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/export/csv', [ActivityLogController::class, 'export'])->name('export');
     });
 
+    // Database Backup
+    Route::prefix('database-backup')->name('database-backup.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'index'])->name('index');
+        Route::post('/create', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'create'])->name('create');
+        Route::get('/download/{filename}', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'download'])->name('download');
+        Route::delete('/destroy/{filename}', [\App\Http\Controllers\Admin\DatabaseBackupController::class, 'destroy'])->name('destroy');
+    });
+
     // Manual Class Attendance - dipindah ke grup admin dengan prefix
 });
 
@@ -353,6 +361,14 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     // Pengaturan (read-only view)
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings');
 
+    // Backup Database
+    Route::prefix('database-backup')->name('database-backup.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\DatabaseBackupController::class, 'index'])->name('index');
+        Route::post('/create', [App\Http\Controllers\Admin\DatabaseBackupController::class, 'create'])->name('create');
+        Route::get('/download/{filename}', [App\Http\Controllers\Admin\DatabaseBackupController::class, 'download'])->name('download');
+        Route::delete('/destroy/{filename}', [App\Http\Controllers\Admin\DatabaseBackupController::class, 'destroy'])->name('destroy');
+    });
+
     // Profil
     Route::get('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'update'])->name('profile.update');
@@ -386,6 +402,8 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
     Route::post('/updates',      [DeveloperController::class, 'storeUpdate'])        ->name('updates.store');
     Route::delete('/updates/{id}',[DeveloperController::class, 'deleteUpdate'])      ->name('updates.delete');
     Route::get('/card-preview/{ticketId?}', [DeveloperController::class, 'cardPreview'])->name('card-preview');
+    Route::post('/deploy',       [DeveloperController::class, 'deploy'])           ->name('deploy');
+    Route::get('/optimize',      [DeveloperController::class, 'optimize'])         ->name('optimize');
 });
 
 Route::get('/run-migrate-secret', function (Request $request) {

@@ -32,3 +32,9 @@ Schedule::command('attendance:generate-alpha')->dailyAt('23:59')->withoutOverlap
 
 // Check Incomplete Class Attendance (Setiap 15 menit)
 Schedule::command('attendance:check-incomplete')->everyFifteenMinutes()->withoutOverlapping();
+
+// Generate QR Codes (Setiap hari jam 01:00 pagi)
+Schedule::command('qr:generate')->dailyAt('01:00')->withoutOverlapping();
+
+// Regenerate Classroom QR Codes (Setiap minggu Senin jam 02:00 pagi)
+Schedule::command('classrooms:regenerate-qr')->weekly()->mondays()->at('02:00')->withoutOverlapping();

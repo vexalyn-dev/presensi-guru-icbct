@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Teacher;
 use App\Notifications\SystemNotification;
 use App\Services\ActivityLogService;
+use App\Helpers\ImageOptimizer;
 // use App\Models\ClassRoom;
 // use App\Models\TeacherSubject;
 use Illuminate\Http\Request;
@@ -81,7 +82,7 @@ class TeacherController extends Controller
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('profiles', 'public');
+            $photoPath = ImageOptimizer::store($request->file('photo'), 'profiles/' . $request->file('photo')->hashName());
         }
 
         $employeeCode = null;
@@ -228,7 +229,7 @@ class TeacherController extends Controller
             if ($teacher->photo) {
                 Storage::disk('public')->delete($teacher->photo);
             }
-            $photoPath = $request->file('photo')->store('profiles', 'public');
+            $photoPath = ImageOptimizer::replace($request->file('photo'), $teacher->photo, 'profiles/' . $request->file('photo')->hashName());
             $updateData['photo'] = $photoPath;
             
             // Pastikan file tersimpan

@@ -37,12 +37,11 @@ class GoogleController extends Controller
                     'password' => bcrypt(uniqid()), // Random password
                 ]);
                 
-                // KIRIM WELCOME EMAIL
+                // KIRIM WELCOME EMAIL (queued)
                 try {
-                    Mail::to($user->email)->send(new WelcomeEmail($user));
+                    Mail::to($user->email)->queue(new WelcomeEmail($user));
                 } catch (\Exception $e) {
-                    // Log error jika email gagal kirim
-                    Log::error('Failed to send welcome email: ' . $e->getMessage());
+                    Log::error('Failed to queue welcome email: ' . $e->getMessage());
                 }
             } else {
                 // Update google_id jika belum ada

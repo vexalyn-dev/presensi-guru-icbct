@@ -242,7 +242,59 @@ class DeveloperController extends Controller
     {
         if (!$this->verifySecret($secret)) abort(404);
         Artisan::call('optimize:clear');
-        return back()->with('success', ' Cache berhasil dibersihkan.');
+        return back()->with('success', 'Cache berhasil dibersihkan.');
+    }
+
+    public function deploy(string $secret)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $output = [];
+        $steps  = [];
+
+        // Step 1: Git pull
+        chdir(base_path());
+        exec('git stash 2>&1', $gitStash, $stashCode);
+        exec('git pull origin main 2>&1', $pullOutput, $pullCode);
+        if ($pullCode !== 0) {
+            $steps[] = "❌ Git pull gagal: " . implode("\n", $pullOutput);
+            return back()->with('error', $steps[count($steps)-1]);
+        }
+        $steps[] = "✅ Git pull berhasil";
+
+        // Step 2: Composer install
+        exec('php composer.phar install --no-dev --optimize-autoloader 2>&1', $composerOutput, $composerCode);
+        if ($composerCode !== 0) {
+            $steps[] = "⚠️ Composer install warning: " . implode("\n", array_slice($composerOutput, -3));
+        } else {
+            $steps[] = "✅ Composer install berhasil";
+        }
+
+        // Step 3: Migrate
+        Artisan::call('migrate', ['--force' => true]);
+        $steps[] = "✅ Migrasi selesai: " . substr(Artisan::output(), 0, 100);
+
+        // Step 4: Optimize
+        Artisan::call('optimize');
+        $steps[] = "✅ Optimasi selesai";
+
+        // Step 5: Clear cache
+        Artisan::call('config:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+        $steps[] = "✅ Cache cleared";
+
+        return back()->with('success', implode(" | ", $steps));
+    }
+
+    public function optimize(string $secret)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+        Artisan::call('optimize');
+        Artisan::call('config:cache');
+        Artisan::call('route:cache');
+        Artisan::call('view:cache');
+        return back()->with('success', 'Optimasi & caching selesai.');
     }
 
     private function getApkSetting(): AppSetting

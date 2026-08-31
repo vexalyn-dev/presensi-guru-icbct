@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Helpers\ImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,7 @@ class ProfileController extends Controller
             if ($user->photo) {
                 Storage::disk('public')->delete($user->photo);
             }
-            $validated['photo'] = $request->file('photo')->store('profiles', 'public');
+            $validated['photo'] = ImageOptimizer::store($request->file('photo'), 'profiles/' . $request->file('photo')->hashName());
         } else {
             // No photo change — remove from validated so it's not overwritten
             unset($validated['photo']);

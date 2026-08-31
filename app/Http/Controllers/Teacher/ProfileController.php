@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\ImageOptimizer;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -68,7 +69,7 @@ class ProfileController extends Controller
             if ($user->photo) {
                 Storage::disk('public')->delete($user->photo);
             }
-            $photoPath = $request->file('photo')->store('teachers', 'public');
+            $photoPath = ImageOptimizer::replace($request->file('photo'), $teacher?->photo ?? null, 'teachers/' . $request->file('photo')->hashName());
             $deletePhoto = false;
         } else {
             $deletePhoto = false;
