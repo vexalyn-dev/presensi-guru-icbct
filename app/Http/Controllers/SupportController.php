@@ -283,7 +283,8 @@ class SupportController extends Controller
                 $caption .= "*🔄 Ticket Status*\n\n";
                 $caption .= "`◉ MENUNGGU PENANGANAN`\n\n";
                 $caption .= "*Tiket kamu sudah kami terima. Saya akan segera mengecek laporan ini dan menghubungi kamu kembali.*\n\n";
-                $caption .= "— *Vexalyn Support Center*";
+                $caption .= "— *Vexalyn Support Center*\n\n";
+                $caption .= "🙏 *Terima kasih sudah menghubungi kami!*";
 
                 // 1. Kirim gambar lampiran user dulu (jika ada)
                 if (!empty($ticket->attachments)) {
