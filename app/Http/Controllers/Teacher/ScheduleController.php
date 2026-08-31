@@ -27,7 +27,7 @@ class ScheduleController extends Controller
             4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', 0 => 'Minggu'
         ];
 
-        return view('teacher.schedule', compact('schedules', 'dayNames', 'today'));
+        return view('teacher.schedule', compact('schedules', 'dayNames'));
     }
 
     public function workSchedule()

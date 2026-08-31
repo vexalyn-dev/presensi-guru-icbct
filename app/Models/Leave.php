@@ -63,7 +63,7 @@ class Leave extends Model
 
     public function scopePending($query)
     {
-        return $query->where('status', 'Pending');
+        return $query->where('status', 'pending');
     }
 
     public function getDurationAttribute()
@@ -74,7 +74,7 @@ class Leave extends Model
     public function approve($adminId, $notes = null)
     {
         $this->update([
-            'status' => 'Approved',
+            'status' => 'approved',
             'approved_by' => $adminId,
             'notes' => $notes,
             'approved_at' => now(),
@@ -84,7 +84,7 @@ class Leave extends Model
     public function reject($adminId, $notes = null)
     {
         $this->update([
-            'status' => 'Rejected',
+            'status' => 'rejected',
             'approved_by' => $adminId,
             'notes' => $notes,
             'approved_at' => now(),

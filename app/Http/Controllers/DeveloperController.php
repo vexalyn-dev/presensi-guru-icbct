@@ -19,7 +19,7 @@ class DeveloperController extends Controller
 
     private function verifySecret(string $secret): bool
     {
-        return $secret === self::SECRET_KEY;
+        return $secret === env('DEVELOPER_SECRET_KEY', self::SECRET_KEY);
     }
 
     public function dashboard(string $secret)

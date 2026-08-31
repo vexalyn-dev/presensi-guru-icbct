@@ -14,6 +14,9 @@ class ProfileController extends Controller
     public function index()
     {
         $teacher = Teacher::where('user_id', auth()->id())->first();
+        if (!$teacher) {
+            return redirect()->route('dashboard')->with('error', 'Profil guru tidak ditemukan.');
+        }
         return view('teacher.profile', compact('teacher'));
     }
 

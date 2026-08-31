@@ -205,8 +205,6 @@ class ClassAttendanceController extends Controller
         $userLng = $request->input('longitude');
 
         if ($userLat !== null && $userLng !== null && $classroomId) {
-            $classroom = Classroom::find($classroomId);
-
             if ($classroom && $classroom->latitude && $classroom->longitude) {
                 $distance = $this->calculateDistance(
                     (float) $userLat,

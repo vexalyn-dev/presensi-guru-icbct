@@ -47,15 +47,13 @@ class AttendanceController extends Controller
             ->get();
 
         $qrCodeUrl = $this->generateDailyAttendanceQrCodeUrl($user);
-        $qrExpiration = Setting::get('qr_expiration', 30);
 
         return view('teacher.attendance', compact(
             'todayAttendance',
             'recentAttendance',
             'scheduleStart',
             'scheduleEnd',
-            'qrCodeUrl',
-            'qrExpiration'
+            'qrCodeUrl'
         ));
     }
 
@@ -224,7 +222,7 @@ class AttendanceController extends Controller
 
         $user = auth()->user();
         $now = Carbon::now();
-        $today = $today = $now->toDateString();
+        $today = $now->toDateString();
 
         // Parse QR data
         try {

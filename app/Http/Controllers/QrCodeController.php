@@ -212,7 +212,7 @@ class QrCodeController extends Controller
 
         $path = storage_path('app/public/' . $teacher->qr_code);
 
-        session()->flash('success', 'QR Code berhasil diunduh: ' . $teacher->name);
+        session()->put('success', 'QR Code berhasil diunduh: ' . $teacher->name);
 
         return response()->download($path, 'QR_' . str_replace(' ', '_', $teacher->name) . '.jpg');
     }

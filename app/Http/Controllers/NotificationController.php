@@ -24,7 +24,7 @@ class NotificationController extends Controller
             ->where('notifiable_id', Auth::id())
             ->first();
 
-        if ($notification && !$notification->is_read) {
+        if ($notification && $notification->read_at === null) {
             $notification->markAsRead();
         }
 

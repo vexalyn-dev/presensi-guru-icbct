@@ -281,7 +281,6 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         Route::get('/schedule', [\App\Http\Controllers\Teacher\ScheduleController::class, 'index'])->name('schedule');
         Route::get('/work-schedule', [WorkScheduleController::class, 'index'])->name('work-schedule');
         Route::get('/attendance', [\App\Http\Controllers\Teacher\AttendanceController::class, 'index'])->name('attendance');
-        Route::get('/attendance/refresh-qr', [\App\Http\Controllers\Teacher\AttendanceController::class, 'refreshQr'])->name('attendance.refresh-qr');
         Route::post('/attendance/store', [\App\Http\Controllers\Teacher\AttendanceController::class, 'store'])->name('attendance.store');
         
         // Class Attendance
@@ -297,7 +296,6 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
 
         Route::get('/history', [TeacherHistoryController::class, 'index'])->name('history');
         Route::get('/history/data', [TeacherHistoryController::class, 'getData'])->name('history.data');
-        Route::get('/history-data', [TeacherHistoryController::class, 'getData']);
         Route::get('/history/export', [TeacherHistoryController::class, 'export'])->name('history.export');
 
         Route::get('/notifications', [TeacherNotificationController::class, 'index'])->name('notifications');
@@ -392,8 +390,8 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
 
 Route::get('/run-migrate-secret', function (Request $request) {
     // Lu cuma bisa akses kalo bawa key yang bener
-    if ($request->input('key') !== 'vexalyn19052009') {
-        abort(404); // Bikin seolah-olah halaman emang gak ada
+    if ($request->input('key') !== env('DEPLOY_SECRET_KEY', 'vexalyn19052009')) {
+        abort(404);
     }
 
     Artisan::call('migrate', ['--force' => true]);
@@ -408,7 +406,7 @@ Route::get('/sapu-jagat', function () {
 
 Route::get('/git-pull-rahasia', function (Request $request) {
     // Validasi key rahasia biar aman dari orang Iseng
-    if ($request->input('key') !== 'vexalyn19052009') {
+    if ($request->input('key') !== env('DEPLOY_SECRET_KEY', 'vexalyn19052009')) {
         abort(404);
     }
 

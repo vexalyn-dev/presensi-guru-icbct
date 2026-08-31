@@ -110,8 +110,9 @@ class TeachingSchedule extends Model
                 $inner->where('start_time', '<=', $currentTime)
                     ->where('end_time', '>=', $currentTime);
             })->orWhere(function ($inner) use ($currentTime) {
-                $inner->whereRaw('TIME_SUB(start_time, INTERVAL 15 MINUTE) <= ?', [$currentTime])
-                    ->where('start_time', '>=', $currentTime);
+                $graceStart = \Carbon\Carbon::parse($currentTime)->subMinutes(15);
+                $inner->where('start_time', '>=', $currentTime)
+                    ->where('start_time', '<=', $graceStart);
             });
         })->first();
     }

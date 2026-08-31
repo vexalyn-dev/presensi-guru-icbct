@@ -54,7 +54,6 @@ class SettingController extends Controller
                 'attendance_end_time' => Setting::get('attendance_end_time', '16:00'),
                 'attendance_late_grace_period' => Setting::get('attendance_late_grace_period', 5),
                 'gps_validation_status' => Setting::get('gps_validation_status', 'on'),
-                'qr_expiration' => Setting::get('qr_expiration', 30),
                 'auto_logout' => Setting::get('auto_logout', 'off'),
             ],
             'appearance' => [
@@ -131,7 +130,6 @@ class SettingController extends Controller
             'attendance_end_time' => 'required|date_format:H:i|after:attendance_start_time',
             'attendance_late_grace_period' => 'required|integer|min:0|max:60',
             'gps_validation_status' => 'required|in:on,off',
-            'qr_expiration' => 'required|integer|in:15,30,45,60',
             'auto_logout' => 'required|in:off,5,10,15,30,60,120',
         ]);
 
@@ -139,7 +137,6 @@ class SettingController extends Controller
         Setting::set('attendance_end_time', $validated['attendance_end_time']);
         Setting::set('attendance_late_grace_period', $validated['attendance_late_grace_period'], 'number');
         Setting::set('gps_validation_status', $validated['gps_validation_status'], 'string');
-        Setting::set('qr_expiration', $validated['qr_expiration'], 'number');
         Setting::set('auto_logout', $validated['auto_logout'], 'string');
 
         $this->syncToAppSetting();
@@ -329,7 +326,6 @@ class SettingController extends Controller
             'attendance_end_time' => ['value' => '16:00', 'type' => 'string'],
             'attendance_late_grace_period' => ['value' => '5', 'type' => 'number'],
             'gps_validation_status' => ['value' => 'on', 'type' => 'string'],
-            'qr_expiration' => ['value' => '30', 'type' => 'number'],
             'auto_logout' => ['value' => 'off', 'type' => 'string'],
             'primary_color' => ['value' => '#0F172A', 'type' => 'string'],
             'accent_color' => ['value' => '#FACC15', 'type' => 'string'],

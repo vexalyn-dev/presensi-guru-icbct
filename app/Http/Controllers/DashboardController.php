@@ -57,20 +57,26 @@ class DashboardController extends Controller
         $chartTidakHadirData = [];
         $chartIzinData = [];
         
-        for ($i = 29; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            
-            $chartHadirData[] = Attendance::whereDate('date', $date)
-                ->whereIn('status', [User::STATUS_HADIR, User::STATUS_TEPAT_WAKTU])->count();
-            
-            $chartTerlambatData[] = Attendance::whereDate('date', $date)
-                ->where('status', User::STATUS_TERLAMBAT)->count();
-            
-            $chartTidakHadirData[] = Attendance::whereDate('date', $date)
-                ->where('status', User::STATUS_ALPHA)->count();
-            
-            $chartIzinData[] = Attendance::whereDate('date', $date)
-                ->whereIn('status', [User::STATUS_IZIN, User::STATUS_SAKIT, User::STATUS_CUTI])->count();
+        $stats = Attendance::selectRaw('
+            DATE(date) as date_str,
+            SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END) as hadir,
+            SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as terlambat,
+            SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as alpha,
+            SUM(CASE WHEN status IN (?, ?, ?) THEN 1 ELSE 0 END) as izin
+        ', [User::STATUS_HADIR, User::STATUS_TEPAT_WAKTU, User::STATUS_TERLAMBAT, User::STATUS_ALPHA, User::STATUS_IZIN, User::STATUS_SAKIT, User::STATUS_CUTI])
+            ->whereBetween('date', [Carbon::today()->subDays(29), Carbon::today()])
+            ->groupBy('date_str')
+            ->orderBy('date_str')
+            ->get();
+
+        for ($i = 0; $i < 30; $i++) {
+            $date = Carbon::today()->subDays(29 - $i);
+            $dateStr = $date->toDateString();
+            $row = $stats->firstWhere('date_str', $dateStr);
+            $chartHadirData[]   = $row ? (int) $row->hadir : 0;
+            $chartTerlambatData[] = $row ? (int) $row->terlambat : 0;
+            $chartTidakHadirData[] = $row ? (int) $row->alpha : 0;
+            $chartIzinData[]    = $row ? (int) $row->izin : 0;
         }
 
         $appSettings = AppSetting::getInstance();

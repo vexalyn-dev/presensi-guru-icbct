@@ -255,7 +255,7 @@ class User extends Authenticatable
      */
     public function scopeTeachers(Builder $query): Builder
     {
-        return $query->whereIn('role', ['guru', 'teacher']);
+        return $query->whereIn('role', ['guru']);
     }
 
     /**
@@ -497,12 +497,18 @@ class User extends Authenticatable
      */
     public function getAttendanceStatsAttribute(): array
     {
+        $stats = $this->attendances()
+            ->selectRaw('status, COUNT(*) as cnt')
+            ->groupBy('status')
+            ->pluck('cnt', 'status')
+            ->toArray();
+
         return [
-            'total' => $this->attendances()->count(),
-            'hadir' => $this->attendances()->where('status', 'Hadir')->count(),
-            'terlambat' => $this->attendances()->where('status', 'Terlambat')->count(),
-            'izin' => $this->attendances()->where('status', 'Izin')->count(),
-            'alpha' => $this->attendances()->where('status', 'Alpha')->count(),
+            'total'     => array_sum($stats),
+            'hadir'     => $stats['Hadir'] ?? 0,
+            'terlambat' => $stats['Terlambat'] ?? 0,
+            'izin'      => ($stats['Izin'] ?? 0) + ($stats['Sakit'] ?? 0) + ($stats['Cuti'] ?? 0),
+            'alpha'     => $stats['Alpha'] ?? 0,
         ];
     }
 
@@ -529,8 +535,8 @@ class User extends Authenticatable
             // Gunakan API external untuk generate format JPG murni tanpa error Imagick PHP extension
             $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/';
             
-            // Gunakan Laravel HTTP client tanpa verifikasi SSL (mengatasi masalah SSL di local Windows/XAMPP)
-            $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(5)->get($qrUrl, [
+            // Gunakan Laravel HTTP client (SSL verification aktif)
+            $response = \Illuminate\Support\Facades\Http::timeout(10)->get($qrUrl, [
                 'size' => '400x400',
                 'margin' => '2',
                 'format' => 'jpeg',

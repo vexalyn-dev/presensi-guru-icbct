@@ -93,12 +93,6 @@ class AttendanceController extends Controller
 
         // ✅ Ambil jadwal hari ini
         $todaySchedule = \App\Models\TeacherSchedule::getTodaySchedule($teacher->id);
-        
-        if (!$todaySchedule) {
-            return $ajaxRequest
-                ? response()->json(['success' => false, 'message' => 'Jadwal hari ini tidak ditemukan.'], 422)
-                : back()->with('error', 'Jadwal hari ini tidak ditemukan.');
-        }
 
         // Validasi GPS lokasi jika diaktifkan
         $gpsValidation = \App\Helpers\GpsHelper::validateLocation($validated['latitude'] ?? null, $validated['longitude'] ?? null);

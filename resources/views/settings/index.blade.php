@@ -354,53 +354,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <!-- QR Code Expiration -->
-                        <div>
-                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">QR Code Berlaku (Detik)</label>
-                            <div class="relative" x-data="{ openQr: false }" @click.outside="openQr = false">
-                                <button type="button" @click="openQr = !openQr"
-                                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 flex items-center justify-between hover:border-navy-300 dark:hover:border-gold-600 transition-all">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-6 h-6 rounded-lg flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
-                                            <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
-                                        </div>
-                                        <span class="text-slate-700 dark:text-slate-300 font-medium" x-text="selectedQrExpiration + ' detik'"></span>
-                                    </div>
-                                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{'rotate-180': openQr}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </button>
-
-                                <div x-show="openQr"
-                                     x-transition:enter="transition ease-out duration-200"
-                                     x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
-                                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                     x-transition:leave="transition ease-in duration-150"
-                                     x-transition:leave-start="opacity-100 scale-100"
-                                     x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                     class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
-                                     x-cloak>
-                                    <div class="overflow-y-auto" style="max-height: 240px;">
-                                        <template x-for="option in qrExpirationOptions" :key="option.value">
-                                            <button type="button" @click="selectedQrExpiration = option.value; openQr = false"
-                                                    class="w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 last:border-0"
-                                                    :class="selectedQrExpiration === option.value ? 'bg-navy-50 dark:bg-navy-900/30' : ''">
-                                                <div class="w-6 h-6 rounded-lg flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
-                                                    <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
-                                                </div>
-                                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300" x-text="option.name"></span>
-                                                <svg x-show="selectedQrExpiration === option.value" class="w-5 h-5 text-navy-800 dark:text-gold-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                                </svg>
-                                            </button>
-                                        </template>
-                                    </div>
-                                </div>
-                                <input type="hidden" name="qr_expiration" :value="selectedQrExpiration">
-                            </div>
-                            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Durasi QR Code tetap valid</p>
-                        </div>
-
                         <!-- ✅ Auto Logout -->
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Auto Logout</label>
@@ -978,13 +931,6 @@
                 { value: 'off', name: 'Nonaktif' },
             ],
 
-            qrExpirationOptions: [
-                { value: '15', name: '15 detik' },
-                { value: '30', name: '30 detik' },
-                { value: '45', name: '45 detik' },
-                { value: '60', name: '60 detik' },
-            ],
-
             autoLogoutOptions: [
                 { value: 'off', name: 'Nonaktif' },
                 { value: '5', name: '5 menit' },
@@ -1098,13 +1044,11 @@
                 const currentLang = '{{ old("app_language", $settings["general"]["app_language"] ?? "id") }}';
                 const currentTimezone = '{{ old("app_timezone", $settings["general"]["app_timezone"] ?? "Asia/Jakarta") }}';
                 const currentGpsValidation = '{{ old("gps_validation_status", $settings["attendance"]["gps_validation_status"] ?? "on") }}';
-                const currentQrExpiration = '{{ old("qr_expiration", $settings["attendance"]["qr_expiration"] ?? "30") }}';
                 const currentAutoLogout = '{{ old("auto_logout", $settings["attendance"]["auto_logout"] ?? "off") }}';
                 
                 this.selectedLanguage = this.languages.find(l => l.code === currentLang) || this.languages[0];
                 this.selectedTimezone = this.timezones.find(t => t.value === currentTimezone) || this.timezones[0];
                 this.selectedGpsValidation = this.gpsValidationOptions.some(opt => opt.value === currentGpsValidation) ? currentGpsValidation : 'on';
-                this.selectedQrExpiration = this.qrExpirationOptions.some(opt => String(opt.value) === String(currentQrExpiration)) ? currentQrExpiration : '30';
                 this.selectedAutoLogout = this.autoLogoutOptions.some(opt => String(opt.value) === String(currentAutoLogout)) ? currentAutoLogout : 'off';
             }
         }));

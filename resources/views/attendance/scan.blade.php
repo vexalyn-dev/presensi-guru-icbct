@@ -968,11 +968,6 @@
         window.addEventListener('beforeunload', () => {
             stopCamera();
         });
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
-        });
     </script>
 
     <style>

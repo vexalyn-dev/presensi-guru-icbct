@@ -12,16 +12,19 @@ class GitHubWebhookController extends Controller
 {
     public function handle(Request $request)
     {
-        // Verifikasi signature GitHub
-        $secret    = env('GITHUB_WEBHOOK_SECRET', '');
+        // Verifikasi signature GitHub — secret wajib ada
+        $secret    = env('GITHUB_WEBHOOK_SECRET');
         $signature = $request->header('X-Hub-Signature-256', '');
 
-        if ($secret && $signature) {
-            $expected = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
-            if (!hash_equals($expected, $signature)) {
-                Log::warning('GitHub Webhook: signature tidak valid');
-                return response()->json(['error' => 'Invalid signature'], 401);
-            }
+        if (!$secret || !$signature) {
+            Log::warning('GitHub Webhook: GITHUB_WEBHOOK_SECRET belum dikonfigurasi atau signature hilang');
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $expected = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
+        if (!hash_equals($expected, $signature)) {
+            Log::warning('GitHub Webhook: signature tidak valid');
+            return response()->json(['error' => 'Invalid signature'], 401);
         }
 
         $event   = $request->header('X-GitHub-Event', '');

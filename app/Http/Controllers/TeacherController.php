@@ -84,6 +84,7 @@ class TeacherController extends Controller
             $photoPath = $request->file('photo')->store('profiles', 'public');
         }
 
+        $employeeCode = null;
         DB::transaction(function () use ($validated, $photoPath, &$employeeCode) {
             $user = User::create([
                 'name' => $validated['name'],
@@ -147,7 +148,6 @@ class TeacherController extends Controller
         // }]);
         
         $attendances = $teacher->attendances()
-            ->latest('date')
             ->latest('check_in')
             ->paginate(5);
         
@@ -243,8 +243,6 @@ class TeacherController extends Controller
 
         // ActivityLog
         try { ActivityLogService::teacherUpdated(auth()->user(), $teacher, array_keys($updateData)); } catch (\Exception $e) {}
-
-        // Update teacher record (sync major_specialty with subject)
 
         // Update teacher record (sync major_specialty with subject)
         if ($teacher->teacher) {
@@ -450,9 +448,11 @@ class TeacherController extends Controller
             if ($teacher->photo) {
                 Storage::disk('public')->delete($teacher->photo);
             }
-            
-            // TeacherSubject::where('user_id', $teacher->id)->delete();
+
             $teacher->attendances()->delete();
+            \App\Models\ClassAttendance::where('user_id', $teacher->id)->delete();
+            \App\Models\TeachingSchedule::where('user_id', $teacher->id)->delete();
+            \App\Models\TeacherSchedule::where('user_id', $teacher->id)->delete();
             $teacher->delete();
         });
 

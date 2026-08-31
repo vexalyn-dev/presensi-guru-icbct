@@ -46,7 +46,7 @@ class Holiday extends Model
         $date = Carbon::parse($date);
         
         if ($date->isWeekend()) {
-            return $date->dayName;
+            return $date->isSaturday() ? 'Sabtu' : 'Minggu';
         }
         
         $holiday = self::where('date', $date->toDateString())->first();
