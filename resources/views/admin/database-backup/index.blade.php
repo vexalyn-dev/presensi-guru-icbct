@@ -153,7 +153,7 @@
             </div>
         </div>
 
-        @if($backups->isEmpty())
+        @if(empty($backups))
             <div class="text-center py-12">
                 <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="folder-open" class="w-8 h-8 text-slate-400 dark:text-slate-500"></i>
