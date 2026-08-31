@@ -245,7 +245,6 @@ class SupportController extends Controller
             if ($adminPhone) {
                 $prioLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
                 $typeLabel = SupportTicket::typeLabels()[$ticket->type]['label'] ?? ucfirst($ticket->type);
-                $reporter  = $ticket->user?->name ?? 'Pengguna';
                 $roleMap   = [
                     'admin'    => 'Admin',
                     'operator' => 'Operator',
@@ -255,7 +254,7 @@ class SupportController extends Controller
                 $roleLabel = $roleMap[$ticket->user?->role] ?? ucfirst($ticket->user?->role ?? 'Pengguna');
                 $fonnte    = new FonnteService();
 
-                // Format pesan baru sesuai requested
+                // Format pesan caption
                 $caption  = "*✦ VEXALYN*\n";
                 $caption .= "*SUPPORT CENTER*\n\n";
                 $caption .= "*🎫 New Support Ticket*\n";
@@ -276,37 +275,59 @@ class SupportController extends Controller
                 $caption .= "*🔄 Ticket Status*\n\n";
                 $caption .= "`◉ MENUNGGU PENANGANAN`\n\n";
                 $caption .= "*Tiket kamu sudah kami terima. Saya akan segera mengecek laporan ini dan menghubungi kamu kembali.*\n\n";
-                $caption .= "— *Vexalyn Support Center*\n\n";
-                $caption .= "*🙏 Terima kasih sudah menghubungi kami!*\n\n";
-                $caption .= "> _Sent via fonnte.com_";
+                $caption .= "— *Vexalyn Support Center*";
 
-                // Kirim lampiran/attachment (gambar/file tambahan dari guru) sebagai gambar + caption
+                // 1. Pastikan card/image selalu dikirim
+                $cardPath = $cardPath ?? $ticket->card_image_path;
+
+                // Generate card jika belum ada
+                if (!$cardPath) {
+                    try {
+                        $generator = new \App\Services\HelpdeskCardGenerator();
+                        $cardPath = $generator->generate($ticket);
+                        if ($cardPath) {
+                            $ticket->update(['card_image_path' => $cardPath]);
+                        }
+                    } catch (\Throwable $e) {
+                        \Log::warning('GD Card generation failed', ['reason' => $e->getMessage()]);
+                    }
+                }
+
+                // Kirim card image dengan caption
+                if ($cardPath) {
+                    $absoluteCardPath = \Storage::disk('public')->path($cardPath);
+                    if (file_exists($absoluteCardPath)) {
+                        $fonnte->sendImageFile($adminPhone, $absoluteCardPath, $caption);
+                    } else {
+                        \Log::warning('notifyFonnte: card file not found', ['path' => $absoluteCardPath]);
+                        $fonnte->sendText($adminPhone, $caption);
+                    }
+                } else {
+                    $fonnte->sendText($adminPhone, $caption);
+                }
+
+                // 2. Kirim lampiran/attachment (gambar/file tambahan dari guru) sebagai gambar TANPA caption
                 if (!empty($ticket->attachments)) {
                     foreach ($ticket->attachments as $attachment) {
                         if (!empty($attachment['url'])) {
-                            // Ekstrak relative path dari URL untuk mendapatkan path lokal
-                            $parsedUrl    = parse_url($attachment['url']);
-                            $urlPath      = $parsedUrl['path'] ?? '';
-                            $storagePos   = strpos($urlPath, '/storage/');
+                            $parsedUrl  = parse_url($attachment['url']);
+                            $urlPath    = $parsedUrl['path'] ?? '';
+                            $storagePos = strpos($urlPath, '/storage/');
                             $relativePath = ($storagePos !== false)
                                 ? substr($urlPath, $storagePos + 9)
                                 : ltrim($urlPath, '/');
 
-                            // Decode URL encoding agar path file di filesystem benar
                             $relativePath = urldecode($relativePath);
                             $absolutePath = \Storage::disk('public')->path($relativePath);
 
                             if (file_exists($absolutePath)) {
-                                // Kirim gambar dengan caption lengkap di bawahnya
-                                $fonnte->sendImageFile($adminPhone, $absolutePath, $caption);
+                                // Kirim sebagai gambar tanpa caption
+                                $fonnte->sendImageFile($adminPhone, $absolutePath, '');
                             } else {
                                 \Log::warning('notifyFonnte: attachment file not found', ['path' => $absolutePath]);
                             }
                         }
                     }
-                } else {
-                    // Jika tidak ada lampiran, kirim teks saja
-                    $fonnte->sendText($adminPhone, $caption);
                 }
             }
         } catch (\Throwable $e) {
