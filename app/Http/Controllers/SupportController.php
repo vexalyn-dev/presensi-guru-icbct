@@ -254,8 +254,14 @@ class SupportController extends Controller
                 $roleLabel = $roleMap[$ticket->user?->role] ?? ucfirst($ticket->user?->role ?? 'Pengguna');
                 $fonnte    = new FonnteService();
 
-                // Priority emoji + warna
+                // Priority emoji + warna (sesuai UI)
                 $prioEmoji = match($ticket->priority) {
+                    'critical' => '🔥',
+                    'high'     => '⚠️',
+                    'medium'   => '⏰',
+                    default    => '✅',
+                };
+                $prioColor = match($ticket->priority) {
                     'critical' => '🔴',
                     'high'     => '🟠',
                     'medium'   => '🟡',
@@ -265,35 +271,31 @@ class SupportController extends Controller
                 // Format pesan caption
                 $caption  = "*✦ VEXALYN*\n";
                 $caption .= "*SUPPORT CENTER*\n\n";
-                $caption .= "*🎫 New Support Ticket*\n";
-                $caption .= "`#{$ticket->ticket_id}`\n\n";
+                $caption .= "*🎫 NEW SUPPORT TICKET*\n";
+                $caption .= "*`#{$ticket->ticket_id}`*\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                $caption .= "*👤 From*\n";
-                $caption .= "{$roleLabel}\n\n";
-                $caption .= "*📂 Type*\n";
-                $caption .= "{$typeLabel}\n\n";
-                $caption .= "*📝 Subject*\n";
-                $caption .= "{$ticket->title}\n\n";
-                $caption .= "*⚠️ Priority*\n";
-                $caption .= "{$prioEmoji} *".strtoupper($prioLabel)."*\n\n";
+                $caption .= "*👤 FROM* : *{$roleLabel}*\n\n";
+                $caption .= "*📂 TYPE* : *{$typeLabel}*\n\n";
+                $caption .= "*📝 SUBJECT* : *{$ticket->title}*\n\n";
+                $caption .= "*⚠️ PRIORITY* : {$prioEmoji} *{$prioColor}*" . strtoupper($prioLabel) . "*\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                $caption .= "*📄 Report Details*\n\n";
+                $caption .= "*📄 REPORT DETAILS*\n\n";
                 $caption .= $ticket->description . "\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
 
-                // Lampiran section
+                // Attachment section
                 if (!empty($ticket->attachments)) {
-                    $caption .= "*📎 Lampiran*\n\n";
+                    $caption .= "*📎 ATTACHMENT*\n\n";
                     foreach ($ticket->attachments as $attachment) {
                         if (!empty($attachment['url'])) {
-                            $caption .= "🔗 {$attachment['url']}\n\n";
+                            $caption .= "🔗 *{$attachment['url']}*\n\n";
                         }
                     }
                     $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
                 }
 
-                $caption .= "*🔄 Ticket Status*\n\n";
-                $caption .= "`◉ MENUNGGU PENANGANAN`\n\n";
+                $caption .= "*🔄 TICKET STATUS*\n\n";
+                $caption .= "*`◉ MENUNGGU PENANGANAN`*\n\n";
                 $caption .= "*Tiket kamu sudah kami terima. Saya akan segera mengecek laporan ini dan menghubungi kamu kembali.*\n\n";
                 $caption .= "— *Vexalyn Support Center*\n\n";
                 $caption .= "🙏 *Terima kasih sudah menghubungi kami!*";
