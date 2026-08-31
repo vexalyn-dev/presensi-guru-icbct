@@ -277,36 +277,10 @@ class SupportController extends Controller
                 $caption .= "`◉ MENUNGGU PENANGANAN`\n\n";
                 $caption .= "*Tiket kamu sudah kami terima. Saya akan segera mengecek laporan ini dan menghubungi kamu kembali.*\n\n";
                 $caption .= "— *Vexalyn Support Center*\n\n";
-                $caption .= "*🙏 Terima kasih sudah menghubungi kami!*";
+                $caption .= "*🙏 Terima kasih sudah menghubungi kami!*\n\n";
+                $caption .= "> _Sent via fonnte.com_";
 
-                // Jika cardPath tidak dikirimkan, coba fallback ke generator PHP GD jika ada
-                if (!$cardPath) {
-                    try {
-                        $generator = new HelpdeskCardGenerator();
-                        $cardPath  = $generator->generate($ticket);
-                        if ($cardPath) {
-                            $ticket->update(['card_image_path' => $cardPath]);
-                        }
-                    } catch (\Throwable $e) {
-                        \Log::warning('GD Card generation failed', ['reason' => $e->getMessage()]);
-                    }
-                }
-
-                if ($cardPath) {
-                    // Kirim gambar kartu langsung via file upload (tidak butuh URL publik)
-                    $absoluteCardPath = \Storage::disk('public')->path($cardPath);
-                    if (file_exists($absoluteCardPath)) {
-                        $fonnte->sendImageFile($adminPhone, $absoluteCardPath, $caption);
-                    } else {
-                        \Log::warning('notifyFonnte: card file not found, falling back to text', ['path' => $absoluteCardPath]);
-                        $fonnte->sendText($adminPhone, $caption);
-                    }
-                } else {
-                    // Fallback: kirim teks saja jika kartu gagal digenerate
-                    $fonnte->sendText($adminPhone, $caption);
-                }
-
-                // Kirim lampiran/attachment (gambar/file tambahan dari guru) sebagai pesan terpisah
+                // Kirim lampiran/attachment (gambar/file tambahan dari guru) sebagai gambar + caption
                 if (!empty($ticket->attachments)) {
                     foreach ($ticket->attachments as $attachment) {
                         if (!empty($attachment['url'])) {
@@ -323,16 +297,16 @@ class SupportController extends Controller
                             $absolutePath = \Storage::disk('public')->path($relativePath);
 
                             if (file_exists($absolutePath)) {
-                                $fonnte->sendImageFile(
-                                    $adminPhone,
-                                    $absolutePath,
-                                    "📎 *LAMPIRAN DARI PENGGUNA* (Tiket #{$ticket->ticket_id})\n📄 File: {$attachment['name']}"
-                                );
+                                // Kirim gambar dengan caption lengkap di bawahnya
+                                $fonnte->sendImageFile($adminPhone, $absolutePath, $caption);
                             } else {
                                 \Log::warning('notifyFonnte: attachment file not found', ['path' => $absolutePath]);
                             }
                         }
                     }
+                } else {
+                    // Jika tidak ada lampiran, kirim teks saja
+                    $fonnte->sendText($adminPhone, $caption);
                 }
             }
         } catch (\Throwable $e) {
