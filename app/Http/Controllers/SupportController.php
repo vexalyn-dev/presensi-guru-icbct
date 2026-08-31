@@ -254,6 +254,14 @@ class SupportController extends Controller
                 $roleLabel = $roleMap[$ticket->user?->role] ?? ucfirst($ticket->user?->role ?? 'Pengguna');
                 $fonnte    = new FonnteService();
 
+                // Priority emoji + warna
+                $prioEmoji = match($ticket->priority) {
+                    'critical' => '🔴',
+                    'high'     => '🟠',
+                    'medium'   => '🟡',
+                    default    => '🟢',
+                };
+
                 // Format pesan caption
                 $caption  = "*✦ VEXALYN*\n";
                 $caption .= "*SUPPORT CENTER*\n\n";
@@ -267,7 +275,7 @@ class SupportController extends Controller
                 $caption .= "*📝 Subject*\n";
                 $caption .= "{$ticket->title}\n\n";
                 $caption .= "*⚠️ Priority*\n";
-                $caption .= "`{$prioLabel}`\n\n";
+                $caption .= "{$prioEmoji} *{$prioLabel}*\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
                 $caption .= "*📄 Report Details*\n\n";
                 $caption .= "> " . wordwrap($ticket->description, 40, "\n> ") . "\n\n";
@@ -277,42 +285,13 @@ class SupportController extends Controller
                 $caption .= "*Tiket kamu sudah kami terima. Saya akan segera mengecek laporan ini dan menghubungi kamu kembali.*\n\n";
                 $caption .= "— *Vexalyn Support Center*";
 
-                // 1. Pastikan card/image selalu dikirim
-                $cardPath = $cardPath ?? $ticket->card_image_path;
-
-                // Generate card jika belum ada
-                if (!$cardPath) {
-                    try {
-                        $generator = new \App\Services\HelpdeskCardGenerator();
-                        $cardPath = $generator->generate($ticket);
-                        if ($cardPath) {
-                            $ticket->update(['card_image_path' => $cardPath]);
-                        }
-                    } catch (\Throwable $e) {
-                        \Log::warning('GD Card generation failed', ['reason' => $e->getMessage()]);
-                    }
-                }
-
-                // Kirim card image dengan caption
-                if ($cardPath) {
-                    $absoluteCardPath = \Storage::disk('public')->path($cardPath);
-                    if (file_exists($absoluteCardPath)) {
-                        $fonnte->sendImageFile($adminPhone, $absoluteCardPath, $caption);
-                    } else {
-                        \Log::warning('notifyFonnte: card file not found', ['path' => $absoluteCardPath]);
-                        $fonnte->sendText($adminPhone, $caption);
-                    }
-                } else {
-                    $fonnte->sendText($adminPhone, $caption);
-                }
-
-                // 2. Kirim lampiran/attachment (gambar/file tambahan dari guru) sebagai gambar TANPA caption
+                // 1. Kirim gambar lampiran user dulu (jika ada)
                 if (!empty($ticket->attachments)) {
                     foreach ($ticket->attachments as $attachment) {
                         if (!empty($attachment['url'])) {
-                            $parsedUrl  = parse_url($attachment['url']);
-                            $urlPath    = $parsedUrl['path'] ?? '';
-                            $storagePos = strpos($urlPath, '/storage/');
+                            $parsedUrl    = parse_url($attachment['url']);
+                            $urlPath      = $parsedUrl['path'] ?? '';
+                            $storagePos   = strpos($urlPath, '/storage/');
                             $relativePath = ($storagePos !== false)
                                 ? substr($urlPath, $storagePos + 9)
                                 : ltrim($urlPath, '/');
@@ -321,13 +300,16 @@ class SupportController extends Controller
                             $absolutePath = \Storage::disk('public')->path($relativePath);
 
                             if (file_exists($absolutePath)) {
-                                // Kirim sebagai gambar tanpa caption
-                                $fonnte->sendImageFile($adminPhone, $absolutePath, '');
+                                // Kirim gambar + caption
+                                $fonnte->sendImageFile($adminPhone, $absolutePath, $caption);
                             } else {
                                 \Log::warning('notifyFonnte: attachment file not found', ['path' => $absolutePath]);
                             }
                         }
                     }
+                } else {
+                    // Jika tidak ada lampiran, kirim teks saja
+                    $fonnte->sendText($adminPhone, $caption);
                 }
             }
         } catch (\Throwable $e) {
