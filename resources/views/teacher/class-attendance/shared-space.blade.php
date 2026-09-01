@@ -179,12 +179,12 @@
          x-transition:leave-end="opacity-0 scale-95">
         <div class="text-center max-w-xs">
             <div class="w-20 h-20 mx-auto mb-5 rounded-full flex items-center justify-center"
-                 :class="result?.success ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'">
-                <i data-lucide="check-circle" x-show="result?.success" class="w-10 h-10 text-green-600 dark:text-green-400"></i>
-                <i data-lucide="x-circle" x-show="!result?.success" class="w-10 h-10 text-red-600 dark:text-red-400"></i>
+                 :class="result && result.success ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'">
+                <i data-lucide="check-circle" x-show="result && result.success" class="w-10 h-10 text-green-600 dark:text-green-400"></i>
+                <i data-lucide="x-circle" x-show="result && !result.success" class="w-10 h-10 text-red-600 dark:text-red-400"></i>
             </div>
-            <h2 class="text-xl font-extrabold text-navy-800 dark:text-white mb-2" x-text="result?.success ? 'Berhasil!' : 'Gagal'"></h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 whitespace-pre-line" x-text="result?.message ?? ''"></p>
+            <h2 class="text-xl font-extrabold text-navy-800 dark:text-white mb-2" x-text="result && result.success ? 'Berhasil!' : 'Gagal'"></h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 whitespace-pre-line" x-text="result ? result.message || '' : ''"></p>
             <button @click="window.location.href = '{{ route('teacher.class-attendance') }}'"
                     class="px-8 py-3 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl font-bold text-sm hover:opacity-90 transition-all active:scale-95">
                 Kembali ke Dashboard
