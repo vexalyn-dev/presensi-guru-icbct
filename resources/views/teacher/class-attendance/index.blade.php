@@ -491,7 +491,7 @@
                     </button>
                 </div>
                 <!-- Step indicator -->
-                <div class="flex items-center gap-1.5 mt-3" x-show="mode==='in'">
+                <div class="flex items-center gap-1.5 mt-3" x-show="showSharedSpaceSheet && mode==='in'">
                     <template x-for="(step,i) in [{l:'Kelas',d:!!sharedSpaceSelectedClass},{l:'Mapel',d:!!sharedSpaceSelectedSubject},{l:'Jam',d:!!sharedSpacePeriod}]" :key="i">
                         <div class="flex items-center gap-1.5" :class="i<2?'flex-1':''">
                             <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0 transition-all duration-300"
@@ -515,7 +515,7 @@
             <div class="flex-1 overflow-y-auto overscroll-contain px-5 py-4 space-y-4">
 
                 <!-- MODE IN -->
-                <div x-show="mode==='in'" class="space-y-4">
+                <div x-show="showSharedSpaceSheet && mode==='in'" class="space-y-4">
 
                     <!-- KELAS -->
                     <div class="relative">
@@ -734,7 +734,7 @@
                 </div>
 
                 <!-- MODE OUT -->
-                <div x-show="mode==='out'" class="space-y-3">
+                <div x-show="showSharedSpaceSheet && mode==='out'" class="space-y-3">
                     <template x-if="sharedSpaceActiveSessions.length > 0">
                         <div class="space-y-2">
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pilih sesi yang ingin diselesaikan</p>
@@ -794,39 +794,39 @@
 
             <!-- Fixed bottom button -->
             <div class="flex-shrink-0 px-5 pt-3 pb-7 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <button x-show="mode==='in'"
+                <button x-show="showSharedSpaceSheet && mode==='in'"
                         @click="submitSharedSpaceAttendance()"
-                        :disabled="!sharedSpaceSelectedClass||!sharedSpaceSelectedSubject||!sharedSpacePeriod||sharedSpaceSubmitting"
+                        :disabled="!showSharedSpaceSheet||!sharedSpaceSelectedClass||!sharedSpaceSelectedSubject||!sharedSpacePeriod||sharedSpaceSubmitting"
                         class="w-full py-4 font-bold text-sm flex items-center justify-center gap-2.5 transition-all duration-200"
                         style="border-radius:14px;"
-                        :class="(!sharedSpaceSelectedClass||!sharedSpaceSelectedSubject||!sharedSpacePeriod||sharedSpaceSubmitting)
+                        :class="(!showSharedSpaceSheet||!sharedSpaceSelectedClass||!sharedSpaceSelectedSubject||!sharedSpacePeriod||sharedSpaceSubmitting)
                             ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                             : 'bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[.98]'">
-                    <svg x-show="sharedSpaceSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg x-show="showSharedSpaceSheet && sharedSpaceSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
-                    <svg x-show="!sharedSpaceSubmitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg x-show="showSharedSpaceSheet && !sharedSpaceSubmitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
                     </svg>
-                    <span x-text="sharedSpaceSubmitting ? 'Menyimpan...' : (!sharedSpaceSelectedClass||!sharedSpaceSelectedSubject||!sharedSpacePeriod ? 'Lengkapi form terlebih dahulu' : 'Simpan Presensi Masuk')"></span>
+                    <span x-text="showSharedSpaceSheet ? (sharedSpaceSubmitting ? 'Menyimpan...' : (!sharedSpaceSelectedClass||!sharedSpaceSelectedSubject||!sharedSpacePeriod ? 'Lengkapi form terlebih dahulu' : 'Simpan Presensi Masuk')) : ''"></span>
                 </button>
-                <button x-show="mode==='out'"
+                <button x-show="showSharedSpaceSheet && mode==='out'"
                         @click="submitSharedSpaceCheckOut()"
-                        :disabled="!sharedSpaceSelectedSession||sharedSpaceSubmitting"
+                        :disabled="!showSharedSpaceSheet||!sharedSpaceSelectedSession||sharedSpaceSubmitting"
                         class="w-full py-4 font-bold text-sm flex items-center justify-center gap-2.5 transition-all duration-200"
                         style="border-radius:14px;"
-                        :class="(!sharedSpaceSelectedSession||sharedSpaceSubmitting)
+                        :class="(!showSharedSpaceSheet||!sharedSpaceSelectedSession||sharedSpaceSubmitting)
                             ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                             : 'bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[.98]'">
-                    <svg x-show="sharedSpaceSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg x-show="showSharedSpaceSheet && sharedSpaceSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
-                    <svg x-show="!sharedSpaceSubmitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg x-show="showSharedSpaceSheet && !sharedSpaceSubmitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
                     </svg>
-                    <span x-text="sharedSpaceSubmitting ? 'Menyimpan...' : 'Selesaikan Sesi Ini'"></span>
+                    <span x-text="showSharedSpaceSheet ? (sharedSpaceSubmitting ? 'Menyimpan...' : 'Selesaikan Sesi Ini') : ''"></span>
                 </button>
             </div>
         </div>
