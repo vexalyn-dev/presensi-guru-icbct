@@ -975,15 +975,23 @@
                         alert('Pilih sesi yang ingin diselesaikan.');
                         return;
                     }
-                    this._post('{{ route("teacher.class-attendance.save-shared") }}', {
-                        classroom_id: this.sharedSpaceLocationId,
-                        attendance_id: this.sharedSpaceSelectedSession,
-                        mode: 'out',
-                    })
+                    const content = document.getElementById('shared-space-content');
+                    if (content) {
+                        content.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
+                        content.style.transform = 'translateY(30px)';
+                        content.style.opacity = '0';
+                    }
+                    setTimeout(() => {
+                        this._post('{{ route("teacher.class-attendance.save-shared") }}', {
+                            classroom_id: this.sharedSpaceLocationId,
+                            attendance_id: this.sharedSpaceSelectedSession,
+                            mode: 'out',
+                        })
                         .then(({ status, data }) => {
                             this.closeSharedSpace();
                             this.handleScanResponse(status, data);
                         });
+                    }, 300);
                 },
 
                 // Batch scan prevention error handler
