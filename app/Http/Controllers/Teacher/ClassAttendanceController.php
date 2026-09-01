@@ -321,6 +321,73 @@ class ClassAttendanceController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────────────────
+    // validateSchedule — cek apakah guru punya jadwal mengajar untuk kelas+mapel+jam tertentu
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function validateSchedule(Request $request)
+    {
+        $request->validate([
+            'classroom_id' => 'required|exists:classrooms,id',
+            'subject_id'   => 'nullable|exists:subjects,id',
+            'period'       => 'nullable|integer|min:1|max:12',
+        ]);
+
+        $user    = auth()->user();
+        $today   = Carbon::now();
+        $todayDoW = $today->dayOfWeek;
+
+        $query = TeachingSchedule::where('user_id', $user->id)
+            ->where('classroom_id', $request->classroom_id)
+            ->where('day_of_week', $todayDoW)
+            ->where('is_active', true);
+
+        if ($request->filled('subject_id')) {
+            $query->where('subject_id', $request->subject_id);
+        }
+        if ($request->filled('period')) {
+            $query->where('period', $request->period);
+        }
+
+        $matches = $query->get();
+
+        // Hasil berdasarkan level validasi
+        $result = [
+            'valid'    => false,
+            'message'  => '',
+            'schedules' => [],
+        ];
+
+        if ($matches->isEmpty()) {
+            $result['message'] = 'Tidak ada jadwal mengajar untuk kombinasi ini hari ini.';
+        } elseif (!$request->filled('subject_id') || !$request->filled('period')) {
+            // Partial match — tampilkan opsi yang tersedia
+            $result['schedules'] = $matches->map(fn ($s) => [
+                'id'       => $s->id,
+                'period'   => $s->period,
+                'subject'  => $s->subject?->name ?? '-',
+                'start'    => $s->start_time ? Carbon::parse($s->start_time)->format('H:i') : '-',
+                'end'      => $s->end_time ? Carbon::parse($s->end_time)->format('H:i') : '-',
+            ])->values()->toArray();
+            $result['message'] = count($matches) === 1
+                ? 'Jadwal cocok, pilih mata pelajaran dan jam untuk melanjutkan.'
+                : 'Ditemukan ' . count($matches) . ' jadwal. Pilih mapel dan jam yang sesuai.';
+        } else {
+            // Full match
+            $result['valid'] = true;
+            $result['message'] = 'Jadwal valid!';
+            $result['schedules'] = $matches->map(fn ($s) => [
+                'id'       => $s->id,
+                'period'   => $s->period,
+                'subject'  => $s->subject?->name ?? '-',
+                'start'    => $s->start_time ? Carbon::parse($s->start_time)->format('H:i') : '-',
+                'end'      => $s->end_time ? Carbon::parse($s->end_time)->format('H:i') : '-',
+            ])->values()->toArray();
+        }
+
+        return response()->json($result);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
     // sharedSpaceForm — halaman baru untuk form presensi shared space
     // ──────────────────────────────────────────────────────────────────────────
 
@@ -565,6 +632,23 @@ class ClassAttendanceController extends Controller
 
         $selectedClassroom = Classroom::find($request->selected_classroom_id);
         $subject           = Subject::find($request->subject_id);
+
+        // Validasi: guru harus punya jadwal mengajar untuk kombinasi kelas+mapel+jam hari ini
+        $todayDoW = $now->dayOfWeek;
+        $scheduleMatch = TeachingSchedule::where('user_id', $user->id)
+            ->where('classroom_id', $request->selected_classroom_id)
+            ->where('subject_id', $request->subject_id)
+            ->where('period', $request->period)
+            ->where('day_of_week', $todayDoW)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$scheduleMatch) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki jadwal mengajar untuk kelas ini jam ke-' . $request->period . ' hari ini. Pastikan pilihan sesuai dengan jadwal mengajar Anda.',
+            ], 422);
+        }
 
         // Cek duplikat: periode + kelas + lokasi yang sama hari ini
         $existing = ClassAttendance::where('user_id', $user->id)

@@ -42,7 +42,19 @@
             </div>
         </div>
 
-        <div class="px-4 py-6 max-w-lg mx-auto space-y-5">
+        <!-- Info Banner (jadwal only) -->
+        <template x-if="mode === 'in' && scheduleStatus">
+            <div class="max-w-lg mx-auto px-4 pt-3">
+                <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium"
+                     :class="scheduleValid ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800'">
+                    <i data-lucide="circle" x-show="scheduleValid" class="w-3 h-3 flex-shrink-0"></i>
+                    <i data-lucide="alert-circle" x-show="!scheduleValid" class="w-3 h-3 flex-shrink-0"></i>
+                    <span x-text="scheduleStatus"></span>
+                </div>
+            </div>
+        </template>
+
+        <div class="px-4 py-5 max-w-lg mx-auto space-y-5">
 
             {{-- MODE IN --}}
             <template x-if="mode === 'in'">
@@ -50,8 +62,9 @@
                     <!-- Kelas -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Kelas <span class="text-red-500">*</span></label>
-                        <select x-model="selectedClass"
-                                class="w-full px-4 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 focus:border-navy-800 dark:focus:ring-gold-400 appearance-none cursor-pointer">
+                        <select x-model="selectedClass" @change="onSelectionChange()"
+                                class="w-full px-4 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 focus:border-navy-800 dark:focus:ring-gold-400 appearance-none cursor-pointer transition-colors"
+                                :class="!selectedClass ? '' : (scheduleValid ? 'border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-700')">
                             <option value="">Pilih kelas...</option>
                             @foreach($classes as $c)
                             <option value="{{ $c->id }}" @if(old('selected_classroom_id') == $c->id) selected @endif>{{ $c->name }} @if($c->code)({{ $c->code }})@endif</option>
@@ -62,8 +75,9 @@
                     <!-- Mata Pelajaran -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Mata Pelajaran <span class="text-red-500">*</span></label>
-                        <select x-model="selectedSubject"
-                                class="w-full px-4 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 focus:border-navy-800 dark:focus:ring-gold-400 appearance-none cursor-pointer">
+                        <select x-model="selectedSubject" @change="onSelectionChange()"
+                                class="w-full px-4 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 focus:border-navy-800 dark:focus:ring-gold-400 appearance-none cursor-pointer transition-colors"
+                                :class="!selectedSubject ? '' : (scheduleValid ? 'border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-700')">
                             <option value="">Pilih mata pelajaran...</option>
                             @foreach($subjects as $s)
                             <option value="{{ $s->id }}" @if(old('subject_id') == $s->id) selected @endif>{{ $s->name }}</option>
@@ -79,9 +93,11 @@
                         </label>
                         <div class="grid grid-cols-4 gap-2">
                             <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
-                                <button type="button" @click="selectedPeriod = jam"
+                                <button type="button" @click="selectedPeriod = jam; onSelectionChange()"
                                         class="h-14 flex flex-col items-center justify-center rounded-2xl font-bold transition-all active:scale-95 touch-manipulation"
-                                        :class="selectedPeriod == jam ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-lg' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'">
+                                        :class="selectedPeriod == jam
+                                            ? (scheduleValid ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-lg' : 'bg-slate-400 dark:bg-slate-600 text-white dark:text-slate-200 shadow-lg')
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'">
                                     <span class="text-lg font-extrabold leading-none" x-text="jam"></span>
                                     <span class="text-[9px] leading-none mt-0.5 opacity-60">JP</span>
                                 </button>
@@ -91,10 +107,15 @@
 
                     <!-- Tombol -->
                     <div class="pt-2 pb-8">
-                        <button @click="submitForm()" :disabled="!canSubmit"
+                        <button @click="submitForm()" :disabled="!canSubmit || validating"
                                 class="w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-xl shadow-navy-800/30 dark:shadow-gold-400/30 hover:shadow-2xl hover:-translate-y-0.5 active:scale-[.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 disabled:hover:translate-y-0">
-                            <i data-lucide="log-in" class="w-5 h-5"></i>
-                            Simpan Presensi Masuk
+                            <svg x-show="validating" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <i data-lucide="log-in" x-show="!validating" class="w-5 h-5"></i>
+                            <span x-text="validating ? 'Memeriksa Jadwal...' : (scheduleValid ? 'Simpan Presensi Masuk' : 'Jadwal Tidak Valid')">
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -163,7 +184,7 @@
                 <i data-lucide="x-circle" x-show="!result?.success" class="w-10 h-10 text-red-600 dark:text-red-400"></i>
             </div>
             <h2 class="text-xl font-extrabold text-navy-800 dark:text-white mb-2" x-text="result?.success ? 'Berhasil!' : 'Gagal'"></h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6" x-text="result?.message ?? ''"></p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 whitespace-pre-line" x-text="result?.message ?? ''"></p>
             <button @click="window.location.href = '{{ route('teacher.class-attendance') }}'"
                     class="px-8 py-3 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl font-bold text-sm hover:opacity-90 transition-all active:scale-95">
                 Kembali ke Dashboard
@@ -178,6 +199,9 @@
                 loading: true,
                 submitted: false,
                 result: null,
+                validating: false,
+                scheduleValid: false,
+                scheduleStatus: '',
                 selectedClass: @json(request('selected_classroom_id', '')),
                 selectedSubject: @json(request('subject_id', '')),
                 selectedPeriod: @json(request('period', '')),
@@ -187,12 +211,59 @@
 
                 get canSubmit() {
                     if (this.mode === 'out') return !!this.selectedSession;
-                    return !!(this.selectedClass && this.selectedSubject && this.selectedPeriod);
+                    return this.scheduleValid && !this.validating;
                 },
 
                 init() {
-                    setTimeout(() => { this.loading = false; }, 1000);
+                    setTimeout(() => { this.loading = false; }, 800);
                     if (window.lucide) lucide.createIcons();
+                    // Auto-validate if pre-filled from URL params
+                    if (this.selectedClass && this.selectedSubject && this.selectedPeriod) {
+                        this.validateSelection();
+                    }
+                },
+
+                onSelectionChange() {
+                    // Debounce: tunggu user selesai pilih sebelum validasi
+                    if (this._debounce) clearTimeout(this._debounce);
+                    this._debounce = setTimeout(() => this.validateSelection(), 300);
+                },
+
+                async validateSelection() {
+                    if (!this.selectedClass || !this.selectedSubject || !this.selectedPeriod) {
+                        this.scheduleValid = false;
+                        this.scheduleStatus = '';
+                        return;
+                    }
+
+                    this.validating = true;
+                    this.scheduleStatus = 'Memeriksa jadwal...';
+
+                    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                    try {
+                        const res = await fetch('{{ route("teacher.class-attendance.validate-schedule") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrf,
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: JSON.stringify({
+                                classroom_id: this.selectedClass,
+                                subject_id: this.selectedSubject,
+                                period: this.selectedPeriod,
+                            }),
+                        });
+                        const data = await res.json();
+                        this.scheduleValid = data.valid;
+                        this.scheduleStatus = data.message || (data.valid ? 'Jadwal valid' : 'Jadwal tidak ditemukan');
+                    } catch (e) {
+                        this.scheduleValid = false;
+                        this.scheduleStatus = 'Gagal memverifikasi jadwal.';
+                    } finally {
+                        this.validating = false;
+                    }
                 },
 
                 async submitForm() {
