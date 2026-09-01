@@ -312,12 +312,11 @@ class SupportController extends Controller
             if ($userPhone) {
                 $userPhoneFormatted = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$userPhone));
                 if ($userPhoneFormatted) {
-                    $userCaption  = "*🙏 TERIMA KASIH SUDAH MENGHUBUNGI VEXALYN SUPPORT!*\n\n";
-                    $userCaption .= "Laporan kamu sudah berhasil diterima. Saya akan segera mengecek\n";
-                    $userCaption .= "dan menindaklanjutinya.\n\n";
-                    $userCaption .= "*Setiap laporan yang masuk sangat membantu saya untuk terus\n";
-                    $userCaption .= "memperbaiki dan mengembangkan Presensi Guru ICB CT. ✦*\n\n";
-                    $userCaption .= "_~ Vexalyn Support Center_";
+                    $userCaption  = "*𝚃𝙴𝚁𝙸𝙼𝙰 𝙺𝙰𝚂𝙸𝙷 𝚂𝚄𝙳𝙷 𝙼𝙴𝙽𝙶𝙷𝚄𝙱𝚄𝙽𝙶𝙸 𝚅𝙴𝚇𝙰𝙻𝚈𝙽 𝚂𝚄𝙿𝙿𝙾𝚁𝚃 𝙲𝙴𝙽𝚃𝙴𝚁!*\n\n";
+                    $userCaption .= "_Laporan kamu sudah berhasil diterima. Saya akan segera mengecek dan menindak lanjutinya._\n\n";
+                    $userCaption .= "*Setiap laporan yang masuk sangat membantu saya untuk terus memperbaiki dan mengembangkan Presensi Guru ICB CT. ✦*\n\n";
+                    $userCaption .= "_~ Vexalyn Support Center_\n\n";
+                    $userCaption .= "> _Sent via fonnte.com_";
 
                     $fonnte->sendText($userPhoneFormatted, $userCaption);
                 }
