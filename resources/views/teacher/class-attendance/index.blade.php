@@ -201,6 +201,17 @@
                     <video id="qr-video" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline
                         muted></video>
 
+                    <!-- Gallery upload button (kamera aktif) -->
+                    <button x-show="scanning" @click="openGallery()"
+                            class="absolute top-3 right-3 w-10 h-10 bg-black/40 backdrop-blur-sm rounded-xl flex items-center justify-center text-white hover:bg-black/60 active:scale-95 transition-all z-10">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </button>
+
+                    <!-- Hidden file input untuk galeri -->
+                    <input type="file" id="qr-gallery-input" accept="image/*" class="hidden" @change="handleGalleryUpload($event)">
+
                     <!-- Idle overlay -->
                     <div id="qr-idle-overlay"
                         class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 text-white gap-3 p-4 text-center">
@@ -229,8 +240,8 @@
                                 class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-gold-400 rounded-bl-lg"></span>
                             <span
                                 class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-gold-400 rounded-br-lg"></span>
-                            <div class="qr-laser absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold-400 to-transparent"
-                                style="top:0;"></div>
+                            <div class="qr-laser absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold-400 to-transparent animate-scan-laser"
+                                style="top: 0;"></div>
                         </div>
                         <p
                             class="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center text-[11px] sm:text-xs text-white/80 font-medium px-2">
@@ -973,6 +984,83 @@
                     startQrVideo(this);
                 },
 
+                openGallery() {
+                    document.getElementById('qr-gallery-input').click();
+                },
+
+                handleGalleryUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    if (!file.type.startsWith('image/')) {
+                        this.showWarning = true;
+                        this.warningMessage = 'File harus berupa gambar (PNG, JPG, JPEG)';
+                        setTimeout(() => { this.showWarning = false; }, 3000);
+                        return;
+                    }
+
+                    // Reset input untuk allow upload ulang file yang sama
+                    event.target.value = '';
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.processQrFromImage(e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                },
+
+                processQrFromImage(imageSrc) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+
+                    img.onload = () => {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+
+                        try {
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                            if (code && code.data) {
+                                this.handleQrDetected(code.data);
+                            } else {
+                                this.showWarning = true;
+                                this.warningMessage = 'QR Code tidak ditemukan dalam gambar. Pastikan QR Code terlihat jelas.';
+                                setTimeout(() => { this.showWarning = false; }, 4000);
+                            }
+                        } catch (error) {
+                            console.error('Error processing QR from image:', error);
+                            this.showWarning = true;
+                            this.warningMessage = 'Gagal memproses gambar. Coba lagi dengan gambar lain.';
+                            setTimeout(() => { this.showWarning = false; }, 3000);
+                        }
+                    };
+
+                    img.onerror = () => {
+                        this.showWarning = true;
+                        this.warningMessage = 'Gagal memuat gambar. Coba pilih gambar lain.';
+                        setTimeout(() => { this.showWarning = false; }, 3000);
+                    };
+
+                    img.src = imageSrc;
+                },
+
+                handleQrDetected(qrData) {
+                    // Feedback visual saat QR terdeteksi
+                    this.stopScanner();
+                    this.showResult = true;
+                    this.resultSuccess = true;
+                    this.resultMessage = 'QR Code berhasil terdeteksi dari galeri!';
+                    
+                    // Proses QR seperti biasa — panggil fungsi yang sama seperti dari kamera
+                    setTimeout(() => {
+                        // Langsung kirim scan seperti dari kamera
+                        this.sendScan(qrData, this.userLatitude, this.userLongitude);
+                    }, 800);
+                },
+
                 stopScanner() {
                     stopQrVideo(this);
                 },
@@ -1288,6 +1376,10 @@
             animation: qrLaser 1.8s ease-in-out infinite;
         }
 
+        .animate-scan-laser {
+            animation: smoothScanLaser 2.2s ease-in-out infinite;
+        }
+
         @keyframes qrLaser {
             0% {
                 top: 0;
@@ -1302,6 +1394,32 @@
             100% {
                 top: 0;
                 opacity: 1;
+            }
+        }
+
+        @keyframes smoothScanLaser {
+            0% { 
+                top: 0; 
+                opacity: 0.4;
+                transform: scaleX(0.7);
+            }
+            20% { 
+                opacity: 1;
+                transform: scaleX(1);
+            }
+            50% { 
+                top: calc(50% - 1px); 
+                opacity: 1;
+                transform: scaleX(1);
+            }
+            80% { 
+                opacity: 1;
+                transform: scaleX(1);
+            }
+            100% { 
+                top: calc(100% - 2px); 
+                opacity: 0.4;
+                transform: scaleX(0.7);
             }
         }
 
