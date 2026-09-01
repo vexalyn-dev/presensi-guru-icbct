@@ -854,7 +854,8 @@
 
                 // Shared space state
                 showSharedSpaceModal: false,
-                sharedSpaceFull: false,                sharedSpaceLocation: '',
+                sharedSpaceFull: false,
+                sharedSpaceLocation: '',
                 sharedSpaceLocationId: '',
                 sharedSpaceClasses: [],
                 sharedSpaceSubjects: [],
@@ -873,7 +874,10 @@
 
                 init() {
                     this.$watch('showSharedSpaceModal', (val) => {
-                        if (!val) {
+                        if (val) {
+                            document.body.style.overflow = 'hidden';
+                        } else {
+                            document.body.style.overflow = '';
                             this.openKelas = false;
                             this.openMapel = false;
                             this.searchKelas = '';
@@ -886,50 +890,38 @@
                 closeSharedSpace() {
                     this.showSharedSpaceModal = false;
                     this.sharedSpaceFull = false;
+                    document.body.style.overflow = '';
                 },
 
-                toggleFullScreen() {
-                    this.sharedSpaceFull = !this.sharedSpaceFull;
-                    if (this.sharedSpaceFull) {
-                        document.body.style.overflow = 'hidden';
-                    } else {
-                        document.body.style.overflow = '';
-                    }
-                },
-
-                handleTouchStart(e) {
-                    this._touchStartY = e.touches[0].clientY;
-                    this._touchDelta = 0;
-                },
-
-                handleTouchMove(e) {
-                    if (!this._touchStartY) return;
-                    this._touchDelta = this._touchStartY - e.touches[0].clientY;
-                },
-
-                handleTouchEnd() {
-                    if (this._touchDelta > 40 && !this.sharedSpaceFull) {
-                        this.toggleFullScreen();
-                    }
-                    this._touchStartY = null;
-                    this._touchDelta = 0;
-                },
-
-                handleDragStart(e) {
-                    this._dragStartY = e.clientY;
+                handleDragStart(e, type) {
+                    this._dragStartY = type === 'touch' ? e.touches[0].clientY : e.clientY;
                     this._dragDelta = 0;
-                    const onMove = (ev) => { this._dragDelta = this._dragStartY - ev.clientY; };
-                    const onUp = () => {
-                        document.removeEventListener('mousemove', onMove);
-                        document.removeEventListener('mouseup', onUp);
+                    const moveHandler = type === 'touch'
+                        ? (ev) => { this._dragDelta = this._dragStartY - ev.touches[0].clientY; }
+                        : (ev) => { this._dragDelta = this._dragStartY - ev.clientY; };
+                    const endHandler = () => {
+                        document.removeEventListener('mousemove', moveHandler);
+                        document.removeEventListener('mouseup', endHandler);
+                        document.removeEventListener('touchmove', moveHandler);
+                        document.removeEventListener('touchend', endHandler);
                         if (this._dragDelta > 30 && !this.sharedSpaceFull) {
-                            this.toggleFullScreen();
+                            this.sharedSpaceFull = true;
+                            const sheet = document.getElementById('shared-space-sheet');
+                            if (sheet) {
+                                sheet.classList.add('h-screen','rounded-none');
+                                sheet.classList.remove('rounded-t-3xl','max-h-[92vh]','mb-0');
+                            }
                         }
                         this._dragStartY = null;
                         this._dragDelta = 0;
                     };
-                    document.addEventListener('mousemove', onMove);
-                    document.addEventListener('mouseup', onUp);
+                    if (type === 'touch') {
+                        document.addEventListener('touchmove', moveHandler, { passive: true });
+                        document.addEventListener('touchend', endHandler);
+                    } else {
+                        document.addEventListener('mousemove', moveHandler);
+                        document.addEventListener('mouseup', endHandler);
+                    }
                 },
 
                 startScanner() {
