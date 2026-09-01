@@ -989,17 +989,26 @@
                         alert('Lengkapi kelas, mata pelajaran, dan jam ke- terlebih dahulu.');
                         return;
                     }
-                    this._post('{{ route("teacher.class-attendance.save-shared") }}', {
-                        classroom_id: this.sharedSpaceLocationId,
-                        selected_classroom_id: this.sharedSpaceSelectedClass,
-                        subject_id: this.sharedSpaceSelectedSubject,
-                        period: this.sharedSpacePeriod,
-                        mode: 'in',
-                    })
+                    const content = document.getElementById('shared-space-content');
+                    if (content) {
+                        content.style.transition = 'transform 0.35s ease-in, opacity 0.35s ease-in';
+                        content.style.transform = 'translateY(30px)';
+                        content.style.opacity = '0';
+                    }
+                    setTimeout(() => {
+                        this._post('{{ route("teacher.class-attendance.save-shared") }}', {
+                            classroom_id: this.sharedSpaceLocationId,
+                            selected_classroom_id: this.sharedSpaceSelectedClass,
+                            subject_id: this.sharedSpaceSelectedSubject,
+                            period: this.sharedSpacePeriod,
+                            mode: 'in',
+                        })
                         .then(({ status, data }) => {
-                            this.closeSharedSpace();
+                            this.showSharedSpaceModal = false;
+                            document.body.style.overflow = '';
                             this.handleScanResponse(status, data);
                         });
+                    }, 350);
                 },
 
                 // Submit presensi KELUAR shared space
