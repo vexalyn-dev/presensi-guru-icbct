@@ -388,6 +388,50 @@ class ClassAttendanceController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────────────────
+    // sharedSpaceData — JSON endpoint untuk bottom sheet data
+    // ──────────────────────────────────────────────────────────────────────────
+    public function sharedSpaceData(Request $request)
+    {
+        $user        = auth()->user();
+        $classroomId = $request->input('classroom_id');
+        $mode        = $request->input('mode', 'in');
+        $classroom   = \App\Models\Classroom::findOrFail($classroomId);
+
+        // Reuse handleSharedSpacePrompt logic
+        $allClasses = \App\Models\Classroom::where('is_active', true)
+            ->where(function ($q) {
+                $q->where('is_shared', false)->orWhereNull('is_shared');
+            })
+            ->orderBy('name')->get();
+
+        $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
+
+        $today          = now()->toDateString();
+        $activeSessions = \App\Models\ClassAttendance::where('teacher_id', $user->teacher?->id)
+            ->whereDate('date', $today)
+            ->whereNotNull('check_in_time')
+            ->whereNull('check_out_time')
+            ->where('classroom_id', $classroomId)
+            ->with(['classroom', 'subject'])
+            ->get()
+            ->map(fn ($a) => [
+                'id'              => $a->id,
+                'classroom_id'    => $a->classroom_id,
+                'classroom_name'  => $a->classroom?->name ?? '-',
+                'subject_name'    => $a->subject?->name ?? '-',
+                'period'          => $a->period,
+                'check_in_time'   => $a->check_in_time?->format('H:i'),
+                'duration_minutes'=> $a->check_in_time ? (int) $a->check_in_time->diffInMinutes(now()) : 0,
+            ])->values();
+
+        return response()->json([
+            'classes'         => $allClasses->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'code' => $c->code])->values(),
+            'subjects'        => $subjects->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])->values(),
+            'active_sessions' => $activeSessions,
+        ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
     // sharedSpaceForm — halaman baru untuk form presensi shared space
     // ──────────────────────────────────────────────────────────────────────────
 
