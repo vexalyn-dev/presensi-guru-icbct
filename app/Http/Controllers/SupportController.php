@@ -239,7 +239,7 @@ class SupportController extends Controller
     private function notifyFonnte(SupportTicket $ticket, ?string $cardPath = null)
     {
         try {
-            $rawPhone   = config('services.whatsapp.support_number', env('SUPPORT_WA_NUMBER', ''));
+            $rawPhone   = config('services.whatsapp.dev_number', env('DEV_WA_NUMBER', env('SUPPORT_WA_NUMBER', '')));
             $adminPhone = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$rawPhone));
 
             if ($adminPhone) {
