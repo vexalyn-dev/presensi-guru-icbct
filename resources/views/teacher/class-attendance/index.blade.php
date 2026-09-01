@@ -1209,4 +1209,3 @@
 
     </style>
 @endsection
-@endsection
