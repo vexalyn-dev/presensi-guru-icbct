@@ -292,6 +292,7 @@ class SupportController extends Controller
                         }
                     }
                     $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                }
             }
 
             // Kirim gambar + caption
