@@ -3,7 +3,7 @@
 @section('page-title', 'Presensi Harian')
 
 @section('content')
-    <div class="fade-in space-y-6">
+    <div class="fade-in space-y-6" x-data="{ showScanner: false }">
 
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
