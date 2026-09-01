@@ -292,27 +292,19 @@ class SupportController extends Controller
                         }
                     }
                     $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                }
+            }
 
-                $caption .= "*🔄 TICKET STATUS*\n\n";
-                $caption .= "*`◉ MENUNGGU PENANGANAN`*\n\n";
-                $caption .= "*Tiket kamu sudah kami terima. Saya akan segera mengecek laporan ini dan menghubungi kamu kembali.*\n\n";
-                $caption .= "— *Vexalyn Support Center*\n\n";
-                $caption .= "🙏 *Terima kasih sudah menghubungi kami!*";
-
-                // 1. Kirim gambar lampiran user dulu (jika ada)
-                if (!empty($ticket->attachments)) {
-                    foreach ($ticket->attachments as $attachment) {
-                        if (!empty($attachment['url'])) {
-                            // Kirim gambar pakai URL + caption
-                            $fonnte->sendImage($adminPhone, $attachment['url'], $caption);
-                            break; // Hanya kirim 1 gambar pertama
-                        }
+            // Kirim gambar + caption
+            if (!empty($ticket->attachments)) {
+                foreach ($ticket->attachments as $attachment) {
+                    if (!empty($attachment['url'])) {
+                        $fonnte->sendImage($adminPhone, $attachment['url'], $caption);
+                        break;
                     }
-                } else {
-                    // Jika tidak ada lampiran, kirim teks saja
-                    $fonnte->sendText($adminPhone, $caption);
                 }
+            } else {
+                $fonnte->sendText($adminPhone, $caption);
+            }
             }
         } catch (\Throwable $e) {
             \Log::warning('Fonnte notification failed', [
