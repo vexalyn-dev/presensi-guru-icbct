@@ -27,7 +27,7 @@
     <!-- FORM PAGE -->
     <div x-show="!loading && !submitted" x-cloak>
         <!-- Header -->
-        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 px-4 py-3.5 sticky top-0 z-10">
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 px-4 py-3.5 sticky top-0 z-10 mb-4">
             <div class="max-w-lg mx-auto flex items-center gap-3">
                 <a href="{{ route('teacher.class-attendance') }}" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all flex-shrink-0">
                     <i data-lucide="arrow-left" class="w-4 h-4 text-slate-600 dark:text-slate-300"></i>
@@ -141,15 +141,15 @@
                                   x-text="'JP ' + selectedPeriod"></span>
                         </label>
                         <div class="grid grid-cols-4 gap-2">
-                            <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
+                            <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="`jam-${jam}`">
                                 <button type="button" @click="selectedPeriod = jam; onSelectionChange()"
                                         class="h-14 flex flex-col items-center justify-center rounded-xl font-bold transition-all duration-150 active:scale-95 touch-manipulation select-none"
-                                        :class="selectedPeriod == jam
-                                            ? (scheduleValid 
+                                        :class="(typeof selectedPeriod !== 'undefined' && selectedPeriod == jam)
+                                            ? ((typeof scheduleValid !== 'undefined' && scheduleValid) 
                                                 ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-lg shadow-navy-800/25 dark:shadow-gold-400/25 scale-[1.02]' 
                                                 : 'bg-slate-400 dark:bg-slate-600 text-white dark:text-slate-200 shadow-lg')
                                             : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-navy-300 dark:hover:border-navy-600 hover:bg-slate-50 dark:hover:bg-slate-700'">
-                                    <span class="text-base font-extrabold leading-none" x-text="jam"></span>
+                                    <span class="text-base font-extrabold leading-none" x-text="typeof jam !== 'undefined' ? jam : ''"></span>
                                     <span class="text-[9px] leading-none mt-0.5 opacity-50 font-medium">JP</span>
                                 </button>
                             </template>
