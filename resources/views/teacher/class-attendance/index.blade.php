@@ -906,21 +906,14 @@
                                 return;
                             }
                             if (data.is_shared_space) {
-                                this.showSharedSpaceModal = true;
-                                this.sharedSpaceLocation = data.classroom?.name || '';
-                                this.sharedSpaceLocationId = data.classroom?.id || this.extractClassroomId(qrData);
-                                this.sharedSpaceClasses = data.all_classes || [];
-                                this.sharedSpaceSubjects = data.subjects || [];
-                                this.sharedSpaceActiveSessions = data.active_sessions || [];
-                                this.sharedSpaceSelectedClass = '';
-                                this.sharedSpaceSelectedSubject = '';
-                                this.sharedSpacePeriod = '';
-                                this.sharedSpaceSelectedSession = '';
-                                this.openKelas = false;
-                                this.searchKelas = '';
-                                this.openMapel = false;
-                                this.searchMapel = '';
-                                this.jamViewMode = 'grid';
+                                const classroomId = data.classroom?.id || this.extractClassroomId(qrData);
+                                const params = new URLSearchParams({
+                                    classroom_id: classroomId,
+                                    mode: this.mode,
+                                });
+                                window.location.href = '{{ route("teacher.class-attendance.shared-space") }}?' + params.toString();
+                                return;
+                            }
                             } else if (data.schedules) {
                                 this.showClassSelection = true;
                                 this.selectedLocation = data.message;
