@@ -111,19 +111,19 @@ class AttendanceController extends Controller
                 $token = $qrData['token'] ?? null;
 
                 if ($userId && $userId != $user->id) {
-                    return back()->with('error', 'QR Code tidak valid untuk akun Anda.');
+                    return $this->_jsonResp(false, 'QR Code tidak valid untuk akun Anda.');
                 }
                 if ($token && $user->qr_token && $token !== $user->qr_token) {
-                    return back()->with('error', 'Token QR Code tidak sesuai.');
+                    return $this->_jsonResp(false, 'Token QR Code tidak sesuai.');
                 }
             } else {
                 if ($validated['qr_data'] !== $user->qr_token && $validated['qr_data'] != $user->id) {
-                    return back()->with('error', 'Format QR Code tidak valid.');
+                    return $this->_jsonResp(false, 'Format QR Code tidak valid.');
                 }
             }
         } catch (\Exception $e) {
             if ($validated['qr_data'] !== $user->qr_token && $validated['qr_data'] != $user->id) {
-                return back()->with('error', 'Format QR Code tidak valid.');
+                return $this->_jsonResp(false, 'Format QR Code tidak valid.');
             }
         }
 
@@ -140,14 +140,14 @@ class AttendanceController extends Controller
         if ($gpsValidationStatus === 'on') {
             $gpsValidation = GpsHelper::validateLocation($request->input('latitude'), $request->input('longitude'));
             if (!$gpsValidation['valid']) {
-                return back()->with('error', $gpsValidation['message']);
+                return $this->_jsonResp(false, $gpsValidation['message']);
             }
         }
         // ===== END GPS VALIDATION =====
 
         if ($validated['mode'] === 'masuk') {
             if ($attendance->check_in) {
-                return back()->with('error', 'Anda sudah melakukan presensi masuk hari ini.');
+                return $this->_jsonResp(false, 'Anda sudah melakukan presensi masuk hari ini.');
             }
 
             if ($scheduleStart) {
@@ -171,13 +171,16 @@ class AttendanceController extends Controller
                 'check_in_longitude' => $request->input('longitude'),
             ]);
 
-            return back()->with('success', 'Presensi masuk berhasil dicatat!');
+            return $this->_jsonResp(true, 'Presensi masuk berhasil dicatat!', [
+                'check_in' => $now->format('H:i'),
+                'status' => $isLate ? 'Terlambat' : 'Hadir',
+            ]);
         } else {
             if (!$attendance->check_in) {
-                return back()->with('error', 'Anda belum melakukan presensi masuk.');
+                return $this->_jsonResp(false, 'Anda belum melakukan presensi masuk.');
             }
             if ($attendance->check_out) {
-                return back()->with('error', 'Anda sudah melakukan presensi pulang hari ini.');
+                return $this->_jsonResp(false, 'Anda sudah melakukan presensi pulang hari ini.');
             }
 
             $attendance->update([
@@ -186,8 +189,18 @@ class AttendanceController extends Controller
                 'check_out_longitude' => $request->input('longitude'),
             ]);
 
-            return back()->with('success', 'Presensi pulang berhasil dicatat!');
+            return $this->_jsonResp(true, 'Presensi pulang berhasil dicatat!', [
+                'check_out' => $now->format('H:i'),
+            ]);
         }
+    }
+
+    private function _jsonResp(bool $success, string $message, array $data = []): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+    {
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json(['success' => $success, 'message' => $message, ...$data]);
+        }
+        return back()->with($success ? 'success' : 'error', $message);
     }
 
     // Presensi Kelas
