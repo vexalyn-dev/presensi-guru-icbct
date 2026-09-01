@@ -61,11 +61,11 @@
             </div>
         </template>
 
-        <div class="px-4 py-4 max-w-lg mx-auto space-y-4 bg-slate-50 dark:bg-slate-950 min-h-screen">
+        <div class="px-4 py-4 max-w-lg mx-auto space-y-4 bg-slate-50 dark:bg-slate-950">
 
             {{-- MODE IN --}}
             <template x-if="mode === 'in'">
-                <div class="space-y-4">
+                <div class="space-y-4 pb-4">
 
                     <!-- Step indicator -->
                     <div class="flex items-center gap-2 mb-1">
@@ -163,7 +163,7 @@
                     </div>
 
                     <!-- Tombol -->
-                    <div class="pt-2 pb-8">
+                    <div class="pt-3">
                         <button @click="submitForm()" :disabled="!canSubmit || validating"
                                 class="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 relative overflow-hidden"
                                 :class="!canSubmit || validating
