@@ -1510,7 +1510,7 @@
                             // Only keep class-specific scan reminders
                             const classReminders = data.reminders.filter(r => r.includes('belum scan') || r.includes('scan keluar'));
                             if (classReminders.length > 0 && reminderText) {
-                                reminderText.textContent = 'âš ï¸ ' + classReminders.join('  â€¢  ');
+                                reminderText.textContent = '[Reminder] ' + classReminders.join(' | ');
                                 if (reminderBar) reminderBar.style.display = '';
                             } else if (reminderBar) {
                                 reminderBar.style.display = 'none';
