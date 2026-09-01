@@ -1207,5 +1207,6 @@
             display: none !important;
         }
 
+    </script>
     </style>
 @endsection
