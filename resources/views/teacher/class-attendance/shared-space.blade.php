@@ -27,16 +27,23 @@
     <!-- FORM PAGE -->
     <div x-show="!loading && !submitted" x-cloak>
         <!-- Header -->
-        <div class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3.5 sticky top-0 z-10">
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 px-4 py-3.5 sticky top-0 z-10">
             <div class="max-w-lg mx-auto flex items-center gap-3">
-                <a href="{{ route('teacher.class-attendance') }}" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex-shrink-0">
-                    <i data-lucide="arrow-left" class="w-5 h-5 text-slate-600 dark:text-slate-300"></i>
+                <a href="{{ route('teacher.class-attendance') }}" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all flex-shrink-0">
+                    <i data-lucide="arrow-left" class="w-4 h-4 text-slate-600 dark:text-slate-300"></i>
                 </a>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-navy-800 dark:text-white" x-text="mode === 'in' ? 'Presensi Masuk' : 'Presensi Keluar'"></p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ $classroom->name ?? 'Ruangan Bersama' }}</p>
+                    <p class="text-sm font-bold text-navy-800 dark:text-white leading-tight" x-text="mode === 'in' ? 'Presensi Masuk' : 'Presensi Keluar'"></p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">{{ $classroom->name ?? 'Ruangan Bersama' }}</p>
                 </div>
-                <a href="{{ route('teacher.class-attendance') }}" class="w-9 h-9 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-all flex-shrink-0">
+                <!-- Mode badge -->
+                <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold flex-shrink-0"
+                      :class="mode === 'in' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'">
+                    <span class="w-1.5 h-1.5 rounded-full animate-pulse inline-block"
+                          :class="mode === 'in' ? 'bg-emerald-500' : 'bg-red-500'"></span>
+                    <span x-text="mode === 'in' ? 'Masuk' : 'Keluar'"></span>
+                </span>
+                <a href="{{ route('teacher.class-attendance') }}" class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white active:scale-95 transition-all flex-shrink-0">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </a>
             </div>
@@ -54,50 +61,100 @@
             </div>
         </template>
 
-        <div class="px-4 py-5 max-w-lg mx-auto space-y-5">
+        <div class="px-4 py-4 max-w-lg mx-auto space-y-4 bg-slate-50 dark:bg-slate-950 min-h-screen">
 
             {{-- MODE IN --}}
             <template x-if="mode === 'in'">
-                <div class="space-y-5">
+                <div class="space-y-4">
+
+                    <!-- Step indicator -->
+                    <div class="flex items-center gap-2 mb-1">
+                        <template x-for="(step,i) in [{l:'Kelas',d:!!selectedClass},{l:'Mapel',d:!!selectedSubject},{l:'Jam',d:!!selectedPeriod}]" :key="i">
+                            <div class="flex items-center gap-2" :class="i<2?'flex-1':''">
+                                <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-all duration-300"
+                                     :class="step.d?'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900':'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'">
+                                    <template x-if="step.d"><i data-lucide="check" class="w-3 h-3"></i></template>
+                                    <span x-show="!step.d" x-text="i+1"></span>
+                                </div>
+                                <span class="text-[11px] font-semibold transition-colors duration-300"
+                                      :class="step.d?'text-navy-800 dark:text-gold-400':'text-slate-400 dark:text-slate-500'"
+                                      x-text="step.l"></span>
+                                <div x-show="i<2" class="flex-1 h-px transition-colors duration-300"
+                                     :class="step.d?'bg-navy-800/30 dark:bg-gold-400/30':'bg-slate-200 dark:bg-slate-700'"></div>
+                            </div>
+                        </template>
+                    </div>
                     <!-- Kelas -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Kelas <span class="text-red-500">*</span></label>
-                        <select x-model="selectedClass" @change="onSelectionChange()"
-                                class="w-full px-4 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 focus:border-navy-800 dark:focus:ring-gold-400 appearance-none cursor-pointer transition-colors"
-                                :class="!selectedClass ? '' : (scheduleValid ? 'border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-700')">
-                            <option value="">Pilih kelas...</option>
-                            @foreach($classes as $c)
-                            <option value="{{ $c->id }}" @if(old('selected_classroom_id') == $c->id) selected @endif>{{ $c->name }} @if($c->code)({{ $c->code }})@endif</option>
-                            @endforeach
-                        </select>
+                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
+                            Kelas <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <select x-model="selectedClass" @change="onSelectionChange()"
+                                    class="w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 text-sm font-semibold appearance-none cursor-pointer active:scale-[.98]"
+                                    :class="!selectedClass 
+                                        ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 text-slate-400 dark:text-slate-500' 
+                                        : (scheduleValid 
+                                            ? 'border-navy-300 dark:border-navy-600 bg-navy-50/50 dark:bg-navy-900/10 text-navy-800 dark:text-white' 
+                                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 text-slate-800 dark:text-white')">
+                                <option value="">Pilih kelas...</option>
+                                @foreach($classes as $c)
+                                <option value="{{ $c->id }}" @if(old('selected_classroom_id') == $c->id) selected @endif>{{ $c->name }} @if($c->code)({{ $c->code }})@endif</option>
+                                @endforeach
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200"></i>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Mata Pelajaran -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Mata Pelajaran <span class="text-red-500">*</span></label>
-                        <select x-model="selectedSubject" @change="onSelectionChange()"
-                                class="w-full px-4 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 focus:border-navy-800 dark:focus:ring-gold-400 appearance-none cursor-pointer transition-colors"
-                                :class="!selectedSubject ? '' : (scheduleValid ? 'border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-900/10' : 'border-slate-200 dark:border-slate-700')">
-                            <option value="">Pilih mata pelajaran...</option>
-                            @foreach($subjects as $s)
-                            <option value="{{ $s->id }}" @if(old('subject_id') == $s->id) selected @endif>{{ $s->name }}</option>
-                            @endforeach
-                        </select>
+                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
+                            Mata Pelajaran <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <select x-model="selectedSubject" @change="onSelectionChange()"
+                                    class="w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 text-sm font-semibold appearance-none cursor-pointer active:scale-[.98]"
+                                    :class="!selectedSubject 
+                                        ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 text-slate-400 dark:text-slate-500' 
+                                        : (scheduleValid 
+                                            ? 'border-navy-300 dark:border-navy-600 bg-navy-50/50 dark:bg-navy-900/10 text-navy-800 dark:text-white' 
+                                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 text-slate-800 dark:text-white')">
+                                <option value="">Pilih mata pelajaran...</option>
+                                @foreach($subjects as $s)
+                                <option value="{{ $s->id }}" @if(old('subject_id') == $s->id) selected @endif>{{ $s->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200"></i>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Jam Ke- -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">
-                            Jam Ke- <span class="text-red-500">*</span>
-                            <span x-show="selectedPeriod" class="ml-1.5 px-2.5 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full text-xs font-bold" x-text="'JP '+selectedPeriod"></span>
+                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider flex items-center gap-2">
+                            Jam Ke- <span class="text-red-500 font-normal">*</span>
+                            <span x-show="selectedPeriod" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
+                                  class="px-2 py-0.5 bg-navy-100 dark:bg-navy-900/40 text-navy-800 dark:text-gold-400 rounded-lg text-[10px] font-black"
+                                  x-text="'JP ' + selectedPeriod"></span>
                         </label>
                         <div class="grid grid-cols-4 gap-2">
                             <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
                                 <button type="button" @click="selectedPeriod = jam; onSelectionChange()"
-                                        class="h-14 flex flex-col items-center justify-center rounded-2xl font-bold transition-all active:scale-95 touch-manipulation"
+                                        class="h-14 flex flex-col items-center justify-center rounded-xl font-bold transition-all duration-150 active:scale-95 touch-manipulation select-none"
                                         :class="selectedPeriod == jam
-                                            ? (scheduleValid ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-lg' : 'bg-slate-400 dark:bg-slate-600 text-white dark:text-slate-200 shadow-lg')
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'">
+                                            ? (scheduleValid 
+                                                ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-lg shadow-navy-800/25 dark:shadow-gold-400/25 scale-[1.02]' 
+                                                : 'bg-slate-400 dark:bg-slate-600 text-white dark:text-slate-200 shadow-lg')
+                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-navy-300 dark:hover:border-navy-600 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                                    <span class="text-base font-extrabold leading-none" x-text="jam"></span>
+                                    <span class="text-[9px] leading-none mt-0.5 opacity-50 font-medium">JP</span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>>
                                     <span class="text-lg font-extrabold leading-none" x-text="jam"></span>
                                     <span class="text-[9px] leading-none mt-0.5 opacity-60">JP</span>
                                 </button>
@@ -108,13 +165,16 @@
                     <!-- Tombol -->
                     <div class="pt-2 pb-8">
                         <button @click="submitForm()" :disabled="!canSubmit || validating"
-                                class="w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-xl shadow-navy-800/30 dark:shadow-gold-400/30 hover:shadow-2xl hover:-translate-y-0.5 active:scale-[.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 disabled:hover:translate-y-0">
-                            <svg x-show="validating" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                class="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 relative overflow-hidden"
+                                :class="!canSubmit || validating
+                                    ? 'opacity-35 cursor-not-allowed shadow-none translate-y-0 bg-gradient-to-r from-slate-400 to-slate-500 dark:from-slate-500 dark:to-slate-600 text-white'
+                                    : 'bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-lg shadow-navy-800/25 dark:shadow-gold-400/25 hover:shadow-xl hover:shadow-navy-800/30 dark:hover:shadow-gold-400/30 hover:-translate-y-0.5 active:scale-[.98]'">
+                            <svg x-show="validating" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <i data-lucide="log-in" x-show="!validating" class="w-5 h-5"></i>
-                            <span x-text="validating ? 'Memeriksa Jadwal...' : (scheduleValid ? 'Simpan Presensi Masuk' : 'Jadwal Tidak Valid')">
+                            <i data-lucide="log-in" x-show="!validating" class="w-4 h-4"></i>
+                            <span x-text="validating ? 'Memeriksa Jadwal...' : (!canSubmit ? 'Lengkapi form terlebih dahulu' : (scheduleValid ? 'Simpan Presensi Masuk' : 'Jadwal Tidak Valid'))">
                             </span>
                         </button>
                     </div>
