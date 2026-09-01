@@ -423,12 +423,16 @@
         </div>
 
         <!-- ══ SHARED SPACE BOTTOM SHEET ══ -->
-        <div x-show="showSharedSpaceModal" x-cloak x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+        <div x-show="showSharedSpaceModal" x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              class="fixed inset-0 z-[999] flex items-end justify-center pointer-events-none"
-             @keydown.escape.window="showSharedSpaceModal=false">
+             @keydown.escape.window="closeSharedSpace()">
+
             <!-- Backdrop -->
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto"
                  @click="closeSharedSpace()"
@@ -438,25 +442,20 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"></div>
+
             <!-- Sheet -->
             <div id="shared-space-sheet"
-                 class="relative w-full max-w-lg mx-auto bg-white dark:bg-slate-800 shadow-2xl flex flex-col pointer-events-auto transition-[max-height,margin-bottom] duration-300 ease-out"
-                 :class="sharedSpaceFull ? 'h-screen rounded-none' : 'rounded-t-3xl max-h-[92vh] mb-0'"
-                 @keydown.escape.window="showSharedSpaceModal=false"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="translate-y-full"
-                 x-transition:enter-end="translate-y-0"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="translate-y-0"
-                 x-transition:leave-end="translate-y-full"
+                 class="relative w-full max-w-lg mx-auto bg-white dark:bg-slate-800 shadow-2xl flex flex-col pointer-events-auto"
+                 style="transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);"
+                 :style="showSharedSpaceModal ? 'transform:translateY(0)' : 'transform:translateY(100%)'"
+                 @keydown.escape.window="closeSharedSpace()"
                  @click.stop>
 
-                <!-- Drag Handle Bar -->
-                <div class="flex-shrink-0 flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing select-none"
-                     @touchstart="handleTouchStart($event)" @touchmove="handleTouchMove($event)" @touchend="handleTouchEnd($event)"
-                     @mousedown="handleDragStart($event)">
-                    <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600 transition-all"
-                         :class="sharedSpaceFull ? 'w-16 bg-gold-400' : ''"></div>
+                <!-- Drag Handle -->
+                <div class="flex-shrink-0 flex justify-center pt-3 pb-1.5 cursor-grab active:cursor-grabbing select-none"
+                     @touchstart="handleDragStart($event,'touch')" @touchmove="handleDragMove($event)" @touchend="handleDragEnd()"
+                     @mousedown="handleDragStart($event,'mouse')">
+                    <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
                 </div>
 
                 <!-- Header -->
@@ -476,13 +475,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Fullscreen toggle button -->
-                        <button type="button" @click="toggleFullScreen()"
-                                class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition-all mr-1"
-                                :title="sharedSpaceFull ? 'Kecilkan' : 'Perbesar'">
-                            <i data-lucide="maximize" x-show="!sharedSpaceFull" class="w-4 h-4"></i>
-                            <i data-lucide="minimize" x-show="sharedSpaceFull" class="w-4 h-4"></i>
-                        </button>
                         <!-- Close (red) -->
                         <button @click="closeSharedSpace()"
                                 class="w-8 h-8 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white flex items-center justify-center transition-all">
@@ -492,7 +484,8 @@
                 </div>
 
                 <!-- Body (scrollable) -->
-                <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4" :class="sharedSpaceFull ? 'max-h-[calc(100vh-200px)]' : ''">
+                <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4"
+                     style="padding-bottom:calc(1.25rem + env(safe-area-inset-bottom));">
 
                     <!-- ── MODE IN ── -->
                     <div x-show="mode==='in'" class="space-y-4">
@@ -509,14 +502,24 @@
                                 <span class="flex-1 text-sm min-w-0 font-medium truncate"
                                       :class="sharedSpaceSelectedClass?'text-slate-800 dark:text-white':'text-slate-400 dark:text-slate-500'"
                                       x-text="sharedSpaceSelectedClass?(sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.name||'Kelas dipilih'):'Pilih kelas...'"></span>
-                                <div class="flex items-center gap-2 flex-shrink-0">
-                                    <button x-show="sharedSpaceSelectedClass" type="button" @click.stop="sharedSpaceSelectedClass=''" class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-500 flex items-center justify-center hover:bg-red-500 transition-colors"><i data-lucide="x" class="w-3 h-3 text-white"></i></button>
+                                <div class="flex items-center gap-1 flex-shrink-0">
+                                    <button x-show="sharedSpaceSelectedClass" type="button" @click.stop="sharedSpaceSelectedClass=''"
+                                            class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-500 flex items-center justify-center hover:bg-red-500 transition-colors">
+                                        <i data-lucide="x" class="w-3 h-3 text-white"></i>
+                                    </button>
                                     <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="openKelas?'rotate-180':''"></i>
                                 </div>
                             </button>
-                            <!-- Inline dropdown — flows naturally -->
-                            <div x-show="openKelas" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="mt-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg overflow-hidden">
+                            <!-- Dropdown inline -->
+                            <div x-show="openKelas"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 -translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 -translate-y-1"
+                                 @click.away="openKelas=false"
+                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg overflow-hidden">
                                 <div class="p-2 border-b border-slate-100 dark:border-slate-700">
                                     <div class="relative">
                                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
@@ -524,7 +527,7 @@
                                                class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-700 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 text-slate-800 dark:text-white placeholder:text-slate-400">
                                     </div>
                                 </div>
-                                <div class="max-h-40 overflow-y-auto py-1">
+                                <div class="max-h-44 overflow-y-auto py-1">
                                     <template x-for="cls in sharedSpaceClasses.filter(c=>!searchKelas||c.name.toLowerCase().includes(searchKelas.toLowerCase())||(c.code&&c.code.toLowerCase().includes(searchKelas.toLowerCase())))" :key="cls.id">
                                         <button type="button" @click.stop="sharedSpaceSelectedClass=cls.id;openKelas=false;searchKelas=''"
                                                 class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors"
@@ -550,13 +553,23 @@
                                 <span class="flex-1 text-sm min-w-0 font-medium truncate"
                                       :class="sharedSpaceSelectedSubject?'text-slate-800 dark:text-white':'text-slate-400 dark:text-slate-500'"
                                       x-text="sharedSpaceSelectedSubject?(sharedSpaceSubjects.find(s=>s.id==sharedSpaceSelectedSubject)?.name||'Mapel dipilih'):'Pilih mata pelajaran...'"></span>
-                                <div class="flex items-center gap-2 flex-shrink-0">
-                                    <button x-show="sharedSpaceSelectedSubject" type="button" @click.stop="sharedSpaceSelectedSubject=''" class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-500 flex items-center justify-center hover:bg-red-500 transition-colors"><i data-lucide="x" class="w-3 h-3 text-white"></i></button>
+                                <div class="flex items-center gap-1 flex-shrink-0">
+                                    <button x-show="sharedSpaceSelectedSubject" type="button" @click.stop="sharedSpaceSelectedSubject=''"
+                                            class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-500 flex items-center justify-center hover:bg-red-500 transition-colors">
+                                        <i data-lucide="x" class="w-3 h-3 text-white"></i>
+                                    </button>
                                     <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="openMapel?'rotate-180':''"></i>
                                 </div>
                             </button>
-                            <div x-show="openMapel" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="mt-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg overflow-hidden">
+                            <div x-show="openMapel"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 -translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 -translate-y-1"
+                                 @click.away="openMapel=false"
+                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg overflow-hidden">
                                 <div class="p-2 border-b border-slate-100 dark:border-slate-700">
                                     <div class="relative">
                                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
@@ -564,7 +577,7 @@
                                                class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-700 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 text-slate-800 dark:text-white placeholder:text-slate-400">
                                     </div>
                                 </div>
-                                <div class="max-h-40 overflow-y-auto py-1">
+                                <div class="max-h-44 overflow-y-auto py-1">
                                     <template x-for="subject in sharedSpaceSubjects.filter(s=>!searchMapel||s.name.toLowerCase().includes(searchMapel.toLowerCase()))" :key="subject.id">
                                         <button type="button" @click.stop="sharedSpaceSelectedSubject=subject.id;openMapel=false;searchMapel=''"
                                                 class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors"
@@ -578,26 +591,26 @@
                             </div>
                         </div>
 
-                        <!-- JAM KE- -->
+                        <!-- JAM KE- (square buttons) -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">
                                 Jam Ke- <span class="text-red-500 font-normal normal-case">*</span>
                                 <span x-show="sharedSpacePeriod" class="ml-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full text-[10px] font-bold normal-case" x-text="'JP '+sharedSpacePeriod"></span>
                             </label>
-                             <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                                 <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
-                                     <button type="button" @click="sharedSpacePeriod=jam"
-                                             class="flex flex-col items-center justify-center rounded-xl py-3 font-bold transition-all active:scale-95 touch-manipulation"
-                                             :class="sharedSpacePeriod==jam?'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-md scale-105':'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-navy-50 dark:hover:bg-navy-900/20 border-2 border-transparent hover:border-navy-200 dark:hover:border-navy-700'">
-                                         <span class="text-base font-extrabold leading-none" x-text="jam"></span>
-                                         <span class="text-[9px] leading-none mt-1 opacity-60">JP</span>
-                                     </button>
-                                 </template>
-                             </div>
+                            <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                                <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
+                                    <button type="button" @click="sharedSpacePeriod=jam"
+                                            class="aspect-square flex flex-col items-center justify-center rounded-xl font-bold transition-all active:scale-95 touch-manipulation"
+                                            :class="sharedSpacePeriod==jam?'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-md scale-105':'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-navy-50 dark:hover:bg-navy-900/20 border-2 border-transparent hover:border-navy-200 dark:hover:border-navy-700'">
+                                        <span class="text-base font-extrabold leading-none" x-text="jam"></span>
+                                        <span class="text-[9px] leading-none mt-0.5 opacity-60">JP</span>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
 
                         <!-- Simpan Presensi Masuk -->
-                        <div class="pt-2">
+                        <div>
                             <button @click="submitSharedSpaceAttendance()"
                                     :disabled="!sharedSpaceSelectedClass||!sharedSpaceSelectedSubject||!sharedSpacePeriod"
                                     class="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-lg shadow-navy-800/30 dark:shadow-gold-400/30 hover:shadow-xl hover:-translate-y-0.5 active:scale-[.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 disabled:hover:translate-y-0">
@@ -653,6 +666,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Dynamic Class Selection Modal -->
         <div x-show="showClassSelection" x-cloak x-transition:enter="transition ease-out duration-200"
@@ -840,8 +854,7 @@
 
                 // Shared space state
                 showSharedSpaceModal: false,
-                sharedSpaceFull: false,
-                sharedSpaceLocation: '',
+                sharedSpaceFull: false,                sharedSpaceLocation: '',
                 sharedSpaceLocationId: '',
                 sharedSpaceClasses: [],
                 sharedSpaceSubjects: [],
