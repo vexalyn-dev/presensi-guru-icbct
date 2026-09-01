@@ -504,49 +504,47 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">Kelas <span class="text-red-500">*</span></label>
                             <button type="button" @click="openKelas=!openKelas;openMapel=false"
-                                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left"
-                                    :class="openKelas?'border-navy-800 dark:border-gold-400 shadow-md':(sharedSpaceSelectedClass?'border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-900/20':'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50')">
+                                    class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 transition-all text-left"
+                                    :class="openKelas?'border-navy-800 dark:border-gold-400 bg-navy-50 dark:bg-navy-900/10 shadow-md':(sharedSpaceSelectedClass?'border-green-400 dark:border-green-500 bg-green-50/50 dark:bg-green-900/10':'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/40')">
                                 <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" :class="sharedSpaceSelectedClass?'bg-green-500':'bg-slate-200 dark:bg-slate-600'">
                                     <i data-lucide="users" class="w-4 h-4" :class="sharedSpaceSelectedClass?'text-white':'text-slate-500'"></i>
                                 </div>
                                 <span class="flex-1 text-sm min-w-0 font-medium truncate"
                                       :class="sharedSpaceSelectedClass?'text-slate-800 dark:text-white':'text-slate-400 dark:text-slate-500'"
                                       x-text="sharedSpaceSelectedClass?(sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.name||'Kelas dipilih'):'Pilih kelas...'"></span>
-                                <div class="flex items-center gap-1 flex-shrink-0">
-                                    <button x-show="sharedSpaceSelectedClass" type="button" @click.stop="sharedSpaceSelectedClass=''"
-                                            class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-500 flex items-center justify-center hover:bg-red-500 transition-colors">
-                                        <i data-lucide="x" class="w-3 h-3 text-white"></i>
-                                    </button>
-                                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="openKelas?'rotate-180':''"></i>
-                                </div>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200" :class="openKelas?'rotate-180':''"></i>
                             </button>
-                            <!-- Dropdown inline -->
+                            <!-- Dropdown -->
                             <div x-show="openKelas"
                                  x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 -translate-y-2"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 translate-y-0"
                                  x-transition:leave-end="opacity-0 -translate-y-1"
                                  @click.away="openKelas=false"
-                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg overflow-hidden">
+                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden relative z-50">
                                 <div class="p-2 border-b border-slate-100 dark:border-slate-700">
                                     <div class="relative">
                                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
                                         <input type="text" x-model="searchKelas" placeholder="Cari kelas..." @click.stop @keydown.escape="openKelas=false"
-                                               class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-700 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 text-slate-800 dark:text-white placeholder:text-slate-400">
+                                               class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-700 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 text-slate-800 dark:text-white placeholder:text-slate-400">
                                     </div>
                                 </div>
-                                <div class="max-h-44 overflow-y-auto py-1">
+                                <div class="max-h-48 overflow-y-auto py-1">
                                     <template x-for="cls in sharedSpaceClasses.filter(c=>!searchKelas||c.name.toLowerCase().includes(searchKelas.toLowerCase())||(c.code&&c.code.toLowerCase().includes(searchKelas.toLowerCase())))" :key="cls.id">
                                         <button type="button" @click.stop="sharedSpaceSelectedClass=cls.id;openKelas=false;searchKelas=''"
-                                                class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors"
-                                                :class="sharedSpaceSelectedClass==cls.id?'bg-green-50 dark:bg-green-900/30 font-semibold text-green-700 dark:text-green-400':'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'">
+                                                class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors"
+                                                :class="sharedSpaceSelectedClass==cls.id?'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-semibold':'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-200'">
+                                            <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                                                 :class="sharedSpaceSelectedClass==cls.id?'bg-green-500':'bg-slate-100 dark:bg-slate-700'">
+                                                <i data-lucide="users" class="w-3.5 h-3.5" :class="sharedSpaceSelectedClass==cls.id?'text-white':'text-slate-500 dark:text-slate-400'"></i>
+                                            </div>
                                             <span class="flex-1 truncate" x-text="cls.code?cls.name+' ('+cls.code+')':cls.name"></span>
                                             <i x-show="sharedSpaceSelectedClass==cls.id" data-lucide="check" class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"></i>
                                         </button>
                                     </template>
-                                    <p x-show="sharedSpaceClasses.filter(c=>!searchKelas||c.name.toLowerCase().includes(searchKelas.toLowerCase())||(c.code&&c.code.toLowerCase().includes(searchKelas.toLowerCase()))).length===0" class="text-center text-xs text-slate-400 py-4">Tidak ditemukan</p>
+                                    <p x-show="sharedSpaceClasses.filter(c=>!searchKelas||c.name.toLowerCase().includes(searchKelas.toLowerCase())||(c.code&&c.code.toLowerCase().includes(searchKelas.toLowerCase()))).length===0" class="text-center text-xs text-slate-400 py-6">Tidak ditemukan</p>
                                 </div>
                             </div>
                         </div>
@@ -555,48 +553,46 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">Mata Pelajaran <span class="text-red-500">*</span></label>
                             <button type="button" @click="openMapel=!openMapel;openKelas=false"
-                                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left"
-                                    :class="openMapel?'border-navy-800 dark:border-gold-400 shadow-md':(sharedSpaceSelectedSubject?'border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-900/20':'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50')">
+                                    class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 transition-all text-left"
+                                    :class="openMapel?'border-navy-800 dark:border-gold-400 bg-navy-50 dark:bg-navy-900/10 shadow-md':(sharedSpaceSelectedSubject?'border-green-400 dark:border-green-500 bg-green-50/50 dark:bg-green-900/10':'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/40')">
                                 <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" :class="sharedSpaceSelectedSubject?'bg-green-500':'bg-slate-200 dark:bg-slate-600'">
                                     <i data-lucide="book-open" class="w-4 h-4" :class="sharedSpaceSelectedSubject?'text-white':'text-slate-500'"></i>
                                 </div>
                                 <span class="flex-1 text-sm min-w-0 font-medium truncate"
                                       :class="sharedSpaceSelectedSubject?'text-slate-800 dark:text-white':'text-slate-400 dark:text-slate-500'"
                                       x-text="sharedSpaceSelectedSubject?(sharedSpaceSubjects.find(s=>s.id==sharedSpaceSelectedSubject)?.name||'Mapel dipilih'):'Pilih mata pelajaran...'"></span>
-                                <div class="flex items-center gap-1 flex-shrink-0">
-                                    <button x-show="sharedSpaceSelectedSubject" type="button" @click.stop="sharedSpaceSelectedSubject=''"
-                                            class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-500 flex items-center justify-center hover:bg-red-500 transition-colors">
-                                        <i data-lucide="x" class="w-3 h-3 text-white"></i>
-                                    </button>
-                                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="openMapel?'rotate-180':''"></i>
-                                </div>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200" :class="openMapel?'rotate-180':''"></i>
                             </button>
                             <div x-show="openMapel"
                                  x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 -translate-y-2"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 translate-y-0"
                                  x-transition:leave-end="opacity-0 -translate-y-1"
                                  @click.away="openMapel=false"
-                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg overflow-hidden">
+                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden relative z-50">
                                 <div class="p-2 border-b border-slate-100 dark:border-slate-700">
                                     <div class="relative">
                                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
                                         <input type="text" x-model="searchMapel" placeholder="Cari mata pelajaran..." @click.stop @keydown.escape="openMapel=false"
-                                               class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-700 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 text-slate-800 dark:text-white placeholder:text-slate-400">
+                                               class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-700 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 text-slate-800 dark:text-white placeholder:text-slate-400">
                                     </div>
                                 </div>
-                                <div class="max-h-44 overflow-y-auto py-1">
+                                <div class="max-h-48 overflow-y-auto py-1">
                                     <template x-for="subject in sharedSpaceSubjects.filter(s=>!searchMapel||s.name.toLowerCase().includes(searchMapel.toLowerCase()))" :key="subject.id">
                                         <button type="button" @click.stop="sharedSpaceSelectedSubject=subject.id;openMapel=false;searchMapel=''"
-                                                class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors"
-                                                :class="sharedSpaceSelectedSubject==subject.id?'bg-green-50 dark:bg-green-900/30 font-semibold text-green-700 dark:text-green-400':'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'">
+                                                class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors"
+                                                :class="sharedSpaceSelectedSubject==subject.id?'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-semibold':'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-200'">
+                                            <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                                                 :class="sharedSpaceSelectedSubject==subject.id?'bg-green-500':'bg-slate-100 dark:bg-slate-700'">
+                                                <i data-lucide="book-open" class="w-3.5 h-3.5" :class="sharedSpaceSelectedSubject==subject.id?'text-white':'text-slate-500 dark:text-slate-400'"></i>
+                                            </div>
                                             <span class="flex-1 truncate" x-text="subject.name"></span>
                                             <i x-show="sharedSpaceSelectedSubject==subject.id" data-lucide="check" class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0"></i>
                                         </button>
                                     </template>
-                                    <p x-show="sharedSpaceSubjects.filter(s=>!searchMapel||s.name.toLowerCase().includes(searchMapel.toLowerCase())).length===0" class="text-center text-xs text-slate-400 py-4">Tidak ditemukan</p>
+                                    <p x-show="sharedSpaceSubjects.filter(s=>!searchMapel||s.name.toLowerCase().includes(searchMapel.toLowerCase())).length===0" class="text-center text-xs text-slate-400 py-6">Tidak ditemukan</p>
                                 </div>
                             </div>
                         </div>
