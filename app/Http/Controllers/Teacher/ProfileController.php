@@ -75,14 +75,16 @@ class ProfileController extends Controller
             $deletePhoto = false;
         }
 
-        // Update user
-        $userData = ['name' => $validated['name']];
+        // Update user name & phone (supaya support ticket WA notif pakai no HP yang benar)
+        $user->update([
+            'name'  => $validated['name'],
+            'phone' => $validated['phone'] ?? null,
+        ]);
         if (isset($deletePhoto) && $deletePhoto) {
-            $userData['photo'] = null;
+            $user->update(['photo' => null]);
         } elseif ($photoPath) {
-            $userData['photo'] = $photoPath;
+            $user->update(['photo' => $photoPath]);
         }
-        $user->update($userData);
 
         // Update teacher
         if ($teacher) {
