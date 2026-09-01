@@ -260,6 +260,16 @@
                     <span>Stop Scan</span>
                 </button>
             </div>
+
+            <!-- Gallery Upload -->
+            <div class="flex justify-center mt-3">
+                <button type="button" onclick="document.getElementById('class-attendance-gallery').click()"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-navy-800 dark:hover:text-gold-400 transition-colors">
+                    <i data-lucide="image" class="w-4 h-4"></i>
+                    Unggah QR dari Galeri
+                </button>
+                <input type="file" id="class-attendance-gallery" accept="image/*" class="hidden" onchange="handleClassAttendanceGallery(this)">
+            </div>
         </div>
 
         <!-- Result Toast -->
@@ -1271,4 +1281,36 @@
         }
 
     </style>
+
+    <script>
+        // ── Class Attendance Gallery Upload ──
+        window.handleClassAttendanceGallery = function(input) {
+            if (!input.files || !input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    if (typeof jsQR === 'function') {
+                        const code = jsQR(imageData.data, canvas.width, canvas.height, { inversionAttempts: 'attemptBoth' });
+                        if (code && _qrAlpine) {
+                            _qrAlpine.processScan(code.data);
+                        } else {
+                            alert('QR Code tidak ditemukan dalam gambar. Pastikan foto QR jelas dan tidak buram.');
+                        }
+                    } else {
+                        alert('Library QR decoder belum dimuat. Coba refresh halaman.');
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+            input.value = '';
+        };
+    </script>
 @endsection
