@@ -794,8 +794,8 @@
                 warningMessage: '',
                 warningTimer: null,
                 remainingSeconds: 0,
-                gracePeriod: {{ $gracePeriodSetting ?? 5 }},
-                scanBeforeStart: {{ $scanBeforeStart ?? 15 }},
+                gracePeriod: 0,
+                scanBeforeStart: 0,
 
                 // Shared space state
                 showSharedSpaceModal: false,
