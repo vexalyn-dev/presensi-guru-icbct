@@ -584,16 +584,16 @@
                                 Jam Ke- <span class="text-red-500 font-normal normal-case">*</span>
                                 <span x-show="sharedSpacePeriod" class="ml-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full text-[10px] font-bold normal-case" x-text="'JP '+sharedSpacePeriod"></span>
                             </label>
-                            <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                                <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
-                                    <button type="button" @click="sharedSpacePeriod=jam"
-                                            class="flex flex-col items-center justify-center rounded-xl py-3 font-bold transition-all active:scale-95 touch-manipulation"
-                                            :class="sharedSpacePeriod==jam?'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-md scale-105':'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-navy-50 dark:hover:bg-navy-900/20 border-2 border-transparent hover:border-navy-200 dark:hover:border-navy-700'">
-                                        <span class="text-base font-extrabold leading-none" x-text="jam"></span>
-                                        <span class="text-[9px] leading-none mt-1 opacity-60">JP</span>
-                                    </button>
-                                </template>
-                            </div>
+                             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+                                 <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
+                                     <button type="button" @click="sharedSpacePeriod=jam"
+                                             class="flex flex-col items-center justify-center rounded-xl py-3 font-bold transition-all active:scale-95 touch-manipulation"
+                                             :class="sharedSpacePeriod==jam?'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-md scale-105':'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-navy-50 dark:hover:bg-navy-900/20 border-2 border-transparent hover:border-navy-200 dark:hover:border-navy-700'">
+                                         <span class="text-base font-extrabold leading-none" x-text="jam"></span>
+                                         <span class="text-[9px] leading-none mt-1 opacity-60">JP</span>
+                                     </button>
+                                 </template>
+                             </div>
                         </div>
 
                         <!-- Simpan Presensi Masuk -->
