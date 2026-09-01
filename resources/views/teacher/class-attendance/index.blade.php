@@ -456,15 +456,13 @@
             <!-- Sheet -->
             <div id="shared-space-sheet"
                  class="relative w-full max-w-lg mx-auto bg-white dark:bg-slate-800 shadow-2xl flex flex-col pointer-events-auto"
-                 style="transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);"
+                 style="transform:translateY(100%);transition:transform 0.3s ease-out;"
                  :style="showSharedSpaceModal ? 'transform:translateY(0)' : 'transform:translateY(100%)'"
                  @keydown.escape.window="closeSharedSpace()"
                  @click.stop>
 
-                <!-- Drag Handle -->
-                <div class="flex-shrink-0 flex justify-center pt-3 pb-1.5 cursor-grab active:cursor-grabbing select-none"
-                     @touchstart="handleDragStart($event,'touch')" @touchmove="handleDragMove($event)" @touchend="handleDragEnd()"
-                     @mousedown="handleDragStart($event,'mouse')">
+                <!-- Handle bar (visual only) -->
+                <div class="flex-shrink-0 flex justify-center pt-3 pb-1.5">
                     <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
                 </div>
 
@@ -514,16 +512,10 @@
                                       x-text="sharedSpaceSelectedClass?(sharedSpaceClasses.find(c=>c.id==sharedSpaceSelectedClass)?.name||'Kelas dipilih'):'Pilih kelas...'"></span>
                                 <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200" :class="openKelas?'rotate-180':''"></i>
                             </button>
-                            <!-- Dropdown -->
-                            <div x-show="openKelas"
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 -translate-y-1"
-                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                 x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 translate-y-0"
-                                 x-transition:leave-end="opacity-0 -translate-y-1"
-                                 @click.away="openKelas=false"
-                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden relative z-50">
+                            <div x-show="openKelas" x-cloak
+                                 transition:opacity.duration.200ms="openKelas"
+                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden relative z-50"
+                                 @click.away="openKelas=false">
                                 <div class="p-2 border-b border-slate-100 dark:border-slate-700">
                                     <div class="relative">
                                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
@@ -563,15 +555,9 @@
                                       x-text="sharedSpaceSelectedSubject?(sharedSpaceSubjects.find(s=>s.id==sharedSpaceSelectedSubject)?.name||'Mapel dipilih'):'Pilih mata pelajaran...'"></span>
                                 <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200" :class="openMapel?'rotate-180':''"></i>
                             </button>
-                            <div x-show="openMapel"
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 -translate-y-1"
-                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                 x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 translate-y-0"
-                                 x-transition:leave-end="opacity-0 -translate-y-1"
-                                 @click.away="openMapel=false"
-                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden relative z-50">
+                            <div x-show="openMapel" x-cloak
+                                 class="mt-1.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden relative z-50"
+                                 @click.away="openMapel=false">
                                 <div class="p-2 border-b border-slate-100 dark:border-slate-700">
                                     <div class="relative">
                                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
@@ -603,16 +589,16 @@
                                 Jam Ke- <span class="text-red-500 font-normal normal-case">*</span>
                                 <span x-show="sharedSpacePeriod" class="ml-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full text-[10px] font-bold normal-case" x-text="'JP '+sharedSpacePeriod"></span>
                             </label>
-                            <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                                <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
-                                    <button type="button" @click="sharedSpacePeriod=jam"
-                                            class="aspect-square flex flex-col items-center justify-center rounded-xl font-bold transition-all active:scale-95 touch-manipulation"
-                                            :class="sharedSpacePeriod==jam?'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-md scale-105':'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-navy-50 dark:hover:bg-navy-900/20 border-2 border-transparent hover:border-navy-200 dark:hover:border-navy-700'">
-                                        <span class="text-base font-extrabold leading-none" x-text="jam"></span>
-                                        <span class="text-[9px] leading-none mt-0.5 opacity-60">JP</span>
-                                    </button>
-                                </template>
-                            </div>
+                             <div class="grid grid-cols-4 gap-2">
+                                 <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
+                                     <button type="button" @click="sharedSpacePeriod=jam"
+                                             class="h-14 flex flex-col items-center justify-center rounded-xl font-bold transition-all active:scale-95 touch-manipulation"
+                                             :class="sharedSpacePeriod==jam?'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-md':'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-navy-50 dark:hover:bg-navy-900/20'">
+                                         <span class="text-base font-extrabold leading-none" x-text="jam"></span>
+                                         <span class="text-[9px] leading-none mt-0.5 opacity-60">JP</span>
+                                     </button>
+                                 </template>
+                             </div>
                         </div>
 
                         <!-- Simpan Presensi Masuk -->
@@ -860,7 +846,6 @@
 
                 // Shared space state
                 showSharedSpaceModal: false,
-                sharedSpaceFull: false,
                 sharedSpaceLocation: '',
                 sharedSpaceLocationId: '',
                 sharedSpaceClasses: [],
@@ -882,52 +867,26 @@
                     this.$watch('showSharedSpaceModal', (val) => {
                         if (val) {
                             document.body.style.overflow = 'hidden';
+                            setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
                         } else {
                             document.body.style.overflow = '';
                             this.openKelas = false;
                             this.openMapel = false;
                             this.searchKelas = '';
                             this.searchMapel = '';
-                            this.sharedSpaceFull = false;
                         }
+                    });
+                    this.$watch('openKelas', (val) => {
+                        if (val) setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 30);
+                    });
+                    this.$watch('openMapel', (val) => {
+                        if (val) setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 30);
                     });
                 },
 
                 closeSharedSpace() {
                     this.showSharedSpaceModal = false;
-                    this.sharedSpaceFull = false;
                     document.body.style.overflow = '';
-                },
-
-                handleDragStart(e, type) {
-                    this._dragStartY = type === 'touch' ? e.touches[0].clientY : e.clientY;
-                    this._dragDelta = 0;
-                    const moveHandler = type === 'touch'
-                        ? (ev) => { this._dragDelta = this._dragStartY - ev.touches[0].clientY; }
-                        : (ev) => { this._dragDelta = this._dragStartY - ev.clientY; };
-                    const endHandler = () => {
-                        document.removeEventListener('mousemove', moveHandler);
-                        document.removeEventListener('mouseup', endHandler);
-                        document.removeEventListener('touchmove', moveHandler);
-                        document.removeEventListener('touchend', endHandler);
-                        if (this._dragDelta > 30 && !this.sharedSpaceFull) {
-                            this.sharedSpaceFull = true;
-                            const sheet = document.getElementById('shared-space-sheet');
-                            if (sheet) {
-                                sheet.classList.add('h-screen','rounded-none');
-                                sheet.classList.remove('rounded-t-3xl','max-h-[92vh]','mb-0');
-                            }
-                        }
-                        this._dragStartY = null;
-                        this._dragDelta = 0;
-                    };
-                    if (type === 'touch') {
-                        document.addEventListener('touchmove', moveHandler, { passive: true });
-                        document.addEventListener('touchend', endHandler);
-                    } else {
-                        document.addEventListener('mousemove', moveHandler);
-                        document.addEventListener('mouseup', endHandler);
-                    }
                 },
 
                 startScanner() {
@@ -1279,33 +1238,40 @@
     </style>
 
     <script>
-        // ── Class Attendance Gallery Upload ──
+        // ── Class Attendance Gallery Upload (optimized) ──
         window.handleClassAttendanceGallery = function(input) {
             if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            // Limit image size for faster processing
+            const MAX_DIM = 640;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
+                    let w = img.width, h = img.height;
+                    if (w > MAX_DIM || h > MAX_DIM) {
+                        const scale = MAX_DIM / Math.max(w, h);
+                        w = Math.round(w * scale);
+                        h = Math.round(h * scale);
+                    }
                     const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
+                    canvas.width = w;
+                    canvas.height = h;
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const imageData = ctx.getImageData(0, 0, w, h);
                     if (typeof jsQR === 'function') {
-                        const code = jsQR(imageData.data, canvas.width, canvas.height, { inversionAttempts: 'attemptBoth' });
+                        const code = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
                         if (code && _qrAlpine) {
                             _qrAlpine.processScan(code.data);
                         } else {
-                            alert('QR Code tidak ditemukan dalam gambar. Pastikan foto QR jelas dan tidak buram.');
+                            alert('QR Code tidak ditemukan dalam gambar. Pastikan foto QR jelas.');
                         }
-                    } else {
-                        alert('Library QR decoder belum dimuat. Coba refresh halaman.');
                     }
                 };
                 img.src = e.target.result;
             };
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
             input.value = '';
         };
     </script>
