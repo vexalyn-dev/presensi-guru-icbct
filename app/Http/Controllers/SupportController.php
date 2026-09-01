@@ -305,6 +305,21 @@ class SupportController extends Controller
             } else {
                 $fonnte->sendText($adminPhone, $caption);
             }
+
+            // 2. Kirim notifikasi konfirmasi ke user yang lapor (jika ada nomor HP)
+            $userPhone = $ticket->user?->phone;
+            if ($userPhone) {
+                $userPhoneFormatted = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$userPhone));
+                if ($userPhoneFormatted) {
+                    $userCaption  = "*🙏 TERIMA KASIH SUDAH MENGHUBUNGI VEXALYN SUPPORT!*\n\n";
+                    $userCaption .= "Laporan kamu sudah berhasil diterima. Saya akan segera mengecek\n";
+                    $userCaption .= "dan menindaklanjutinya.\n\n";
+                    $userCaption .= "*Setiap laporan yang masuk sangat membantu saya untuk terus\n";
+                    $userCaption .= "memperbaiki dan mengembangkan Presensi Guru ICB CT. ✦*\n\n";
+                    $userCaption .= "_~ Vexalyn Support Center_";
+
+                    $fonnte->sendText($userPhoneFormatted, $userCaption);
+                }
             }
         } catch (\Throwable $e) {
             \Log::warning('Fonnte notification failed', [
