@@ -1196,7 +1196,7 @@
                     this.sharedSpaceSubmitting      = false;
 
                     // Fetch classes, subjects, active sessions
-                    fetch(`{{ route("teacher.class-attendance.shared-space.sessions") }}?classroom_id=${classroomId}&mode=${this.mode}`, {
+                    fetch(`/teacher/class-attendance/shared-space/data?classroom_id=${classroomId}&mode=${this.mode}`, {
                         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                     })
                     .then(r => r.json())
