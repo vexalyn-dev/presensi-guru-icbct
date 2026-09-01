@@ -435,8 +435,14 @@
         <!-- ══ SHARED SPACE FULL-PAGE OVERLAY ══ -->
         <div x-show="showSharedSpaceModal" x-cloak
              class="fixed inset-0 z-[999] bg-white dark:bg-slate-900 overflow-y-auto"
-             style="display:none;"
-             @keydown.escape.window="closeSharedSpace()">
+             :class="showSharedSpaceModal ? '' : 'pointer-events-none'"
+             @keydown.escape.window="closeSharedSpace()"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="translate-y-full"
+             x-transition:enter-end="translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="translate-y-0"
+             x-transition:leave-end="translate-y-full">
 
             <!-- Sticky Header -->
             <div class="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center gap-3">
