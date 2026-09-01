@@ -172,6 +172,9 @@ class SupportController extends Controller
         // Kirim notifikasi ke semua admin & guru_piket
         $this->notifyAdmins($ticket);
 
+        // Kirim notifikasi konfirmasi ke user yang lapor (semua jenis laporan)
+        $this->notifyUser($ticket);
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success'      => true,
@@ -322,6 +325,29 @@ class SupportController extends Controller
             }
         } catch (\Throwable $e) {
             \Log::warning('Fonnte notification failed', [
+                'ticket' => $ticket->id,
+                'reason' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /** Kirim notifikasi terima kasih ke user yang lapor (semua jenis laporan) */
+    public function notifyUser(SupportTicket $ticket): void
+    {
+        try {
+            $userPhone = $ticket->user?->phone;
+            if ($userPhone) {
+                $formatted = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$userPhone));
+                if ($formatted) {
+                    $caption  = "*𝚃𝙴𝚁𝙸𝙼𝙰 𝙺𝙰𝚂𝙸𝙷 𝚂𝚄𝙳𝙰𝙷 𝙼𝙴𝙽𝙶𝙷𝚄𝙱𝚄𝙽𝙶𝙸 𝚅𝙴𝚇𝙰𝙻𝚈𝙽 𝚂𝚄𝙿𝙿𝙾𝚁𝚃 𝙲𝙴𝙽𝚃𝙴𝚁!*\n\n";
+                    $caption .= "_Laporan kamu sudah berhasil diterima. Saya akan segera mengecek dan menindak lanjutinya._\n\n";
+                    $caption .= "*Setiap laporan yang masuk sangat membantu saya untuk terus memperbaiki dan mengembangkan Presensi Guru ICB CT. ✦*\n\n";
+                    $caption .= "_~ Vexalyn Support_";
+                    (new \App\Services\FonnteService())->sendText($formatted, $caption);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Fonnte user notification failed', [
                 'ticket' => $ticket->id,
                 'reason' => $e->getMessage(),
             ]);
