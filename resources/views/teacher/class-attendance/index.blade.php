@@ -584,7 +584,7 @@
                                 Jam Ke- <span class="text-red-500 font-normal normal-case">*</span>
                                 <span x-show="sharedSpacePeriod" class="ml-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full text-[10px] font-bold normal-case" x-text="'JP '+sharedSpacePeriod"></span>
                             </label>
-                             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+                             <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
                                  <template x-for="jam in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="jam">
                                      <button type="button" @click="sharedSpacePeriod=jam"
                                              class="flex flex-col items-center justify-center rounded-xl py-3 font-bold transition-all active:scale-95 touch-manipulation"
