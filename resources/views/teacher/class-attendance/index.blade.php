@@ -435,7 +435,6 @@
         <!-- ══ SHARED SPACE FULL-PAGE OVERLAY ══ -->
         <div x-show="showSharedSpaceModal" x-cloak
              class="fixed inset-0 z-[999] bg-white dark:bg-slate-900 overflow-y-auto"
-             :class="showSharedSpaceModal ? '' : 'pointer-events-none'"
              @keydown.escape.window="closeSharedSpace()"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="translate-y-full"
@@ -850,7 +849,14 @@
 
                 closeSharedSpace() {
                     this.showSharedSpaceModal = false;
-                    document.body.style.overflow = '';
+                    // Reset content styles immediately
+                    const content = document.getElementById('shared-space-content');
+                    if (content) {
+                        content.style.removeProperty('transform');
+                        content.style.removeProperty('opacity');
+                        content.style.removeProperty('overflow');
+                    }
+                    setTimeout(() => { document.body.style.overflow = ''; }, 250);
                 },
 
                 startScanner() {
@@ -955,9 +961,10 @@
                     }
                     const content = document.getElementById('shared-space-content');
                     if (content) {
-                        content.style.transition = 'transform 0.35s ease-in, opacity 0.35s ease-in';
-                        content.style.transform = 'translateY(30px)';
-                        content.style.opacity = '0';
+                        content.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
+                        content.style.setProperty('transform', 'translateY(30px)', 'important');
+                        content.style.setProperty('opacity', '0', 'important');
+                        content.style.overflow = 'hidden';
                     }
                     setTimeout(() => {
                         this._post('{{ route("teacher.class-attendance.save-shared") }}', {
@@ -972,7 +979,7 @@
                             document.body.style.overflow = '';
                             this.handleScanResponse(status, data);
                         });
-                    }, 350);
+                    }, 300);
                 },
 
                 // Submit presensi KELUAR shared space
@@ -984,8 +991,9 @@
                     const content = document.getElementById('shared-space-content');
                     if (content) {
                         content.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
-                        content.style.transform = 'translateY(30px)';
-                        content.style.opacity = '0';
+                        content.style.setProperty('transform', 'translateY(30px)', 'important');
+                        content.style.setProperty('opacity', '0', 'important');
+                        content.style.overflow = 'hidden';
                     }
                     setTimeout(() => {
                         this._post('{{ route("teacher.class-attendance.save-shared") }}', {
