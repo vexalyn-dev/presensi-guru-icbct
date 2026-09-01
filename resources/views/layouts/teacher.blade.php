@@ -23,6 +23,9 @@
             return { open: false, markRead() {}, init() {} };
         };
         window.notificationDropdownAdmin = window.notificationDropdown;
+        window.classAttendance = function() {
+            return { mode: 'in', scanning: false, showResult: false, resultSuccess: false, resultMessage: '', resultData: null, showClassSelection: false, selectedLocation: '', classSchedules: [], selectedScheduleId: null, scannedQrData: '', userLatitude: null, userLongitude: null, showWarning: false, warningMessage: '', warningTimer: null, remainingSeconds: 0, gracePeriod: 5, scanBeforeStart: 15, showSharedSpaceModal: false, sharedSpaceLocation: '', sharedSpaceLocationId: '', sharedSpaceClasses: [], sharedSpaceSubjects: [], sharedSpaceActiveSessions: [], sharedSpaceSelectedClass: '', sharedSpaceSelectedSubject: '', sharedSpacePeriod: '', sharedSpaceSelectedSession: '', openKelas: false, searchKelas: '', openMapel: false, searchMapel: '', jamViewMode: 'grid' };
+        };
     </script>
 
     <style>
