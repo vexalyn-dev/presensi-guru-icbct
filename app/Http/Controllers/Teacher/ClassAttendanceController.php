@@ -321,6 +321,69 @@ class ClassAttendanceController extends Controller
     }
 
     // ──────────────────────────────────────────────────────────────────────────
+    // sharedSpaceForm — halaman baru untuk form presensi shared space
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function sharedSpaceForm(Request $request)
+    {
+        $user = auth()->user();
+        $mode = $request->input('mode', 'in');
+        $classroomId = $request->input('classroom_id');
+        $classroom = $classroomId ? Classroom::find($classroomId) : null;
+
+        // Ambil semua kelas aktif (bukan shared)
+        $classes = Classroom::where('is_active', true)
+            ->where(function ($q) {
+                $q->where('is_shared', false)->orWhereNull('is_shared');
+            })
+            ->where(function ($q) {
+                $q->where('type', 'regular')->orWhereNull('type');
+            })
+            ->orderBy('level')
+            ->orderBy('name')
+            ->get();
+
+        // Semua mapel aktif
+        $subjects = Subject::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        // Sesi aktif untuk mode out
+        $activeSessions = [];
+        if ($mode === 'out' && $classroom) {
+            $today = Carbon::today();
+            $activeSessions = ClassAttendance::where('classroom_id', $classroom->id)
+                ->where('user_id', $user->id)
+                ->whereDate('date', $today)
+                ->whereNotNull('check_in_time')
+                ->whereNull('check_out_time')
+                ->with(['selectedClassroom', 'subject'])
+                ->get()
+                ->map(function ($a) {
+                    $checkInStr = $a->check_in_time ? Carbon::parse($a->check_in_time)->format('H:i:s') : '00:00:00';
+                    $dateStr = $a->date ? Carbon::parse($a->date)->toDateString() : now()->toDateString();
+                    $checkIn = Carbon::parse("{$dateStr} {$checkInStr}");
+                    $duration = (int) max(0, round($checkIn->diffInMinutes(now())));
+
+                    return [
+                        'id' => $a->id,
+                        'classroom_name' => $a->selectedClassroom?->name ?? '-',
+                        'subject_name' => $a->subject?->name ?? '-',
+                        'period' => $a->period,
+                        'check_in_time' => Carbon::parse($a->check_in_time)->format('H:i'),
+                        'duration_minutes' => $duration,
+                    ];
+                })
+                ->values()
+                ->toArray();
+        }
+
+        return view('teacher.class-attendance.shared-space', compact(
+            'classroom', 'classes', 'subjects', 'activeSessions', 'mode'
+        ));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
     // saveSharedSpace — endpoint langsung dari modal ON-DEMAND (tanpa QR scan ulang)
     // ──────────────────────────────────────────────────────────────────────────
 

@@ -286,6 +286,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->g
         // Class Attendance
         Route::get('/class-attendance', [TeacherClassAttendanceController::class, 'index'])->name('class-attendance');
         Route::post('/class-attendance/scan', [TeacherClassAttendanceController::class, 'scan'])->name('class-attendance.scan');
+        Route::get('/class-attendance/shared-space', [TeacherClassAttendanceController::class, 'sharedSpaceForm'])->name('class-attendance.shared-space');
         Route::post('/class-attendance/save-shared', [TeacherClassAttendanceController::class, 'saveSharedSpace'])->name('class-attendance.save-shared');
         Route::get('/class-attendance/refresh', [TeacherClassAttendanceController::class, 'refreshData'])->name('class-attendance.refresh');
         
