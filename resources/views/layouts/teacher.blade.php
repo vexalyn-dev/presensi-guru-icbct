@@ -153,7 +153,6 @@
                                 });
                                 window.location.href = '{{ route("teacher.class-attendance.shared-space") }}?' + params.toString();
                                 return;
-                            }
                             } else if (data.schedules) {
                                 this.showClassSelection = true;
                                 this.selectedLocation = data.message;

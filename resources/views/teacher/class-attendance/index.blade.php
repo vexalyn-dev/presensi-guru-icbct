@@ -262,15 +262,6 @@
             </div>
         </div>
 
-        <!-- Gallery FAB (fixed bottom-right) -->
-        <button type="button" onclick="document.getElementById('class-attendance-gallery').click()"
-                class="fixed bottom-6 right-4 z-40 w-12 h-12 rounded-2xl bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 flex items-center justify-center shadow-xl hover:shadow-2xl active:scale-95 transition-all"
-                title="Unggah QR dari Galeri">
-            <i data-lucide="image" class="w-5 h-5"></i>
-        </button>
-        <input type="file" id="class-attendance-gallery" accept="image/*" class="hidden" onchange="handleClassAttendanceGallery(this)">
-        </div>
-
         <!-- Result Toast -->
         <div x-show="showResult" x-transition class="card p-4 sm:p-6 border-2"
             :class="resultSuccess ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20'">
@@ -827,41 +818,7 @@
     </style>
 
     <script>
-        // ── Class Attendance Gallery Upload (optimized) ──
-        window.handleClassAttendanceGallery = function(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            // Limit image size for faster processing
-            const MAX_DIM = 640;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    let w = img.width, h = img.height;
-                    if (w > MAX_DIM || h > MAX_DIM) {
-                        const scale = MAX_DIM / Math.max(w, h);
-                        w = Math.round(w * scale);
-                        h = Math.round(h * scale);
-                    }
-                    const canvas = document.createElement('canvas');
-                    canvas.width = w;
-                    canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
-                    const imageData = ctx.getImageData(0, 0, w, h);
-                    if (typeof jsQR === 'function') {
-                        const code = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
-                        if (code && _qrAlpine) {
-                            _qrAlpine.processScan(code.data);
-                        } else {
-                            alert('QR Code tidak ditemukan dalam gambar. Pastikan foto QR jelas.');
-                        }
-                    }
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-            input.value = '';
-        };
-    </script>
-@endsection
+        // ── QR Scanner with Camera ──
+        let _qrAlpine = null;
+
+        function startQrVideo(alpineCtx) {
