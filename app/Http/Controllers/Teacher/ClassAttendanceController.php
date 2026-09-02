@@ -510,9 +510,15 @@ class ClassAttendanceController extends Controller
         ];
 
         if ($mode === 'in' || !$request->filled('attendance_id')) {
-            $rules['selected_classroom_id'] = 'required|exists:classrooms,id';
-            $rules['subject_id']            = 'required|exists:subjects,id';
-            $rules['period']                = 'required|integer|min:1|max:12';
+            // Support multi-kelas: bisa single string ATAU array
+            if ($request->has('selected_classroom_ids')) {
+                $rules['selected_classroom_ids']   = 'required|array|min:1|max:5';
+                $rules['selected_classroom_ids.*'] = 'exists:classrooms,id';
+            } else {
+                $rules['selected_classroom_id'] = 'required|exists:classrooms,id';
+            }
+            $rules['subject_id'] = 'required|exists:subjects,id';
+            $rules['period']     = 'required|integer|min:1|max:12';
         }
 
         $request->validate($rules);
@@ -530,7 +536,49 @@ class ClassAttendanceController extends Controller
             return $this->handleSharedSpaceCheckOut($classroom, $user, $now, $today, $request);
         }
 
-        return $this->handleSharedSpaceCheckIn($classroom, $user, $now, $today, $request);
+        // Mode IN: support multi-kelas
+        $classroomIds = $request->input('selected_classroom_ids')
+            ?? [$request->input('selected_classroom_id')];
+
+        if (count($classroomIds) === 1) {
+            // Single kelas — flow lama
+            return $this->handleSharedSpaceCheckIn($classroom, $user, $now, $today, $request);
+        }
+
+        // Multi-kelas — loop dan kumpulkan hasil
+        $results  = [];
+        $anyOk    = false;
+        $allFail  = true;
+
+        foreach ($classroomIds as $cid) {
+            $cloned = $request->merge(['selected_classroom_id' => $cid]);
+            $resp   = $this->handleSharedSpaceCheckIn($classroom, $user, $now, $today, $request);
+            $body   = json_decode($resp->getContent(), true);
+            $ok     = $body['success'] ?? false;
+            if ($ok) $anyOk  = true;
+            if ($ok) $allFail = false;
+            $results[] = [
+                'classroom_id' => $cid,
+                'success'      => $ok,
+                'message'      => $body['message'] ?? '',
+            ];
+        }
+
+        $successCount = collect($results)->where('success', true)->count();
+        $failCount    = collect($results)->where('success', false)->count();
+
+        $summary = $allFail
+            ? '❌ Semua presensi gagal disimpan.'
+            : ($failCount > 0
+                ? "✅ {$successCount} kelas berhasil, {$failCount} kelas gagal."
+                : "✅ Semua {$successCount} kelas berhasil disimpan.");
+
+        return response()->json([
+            'success'  => $anyOk,
+            'message'  => $summary,
+            'multi'    => true,
+            'results'  => $results,
+        ], $allFail ? 422 : 200);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
