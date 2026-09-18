@@ -507,7 +507,6 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Alpine.js](https://alpinejs.dev/)
 - [Leaflet.js](https://leafletjs.com/)
-- [Lucide Icons](https://lucide.dev/)
 - [Chart.js](https://www.chartjs.org/)
 - [PhpSpreadsheet](https://phpspreadsheet.readthedocs.io/)
 - [ClickUp API](https://clickup.com/api)
@@ -524,7 +523,7 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 <div align="center">
 
-**⭐ Star this repo if you find it helpful!.**
+**⭐ Star this repo if you find it helpful!**
 
 Made with ❤️ by <img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;margin-bottom:3px;"> • © 2026 ICB Cinta Teknika
 
