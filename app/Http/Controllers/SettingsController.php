@@ -126,8 +126,6 @@ class SettingsController extends Controller
         Setting::set('class_switch_grace_period',    $validated['class_switch_grace_period'] ?? 0, 'number',  'attendance');
         Setting::set('scan_before_start',            $validated['scan_before_start'] ?? 0,         'number',  'attendance');
 
-        Artisan::call('config:clear');
-
         return back()->with('success', 'Pengaturan presensi berhasil diperbarui!');
     }
 

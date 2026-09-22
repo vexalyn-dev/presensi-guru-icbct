@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="id" style="height:100%;overflow:hidden;">
 
 <head>

@@ -20,6 +20,8 @@ class Classroom extends Model
         'is_active',
         'qr_token',
         'qr_code',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [

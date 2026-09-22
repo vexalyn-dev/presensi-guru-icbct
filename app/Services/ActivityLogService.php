@@ -109,7 +109,7 @@ class ActivityLogService
                 'classroom_name' => $classroom->name,
                 'classroom_code' => $classroom->code ?? '-',
                 'period' => $schedule->period,
-                'subject' => $schedule->subject->name ?? '-',
+                'subject' => $schedule->subject?->name ?? '-',
                 'schedule_id' => $schedule->id,
             ], $location),
             $user
@@ -127,7 +127,7 @@ class ActivityLogService
                 'classroom_name' => $classroom->name,
                 'classroom_code' => $classroom->code ?? '-',
                 'period' => $schedule->period,
-                'subject' => $schedule->subject->name ?? '-',
+                'subject' => $schedule->subject?->name ?? '-',
                 'schedule_id' => $schedule->id,
             ], $location),
             $user
@@ -181,7 +181,7 @@ class ActivityLogService
             'teacher',
             "{$admin->name} menambahkan guru: {$teacher->name}",
             $teacher,
-            ['teacher_code' => $teacher->teacher_code],
+            ['teacher_code' => $teacher->employee_code],
             $admin
         );
     }
@@ -205,7 +205,7 @@ class ActivityLogService
             'teacher',
             "{$admin->name} menghapus guru: {$teacher->name}",
             null,
-            ['teacher_name' => $teacher->name, 'teacher_code' => $teacher->teacher_code],
+            ['teacher_name' => $teacher->name, 'teacher_code' => $teacher->employee_code],
             $admin
         );
     }

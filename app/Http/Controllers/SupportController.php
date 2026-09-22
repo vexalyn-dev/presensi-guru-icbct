@@ -243,7 +243,7 @@ class SupportController extends Controller
     {
         try {
             $rawPhone   = config('services.whatsapp.dev_number', env('DEV_WA_NUMBER', env('SUPPORT_WA_NUMBER', '')));
-            $adminPhone = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$rawPhone));
+            $adminPhone = preg_replace('/[^0-9]/', '', (string)$rawPhone);
 
             if ($adminPhone) {
                 $prioLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
@@ -313,7 +313,7 @@ class SupportController extends Controller
             // 2. Kirim notifikasi konfirmasi ke user yang lapor (jika ada nomor HP dan bukan nomor dev)
             $userPhone = $ticket->user?->phone;
             if ($userPhone && $userPhone !== $rawPhone) {
-                $userPhoneFormatted = preg_replace('/^08/', '628', preg_replace('/[^0-9]/', '', (string)$userPhone));
+                $userPhoneFormatted = preg_replace('/[^0-9]/', '', (string)$userPhone);
                 if ($userPhoneFormatted && $userPhoneFormatted !== $adminPhone) {
                     $userCaption  = "*𝚃𝙴𝚁𝙸𝙼𝙰 𝙺𝙰𝚂𝙸𝙷 𝚂𝚄𝙳𝙰𝙷 𝙼𝙴𝙽𝙶𝙷𝚄𝙱𝚄𝙽𝙶𝙸 𝚅𝙴𝚇𝙰𝙻𝚈𝙽 𝚂𝚄𝙿𝙿𝙾𝚁𝚃 𝙲𝙴𝙽𝚃𝙴𝚁!*\n\n";
                     $userCaption .= "_Laporan kamu sudah berhasil diterima. Saya akan segera mengecek dan menindak lanjutinya._\n\n";

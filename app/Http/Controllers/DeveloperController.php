@@ -15,11 +15,9 @@ use Illuminate\Support\Facades\Schema;
 
 class DeveloperController extends Controller
 {
-    const SECRET_KEY = 'vexalyn-dev-2026';
-
     private function verifySecret(string $secret): bool
     {
-        return $secret === env('DEVELOPER_SECRET_KEY', self::SECRET_KEY);
+        return $secret === env('DEVELOPER_SECRET_KEY');
     }
 
     public function dashboard(string $secret)

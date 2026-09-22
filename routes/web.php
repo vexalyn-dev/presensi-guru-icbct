@@ -12,8 +12,7 @@ use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\Teacher\ClassAttendanceController as TeacherClassAttendanceController;
 use App\Http\Controllers\Teacher\WorkScheduleController;
-use App\Http\Controllers\ClassController;
-use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\TeacherScheduleController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\MessageController;
@@ -24,7 +23,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\SocialAuthController;
-use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\TeachingScheduleController;
 use App\Http\Controllers\ClassAttendanceController;
 use App\Http\Controllers\Teacher\ProfileController as TeacherProfileController;
@@ -48,8 +46,8 @@ use App\Http\Controllers\DeveloperController;
 |--------------------------------------------------------------------------
 */
 
-// Storage symlink helper (untuk shared hosting)
-Route::get('/link-storage', function () {
+// Storage symlink helper (untuk shared hosting) — hanya admin yang bisa akses
+Route::middleware(['auth', 'role:admin'])->get('/link-storage', function () {
     Artisan::call('storage:link');
     return 'Symlink storage berhasil dibuat!';
 });
@@ -74,15 +72,11 @@ Route::get('/', function () {
 
 // Auth Routes
 Route::middleware(['guest'])->group(function () {
-    Route::get('/login', function () {
-        return view('auth.login');
-    })->name('login');
-
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
     Route::get('/register', function () {
         return redirect()->route('login');
     })->name('register');
-
-    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
     Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
 
     // Password Reset
@@ -148,15 +142,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     
     // Subjects
     Route::resource('subjects', SubjectController::class);
-    
-    // Classes
-    // Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
-    // Route::get('/classes/create', [ClassController::class, 'create'])->name('classes.create');
-    // Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
-    // Route::get('/classes/{class}/edit', [ClassController::class, 'edit'])->name('classes.edit');
-    // Route::put('/classes/{class}', [ClassController::class, 'update'])->name('classes.update');
-    // Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
-    
+
     Route::get('/schedules', [TeacherScheduleController::class, 'index'])->name('schedules.index');
     Route::get('/schedules/{teacher}/edit', [TeacherScheduleController::class, 'edit'])->name('schedules.edit');
     Route::put('/schedules/{teacher}', [TeacherScheduleController::class, 'update'])->name('schedules.update');
@@ -187,15 +173,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/my-leaves', [LeaveController::class, 'myLeaves'])->name('leaves.my');
     
     // Reports
-    Route::middleware(['auth', 'role:admin'])->group(function () {
-        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
-
-        // Report Enhancement
-        Route::get('/reports/attendance',        [\App\Http\Controllers\Reports\AttendanceReportController::class,  'index']) ->name('reports.attendance');
-        Route::get('/reports/attendance/export', [\App\Http\Controllers\Reports\AttendanceReportController::class,  'export'])->name('reports.attendance.export');
-        Route::get('/reports/performance',       [\App\Http\Controllers\Reports\PerformanceReportController::class, 'index']) ->name('reports.performance');
-    });
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('/reports/attendance',        [\App\Http\Controllers\Reports\AttendanceReportController::class,  'index']) ->name('reports.attendance');
+    Route::get('/reports/attendance/export', [\App\Http\Controllers\Reports\AttendanceReportController::class,  'export'])->name('reports.attendance.export');
+    Route::get('/reports/performance',       [\App\Http\Controllers\Reports\PerformanceReportController::class, 'index']) ->name('reports.performance');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -395,7 +377,7 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
 
 Route::get('/run-migrate-secret', function (Request $request) {
     // Lu cuma bisa akses kalo bawa key yang bener
-    if ($request->input('key') !== env('DEPLOY_SECRET_KEY', 'vexalyn19052009')) {
+    if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
         abort(404);
     }
 
@@ -411,7 +393,7 @@ Route::get('/sapu-jagat', function () {
 
 Route::get('/git-pull-rahasia', function (Request $request) {
     // Validasi key rahasia biar aman dari orang Iseng
-    if ($request->input('key') !== env('DEPLOY_SECRET_KEY', 'vexalyn19052009')) {
+    if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
         abort(404);
     }
 

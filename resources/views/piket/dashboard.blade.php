@@ -290,12 +290,18 @@
 function closePiketWelcome() {
     var overlay = document.getElementById('piket-welcome-overlay');
     var box     = document.getElementById('piket-welcome-box');
+    if (!overlay || !box) return;
     box.style.transform = 'translateY(10px) scale(0.97)';
     box.style.opacity   = '0';
     setTimeout(function() { overlay.style.display = 'none'; }, 320);
 }
-document.getElementById('piket-welcome-overlay').addEventListener('click', function(e) {
-    if (e.target === this) closePiketWelcome();
-});
+(function() {
+    var overlay = document.getElementById('piket-welcome-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) closePiketWelcome();
+        });
+    }
+})();
 </script>
 @endsection

@@ -345,10 +345,16 @@
                         this.longPressTimer = null;
                     }
                     
-                    if (!this.selectionMode && deltaX > 10 && deltaY < 30) {
-                        const distance = touchX - this.touchStartX;
-                        event.target.closest('[x-data]').swipeDistance = Math.min(0, distance);
-                    }
+                        if (!this.selectionMode && deltaX > 10 && deltaY < 30) {
+                            const distance = touchX - this.touchStartX;
+                            const target = event.target.closest('[x-data]');
+                            if (target) {
+                                const data = Alpine.$data(target);
+                                if (data && typeof data.swipeDistance !== 'undefined') {
+                                    data.swipeDistance = Math.min(0, distance);
+                                }
+                            }
+                        }
                 }
             },
             
@@ -359,8 +365,11 @@
                 }
                 
                 const element = event.target.closest('[x-data]');
-                if (element && element.swipeDistance > -80) {
-                    element.swipeDistance = 0;
+                if (element) {
+                    const data = Alpine.$data(element);
+                    if (data && typeof data.swipeDistance !== 'undefined' && data.swipeDistance > -80) {
+                        data.swipeDistance = 0;
+                    }
                 }
             },
             

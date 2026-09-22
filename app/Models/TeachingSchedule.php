@@ -31,11 +31,6 @@ class TeachingSchedule extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function teacher()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
@@ -110,9 +105,9 @@ class TeachingSchedule extends Model
                 $inner->where('start_time', '<=', $currentTime)
                     ->where('end_time', '>=', $currentTime);
             })->orWhere(function ($inner) use ($currentTime) {
-                $graceStart = \Carbon\Carbon::parse($currentTime)->subMinutes(15);
+                $graceEnd = \Carbon\Carbon::parse($currentTime)->addMinutes(15);
                 $inner->where('start_time', '>=', $currentTime)
-                    ->where('start_time', '<=', $graceStart);
+                    ->where('start_time', '<=', $graceEnd);
             });
         })->first();
     }

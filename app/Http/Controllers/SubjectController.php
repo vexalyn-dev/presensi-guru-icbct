@@ -74,8 +74,7 @@ class SubjectController extends Controller
         $lastSubject = Subject::orderBy('id', 'desc')->first();
         $nextId = $lastSubject ? $lastSubject->id + 1 : 1;
         $validated['code'] = 'MP-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
-        $validated['category'] = 'Umum'; // Set default category
-        
+
         $validated['is_active'] = $request->has('is_active');
 
         $subject = Subject::create($validated);
@@ -86,14 +85,6 @@ class SubjectController extends Controller
         }
 
         return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil ditambahkan.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Subject $subject)
-    {
-        //
     }
 
     /**

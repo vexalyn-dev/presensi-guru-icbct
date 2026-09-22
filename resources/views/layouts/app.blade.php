@@ -17,7 +17,7 @@
     </script>
 
     <script src="https://unpkg.com/lucide@1.7.0/dist/umd/lucide.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -636,8 +636,8 @@
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                     <button @click.stop="open = !open" class="flex items-center gap-2.5 p-1.5 pr-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all hover:scale-105 icon-click">
                         <div class="relative">
-                            <img src="{{ Auth::user()->photo_url }}" 
-                                 class="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shadow-sm">
+                            <img src="{{ Auth::user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=0F172A&color=fff' }}"
+                                  class="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shadow-sm">
                             <!-- PERMANENT GREEN DOT - FIXED -->
                             <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-navy-900 rounded-full pulse-dot" style="display:inline-block!important; animation:pulse-green 2s infinite!important;"></span>
                         </div>
@@ -662,8 +662,8 @@
                         <div class="p-4 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-slate-700 dark:to-slate-800">
                             <div class="flex items-center gap-3">
                                 <div class="relative">
-                                    <img src="{{ Auth::user()->photo_url }}" 
-                                         class="w-12 h-12 rounded-full object-cover border-2 border-gold-400/50 shadow-lg">
+                                    <img src="{{ Auth::user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=0F172A&color=fff' }}"
+                                          class="w-12 h-12 rounded-full object-cover border-2 border-gold-400/50 shadow-lg">
                                     <!-- PERMANENT GREEN DOT - FIXED -->
                                     <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-navy-800 dark:border-slate-700 rounded-full pulse-dot" style="display:inline-block!important; animation:pulse-green 2s infinite!important;"></span>
                                 </div>

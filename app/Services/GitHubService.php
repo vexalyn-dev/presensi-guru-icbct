@@ -172,7 +172,7 @@ class GitHubService
 
         // HTTP fallback
         try {
-            $resp = Http::withoutVerifying()->timeout(10)->get($url);
+            $resp = Http::timeout(10)->get($url);
             return $resp->successful() ? $resp->body() : '';
         } catch (\Exception $e) {
             return '';

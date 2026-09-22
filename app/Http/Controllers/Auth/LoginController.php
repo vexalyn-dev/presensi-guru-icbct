@@ -37,6 +37,14 @@ class LoginController extends Controller
     }
 
     /**
+     * Show the login form.
+     */
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+    /**
      * Handle login request
      */
     public function login(Request $request)

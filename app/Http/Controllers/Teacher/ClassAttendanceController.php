@@ -407,7 +407,7 @@ class ClassAttendanceController extends Controller
         $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
 
         $today          = now()->toDateString();
-        $activeSessions = \App\Models\ClassAttendance::where('teacher_id', $user->teacher?->id)
+        $activeSessions = \App\Models\ClassAttendance::where('user_id', $user->id)
             ->whereDate('date', $today)
             ->whereNotNull('check_in_time')
             ->whereNull('check_out_time')
@@ -552,7 +552,8 @@ class ClassAttendanceController extends Controller
 
         foreach ($classroomIds as $cid) {
             $cloned = $request->merge(['selected_classroom_id' => $cid]);
-            $resp   = $this->handleSharedSpaceCheckIn($classroom, $user, $now, $today, $request);
+            $foundClassroom = Classroom::find($cid);
+            $resp   = $this->handleSharedSpaceCheckIn($foundClassroom ?? $classroom, $user, $now, $today, $request);
             $body   = json_decode($resp->getContent(), true);
             $ok     = $body['success'] ?? false;
             if ($ok) $anyOk  = true;

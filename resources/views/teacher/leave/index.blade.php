@@ -25,9 +25,10 @@
     <!-- Stat Cards -->
     @php
         $total    = $leaveRequests->total();
-        $pending  = $leaveRequests->getCollection()->where('status','pending')->count();
-        $approved = $leaveRequests->getCollection()->where('status','approved')->count();
-        $rejected = $leaveRequests->getCollection()->where('status','rejected')->count();
+        $pending  = $leaveRequests->items();
+        $pending  = count(array_filter($pending, fn($r) => $r->status === 'pending'));
+        $approved = count(array_filter($leaveRequests->items(), fn($r) => $r->status === 'approved'));
+        $rejected = count(array_filter($leaveRequests->items(), fn($r) => $r->status === 'rejected'));
     @endphp
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="card p-4 flex items-center gap-3">

@@ -156,7 +156,7 @@ class HistoryController extends Controller
                 'date' => $att->date ? Carbon::parse($att->date)->toDateString() : '',
                 'date_formatted' => $date->format('d M Y'),
                 'day_name' => $date->locale('id')->isoFormat('dddd'),
-                'classroom_name' => $att->classroom->name ?? ($att->selectedClassroom->name ?? '-'),
+                'classroom_name' => $att->classroom?->name ?? ($att->selectedClassroom?->name ?? '-'),
                 'subject_name' => $att->teachingSchedule?->subject?->name ?? ($att->subject?->name ?? '-'),
                 'period' => $att->period,
                 'check_in_time' => $att->check_in_time ? Carbon::parse($att->check_in_time)->format('H:i') : null,
@@ -248,7 +248,7 @@ class HistoryController extends Controller
                 fputcsv($output, [
                     Carbon::parse($att->date)->format('d-m-Y'),
                     $att->classroom->name ?? '-',
-                    $att->teachingSchedule->subject->name ?? '-',
+                    $att->teachingSchedule?->subject?->name ?? '-',
                     'Jam ke-' . $att->period,
                     $att->check_in_time ?? '-',
                     $att->check_out_time ?? '-',

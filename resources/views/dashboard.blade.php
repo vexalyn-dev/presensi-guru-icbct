@@ -710,26 +710,10 @@
     }
 
     /* ==========================================
-       UTILITY CLASSES
-       ========================================== */
+        UTILITY CLASSES
+        ========================================== */
     .tabular-nums {
         font-variant-numeric: tabular-nums;
-    }
-
-    /* Confetti canvas overlay */
-    #attendanceChart {
-        position: relative;
-    }
-
-    /* Bounce animation for holiday bars */
-    @keyframes barBounce {
-        0%, 100% { transform: scaleY(1); }
-        50% { transform: scaleY(1.05); }
-    }
-
-    .chartjs-render-monitor .bar-holiday {
-        animation: barBounce 1s ease-in-out infinite;
-        transform-origin: bottom;
     }
 </style>
 

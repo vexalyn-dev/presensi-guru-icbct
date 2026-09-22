@@ -92,6 +92,12 @@ class User extends Authenticatable
      */
     protected $appends = [
         'photo_url',
+        'formatted_id',
+        'qr_code_url',
+        'role_name',
+        'subject_names',
+        'total_hours',
+        'attendance_stats',
     ];
 
     /**
@@ -255,7 +261,7 @@ class User extends Authenticatable
      */
     public function scopeTeachers(Builder $query): Builder
     {
-        return $query->whereIn('role', ['guru']);
+        return $query->whereIn('role', ['guru', 'guru_piket']);
     }
 
     /**
@@ -653,7 +659,12 @@ class User extends Authenticatable
      */
     public function canBeDeleted(): bool
     {
-        return $this->attendances()->count() === 0;
+        if ($this->attendances()->count() > 0) return false;
+        if ($this->classAttendances()->count() > 0) return false;
+        if ($this->leaves()->count() > 0) return false;
+        if ($this->messagesReceived()->count() > 0 || $this->messagesSent()->count() > 0) return false;
+        if ($this->supportTickets()->count() > 0) return false;
+        return true;
     }
 
     /**
