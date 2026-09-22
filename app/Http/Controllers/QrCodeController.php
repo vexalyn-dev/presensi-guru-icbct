@@ -137,7 +137,7 @@ class QrCodeController extends Controller
                         "{$teacher->name} scan presensi MASUK ({$status})",
                         null,
                         [
-                            'teacher_code' => $teacher->teacher_code,
+                            'teacher_code' => $teacher->employee_code,
                             'status' => $status,
                             'latitude' => $request->latitude,
                             'longitude' => $request->longitude,

@@ -216,7 +216,7 @@ class User extends Authenticatable
     /** Cek role guru reguler */
     public function isTeacher(): bool
     {
-        return in_array($this->role, [self::ROLE_GURU, self::ROLE_GURU_PIKET]);
+        return $this->role === self::ROLE_GURU;
     }
 
     /** Cek khusus guru piket */
