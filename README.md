@@ -370,7 +370,72 @@ MAIL_ENCRYPTION=tls
 
 ---
 
-## Dokumentasi
+## 🛡️ Keamanan
+
+Project ini telah melalui audit keamanan komprehensif mencakup:
+
+| Kategori | Status |
+|----------|--------|
+| SQL Injection | ✅ Dilindungi ORM Laravel |
+| XSS (Stored/Reflected) | ✅ CSP + escaping DOM |
+| CSRF | ✅ Token wajib di semua form |
+| IDOR | ✅ Ownership check di semua endpoint |
+| SSRF | ✅ Host allowlist di service |
+| Brute Force | ✅ Rate limiting di auth |
+| Session Hijacking | ✅ Secure cookie + encrypt |
+| Command Injection | ✅ Admin-only + key-based |
+| Email Enumeration | ✅ Generic response message |
+| Open Redirect | ✅ Origin validation |
+
+### Environment Variables yang Wajib Diisi
+
+Edit `.env` sesuai kebutuhan:
+
+```env
+# Keamanan
+APP_DEBUG=false                    # JANGAN aktifkan di production!
+SESSION_SECURE_COOKIE=true         # Cookie hanya kirim via HTTPS
+
+# Database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=icb_ct_absensi
+DB_USERNAME=root
+DB_PASSWORD=your-strong-password
+
+# Email (Resend / SMTP)
+MAIL_MAILER=resend
+RESEND_API_KEY=your-resend-key
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_REDIRECT_URI=https://your-domain/auth/google/callback
+```
+
+### 🔐 Production Checklist
+
+Sebelum deploy ke production, pastikan:
+
+```bash
+# 1. Generate unique APP_KEY
+php artisan key:generate
+
+# 2. Set APP_DEBUG ke false di .env.production
+# APP_DEBUG=false
+
+# 3. Build assets
+npm run build
+
+# 4. Run migrations
+php artisan migrate --force
+
+# 5. Cache everything
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
 
 ### 👥 Roles & Permissions
 
