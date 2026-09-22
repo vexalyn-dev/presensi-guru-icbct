@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Student extends Model
 {
@@ -35,12 +36,12 @@ class Student extends Model
         return $this->hasMany(Attendance::class);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    public function scopeByClass($query, $classId)
+    public function scopeByClass(Builder $query, int $classId): Builder
     {
         return $query->where('class_id', $classId);
     }
