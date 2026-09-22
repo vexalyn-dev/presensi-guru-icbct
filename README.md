@@ -86,6 +86,24 @@
 - [x] Detail tiket dengan link ke GitHub & ClickUp
 - [x] Tersedia untuk semua role
 
+### 🔒 Keamanan & Proteksi
+- [x] **Content Security Policy (CSP)** — header anti-XSS global
+- [x] **X-Frame-Options DENY** — proteksi clickjacking
+- [x] **Rate Limiting** — login (10/menit), register (5/menit), forgot-password (3/menit)
+- [x] **CSRF Protection** — semua form POST wajib token
+- [x] **SSRF Protection** — validasi host URL di service
+- [x] **IDOR Prevention** — ownership check di semua endpoint data sensitif
+- [x] **XSS Prevention** — escaping user input di JavaScript DOM
+- [x] **Secure Session** — cookie HTTPS-only, encrypt, http_only
+- [x] **Password Enforcement** — bcrypt rounds 12, random password saat import
+- [x] **Email Enumeration Prevention** — response message seragam
+- [x] **QR Token Rotation** — token lama invalid setelah regenerate
+- [x] **PII Minimization** — QR code tanpa nama/email
+- [x] **MIME Validation** — base64 image upload diverifikasi
+- [x] **CRLF Injection Prevention** — sanitasi filename export
+- [x] **Error Message Sanitization** — exception detail tidak terekspose
+- [x] **Open Redirect Prevention** — validasi origin URL
+
 ### 📱 Download APK
 - [x] Halaman download APK mobile
 - [x] Banner slider 4 slide dengan Netflix-style transition
