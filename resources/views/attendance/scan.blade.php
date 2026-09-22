@@ -337,6 +337,14 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
     <script>
+        // XSS prevention helper — escape HTML entities before inserting into innerHTML
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(String(str)));
+            return div.innerHTML;
+        }
+
         // Global variables
         let video = document.getElementById('camera-video');
         let canvas = document.getElementById('qr-canvas');
@@ -466,15 +474,15 @@
                             <div class="mt-2 space-y-1">
                                 <div class="flex items-center gap-2">
                                     <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Nama Guru</span>
-                                    <span class="text-sm font-bold text-navy-800 dark:text-white">${teacherData.name || '-'}</span>
+                                    <span class="text-sm font-bold text-navy-800 dark:text-white">${escapeHtml(teacherData.name) || '-'}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Email</span>
-                                    <span class="text-xs text-slate-600 dark:text-slate-400">${teacherData.email || '-'}</span>
+                                    <span class="text-xs text-slate-600 dark:text-slate-400">${escapeHtml(teacherData.email) || '-'}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Mata Pelajaran</span>
-                                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">${teacherData.subject || 'Belum diatur'}</span>
+                                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">${escapeHtml(teacherData.subject) || 'Belum diatur'}</span>
                                 </div>
                             </div>
                         `;
@@ -502,13 +510,13 @@
                                     document.getElementById('btn-confirm-text').textContent = 'Konfirmasi Presensi Keluar';
                                     document.getElementById('attendance-mode-input').value = 'keluar';
                                     
-                                    qrDataEl.innerHTML += `
-                                        <div class="mt-4 pt-4 border-t border-green-200 dark:border-green-800">
-                                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Waktu masuk tadi:</p>
-                                            <p class="text-sm font-bold text-navy-800 dark:text-white">${statusData.check_in_time} WIB</p>
-                                            <p class="text-xs text-green-600 dark:text-green-400 mt-1">Status: ${statusData.status}</p>
-                                        </div>
-                                    `;
+                                     qrDataEl.innerHTML += `
+                                         <div class="mt-4 pt-4 border-t border-green-200 dark:border-green-800">
+                                             <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Waktu masuk tadi:</p>
+                                             <p class="text-sm font-bold text-navy-800 dark:text-white">${escapeHtml(statusData.check_in_time)} WIB</p>
+                                             <p class="text-xs text-green-600 dark:text-green-400 mt-1">Status: ${escapeHtml(statusData.status)}</p>
+                                         </div>
+                                     `;
                                 } else if (currentMode === 'keluar' && !alreadyIn) {
                                     // Mode keluar tapi belum ada data masuk
                                     document.getElementById('success-title').textContent = 'Peringatan';
@@ -744,15 +752,15 @@
                         <div class="mt-2 space-y-1">
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Nama Guru</span>
-                                <span class="text-sm font-bold text-navy-800 dark:text-white">${teacherData.name || '-'}</span>
+                                <span class="text-sm font-bold text-navy-800 dark:text-white">${escapeHtml(teacherData.name) || '-'}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Email</span>
-                                <span class="text-xs text-slate-600 dark:text-slate-400">${teacherData.email || '-'}</span>
+                                <span class="text-xs text-slate-600 dark:text-slate-400">${escapeHtml(teacherData.email) || '-'}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Mata Pelajaran</span>
-                                <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">${teacherData.subject || 'Belum diatur'}</span>
+                                <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">${escapeHtml(teacherData.subject) || 'Belum diatur'}</span>
                             </div>
                         </div>
                     `;
@@ -776,8 +784,8 @@
                                 qrDataEl.innerHTML += `
                                     <div class="mt-4 pt-4 border-t border-green-200 dark:border-green-800">
                                         <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Waktu masuk tadi:</p>
-                                        <p class="text-sm font-bold text-navy-800 dark:text-white">${statusData.check_in_time} WIB</p>
-                                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">Status: ${statusData.status}</p>
+                                        <p class="text-sm font-bold text-navy-800 dark:text-white">${escapeHtml(statusData.check_in_time)} WIB</p>
+                                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">Status: ${escapeHtml(statusData.status)}</p>
                                     </div>
                                 `;
                                 

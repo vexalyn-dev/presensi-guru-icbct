@@ -175,7 +175,7 @@ class QrCodeController extends Controller
             Log::error('QR Scan Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan sistem. Silakan coba lagi.'
             ], 500);
         }
     }

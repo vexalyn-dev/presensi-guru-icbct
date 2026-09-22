@@ -72,9 +72,10 @@ class AttendanceController extends Controller
             }
             
         } catch (\Exception $e) {
+            Log::warning('Attendance store failed: ' . $e->getMessage());
             return $ajaxRequest
-                ? response()->json(['success' => false, 'message' => 'Gagal memproses QR code: ' . $e->getMessage()], 422)
-                : back()->with('error', 'Gagal memproses QR code: ' . $e->getMessage());
+                ? response()->json(['success' => false, 'message' => 'Gagal memproses presensi. Silakan coba lagi.'], 422)
+                : back()->with('error', 'Gagal memproses presensi. Silakan coba lagi.');
         }
 
         if (\App\Models\Holiday::isHoliday(today())) {
@@ -300,6 +301,13 @@ class AttendanceController extends Controller
      */
     public function checkStatus(int $teacherId)
     {
+        $currentUser = auth()->user();
+
+        // Allow admin/operator to check any teacher, but teachers can only check themselves
+        if (!$currentUser->canAccessAdmin() && (int) $teacherId !== $currentUser->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $attendance = Attendance::where('user_id', $teacherId)
             ->where('date', today())
             ->first();

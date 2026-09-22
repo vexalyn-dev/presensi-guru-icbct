@@ -138,6 +138,14 @@
 </div>
 
 <script>
+    // XSS prevention helper
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(String(str)));
+        return div.innerHTML;
+    }
+
     let currentTab = 'daily';
     let currentPage = 1;
     const historyDataUrl = "{{ route('teacher.history.data') }}";
@@ -247,7 +255,7 @@
                         ${att.check_in ? `
                             <div class="flex items-center gap-2">
                                 <i data-lucide="clock" class="w-4 h-4 text-green-500"></i>
-                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${att.check_in}</span>
+                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${escapeHtml(att.check_in)}</span>
                             </div>
                         ` : '<span class="text-sm text-slate-400">-</span>'}
                     </td>
@@ -255,17 +263,17 @@
                         ${att.check_out ? `
                             <div class="flex items-center gap-2">
                                 <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i>
-                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${att.check_out}</span>
+                                <span class="text-sm font-mono text-slate-700 dark:text-slate-300">${escapeHtml(att.check_out)}</span>
                             </div>
                         ` : '<span class="text-sm text-slate-400">-</span>'}
                     </td>
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
-                            ${(att.status === 'Hadir' || att.status === 'Tepat Waktu') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
-                            ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
-                            ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
-                            ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
-                            ${att.status}
+                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
+                             ${(att.status === 'Hadir' || att.status === 'Tepat Waktu') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
+                             ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
+                             ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
+                             ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
+                             ${escapeHtml(att.status)}
                         </span>
                     </td>
                 </tr>
@@ -281,18 +289,18 @@
                 <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm space-y-3">
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700/60">
                         <div>
-                            <p class="text-sm font-bold text-navy-800 dark:text-white">${att.date_formatted}</p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">${att.day_name}</p>
+                        <p class="text-sm font-bold text-navy-800 dark:text-white">${escapeHtml(att.date_formatted)}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(att.day_name)}</p>
                         </div>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-xs
                             ${(att.status === 'Hadir' || att.status === 'Tepat Waktu') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
                             ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
                             ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
                             ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
-                            ${att.status}
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 pt-1">
+                             ${escapeHtml(att.status)}
+                         </span>
+                     </div>
+                     <div class="grid grid-cols-2 gap-3 pt-1">
                         <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/40">
                             <i data-lucide="clock" class="w-4 h-4 text-green-500 flex-shrink-0"></i>
                             <div class="min-w-0">
@@ -377,10 +385,10 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400">${att.day_name}</p>
                     </td>
                     <td class="px-6 py-4">
-                        <p class="text-sm font-bold text-navy-800 dark:text-white">${att.classroom_name || '-'}</p>
+                        <p class="text-sm font-bold text-navy-800 dark:text-white">${escapeHtml(att.classroom_name || '-')}</p>
                     </td>
                     <td class="px-6 py-4">
-                        <p class="text-sm text-slate-700 dark:text-slate-300">${att.subject_name || '-'}</p>
+                        <p class="text-sm text-slate-700 dark:text-slate-300">${escapeHtml(att.subject_name || '-')}</p>
                     </td>
                     <td class="px-6 py-4">
                         <span class="text-sm font-mono text-slate-700 dark:text-slate-300">Jam ${att.period}</span>
@@ -402,12 +410,12 @@
                         ` : '<span class="text-sm text-slate-400">-</span>'}
                     </td>
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
-                            ${(att.status === 'Hadir' || att.status === 'Tepat Waktu' || att.status === 'Selesai') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
-                            ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
-                            ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
-                            ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
-                            ${att.status}
+                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
+                             ${(att.status === 'Hadir' || att.status === 'Tepat Waktu' || att.status === 'Selesai') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
+                             ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
+                             ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
+                             ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
+                             ${escapeHtml(att.status)}
                         </span>
                     </td>
                 </tr>
@@ -423,21 +431,21 @@
                 <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm space-y-4">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700/60">
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">${att.day_name}</p>
-                            <h4 class="text-base font-bold text-navy-900 dark:text-white">${att.date_formatted}</h4>
+                             <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">${escapeHtml(att.day_name)}</p>
+                             <h4 class="text-base font-bold text-navy-900 dark:text-white">${escapeHtml(att.date_formatted)}</h4>
                         </div>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-xs
                             ${(att.status === 'Hadir' || att.status === 'Tepat Waktu' || att.status === 'Selesai') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}
                             ${att.status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
                             ${(att.status === 'Izin' || att.status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : ''}
                             ${att.status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : ''}">
-                            ${att.status}
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
+                             ${escapeHtml(att.status)}
+                         </span>
+                     </div>
+                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700/40">
                             <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-0.5">Kelas</p>
-                            <p class="font-bold text-navy-900 dark:text-white text-sm truncate">${att.classroom_name || '-'}</p>
+                            <p class="font-bold text-navy-900 dark:text-white text-sm truncate">${escapeHtml(att.classroom_name || '-')}</p>
                         </div>
                         <div class="bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700/40">
                             <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-0.5">Jam Pelajaran</p>
@@ -445,7 +453,7 @@
                         </div>
                         <div class="col-span-2 bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700/40">
                             <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-0.5">Mata Pelajaran</p>
-                            <p class="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">${att.subject_name || '-'}</p>
+                            <p class="font-semibold text-slate-800 dark:text-slate-200 text-xs truncate">${escapeHtml(att.subject_name || '-')}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3 pt-1">

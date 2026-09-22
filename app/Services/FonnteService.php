@@ -45,6 +45,13 @@ class FonnteService
      */
     public function sendImage(string $to, string $imageUrl, string $caption = ''): array
     {
+        // SSRF protection: only allow HTTPS URLs from allowed domains
+        $parsedUrl = parse_url($imageUrl);
+        if (!$parsedUrl || !isset($parsedUrl['scheme']) || $parsedUrl['scheme'] !== 'https') {
+            Log::warning('FonnteService: Blocked insecure image URL', ['url' => $imageUrl]);
+            return ['success' => false, 'response' => 'URL gambar harus menggunakan HTTPS'];
+        }
+
         return $this->send([
             'target'  => $to,
             'message' => $caption,

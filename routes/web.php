@@ -73,15 +73,21 @@ Route::get('/', function () {
 // Auth Routes
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+    Route::post('/login', [LoginController::class, 'login'])
+        ->middleware('throttle:10,1')
+        ->name('login.post');
     Route::get('/register', function () {
         return redirect()->route('login');
     })->name('register');
-    Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+    Route::post('/register', [RegisterController::class, 'register'])
+        ->middleware('throttle:5,1')
+        ->name('register.post');
 
     // Password Reset
     Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:3,1')
+        ->name('password.email');
     Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
@@ -375,7 +381,7 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
     Route::get('/optimize',      [DeveloperController::class, 'optimize'])         ->name('optimize');
 });
 
-Route::get('/run-migrate-secret', function (Request $request) {
+Route::middleware(['auth', 'role:admin'])->get('/run-migrate-secret', function (Request $request) {
     // Lu cuma bisa akses kalo bawa key yang bener
     if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
         abort(404);
@@ -385,13 +391,13 @@ Route::get('/run-migrate-secret', function (Request $request) {
     return '<pre>' . Artisan::output() . '</pre>';
 });
 
-Route::get('/sapu-jagat', function () {
+Route::middleware(['auth', 'role:admin'])->get('/sapu-jagat', function () {
     Artisan::call('optimize:clear');
-    
+
     return 'Optimize clear sukses! Semua cache udah ludes.';
 });
 
-Route::get('/git-pull-rahasia', function (Request $request) {
+Route::middleware(['auth', 'role:admin'])->get('/git-pull-rahasia', function (Request $request) {
     // Validasi key rahasia biar aman dari orang Iseng
     if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
         abort(404);

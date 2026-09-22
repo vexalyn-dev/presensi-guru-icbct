@@ -532,9 +532,6 @@ class User extends Authenticatable
         $qrData = json_encode([
             'teacher_id' => $this->id,
             'token' => $this->qr_token,
-            'name' => $this->name,
-            'email' => $this->email,
-            'subject' => $this->subject,
         ], JSON_UNESCAPED_UNICODE);
 
         try {
@@ -593,7 +590,8 @@ class User extends Authenticatable
             Storage::disk('public')->delete($this->qr_code);
         }
 
-        // Generate new token
+        // Invalidate old token by rotating to new UUID
+        $oldToken = $this->qr_token;
         $this->qr_token = Str::uuid()->toString();
         $this->save();
 

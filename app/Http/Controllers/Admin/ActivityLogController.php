@@ -39,7 +39,7 @@ class ActivityLogController extends Controller
 
         // Search
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = preg_replace('/[%_]/', '\\\\$0', $request->search);
             $query->where(function($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
                   ->orWhere('ip_address', 'like', "%{$search}%");

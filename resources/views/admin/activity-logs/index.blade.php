@@ -1,4 +1,4 @@
-﻿﻿@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('page-title', 'Log Aktivitas')
 @section('content')
 <div class="space-y-6 fade-in">
@@ -515,7 +515,7 @@ async function showLogDetail(id) {
                     : `<div class="w-11 h-11 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-extrabold text-base ring-2 ring-white dark:ring-slate-800 shadow-md">${d.user.name.charAt(0).toUpperCase()}</div>`
                 }
                 <p class="text-xs font-bold text-navy-800 dark:text-white text-center leading-tight">${d.user.name}</p>
-                <p class="text-[10px] text-slate-400 text-center truncate w-full px-1">${d.user.teacher_code || d.user.email}</p>
+                <p class="text-[10px] text-slate-400 text-center truncate w-full px-1">${escapeHtml(d.user.teacher_code) || escapeHtml(d.user.email)}</p>
             </div>
             <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40 flex flex-col justify-center">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Tanggal</p>
@@ -565,16 +565,16 @@ async function showLogDetail(id) {
         <div class="space-y-3">
             <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">Keterangan</p>
-                <p class="text-sm font-semibold text-navy-800 dark:text-white leading-snug">${d.description}</p>
+                <p class="text-sm font-semibold text-navy-800 dark:text-white leading-snug">${escapeHtml(d.description)}</p>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div class="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1">Kategori</p>
-                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">${d.category}</p>
+                    <p class="text-sm font-bold text-blue-700 dark:text-blue-300">${escapeHtml(d.category)}</p>
                 </div>
                 <div class="p-3.5 rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/40">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-violet-400 mb-1">Jenis Aktivitas</p>
-                    <p class="text-sm font-bold text-violet-700 dark:text-violet-300">${d.type}</p>
+                    <p class="text-sm font-bold text-violet-700 dark:text-violet-300">${escapeHtml(d.type)}</p>
                 </div>
             </div>
             ${userBlock}

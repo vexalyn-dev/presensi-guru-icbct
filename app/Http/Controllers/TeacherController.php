@@ -324,7 +324,6 @@ class TeacherController extends Controller
             $successCount = 0;
             $errorCount = 0;
             $errors = [];
-            $defaultPasswordHash = Hash::make('password123');
 
             foreach ($rows as $index => $row) {
                 $rowNumber = $index + 2;
@@ -347,12 +346,13 @@ class TeacherController extends Controller
                 }
 
                 try {
-                    DB::transaction(function () use ($row, $namaIndex, $kodeIndex, &$user, $defaultPasswordHash) {
+                    DB::transaction(function () use ($row, $namaIndex, $kodeIndex, &$user) {
+                        $randomPassword = substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'), 0, 16);
                         $user = User::create([
                             'name' => $row[$namaIndex],
                             'teacher_code' => $row[$kodeIndex],
                             'email' => strtolower(trim($row[$kodeIndex])) . '@icbct.sch.id',
-                            'password' => $defaultPasswordHash,
+                            'password' => Hash::make($randomPassword),
                             'role' => 'guru',
                             'is_active' => true,
                         ]);
@@ -376,7 +376,7 @@ class TeacherController extends Controller
                     $successCount++;
                 } catch (\Exception $e) {
                     $errorCount++;
-                    $errors[] = "Baris {$rowNumber}: Gagal menyimpan - " . $e->getMessage();
+                    $errors[] = "Baris {$rowNumber}: Gagal menyimpan data.";
                 }
             }
 
@@ -542,6 +542,13 @@ class TeacherController extends Controller
 
     public function getData(User $teacher)
     {
+        $currentUser = auth()->user();
+
+        // Allow admin/operator to view any teacher, but regular users can only view themselves
+        if (!$currentUser->canAccessAdmin() && (int) $teacher->id !== $currentUser->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         if ($teacher->role !== 'guru') {
             return response()->json(['error' => 'Not a teacher'], 403);
         }

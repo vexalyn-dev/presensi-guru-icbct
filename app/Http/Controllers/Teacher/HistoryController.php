@@ -204,7 +204,7 @@ class HistoryController extends Controller
                 ->orderBy('date', 'desc')
                 ->get();
 
-            $filename = "Riwayat_Absensi_{$user->name}_{$startDate}_{$endDate}.csv";
+            $filename = 'Riwayat_Absensi_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $user->name) . '_' . $startDate . '_' . $endDate . '.csv';
             
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -234,7 +234,7 @@ class HistoryController extends Controller
                 ->orderBy('period', 'asc')
                 ->get();
 
-            $filename = "Riwayat_Presensi_Kelas_{$user->name}_{$startDate}_{$endDate}.csv";
+            $filename = 'Riwayat_Presensi_Kelas_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $user->name) . '_' . $startDate . '_' . $endDate . '.csv';
             
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="' . $filename . '"');

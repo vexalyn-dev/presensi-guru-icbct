@@ -1494,7 +1494,17 @@
                         }
                         showState('success');
                         setTimeout(function() {
-                            window.location.href = data.redirect;
+                            var target = data.redirect || '/';
+                            // Validate redirect URL — only allow same-origin paths
+                            try {
+                                var parsed = new URL(target, window.location.origin);
+                                if (parsed.origin !== window.location.origin) {
+                                    target = '/teacher/dashboard';
+                                }
+                            } catch(e) {
+                                target = '/teacher/dashboard';
+                            }
+                            window.location.href = target;
                         }, 1300);
 
                     } else {

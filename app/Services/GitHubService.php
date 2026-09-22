@@ -144,11 +144,23 @@ class GitHubService
         return $results;
     }
 
+    private array $allowedHosts = ['smkicb-teknika.sch.id', 'presensi-guru.smkicb-teknika.sch.id', 'raw.githubusercontent.com'];
+
     /**
      * Baca konten file: coba dari storage dulu, fallback HTTP.
      */
     private function readFile(string $url): string
     {
+        // SSRF protection: only allow known safe hosts
+        $parsedUrl = parse_url($url);
+        if ($parsedUrl && isset($parsedUrl['host'])) {
+            $host = strtolower($parsedUrl['host']);
+            if (!in_array($host, $this->allowedHosts, true)) {
+                Log::warning('GitHubService: Blocked SSRF attempt to host', ['host' => $host, 'url' => $url]);
+                return '';
+            }
+        }
+
         // Coba strip ke path relatif storage public
         try {
             $publicBase = rtrim(Storage::disk('public')->url(''), '/');
