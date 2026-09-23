@@ -421,8 +421,8 @@
         const qrDataInput = document.getElementById('qr-data-input');
         const attendanceForm = document.getElementById('attendance-form');
         const gpsValidationStatus = "{{ $gpsValidationStatus ?? 'on' }}";
-        const scanRoute = @json($scanRoute);
-        const attendanceStatusRoute = @json($attendanceStatusRoute);
+        const scanRoute = "{{ $scanRoute }}";
+        const attendanceStatusRoute = "{{ $attendanceStatusRoute }}";
         // Add hidden mode input to attendance form if not present
         if (!document.getElementById('attendance-mode-input')) {
             const hidden = document.createElement('input');
