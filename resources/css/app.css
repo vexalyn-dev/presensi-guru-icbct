@@ -30,10 +30,6 @@
 }
 
 @layer components {
-    .glass {
-        @apply bg-white/80 dark:bg-navy-800/80 backdrop-blur-md border border-white/20 dark:border-white/5;
-    }
-    
     .card {
         @apply bg-white dark:bg-navy-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700;
     }
@@ -42,12 +38,6 @@
         @apply px-5 py-2.5 bg-navy-800 hover:bg-navy-900 text-white font-medium rounded-xl 
                shadow-lg shadow-navy-800/30 transition-all duration-200 
                hover:shadow-xl hover:shadow-navy-800/40 active:scale-[0.98];
-    }
-    
-    .input-field {
-        @apply w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 
-               dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 
-               focus:ring-navy-800 dark:focus:ring-gold-400 transition-all dark:text-white;
     }
 
     /* Global Dark Mode Input Fix */

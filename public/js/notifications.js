@@ -14,17 +14,8 @@
         return `/teacher/notifications/${id}/read`;
     }
 
-    function getNotifReadAllUrl() {
-        if (isPiket) return '/piket/notifications/read-all';
-        if (isAdmin) return '/notifications/mark-all-read';
-        return '/teacher/notifications/read-all';
-    }
-
-    function getMarkAsReadUrl(id) {
-        if (isPiket) return `/piket/notifications/${id}/read`;
-        if (isAdmin) return `/notifications/${id}/read`;
-        return `/teacher/notifications/${id}/read`;
-    }
+    // Alias kept for compatibility
+    window.getMarkAsReadUrl = getNotifReadUrl;
 
     // Initialize Lucide icons
     function initIcons() {
@@ -141,10 +132,6 @@
             };
         };
     }
-    if (typeof window.notificationDropdownAdmin !== 'function') {
-        window.notificationDropdownAdmin = window.notificationDropdown;
-    }
-
     function refreshLeaveRequestCards() {
         const list = document.getElementById('leave-requests-list');
         if (!list) return;

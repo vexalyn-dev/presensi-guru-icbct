@@ -51,17 +51,6 @@ class TeacherSchedule extends Model
     }
 
     /**
-     * Ambil semua jadwal guru
-     */
-    public static function getTeacherSchedules($userId)
-    {
-        return self::where('user_id', $userId)
-            ->where('is_active', true)
-            ->orderBy('day_of_week')
-            ->get();
-    }
-
-    /**
      * Nama hari dalam bahasa Indonesia
      */
     public static function getDayName($dayOfWeek)
