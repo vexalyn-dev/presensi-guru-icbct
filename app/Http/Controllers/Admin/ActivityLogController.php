@@ -129,12 +129,6 @@ class ActivityLogController extends Controller
         return back()->with('success', "Berhasil menghapus {$deleted} log yang lebih dari {$days} hari.");
     }
 
-    // Alias untuk route 'cleanup'
-    public function cleanup(Request $request)
-    {
-        return $this->destroyOld($request);
-    }
-
     public function export(Request $request)
     {
         $query = ActivityLog::with('user:id,name,email,teacher_code');
@@ -271,33 +265,4 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    private function getCategoryLabel($category)
-    {
-        $labels = [
-            'attendance' => 'Presensi',
-            'auth' => 'Autentikasi',
-            'settings' => 'Pengaturan',
-            'teacher' => 'Data Guru',
-            'classroom' => 'Kelas',
-            'system' => 'Sistem',
-        ];
-        return $labels[$category] ?? ucfirst($category);
-    }
-
-    private function getTypeLabel($type)
-    {
-        $labels = [
-            'scan_in_daily' => 'Scan Masuk (Harian)',
-            'scan_out_daily' => 'Scan Keluar (Harian)',
-            'scan_in' => 'Scan Masuk (Kelas)',
-            'scan_out' => 'Scan Keluar (Kelas)',
-            'login' => 'Login Sistem',
-            'logout' => 'Logout Sistem',
-            'teacher_created' => 'Tambah Guru',
-            'teacher_updated' => 'Ubah Guru',
-            'teacher_deleted' => 'Hapus Guru',
-            'settings_change' => 'Ubah Pengaturan',
-        ];
-        return $labels[$type] ?? ucfirst(str_replace('_', ' ', $type));
-    }
 }

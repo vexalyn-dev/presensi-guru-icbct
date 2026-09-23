@@ -176,8 +176,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
     Route::post('/leaves/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])->name('leaves.approve');
     Route::post('/leaves/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])->name('leaves.reject');
-    Route::get('/my-leaves', [LeaveController::class, 'myLeaves'])->name('leaves.my');
-    
+
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');

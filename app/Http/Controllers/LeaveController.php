@@ -182,13 +182,4 @@ class LeaveController extends Controller
 
         return back()->with('success', 'Pengajuan ditolak');
     }
-
-    public function myLeaves()
-    {
-        $leaveRequests = LeaveRequest::where('user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-
-        return view('leaves.my-leaves', compact('leaveRequests'));
-    }
 }
