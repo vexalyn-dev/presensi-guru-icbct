@@ -433,6 +433,7 @@ class ReportController extends Controller
             $teachersQuery->where('name', 'like', "%{$search}%");
         }
         $teachers = $teachersQuery->with('teacher')->orderBy('name')->get();
+        $teacherIds = $teachers->pluck('id');
 
         $dates = [];
         $period = CarbonPeriod::create($startDate, $endDate);
@@ -451,6 +452,10 @@ class ReportController extends Controller
                 ->where('end_date', '>=', $startDate)->where('start_date', '<=', $endDate)->get();
 
             $holidays = Holiday::whereBetween('date', [$startDate, $endDate])->pluck('date')->toArray();
+            $scheduledDays = TeacherSchedule::whereIn('user_id', $teacherIds)
+                ->where('is_active', true)
+                ->get(['user_id', 'day_of_week'])
+                ->mapWithKeys(fn ($schedule) => [$schedule->user_id . '_' . $schedule->day_of_week => true]);
 
             foreach ($teachers as $teacher) {
                 $teacherData = [
@@ -466,8 +471,7 @@ class ReportController extends Controller
                     $isWeekend   = in_array($dayOfWeek, [0, 6]);
                     $isHoliday   = in_array($dateStr, $holidays);
                     $isFuture    = Carbon::parse($dateStr)->gt(Carbon::today());
-                    $hasSchedule = TeacherSchedule::where('user_id', $teacher->id)
-                        ->where('day_of_week', $dayOfWeek)->where('is_active', true)->exists();
+                    $hasSchedule = isset($scheduledDays[$teacher->id . '_' . $dayOfWeek]);
 
                     $attKey     = $teacher->id . '_' . $dateStr;
                     $attendance = $attendances->get($attKey)?->first();
@@ -537,6 +541,13 @@ class ReportController extends Controller
                 ->where('end_date', '>=', $startDate)->where('start_date', '<=', $endDate)->get();
             $holidays = Holiday::whereBetween('date', [$startDate, $endDate])->pluck('date')->toArray();
             $today    = Carbon::today();
+            $teachingSchedules = TeachingSchedule::whereIn('user_id', $teacherIds)
+                ->where('is_active', true)
+                ->with(['classroom', 'subject'])
+                ->orderBy('start_time')
+                ->get()
+                ->groupBy(fn ($schedule) => $schedule->user_id . '_' . $schedule->day_of_week);
+            $allTeachingSchedules = $teachingSchedules->flatten(1)->groupBy('user_id');
 
             foreach ($teachers as $teacher) {
                 $teacherData = [
@@ -552,11 +563,7 @@ class ReportController extends Controller
                 $todayDayOfWeek = Carbon::now()->dayOfWeek;
                 $todayStr       = Carbon::today()->toDateString();
 
-                $todayScheduledClassrooms = TeachingSchedule::where('user_id', $teacher->id)
-                    ->where('is_active', true)
-                    ->where('day_of_week', $todayDayOfWeek)
-                    ->with('classroom')
-                    ->get()
+                $todayScheduledClassrooms = ($teachingSchedules->get($teacher->id . '_' . $todayDayOfWeek) ?? collect())
                     ->map(fn($s) => $s->classroom);
 
                 // Kelas shared-space yang di-scan hari ini
@@ -598,10 +605,7 @@ class ReportController extends Controller
                 usort($classroomsList, fn($a, $b) => strcmp($a['name'], $b['name']));
 
                 // all_classrooms (semua jadwal aktif) — untuk kolom summary & Excel
-                $allScheduledNames = TeachingSchedule::where('user_id', $teacher->id)
-                    ->where('is_active', true)
-                    ->with('classroom')
-                    ->get()
+                $allScheduledNames = ($allTeachingSchedules->get($teacher->id) ?? collect())
                     ->map(fn($s) => $s->classroom?->code
                         ? strtoupper(str_replace('-', ' ', $s->classroom->code))
                         : ($s->classroom?->name ?? null))
@@ -615,9 +619,7 @@ class ReportController extends Controller
                     $dayOfWeek = $date->dayOfWeek;
                     $isWeekend = in_array($dayOfWeek, [0, 6]);
                     
-                    $schedules = TeachingSchedule::where('user_id', $teacher->id)
-                        ->where('day_of_week', $dayOfWeek)->where('is_active', true)
-                        ->with(['classroom', 'subject'])->orderBy('start_time')->get();
+                    $schedules = $teachingSchedules->get($teacher->id . '_' . $dayOfWeek) ?? collect();
 
                     // Shared-space records for this teacher+date (scan_method = qr_shared_space)
                     $sharedSpaceForDay = $classAttendances->filter(function ($att) use ($teacher, $dateStr) {
