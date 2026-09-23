@@ -31,6 +31,9 @@
                 $scanRoute = auth()->user()?->isGuruPiket()
                     ? route('piket.attendance')
                     : route('attendance.scan');
+                $attendanceStatusRoute = auth()->user()?->isGuruPiket()
+                    ? url('/piket/attendance/check-status')
+                    : url('/attendance/check-status');
             @endphp
             <a href="{{ $backRoute }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-sm group w-fit">
                 <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
@@ -365,6 +368,7 @@
         const attendanceForm = document.getElementById('attendance-form');
         const gpsValidationStatus = "{{ $gpsValidationStatus ?? 'on' }}";
         const scanRoute = @json($scanRoute);
+        const attendanceStatusRoute = @json($attendanceStatusRoute);
         // Add hidden mode input to attendance form if not present
         if (!document.getElementById('attendance-mode-input')) {
             const hidden = document.createElement('input');
@@ -377,6 +381,53 @@
         const scanError = document.getElementById('scan-error');
         const errorMessage = document.getElementById('error-message');
         const noCamera = document.getElementById('no-camera');
+
+        function renderTeacherInfo(teacherData) {
+            return `
+                <div class="mt-2 space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Nama Guru</span>
+                        <span class="text-sm font-bold text-navy-800 dark:text-white">${escapeHtml(teacherData.name) || '-'}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Email</span>
+                        <span class="text-xs text-slate-600 dark:text-slate-400">${escapeHtml(teacherData.email) || '-'}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Mata Pelajaran</span>
+                        <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">${escapeHtml(teacherData.subject) || 'Belum diatur'}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAlreadyCheckedInWarning(teacherData, statusData) {
+            document.getElementById('success-title').textContent = 'Peringatan';
+            document.getElementById('success-icon-type').setAttribute('data-lucide', 'alert-triangle');
+            document.getElementById('attendance-form').classList.add('hidden');
+            qrDataEl.innerHTML = `
+                <div class="rounded-3xl border border-amber-200/80 dark:border-amber-800/70 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur">
+                    ${renderTeacherInfo(teacherData)}
+                    <div class="mt-5 pt-5 border-t border-amber-200 dark:border-amber-800">
+                        <div class="flex items-start gap-3 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200/70 dark:border-amber-800/60 p-4">
+                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 flex-shrink-0">
+                                <i data-lucide="clock-check" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-amber-900 dark:text-amber-200">Guru ini sudah presensi masuk.</p>
+                                <p class="text-xs text-amber-700 dark:text-amber-300 mt-1">Scan masuk kedua tidak dapat diproses. Waktu masuk tercatat: <span class="font-bold">${escapeHtml(statusData.check_in_time || '-')} WIB</span>.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="window.location.href='${scanRoute}'" class="mt-5 w-full px-6 py-3.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-2xl text-sm font-bold transition-all shadow-xl shadow-navy-900/10 dark:shadow-gold-500/10 flex items-center justify-center gap-2">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i>
+                        Scan Guru Lain
+                    </button>
+                </div>
+            `;
+
+            if (window.lucide) lucide.createIcons();
+        }
 
         // Hardware QR Scanner Logic
         let hardwareScanTimeout = null;
@@ -502,10 +553,16 @@
                         document.getElementById('attendance-mode-input').value = currentMode;
                         
                         // 2. AUTO CHECK STATUS
-                        fetch(`/attendance/check-status/${teacherId}`)
+                        fetch(`${attendanceStatusRoute}/${teacherId}`)
                             .then(res => res.json())
                             .then(statusData => {
                                 const alreadyIn = statusData.already_checked_in && !statusData.checked_out;
+                                const alreadyCheckedIn = statusData.already_checked_in;
+
+                                if (alreadyCheckedIn && currentMode === 'masuk') {
+                                    showAlreadyCheckedInWarning(teacherData, statusData);
+                                    return;
+                                }
 
                                 // Gunakan status server ATAU mode yang dipilih user
                                 const isKeluar = alreadyIn || currentMode === 'keluar';
@@ -718,6 +775,8 @@
 
         // Handle QR success
         function handleQRSuccess(data) {
+            const alpineData = getAlpineData(document.getElementById('attendance-root'));
+            const currentMode = alpineData?.mode || document.getElementById('attendance-mode-input')?.value || 'masuk';
             stopCamera();
             document.getElementById('scanning-overlay').classList.add('hidden');
             document.getElementById('scanning-overlay').classList.remove('flex', 'items-center', 'justify-center');
@@ -755,33 +814,24 @@
                 .then(teacherData => {
                     if (teacherData.error) throw new Error(teacherData.error);
                     
-                    qrDataEl.innerHTML = `
-                        <div class="mt-2 space-y-1">
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Nama Guru</span>
-                                <span class="text-sm font-bold text-navy-800 dark:text-white">${escapeHtml(teacherData.name) || '-'}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Email</span>
-                                <span class="text-xs text-slate-600 dark:text-slate-400">${escapeHtml(teacherData.email) || '-'}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] uppercase text-slate-400 font-semibold w-24">Mata Pelajaran</span>
-                                <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">${escapeHtml(teacherData.subject) || 'Belum diatur'}</span>
-                            </div>
-                        </div>
-                    `;
+                    qrDataEl.innerHTML = renderTeacherInfo(teacherData);
                     
                     // Update hidden input for form submission
                     qrDataInput.value = JSON.stringify({
                         teacher_id: teacherId,
                         token: qrToken
                     });
+                    document.getElementById('attendance-mode-input').value = currentMode;
                     
                     // AUTO CHECK STATUS
-                    fetch(`/attendance/check-status/${teacherId}`)
+                    fetch(`${attendanceStatusRoute}/${teacherId}`)
                         .then(res => res.json())
                         .then(statusData => {
+                            if (statusData.already_checked_in && currentMode === 'masuk') {
+                                showAlreadyCheckedInWarning(teacherData, statusData);
+                                return;
+                            }
+
                             if (statusData.already_checked_in && !statusData.checked_out) {
                                 // SUDAH MASUK → TAMPILKAN INFO KELUAR
                                 document.getElementById('success-title').textContent = 'Presensi Keluar';

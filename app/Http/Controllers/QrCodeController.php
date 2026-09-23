@@ -36,6 +36,7 @@ class QrCodeController extends Controller
                 'qr_data' => 'required|string',
                 'latitude' => 'nullable|numeric',
                 'longitude' => 'nullable|numeric',
+                'mode' => 'nullable|in:masuk,keluar',
             ]);
 
             // Decode QR data - Handle both JSON and plain ID
@@ -98,11 +99,36 @@ class QrCodeController extends Controller
                 ->where('date', $today)
                 ->first();
 
-            if ($existingAttendance) {
+            if ($existingAttendance && $request->input('mode', 'masuk') === 'masuk') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Anda sudah presensi hari ini pada jam ' . $existingAttendance->check_in
-                ], 400);
+                    'message' => 'Guru ini sudah presensi masuk hari ini pada jam ' . $existingAttendance->check_in,
+                    'code' => 'already_checked_in',
+                ], 422);
+            }
+
+            if ($existingAttendance && $existingAttendance->check_out) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Presensi hari ini sudah lengkap. Guru sudah masuk dan keluar.',
+                    'code' => 'attendance_complete',
+                ], 422);
+            }
+
+            if ($existingAttendance) {
+                $existingAttendance->update([
+                    'check_out' => Carbon::now()->format('H:i:s'),
+                    'check_out_latitude' => $request->latitude,
+                    'check_out_longitude' => $request->longitude,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Presensi keluar berhasil!',
+                    'teacher_name' => $teacher->name,
+                    'status' => $existingAttendance->status,
+                    'time' => Carbon::now()->format('H:i:s')
+                ]);
             }
 
             // Determine status based on configured start time + late grace period

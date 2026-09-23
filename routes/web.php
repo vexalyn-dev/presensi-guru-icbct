@@ -321,6 +321,7 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     // Presensi Harian — pakai halaman scan QR admin yang sama
     Route::get('/attendance',        [QrCodeController::class, 'scan'])       ->name('attendance');
     Route::post('/attendance/store', [QrCodeController::class, 'processScan'])->name('attendance.store');
+    Route::get('/attendance/check-status/{teacherId}', [AttendanceController::class, 'checkStatus'])->name('attendance.check-status');
 
     // Manual Presensi (admin manual)
     Route::get('/class-attendance/manual', [ManualClassAttendanceController::class, 'index'])->name('class-attendance.manual');
