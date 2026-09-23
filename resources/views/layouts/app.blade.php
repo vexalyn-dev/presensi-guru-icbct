@@ -315,7 +315,7 @@
                           {{ request()->routeIs('dashboard') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Dashboard</span>
                 </a>
 
@@ -324,7 +324,7 @@
                           {{ request()->routeIs('admin.live-monitoring.*')
                               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="monitor" class="w-4 h-4"></i>
+                    <i data-lucide="monitor" class="w-4 h-4 sidebar-icon pulse"></i>
                     <span>Live Monitoring</span>
                     <span class="ml-auto flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
@@ -342,7 +342,7 @@
                           {{ request()->routeIs('teachers.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="users" class="w-4 h-4"></i>
+                    <i data-lucide="users" class="w-4 h-4 sidebar-icon wiggle"></i>
                     <span>Data Guru</span>
                 </a>
 
@@ -351,7 +351,7 @@
                           {{ request()->routeIs('classrooms.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="school" class="w-4 h-4"></i>
+                    <i data-lucide="school" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Data Kelas</span>
                 </a>
 
@@ -360,7 +360,7 @@
                           {{ request()->routeIs('subjects.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                    <i data-lucide="book-open" class="w-4 h-4 sidebar-icon shake"></i>
                     <span>Mata Pelajaran</span>
                 </a>
 
@@ -369,7 +369,7 @@
                           {{ request()->routeIs('schedules.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                    <i data-lucide="calendar-clock" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Jadwal Kerja</span>
                 </a>
 
@@ -378,7 +378,7 @@
                           {{ request()->routeIs('teaching-schedules.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                    <i data-lucide="calendar-range" class="w-4 h-4 sidebar-icon pulse"></i>
                     <span>Jadwal Mengajar</span>
                 </a>
             </div>
@@ -393,7 +393,7 @@
                           {{ request()->routeIs('attendance.scan')
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="scan-line" class="w-4 h-4"></i>
+                    <i data-lucide="scan-line" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Presensi Harian</span>
                 </a>
                 @endunless
@@ -404,7 +404,7 @@
                           {{ request()->routeIs('class-attendance.*') && !request()->routeIs('admin.class-attendance.*')
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="scan" class="w-4 h-4"></i>
+                    <i data-lucide="scan" class="w-4 h-4 sidebar-icon wiggle"></i>
                     <span>Presensi Kelas</span>
                 </a>
                 @endunless
@@ -415,7 +415,7 @@
                           {{ request()->routeIs('admin.class-attendance.manual*')
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    <i data-lucide="edit-3" class="w-4 h-4 sidebar-icon shake"></i>
                     <span>Manual Presensi</span>
                 </a>
                 @endunless
@@ -425,7 +425,7 @@
                           {{ request()->routeIs('attendance.history')
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                    <i data-lucide="calendar-check" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Riwayat Presensi</span>
                 </a>
             </div>
@@ -439,7 +439,7 @@
                           {{ request()->routeIs('leaves.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <i data-lucide="file-text" class="w-4 h-4 sidebar-icon wiggle"></i>
                     <span>Izin & Sakit</span>
                 </a>
 
@@ -448,7 +448,7 @@
                           {{ request()->routeIs('reports.index') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 sidebar-icon pulse"></i>
                     <span>Laporan Umum</span>
                 </a>
 
@@ -457,7 +457,7 @@
                           {{ request()->routeIs('reports.attendance*')
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                    <i data-lucide="clipboard-list" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Laporan Presensi</span>
                 </a>
 
@@ -466,7 +466,7 @@
                           {{ request()->routeIs('reports.performance')
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="trending-up" class="w-4 h-4"></i>
+                    <i data-lucide="trending-up" class="w-4 h-4 sidebar-icon wiggle"></i>
                     <span>Kinerja & Analitik</span>
                 </a>
 
@@ -475,7 +475,7 @@
                           {{ request()->routeIs('activity-logs.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="scroll-text" class="w-4 h-4"></i>
+                    <i data-lucide="scroll-text" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Log Aktivitas</span>
                 </a>
 
@@ -484,7 +484,7 @@
                           {{ request()->routeIs('admin.support*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="life-buoy" class="w-4 h-4"></i>
+                    <i data-lucide="life-buoy" class="w-4 h-4 sidebar-icon wiggle"></i>
                     <span>Pusat Bantuan</span>
                 </a>
 
@@ -494,7 +494,7 @@
                           {{ request()->routeIs('download-apk')
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="smartphone" class="w-4 h-4"></i>
+                    <i data-lucide="smartphone" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Download APK</span>
                 </a>
                 @endunless
@@ -509,7 +509,7 @@
                           {{ request()->routeIs('holidays.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="calendar-off" class="w-4 h-4"></i>
+                    <i data-lucide="calendar-off" class="w-4 h-4 sidebar-icon shake"></i>
                     <span>Kalender Libur</span>
                 </a>
 
@@ -518,7 +518,7 @@
                           {{ request()->routeIs('settings.*') 
                               ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <i data-lucide="settings" class="w-4 h-4 sidebar-icon wiggle"></i>
                     <span>Pengaturan</span>
                 </a>
             </div>
@@ -836,6 +836,48 @@
         @keyframes ptSpin    { to { transform: rotate(360deg); } }
         @keyframes ptSpinRev { to { transform: rotate(-360deg); } }
         @keyframes ptBounce  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        /* ══════════════════════════════════════════
+           SIDEBAR ICON ANIMATIONS (inspired by animate-ui)
+        ══════════════════════════════════════════ */
+        @keyframes sidebarIconBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            35% { transform: translateY(-4px) scale(1.15); }
+            65% { transform: translateY(-2px) scale(1.05); }
+        }
+        @keyframes sidebarIconShake {
+            0%, 100% { transform: rotate(0deg); }
+            15% { transform: rotate(-8deg); }
+            30% { transform: rotate(8deg); }
+            45% { transform: rotate(-6deg); }
+            60% { transform: rotate(6deg); }
+            75% { transform: rotate(-3deg); }
+            90% { transform: rotate(3deg); }
+        }
+        @keyframes sidebarIconPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.25); opacity: 0.85; }
+        }
+        @keyframes sidebarIconWiggle {
+            0%, 100% { transform: skewX(0deg); }
+            20% { transform: skewX(-12deg); }
+            40% { transform: skewX(10deg); }
+            60% { transform: skewX(-6deg); }
+            80% { transform: skewX(4deg); }
+        }
+        .sidebar-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+        .nav-item:hover .sidebar-icon {
+            animation: sidebarIconBounce 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        .sidebar-icon.shake:hover { animation: sidebarIconShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+        .sidebar-icon.pulse:hover { animation: sidebarIconPulse 0.6s ease-in-out both; }
+        .sidebar-icon.wiggle:hover { animation: sidebarIconWiggle 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+        .sidebar-icon.bounce:hover { animation: sidebarIconBounce 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
     </style>
     <script>
     (function() {
