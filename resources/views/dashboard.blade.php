@@ -60,7 +60,6 @@
             </div>
         </a>
 
-        @unless(auth()->user()->isAdmin())
         <!-- Hadir Hari Ini -->
         <a href="{{ route('attendance.history', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString(), 'status' => 'Hadir']) }}" class="card-hover card p-5 group animate-stagger-2 block cursor-pointer">
             <div class="flex items-center gap-4">
@@ -132,7 +131,6 @@
                 <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </div>
         </a>
-        @endunless
     </div>
 
     <!-- Chart & Attendance Info -->
@@ -1359,7 +1357,7 @@
                                 afterBody: (items) => {
                                     const index = items[0].dataIndex;
                                     if (window.holidayIndices.includes(index)) {
-                                        return ['', '\uD83C\uDFD6\uFE0F Hari Libur - Tidak ada absensi'];
+                                        return ['', '\uD83C\uDFD6\uFE0F Hari Libur - Tidak ada Presensi'];
                                     }
                                     return [];
                                 },
