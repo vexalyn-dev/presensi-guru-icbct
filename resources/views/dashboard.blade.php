@@ -78,7 +78,6 @@
                 <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-green-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </div>
         </a>
-        @endunless
 
         <!-- Terlambat -->
         <a href="{{ route('attendance.history', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString(), 'status' => 'Terlambat']) }}" class="card-hover card p-5 group animate-stagger-3 block cursor-pointer">
@@ -97,7 +96,6 @@
                 <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-yellow-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </div>
         </a>
-        @endunless
 
         <!-- Tidak Hadir -->
         <a href="{{ route('attendance.history', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString(), 'status' => 'Alpha']) }}" class="card-hover card p-5 group animate-stagger-4 block cursor-pointer">
@@ -116,7 +114,6 @@
                 <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-red-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </div>
         </a>
-        @endunless
 
         <!-- Izin/Cuti -->
         <a href="{{ route('attendance.history', ['start_date' => now()->toDateString(), 'end_date' => now()->toDateString(), 'status' => 'Izin']) }}" class="card-hover card p-5 group animate-stagger-5 block cursor-pointer">
