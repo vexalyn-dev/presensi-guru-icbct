@@ -41,7 +41,12 @@ class AttendanceController extends Controller
             ->take(7)
             ->get();
 
-        $qrCodeUrl = $this->generateDailyAttendanceQrCodeUrl($user);
+        if (!$user->qr_code_url) {
+            $user->generateQrCode();
+            $user->refresh();
+        }
+
+        $qrCodeUrl = $user->qr_code_url;
 
         return view('teacher.attendance', compact(
             'todayAttendance',
