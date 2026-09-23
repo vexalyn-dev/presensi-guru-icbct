@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (!auth()->check()) {
             return redirect()->route('login');
@@ -17,9 +17,18 @@ class RoleMiddleware
         $user = auth()->user();
 
         // operator mendapat akses ke semua route yang membutuhkan 'admin'
-        $effectiveRole = ($role === 'admin' && $user->role === 'operator') ? 'admin' : $user->role;
+        // guru_piket mendapat akses ke route presensi admin (check-status, teachers/data)
+        $effectiveRoles = [];
+        foreach ($roles as $role) {
+            if ($role === 'admin') {
+                $effectiveRoles[] = 'operator';
+                $effectiveRoles[] = 'guru_piket';
+            }
+            $effectiveRoles[] = $role;
+        }
+        $effectiveRoles = array_unique($effectiveRoles);
 
-        if ($effectiveRole !== $role) {
+        if (!in_array($user->role, $effectiveRoles)) {
             return $this->redirectByRole($user);
         }
 
