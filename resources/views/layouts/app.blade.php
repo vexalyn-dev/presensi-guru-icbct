@@ -420,7 +420,6 @@
                 </a>
                 @endunless
 
-                @unless(auth()->user()->isAdmin())
                 <a href="{{ route('attendance.history') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('attendance.history')
@@ -429,7 +428,6 @@
                     <i data-lucide="calendar-check" class="w-4 h-4"></i>
                     <span>Riwayat Presensi</span>
                 </a>
-                @endunless
             </div>
 
             <!-- FITUR LAINNYA -->
