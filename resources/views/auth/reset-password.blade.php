@@ -246,7 +246,7 @@
             .panel-badge { margin-top: 24px; }
             .right-panel {
                 flex: 1;
-                padding: 40px 28px 52px;
+                padding: 48px 28px 52px;
                 background: #FFFFFF;
                 border-radius: 32px 32px 0 0;
                 margin-top: -28px;
@@ -254,7 +254,7 @@
                 z-index: 2; position: relative;
             }
             .form-title { font-size: 1.75rem; }
-            .form-sub { font-size: 0.88rem; margin-bottom: 28px; }
+            .form-sub { font-size: 0.88rem; margin-bottom: 28px; margin-top: 8px; }
             .field { margin-bottom: 22px; }
             .input-wrap input { height: 56px; border-radius: 14px; font-size: 15px; padding: 0 52px 0 48px; }
             .input-icon { left: 16px; width: 19px; height: 19px; }
