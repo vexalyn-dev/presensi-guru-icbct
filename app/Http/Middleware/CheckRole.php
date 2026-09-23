@@ -16,10 +16,13 @@ class CheckRole
 
         $user = $request->user();
 
-        // operator selalu dapat akses ke route yang allow 'admin'
+        // operator & guru_piket mendapat akses ke route yang allow 'admin'
         $allowedRoles = $roles;
         if (in_array('admin', $roles) && !in_array('operator', $roles)) {
             $allowedRoles[] = 'operator';
+        }
+        if (in_array('admin', $roles) && !in_array('guru_piket', $roles)) {
+            $allowedRoles[] = 'guru_piket';
         }
 
         if (!in_array($user->role, $allowedRoles)) {
