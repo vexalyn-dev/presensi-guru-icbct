@@ -110,10 +110,20 @@
         }
         .form-title {
             font-size: 1.65rem; font-weight: 800; color: #0F172A;
-            letter-spacing: -0.5px; margin-bottom: 6px;
+            letter-spacing: -0.5px; margin-bottom: 10px;
+            background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+        .form-title::after {
+            content: ''; display: block; width: 48px; height: 3px;
+            background: linear-gradient(90deg, #FACC15, #F59E0B);
+            border-radius: 99px; margin-top: 10px;
         }
         .form-sub {
-            font-size: 0.87rem; color: #64748B; line-height: 1.55; margin-bottom: 32px;
+            font-size: 0.87rem; color: #94A3B8; line-height: 1.65; margin-bottom: 32px;
+            font-weight: 400; letter-spacing: 0.01em;
         }
 
         /* Alert */
@@ -255,6 +265,7 @@
             }
             .form-title { font-size: 1.75rem; }
             .form-sub { font-size: 0.88rem; margin-bottom: 28px; margin-top: 8px; }
+            .form-title::after { width: 36px; height: 3px; margin-top: 12px; }
             .field { margin-bottom: 22px; }
             .input-wrap input { height: 56px; border-radius: 14px; font-size: 15px; padding: 0 52px 0 48px; }
             .input-icon { left: 16px; width: 19px; height: 19px; }
@@ -311,7 +322,7 @@
     <!-- Right Panel (Form) -->
     <div class="right-panel">
         <p class="form-title">Buat Password Baru</p>
-        <p class="form-sub">Masukkan password baru yang kuat. Pastikan mudah diingat dan aman ya.</p>
+        <p class="form-sub">Kunci kembali akunmu dengan password yang baru. Kuat, unik, dan mudah diingat.</p>
 
         @if ($errors->any())
         <div class="alert alert-error">
