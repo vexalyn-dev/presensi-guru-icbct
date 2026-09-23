@@ -3,7 +3,14 @@
 @section('page-title', 'Scan QR Absensi')
 
 @section('content')
-    <div id="attendance-root" class="fade-in" x-data="{ mode: 'masuk' }" x-init="$watch('mode', val => {
+    <div id="attendance-root" class="fade-in" x-data="{
+        mode: 'masuk',
+        scanMode: localStorage.getItem('attendance_scan_mode') || '{{ auth()->user()?->isGuruPiket() ? 'auto' : 'manual' }}',
+        setScanMode(value) {
+            this.scanMode = value;
+            localStorage.setItem('attendance_scan_mode', value);
+        }
+    }" x-init="$watch('mode', val => {
         const hwInput = document.getElementById('hardware-mode-input');
         const attInput = document.getElementById('attendance-mode-input');
         if (hwInput) hwInput.value = val;
@@ -55,8 +62,8 @@
                         <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
                             <i data-lucide="scan" class="w-10 h-10 text-white"></i>
                         </div>
-                        <h3 class="text-xl font-bold mb-2" x-text="mode === 'masuk' ? 'Presensi Masuk' : 'Presensi Keluar'"></h3>
-                        <p class="text-sm text-slate-300 mb-8 text-center max-w-xs">Pastikan Anda berada di lokasi sekolah dan wajah terlihat jelas.</p>
+                        <h3 class="text-xl font-bold mb-2" x-text="scanMode === 'auto' ? 'Presensi Otomatis' : (mode === 'masuk' ? 'Presensi Masuk' : 'Presensi Keluar')"></h3>
+                        <p class="text-sm text-slate-300 mb-8 text-center max-w-xs" x-text="scanMode === 'auto' ? 'Scan QR guru. Sistem otomatis menentukan masuk atau keluar.' : 'Pastikan Anda berada di lokasi sekolah dan wajah terlihat jelas.'"></p>
                         
                         <button type="button" onclick="startAttendance()" class="px-8 py-3.5 bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-500 hover:to-gold-600 text-navy-900 font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-2">
                             <i data-lucide="power" class="w-5 h-5"></i>
@@ -150,9 +157,56 @@
 
             <!-- Right: Mode Card & Guide (lg:col-span-5) -->
             <div class="lg:col-span-5 xl:col-span-4 space-y-6">
+                <div class="bg-gradient-to-b from-white to-slate-50 dark:from-slate-800/50 dark:to-slate-900/40 rounded-3xl p-6 border border-slate-200/70 dark:border-slate-700/70 shadow-sm">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-xl flex items-center justify-center shadow-sm">
+                            <i data-lucide="zap" class="w-5 h-5 text-white dark:text-navy-900"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-navy-800 dark:text-white leading-tight">Mode Kerja</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Otomatis default untuk guru piket</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <button type="button" @click="setScanMode('auto')"
+                                :class="scanMode === 'auto' ? 'bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 ring-2 ring-navy-800 dark:ring-gold-500 shadow-md' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'"
+                                class="relative overflow-hidden rounded-2xl p-4 transition-all duration-300">
+                            <i data-lucide="scan-line" class="w-5 h-5 mx-auto mb-2"></i>
+                            <p class="text-sm font-bold">Otomatis</p>
+                            <p class="text-[9px] opacity-80 mt-0.5">Langsung proses</p>
+                            <div x-show="scanMode === 'auto'" class="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md animate-scale-in">
+                                <i data-lucide="check" class="w-3 h-3 text-navy-800 dark:text-gold-500"></i>
+                            </div>
+                        </button>
+                        <button type="button" @click="setScanMode('manual')"
+                                :class="scanMode === 'manual' ? 'bg-gradient-to-br from-gold-400 to-gold-500 text-white ring-2 ring-gold-500 shadow-md' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'"
+                                class="relative overflow-hidden rounded-2xl p-4 transition-all duration-300">
+                            <i data-lucide="mouse-pointer" class="w-5 h-5 mx-auto mb-2"></i>
+                            <p class="text-sm font-bold">Manual</p>
+                            <p class="text-[9px] opacity-80 mt-0.5">Perlu konfirmasi</p>
+                            <div x-show="scanMode === 'manual'" class="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md animate-scale-in">
+                                <i data-lucide="check" class="w-3 h-3 text-gold-500"></i>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="p-3 rounded-xl border border-green-200/70 dark:border-green-800/60 bg-green-50 dark:bg-green-900/20" x-show="scanMode === 'auto'">
+                        <p class="text-xs text-green-700 dark:text-green-300 font-semibold text-center">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 inline mr-1"></i>
+                            Mode Otomatis Aktif. Scan langsung diproses.
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl border border-amber-200/70 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-900/20" x-show="scanMode === 'manual'">
+                        <p class="text-xs text-amber-700 dark:text-amber-300 font-semibold text-center">
+                            <i data-lucide="mouse-pointer" class="w-3.5 h-3.5 inline mr-1"></i>
+                            Mode Manual Aktif. Guru piket wajib konfirmasi.
+                        </p>
+                    </div>
+                </div>
                 
                 <!-- ✅ MODE CARD - Match "Cara Presensi" Card Style -->
-                <div class="bg-gradient-to-b from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-800/20 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-700/60">
+                <div x-show="scanMode === 'manual'" class="bg-gradient-to-b from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-800/20 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-700/60">
                     <div class="relative z-10">
                         <!-- Header -->
                         <div class="flex items-center gap-3 mb-5">
@@ -429,8 +483,144 @@
             if (window.lucide) lucide.createIcons();
         }
 
+        function setResultShell(type, title) {
+            const icon = document.getElementById('success-icon-type');
+            const titleEl = document.getElementById('success-title');
+            const iconWrap = icon?.parentElement;
+            const palette = {
+                loading: ['bg-navy-800 dark:bg-gold-500', 'refresh-cw', 'text-white dark:text-navy-900', 'text-navy-800 dark:text-gold-300'],
+                success: ['bg-green-500', 'check', 'text-white', 'text-green-800 dark:text-green-300'],
+                warning: ['bg-amber-500', 'alert-triangle', 'text-white', 'text-amber-800 dark:text-amber-300'],
+                error: ['bg-red-500', 'x', 'text-white', 'text-red-800 dark:text-red-300'],
+            }[type];
+
+            if (iconWrap) iconWrap.className = `w-20 h-20 ${palette[0]} rounded-full flex items-center justify-center shrink-0 shadow-lg mb-6 ${type === 'loading' ? 'animate-pulse' : 'animate-scale-in'}`;
+            if (icon) {
+                icon.setAttribute('data-lucide', palette[1]);
+                icon.className = `w-10 h-10 ${palette[2]} ${type === 'loading' ? 'animate-spin' : ''}`;
+            }
+            if (titleEl) {
+                titleEl.textContent = title;
+                titleEl.className = `text-2xl font-bold ${palette[3]}`;
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function showAutoLoading(teacherData) {
+            setResultShell('loading', 'Memproses Presensi');
+            document.getElementById('attendance-form').classList.add('hidden');
+            qrDataEl.innerHTML = `
+                <div class="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur">
+                    ${renderTeacherInfo(teacherData)}
+                    <div class="mt-5 pt-5 border-t border-slate-200 dark:border-slate-700 text-center">
+                        <div class="mx-auto w-12 h-12 rounded-full border-4 border-slate-200 border-t-gold-500 animate-spin"></div>
+                        <p class="text-sm font-semibold text-navy-800 dark:text-white mt-4">Menyimpan presensi otomatis...</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Mohon tunggu sebentar.</p>
+                    </div>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function showAutoSuccess(data) {
+            const typeLabel = data.attendance_type === 'keluar' ? 'Presensi Keluar' : 'Presensi Masuk';
+            setResultShell('success', `${typeLabel} Berhasil`);
+            qrDataEl.innerHTML = `
+                <div class="rounded-3xl border border-green-200/80 dark:border-green-800/70 bg-white/80 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur">
+                    <div class="text-center">
+                        <p class="text-lg font-bold text-navy-800 dark:text-white">${escapeHtml(data.teacher_name || '-')}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${typeLabel}</p>
+                    </div>
+                    <div class="mt-5 grid grid-cols-2 gap-3">
+                        <div class="rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 text-center">
+                            <p class="text-[10px] uppercase font-bold text-green-600 dark:text-green-400">Jam</p>
+                            <p class="text-sm font-bold text-green-900 dark:text-green-200 mt-1">${escapeHtml(data.time || '-')} WIB</p>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 text-center">
+                            <p class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Status</p>
+                            <p class="text-sm font-bold text-navy-800 dark:text-white mt-1">${escapeHtml(data.status || 'Berhasil')}</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-green-700 dark:text-green-300 font-semibold text-center mt-5">Siap scan guru berikutnya...</p>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+            setTimeout(() => window.location.href = scanRoute, 2500);
+        }
+
+        function showAutoError(message, type = 'error') {
+            setResultShell(type, type === 'warning' ? 'Peringatan' : 'Presensi Gagal');
+            qrDataEl.innerHTML = `
+                <div class="rounded-3xl border ${type === 'warning' ? 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20' : 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20'} p-5 shadow-sm text-center">
+                    <p class="text-sm font-bold ${type === 'warning' ? 'text-amber-900 dark:text-amber-200' : 'text-red-900 dark:text-red-200'}">${escapeHtml(message)}</p>
+                    <button type="button" onclick="window.location.href='${scanRoute}'" class="mt-5 w-full px-6 py-3.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-2xl text-sm font-bold transition-all shadow-xl flex items-center justify-center gap-2">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i>
+                        Scan Lagi
+                    </button>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function submitAutoAttendance(teacherData) {
+            showAutoLoading(teacherData);
+
+            const send = () => {
+                fetch(attendanceForm.action, {
+                    method: 'POST',
+                    body: new FormData(attendanceForm),
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                    .then(async response => {
+                        const data = await response.json().catch(() => ({ message: 'Respons server tidak valid.' }));
+                        if (!response.ok || !data.success) throw data;
+                        showAutoSuccess(data);
+                    })
+                    .catch(error => showAutoError(error.message || 'Presensi gagal.', error.code ? 'warning' : 'error'));
+            };
+
+            if (gpsValidationStatus !== 'on' || !navigator.geolocation) {
+                document.getElementById('latitude-input').value = '';
+                document.getElementById('longitude-input').value = '';
+                send();
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    document.getElementById('latitude-input').value = position.coords.latitude;
+                    document.getElementById('longitude-input').value = position.coords.longitude;
+                    send();
+                },
+                () => {
+                    document.getElementById('latitude-input').value = '';
+                    document.getElementById('longitude-input').value = '';
+                    send();
+                },
+                { enableHighAccuracy: true, timeout: 7000, maximumAge: 30000 }
+            );
+        }
+
         // Hardware QR Scanner Logic
         let hardwareScanTimeout = null;
+        let lastAutoScanData = null;
+        let lastAutoScanAt = 0;
+
+        function getScanMode() {
+            return getAlpineData(document.getElementById('attendance-root'))?.scanMode || 'manual';
+        }
+
+        function shouldSkipDuplicateAutoScan(qrData) {
+            if (getScanMode() !== 'auto') return false;
+            const now = Date.now();
+            if (lastAutoScanData === qrData && now - lastAutoScanAt < 3000) return true;
+            lastAutoScanData = qrData;
+            lastAutoScanAt = now;
+            return false;
+        }
 
         function getAlpineData(element) {
             if (!element) return null;
@@ -489,8 +679,12 @@
             }
 
             window.processHardwareScan = function(qrData) {
-                // Ambil mode yang dipilih user
-                const currentMode = document.getElementById('hardware-mode-input')?.value || 'masuk';
+                if (shouldSkipDuplicateAutoScan(qrData)) return;
+
+                const scanMode = getScanMode();
+                const currentMode = scanMode === 'auto'
+                    ? 'auto'
+                    : (document.getElementById('hardware-mode-input')?.value || 'masuk');
 
                 // Hide hardware input area dan show result container
                 document.getElementById('camera-box').classList.add('hidden');
@@ -551,6 +745,11 @@
                             token: qrToken
                         });
                         document.getElementById('attendance-mode-input').value = currentMode;
+
+                        if (scanMode === 'auto') {
+                            submitAutoAttendance(teacherData);
+                            return;
+                        }
                         
                         // 2. AUTO CHECK STATUS
                         fetch(`${attendanceStatusRoute}/${teacherId}`)
@@ -775,8 +974,10 @@
 
         // Handle QR success
         function handleQRSuccess(data) {
+            if (shouldSkipDuplicateAutoScan(data)) return;
             const alpineData = getAlpineData(document.getElementById('attendance-root'));
-            const currentMode = alpineData?.mode || document.getElementById('attendance-mode-input')?.value || 'masuk';
+            const scanMode = alpineData?.scanMode || 'manual';
+            const currentMode = scanMode === 'auto' ? 'auto' : (alpineData?.mode || document.getElementById('attendance-mode-input')?.value || 'masuk');
             stopCamera();
             document.getElementById('scanning-overlay').classList.add('hidden');
             document.getElementById('scanning-overlay').classList.remove('flex', 'items-center', 'justify-center');
@@ -822,7 +1023,12 @@
                         token: qrToken
                     });
                     document.getElementById('attendance-mode-input').value = currentMode;
-                    
+
+                    if (scanMode === 'auto') {
+                        submitAutoAttendance(teacherData);
+                        return;
+                    }
+                     
                     // AUTO CHECK STATUS
                     fetch(`${attendanceStatusRoute}/${teacherId}`)
                         .then(res => res.json())

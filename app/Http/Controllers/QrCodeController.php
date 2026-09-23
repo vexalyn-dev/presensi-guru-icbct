@@ -36,7 +36,7 @@ class QrCodeController extends Controller
                 'qr_data' => 'required|string',
                 'latitude' => 'nullable|numeric',
                 'longitude' => 'nullable|numeric',
-                'mode' => 'nullable|in:masuk,keluar',
+                'mode' => 'nullable|in:auto,masuk,keluar',
             ]);
 
             // Decode QR data - Handle both JSON and plain ID
@@ -98,8 +98,9 @@ class QrCodeController extends Controller
             $existingAttendance = Attendance::where('user_id', $teacher->id)
                 ->where('date', $today)
                 ->first();
+            $requestedMode = $request->input('mode', 'masuk');
 
-            if ($existingAttendance && $request->input('mode', 'masuk') === 'masuk') {
+            if ($existingAttendance && $requestedMode === 'masuk') {
                 return response()->json([
                     'success' => false,
                     'message' => 'Guru ini sudah presensi masuk hari ini pada jam ' . $existingAttendance->check_in,
@@ -116,8 +117,9 @@ class QrCodeController extends Controller
             }
 
             if ($existingAttendance) {
+                $now = Carbon::now();
                 $existingAttendance->update([
-                    'check_out' => Carbon::now()->format('H:i:s'),
+                    'check_out' => $now->format('H:i:s'),
                     'check_out_latitude' => $request->latitude,
                     'check_out_longitude' => $request->longitude,
                 ]);
@@ -126,9 +128,18 @@ class QrCodeController extends Controller
                     'success' => true,
                     'message' => 'Presensi keluar berhasil!',
                     'teacher_name' => $teacher->name,
+                    'attendance_type' => 'keluar',
                     'status' => $existingAttendance->status,
-                    'time' => Carbon::now()->format('H:i:s')
+                    'time' => $now->format('H:i:s')
                 ]);
+            }
+
+            if ($requestedMode === 'keluar') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Guru ini belum tercatat presensi masuk hari ini.',
+                    'code' => 'not_checked_in',
+                ], 422);
             }
 
             // Determine status based on configured start time + late grace period
@@ -188,6 +199,7 @@ class QrCodeController extends Controller
                 'success' => true,
                 'message' => 'Presensi berhasil!',
                 'teacher_name' => $teacher->name,
+                'attendance_type' => 'masuk',
                 'status' => $status,
                 'time' => $now->format('H:i:s')
             ]);

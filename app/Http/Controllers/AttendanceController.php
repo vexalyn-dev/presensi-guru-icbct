@@ -33,7 +33,7 @@ class AttendanceController extends Controller
             'qr_data'   => 'required|string',
             'latitude'  => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'mode'      => 'nullable|in:masuk,keluar',
+            'mode'      => 'nullable|in:auto,masuk,keluar',
         ]);
 
         try {
@@ -114,7 +114,7 @@ class AttendanceController extends Controller
         if ($attendance && $attendance->check_in && !$attendance->check_out) {
             $this->processKeluar($attendance, $teacher, $validated, $todaySchedule);
             return $ajaxRequest
-                ? response()->json(['success' => true, 'message' => 'Presensi keluar berhasil!'])
+                ? response()->json(['success' => true, 'message' => 'Presensi keluar berhasil!', 'teacher_name' => $teacher->name, 'attendance_type' => 'keluar', 'status' => $attendance->status, 'time' => now()->format('H:i:s')])
                 : redirect()->route('dashboard')->with('success', 'Presensi keluar berhasil!');
         }
 
@@ -141,14 +141,14 @@ class AttendanceController extends Controller
             ]);
             $this->processKeluar($newAttendance, $teacher, $validated, $todaySchedule);
             return $ajaxRequest
-                ? response()->json(['success' => true, 'message' => 'Presensi keluar berhasil dicatat!'])
+                ? response()->json(['success' => true, 'message' => 'Presensi keluar berhasil dicatat!', 'teacher_name' => $teacher->name, 'attendance_type' => 'keluar', 'status' => $newAttendance->status, 'time' => now()->format('H:i:s')])
                 : redirect()->route('dashboard')->with('success', 'Presensi keluar berhasil dicatat!');
         }
 
         // Mode masuk (default)
         $this->processMasuk($teacher, $validated, $todaySchedule);
         return $ajaxRequest
-            ? response()->json(['success' => true, 'message' => 'Presensi masuk berhasil!'])
+            ? response()->json(['success' => true, 'message' => 'Presensi masuk berhasil!', 'teacher_name' => $teacher->name, 'attendance_type' => 'masuk', 'status' => 'Berhasil', 'time' => now()->format('H:i:s')])
             : redirect()->route('dashboard')->with('success', 'Presensi masuk berhasil!');
     }
 
