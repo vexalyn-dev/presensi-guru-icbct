@@ -25,6 +25,12 @@
                 $backRoute = auth()->user()?->isGuruPiket()
                     ? route('piket.dashboard')
                     : (auth()->user()?->isTeacher() ? route('teacher.dashboard') : route('dashboard'));
+                $attendanceStoreRoute = auth()->user()?->isGuruPiket()
+                    ? route('piket.attendance.store')
+                    : route('attendance.store');
+                $scanRoute = auth()->user()?->isGuruPiket()
+                    ? route('piket.attendance')
+                    : route('attendance.scan');
             @endphp
             <a href="{{ $backRoute }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-sm group w-fit">
                 <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
@@ -110,7 +116,7 @@
                                 </div>
                                 
                                 <!-- Submit Form -->
-                                <form id="attendance-form" action="{{ route('attendance.store') }}" method="POST" class="hidden mt-8">
+                                <form id="attendance-form" action="{{ $attendanceStoreRoute }}" method="POST" class="hidden mt-8">
                                     @csrf
                                     <input type="hidden" name="qr_data" id="qr-data-input">
                                     <input type="hidden" name="latitude" id="latitude-input">
@@ -358,6 +364,7 @@
         const qrDataInput = document.getElementById('qr-data-input');
         const attendanceForm = document.getElementById('attendance-form');
         const gpsValidationStatus = "{{ $gpsValidationStatus ?? 'on' }}";
+        const scanRoute = @json($scanRoute);
         // Add hidden mode input to attendance form if not present
         if (!document.getElementById('attendance-mode-input')) {
             const hidden = document.createElement('input');
@@ -891,6 +898,33 @@
 
         // Handle attendance form submit (untuk hardware & camera)
         if (attendanceForm) {
+            const submitAttendanceForm = () => {
+                fetch(attendanceForm.action, {
+                    method: 'POST',
+                    body: new FormData(attendanceForm),
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                    .then(async response => {
+                        const data = await response.json().catch(() => ({ message: 'Respons server tidak valid.' }));
+                        if (!response.ok || !data.success) throw new Error(data.message || 'Presensi gagal.');
+                        showToast(data.message || 'Presensi berhasil!', 'success');
+                        setTimeout(() => window.location.href = scanRoute, 900);
+                    })
+                    .catch(error => {
+                        showToast(error.message || 'Presensi gagal.', 'error');
+                        const submitBtn = document.getElementById('btn-confirm-attendance');
+                        if (submitBtn) {
+                            submitBtn.removeAttribute('data-submitting');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<span id="btn-confirm-text">Konfirmasi Presensi</span><i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>';
+                            if (window.lucide) lucide.createIcons();
+                        }
+                    });
+            };
+
             attendanceForm.addEventListener('submit', function(e) {
                 e.preventDefault();
 
@@ -905,7 +939,7 @@
 
                 // If GPS validation is disabled in settings, skip geolocation request
                 if (gpsValidationStatus !== 'on') {
-                    attendanceForm.submit();
+                    submitAttendanceForm();
                     return;
                 }
 
@@ -916,7 +950,7 @@
                     const lngInput = document.getElementById('longitude-input') || document.getElementById('hardware-longitude');
                     if (latInput) latInput.value = '';
                     if (lngInput) lngInput.value = '';
-                    attendanceForm.submit();
+                    submitAttendanceForm();
                     return;
                 }
 
@@ -931,7 +965,7 @@
                             if (latInput) latInput.value = lat;
                             if (lngInput) lngInput.value = lng;
 
-                            attendanceForm.submit();
+                            submitAttendanceForm();
                         },
                         (error) => {
                             if (highAccuracy && (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE)) {
@@ -962,7 +996,7 @@
                             if (latInput) latInput.value = '';
                             if (lngInput) lngInput.value = '';
 
-                            attendanceForm.submit();
+                            submitAttendanceForm();
                         },
                         { enableHighAccuracy: highAccuracy, timeout: timeoutMs, maximumAge: 30000 }
                     );
