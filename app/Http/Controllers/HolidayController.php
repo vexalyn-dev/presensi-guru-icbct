@@ -64,55 +64,38 @@ class HolidayController extends Controller
     {
         try {
             $year = Carbon::now()->year;
-            
-            // ✅ Menggunakan API libur.deno.dev
-            $response = Http::timeout(15)->get("https://libur.deno.dev/api?year={$year}");
-            
+
+            // Menggunakan API baru dari kemendesa.link
+            $response = Http::timeout(15)->get("https://api.kemendesa.link/libur-nasional/api/holidays/{$year}.json");
+
             if (!$response->successful()) {
-                return back()->with('error', 'Gagal mengakses API libur. Status: ' . $response->status());
+                return back()->with('error', 'Gagal mengakses API libur nasional. Status: ' . $response->status());
             }
-            
-            $holidays = $response->json();
-            
-            // Validasi response
-            if (!is_array($holidays) || empty($holidays)) {
-                return back()->with('error', 'Data libur kosong atau format tidak valid');
+
+            $result = $response->json();
+
+            if (!isset($result['data']) || !is_array($result['data'])) {
+                return back()->with('error', 'Format data libur tidak valid dari API');
             }
-            
+
+            $holidays = $result['data'];
+
             $count = 0;
-            $errors = [];
-            
             foreach ($holidays as $holiday) {
                 try {
-                    // ✅ Flexible parsing - support multiple field names
-                    $date = $holiday['holiday_date'] 
-                        ?? $holiday['date'] 
-                        ?? $holiday['tanggal'] 
-                        ?? null;
-                        
-                    $name = $holiday['holiday_name'] 
-                        ?? $holiday['name'] 
-                        ?? $holiday['nama'] 
-                        ?? $holiday['description'] 
-                        ?? null;
-                    
-                    // Skip jika data tidak valid
+                    $date = $holiday['date'] ?? null;
+                    $name = $holiday['name'] ?? null;
+
                     if (!$date || !$name) {
                         continue;
                     }
-                    
-                    // Parse date ke format Y-m-d
-                    try {
-                        $parsedDate = Carbon::parse($date)->toDateString();
-                    } catch (\Exception $e) {
-                        continue;
-                    }
-                    
-                    // Cek apakah sudah ada di database
+
+                    $parsedDate = Carbon::parse($date)->toDateString();
+
                     $exists = Holiday::where('date', $parsedDate)
                         ->where('type', 'national')
                         ->exists();
-                    
+
                     if (!$exists) {
                         Holiday::create([
                             'date' => $parsedDate,
@@ -123,25 +106,24 @@ class HolidayController extends Controller
                         $count++;
                     }
                 } catch (\Exception $e) {
-                    $errors[] = "Error parsing: " . json_encode($holiday);
                     continue;
                 }
             }
-            
+
             if ($count > 0) {
                 return back()->with('success', "Berhasil menambahkan {$count} hari libur nasional tahun {$year}");
             } else {
                 $existingCount = Holiday::where('type', 'national')
                     ->whereYear('date', $year)
                     ->count();
-                    
+
                 if ($existingCount > 0) {
                     return back()->with('success', "Data libur nasional tahun {$year} sudah ada ({$existingCount} hari). Tidak ada data baru.");
                 }
-                
-                return back()->with('error', 'Tidak ada data libur baru yang ditambahkan. Response API: ' . json_encode($holidays));
+
+                return back()->with('error', 'Tidak ada data libur baru yang ditambahkan.');
             }
-            
+
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             return back()->with('error', 'Koneksi ke API gagal. Periksa koneksi internet Anda.');
         } catch (\Exception $e) {
