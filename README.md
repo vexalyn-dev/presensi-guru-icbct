@@ -50,6 +50,9 @@
 - [x] Riwayat presensi 7 hari terakhir
 - [x] Statistik bulanan
 - [x] Hardware scanner support (barcode scanner USB)
+- [x] **Mode Otomatis** — scan QR langsung proses tanpa klik konfirmasi
+- [x] **Mode Manual** — perlu konfirmasi guru piket sebelum presensi tercatat
+- [x] Auto-detect Masuk/Keluar berdasarkan status absen hari itu
 
 ### 🏫 Presensi Kelas
 - [x] QR Code scanning real-time via kamera

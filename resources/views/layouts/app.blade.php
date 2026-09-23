@@ -387,41 +387,49 @@
             <div>
                 <p class="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Presensi</p>
                 
-                <a href="{{ route('attendance.scan') }}" 
+                @unless(auth()->user()->isAdmin())
+                <a href="{{ route('attendance.scan') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('attendance.scan') 
-                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                          {{ request()->routeIs('attendance.scan')
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="scan-line" class="w-4 h-4"></i>
                     <span>Presensi Harian</span>
                 </a>
+                @endunless
 
-                <a href="{{ route('class-attendance.scan') }}" 
+                @unless(auth()->user()->isAdmin())
+                <a href="{{ route('class-attendance.scan') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('class-attendance.*') && !request()->routeIs('admin.class-attendance.*')
-                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="scan" class="w-4 h-4"></i>
                     <span>Presensi Kelas</span>
                 </a>
+                @endunless
 
-                <a href="{{ route('admin.class-attendance.manual') }}" 
+                @unless(auth()->user()->isAdmin())
+                <a href="{{ route('admin.class-attendance.manual') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('admin.class-attendance.manual*') 
-                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                          {{ request()->routeIs('admin.class-attendance.manual*')
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="edit-3" class="w-4 h-4"></i>
                     <span>Manual Presensi</span>
                 </a>
+                @endunless
 
-                <a href="{{ route('attendance.history') }}" 
+                @unless(auth()->user()->isAdmin())
+                <a href="{{ route('attendance.history') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('attendance.history') 
-                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
+                          {{ request()->routeIs('attendance.history')
+                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="calendar-check" class="w-4 h-4"></i>
                     <span>Riwayat Presensi</span>
                 </a>
+                @endunless
             </div>
 
             <!-- FITUR LAINNYA -->
@@ -482,7 +490,7 @@
                     <span>Pusat Bantuan</span>
                 </a>
 
-                @unless(auth()->user()->role === 'operator')
+                @unless(auth()->user()->isAdmin() || auth()->user()->isGuruPiket())
                 <a href="{{ route('download-apk') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('download-apk')
