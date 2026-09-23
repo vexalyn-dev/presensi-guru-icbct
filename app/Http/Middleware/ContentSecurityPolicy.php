@@ -14,11 +14,11 @@ class ContentSecurityPolicy
 
         $csp = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com",
             "img-src 'self' data: https: http: blob:",
             "font-src 'self' https://fonts.gstatic.com https://unpkg.com",
-            "connect-src 'self' https://api.github.com https://api.qrserver.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com",
+            "connect-src 'self' https://api.github.com https://api.qrserver.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com",
             "media-src 'self' blob:",
             "object-src 'none'",
             "frame-src 'none'",
