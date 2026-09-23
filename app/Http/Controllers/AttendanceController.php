@@ -303,8 +303,9 @@ class AttendanceController extends Controller
     {
         $currentUser = auth()->user();
 
-        // Allow admin/operator to check any teacher, but teachers can only check themselves
-        if (!$currentUser->canAccessAdmin() && (int) $teacherId !== $currentUser->id) {
+        // Allow admin/operator/piket to check any teacher, but teachers can only check themselves
+        $canViewAny = $currentUser->canAccessAdmin() || $currentUser->isGuruPiket();
+        if (!$canViewAny && (int) $teacherId !== $currentUser->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

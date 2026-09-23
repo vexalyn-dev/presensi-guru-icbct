@@ -544,8 +544,9 @@ class TeacherController extends Controller
     {
         $currentUser = auth()->user();
 
-        // Allow admin/operator to view any teacher, but regular users can only view themselves
-        if (!$currentUser->canAccessAdmin() && (int) $teacher->id !== $currentUser->id) {
+        // Allow admin/operator/piket to view any teacher, but regular users can only view themselves
+        $canViewAny = $currentUser->canAccessAdmin() || $currentUser->isGuruPiket();
+        if (!$canViewAny && (int) $teacher->id !== $currentUser->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
