@@ -316,8 +316,8 @@ class AttendanceController extends Controller
         return response()->json([
             'already_checked_in' => $attendance !== null,
             'checked_out' => $attendance ? $attendance->check_out !== null : false,
-            'check_in_time' => $attendance ? $attendance->check_in : null,
-            'check_out_time' => $attendance ? $attendance->check_out : null,
+            'check_in_time' => $attendance && $attendance->check_in ? Carbon::parse($attendance->check_in)->format('H:i') : null,
+            'check_out_time' => $attendance && $attendance->check_out ? Carbon::parse($attendance->check_out)->format('H:i') : null,
             'status' => $attendance ? $attendance->status : null,
         ]);
     }
