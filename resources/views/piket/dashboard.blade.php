@@ -197,21 +197,9 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-1.5 flex-shrink-0">
-                        <form action="{{ route('piket.leave-approval.approve', $leave) }}" method="POST" class="inline">
-                            @csrf
-                            <input type="hidden" name="admin_notes" value="Disetujui oleh piket">
-                            <button type="submit" class="p-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all" title="Setujui">
-                                <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                            </button>
-                        </form>
-                        <form action="{{ route('piket.leave-approval.reject', $leave) }}" method="POST" class="inline">
-                            @csrf
-                            <input type="hidden" name="admin_notes" value="Ditolak oleh piket">
-                            <button type="submit" onclick="return confirm('Tolak pengajuan ini?')"
-                                    class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all" title="Tolak">
-                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                            </button>
-                        </form>
+                        <button type="button" onclick="openLeaveModal({{ $leave->id }}, {{ json_encode($leave->user->name ?? '-') }}, {{ json_encode(ucfirst($leave->type)) }}, {{ json_encode(optional($leave->start_date)->format('d M Y')) }}, {{ json_encode(optional($leave->end_date)->format('d M Y')) }}, {{ json_encode($leave->reason ?? '') }}, {{ json_encode($leave->attachment ?? '') }})" class="p-1.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-lg transition-all" title="Lihat Detail">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                        </button>
                     </div>
                 </div>
                 @empty
@@ -303,5 +291,78 @@ function closePiketWelcome() {
         });
     }
 })();
+
+// Leave Detail Modal
+window.openLeaveModal = function(id, name, type, startDate, endDate, reason, attachment) {
+    var modal = document.getElementById('leaveDetailModal');
+    if (!modal) return;
+    modal.querySelector('[data-leave-name]').textContent = name;
+    modal.querySelector('[data-leave-type]').textContent = type;
+    modal.querySelector('[data-leave-dates]').textContent = startDate + ' — ' + endDate;
+    modal.querySelector('[data-leave-reason]').textContent = reason || 'Tidak ada keterangan';
+    var attachEl = modal.querySelector('[data-leave-attachment]');
+    var attachRow = modal.querySelector('[data-attachment-row]');
+    if (attachment) {
+        attachRow.classList.remove('hidden');
+        attachEl.href = '/storage/' + attachment;
+        attachEl.textContent = 'Download Lampiran';
+    } else {
+        attachRow.classList.add('hidden');
+    }
+    modal.classList.remove('hidden');
+};
+window.closeLeaveModal = function() {
+    var modal = document.getElementById('leaveDetailModal');
+    if (modal) modal.classList.add('hidden');
+};
 </script>
+
+<!-- Leave Detail Modal -->
+<div id="leaveDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="display:none;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLeaveModal()"></div>
+    <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                    <i data-lucide="file-text" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-navy-800 dark:text-white">Detail Pengajuan Izin</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400" data-leave-name></p>
+                </div>
+            </div>
+            <button onclick="closeLeaveModal()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+            </button>
+        </div>
+        <div class="px-6 py-5 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                    <p class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Jenis</p>
+                    <p class="text-sm font-bold text-navy-800 dark:text-white" data-leave-type></p>
+                </div>
+                <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                    <p class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Tanggal</p>
+                    <p class="text-sm font-bold text-navy-800 dark:text-white" data-leave-dates></p>
+                </div>
+            </div>
+            <div>
+                <p class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1.5">Alasan</p>
+                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl" data-leave-reason></p>
+            </div>
+            <div data-attachment-row class="hidden">
+                <p class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1.5">Lampiran</p>
+                <a data-leave-attachment href="#" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-navy-800 dark:bg-gold-500 hover:bg-navy-900 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-xl text-sm font-semibold transition-all">
+                    <i data-lucide="paperclip" class="w-4 h-4"></i>
+                    Download Lampiran
+                </a>
+            </div>
+        </div>
+        <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+            <button onclick="closeLeaveModal()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-semibold transition-all">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
 @endsection
