@@ -129,20 +129,16 @@
                                 </span>
                             </div>
                         </div>
-                        @if($leave->status === 'approved' && $leave->admin_notes)
-                        <div class="mt-3 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 leave-admin-notes-wrap {{ $leave->admin_notes ? '' : 'hidden' }}">
+                        <div class="mt-3 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 leave-admin-notes-wrap leave-admin-notes-approved {{ $leave->status === 'approved' && $leave->admin_notes ? '' : 'hidden' }}">
                             <p class="text-xs text-green-700 dark:text-green-300">
-                                <strong>Catatan Peninjau:</strong> <span class="leave-admin-notes">{{ $leave->admin_notes }}</span>
+                                <strong>Catatan Peninjau:</strong> <span class="leave-admin-notes">{{ $leave->admin_notes ?? '' }}</span>
                             </p>
                         </div>
-                        @endif
-                        @if($leave->status === 'rejected' && $leave->admin_notes)
-                        <div class="mt-3 p-2.5 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 leave-admin-notes-wrap {{ $leave->admin_notes ? '' : 'hidden' }}">
+                        <div class="mt-3 p-2.5 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 leave-admin-notes-wrap leave-admin-notes-rejected {{ $leave->status === 'rejected' && $leave->admin_notes ? '' : 'hidden' }}">
                             <p class="text-xs text-red-700 dark:text-red-300">
-                                <strong>Ditolak:</strong> <span class="leave-admin-notes">{{ $leave->admin_notes }}</span>
+                                <strong>Ditolak:</strong> <span class="leave-admin-notes">{{ $leave->admin_notes ?? '' }}</span>
                             </p>
                         </div>
-                        @endif
                     </div>
                 </div>
                 <!-- Action Buttons -->
@@ -317,22 +313,33 @@
                     if (badge.className !== newClass) {
                         badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold leave-status-badge ' + newClass;
                         badge.textContent = leave.status_text;
-                        card.classList.add('updating');
-                        setTimeout(function() { card.classList.remove('updating'); }, 700);
                     } else {
                         badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold leave-status-badge ' + newClass;
                         badge.textContent = leave.status_text;
                     }
                 }
 
-                var notesWraps = card.querySelectorAll('.leave-admin-notes-wrap');
-                notesWraps.forEach(function(wrap) {
-                    var notesSpan = wrap.querySelector('.leave-admin-notes');
-                    if (notesSpan && leave.admin_notes) {
-                        notesSpan.textContent = leave.admin_notes;
-                        wrap.classList.remove('hidden');
+                // Update admin notes visibility and content
+                var approvedWrap = card.querySelector('.leave-admin-notes-approved');
+                var rejectedWrap = card.querySelector('.leave-admin-notes-rejected');
+                if (approvedWrap) {
+                    var approvedNotes = approvedWrap.querySelector('.leave-admin-notes');
+                    if (leave.status === 'approved' && leave.admin_notes) {
+                        if (approvedNotes) approvedNotes.textContent = leave.admin_notes;
+                        approvedWrap.classList.remove('hidden');
+                    } else {
+                        approvedWrap.classList.add('hidden');
                     }
-                });
+                }
+                if (rejectedWrap) {
+                    var rejectedNotes = rejectedWrap.querySelector('.leave-admin-notes');
+                    if (leave.status === 'rejected' && leave.admin_notes) {
+                        if (rejectedNotes) rejectedNotes.textContent = leave.admin_notes;
+                        rejectedWrap.classList.remove('hidden');
+                    } else {
+                        rejectedWrap.classList.add('hidden');
+                    }
+                }
             });
 
             var pendingEl = document.querySelector('[data-leave-stat="pending"]');
@@ -375,13 +382,7 @@
     }
 
     .leave-card.updating {
-        animation: cardFlash 0.6s ease;
-    }
-
-    @keyframes cardFlash {
-        0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.5); }
-        50% { box-shadow: 0 0 0 6px rgba(59,130,246,0.15); }
-        100% { box-shadow: none; }
+        /* removed */
     }
 </style>
 @endsection

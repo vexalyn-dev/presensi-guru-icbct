@@ -202,6 +202,12 @@
     }
 
     function showNotificationToast(notification) {
+        // Skip toast for leave approval/rejection (card updates in real-time instead)
+        if (notification.title && notification.title.includes('Pengajuan') &&
+            (notification.message && notification.message.includes('disetujui')) ||
+            (notification.message && notification.message.includes('ditolak'))) {
+            return;
+        }
         const toast = document.createElement('div');
         toast.className = `fixed bottom-6 right-6 p-4 rounded-lg shadow-lg animate-bounce-in flex items-start gap-3 max-w-sm z-50 ${notification.bg_color || 'bg-blue-100 text-blue-600'} transition-all duration-300`;
         toast.innerHTML = `
