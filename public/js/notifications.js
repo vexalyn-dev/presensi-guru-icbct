@@ -204,8 +204,8 @@
     function showNotificationToast(notification) {
         // Skip toast for leave approval/rejection (card updates in real-time instead)
         if (notification.title && notification.title.includes('Pengajuan') &&
-            (notification.message && notification.message.includes('disetujui')) ||
-            (notification.message && notification.message.includes('ditolak'))) {
+            notification.message &&
+            (notification.message.includes('disetujui') || notification.message.includes('ditolak'))) {
             return;
         }
         const toast = document.createElement('div');
