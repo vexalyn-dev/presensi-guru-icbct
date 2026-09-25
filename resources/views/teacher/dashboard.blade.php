@@ -703,6 +703,6 @@
     }
 
     refreshDashboard();
-    setInterval(refreshDashboard, 3000);
+    setInterval(refreshDashboard, 1000);
     window.addEventListener('notifications:new', function() { refreshDashboard(); });
 })();
