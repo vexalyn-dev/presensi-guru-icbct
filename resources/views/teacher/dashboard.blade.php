@@ -172,15 +172,15 @@
                 <!-- Check Out -->
                 <div class="p-3 rounded-2xl border-2 overflow-hidden
                     {{ $todayAttendance->check_out
-                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                        ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                         : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
                     <div class="flex items-center gap-1.5 mb-2">
-                        <div class="w-6 h-6 rounded-lg {{ $todayAttendance->check_out ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center flex-shrink-0">
+                        <div class="w-6 h-6 rounded-lg {{ $todayAttendance->check_out ? 'bg-red-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center flex-shrink-0">
                             <i data-lucide="log-out" class="w-3 h-3 text-white"></i>
                         </div>
                         <p class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 truncate">Jam Pulang</p>
                     </div>
-                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_out ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}" data-key="check_out" data-key-type="checkout">
+                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_out ? 'text-red-700 dark:text-red-400' : 'text-slate-400' }}" data-key="check_out" data-key-type="checkout">
                         {{ $todayAttendance->check_out ? \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') : '--:--' }}
                     </p>
                     @if($todayAttendance->check_out_status)
@@ -695,8 +695,8 @@
         if (s.check_out_color) {
             var checkoutEl = document.querySelector('[data-key="check_out"]');
             if (checkoutEl) {
-                if (s.check_out_color === 'green') {
-                    checkoutEl.className = checkoutEl.className.replace(/text-(blue|slate)-[0-9]+ dark:text-(blue|slate)-[0-9]+/g, 'text-green-700 dark:text-green-400');
+                if (s.check_out_color === 'red') {
+                    checkoutEl.className = checkoutEl.className.replace(/text-(blue|green|slate)-[0-9]+ dark:text-(blue|green|slate)-[0-9]+/g, 'text-red-700 dark:text-red-400');
                 }
             }
         }

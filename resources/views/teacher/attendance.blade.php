@@ -106,10 +106,10 @@
                             </h3>
                         </div>
 
-                        <div class="p-3 sm:p-4 rounded-2xl border-2 {{ $todayAttendance && $todayAttendance->check_out ? 'bg-gradient-to-br from-navy-50 to-slate-50 dark:from-navy-900/20 dark:to-slate-900/20 border-navy-200 dark:border-navy-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
+                        <div class="p-3 sm:p-4 rounded-2xl border-2 {{ $todayAttendance && $todayAttendance->check_out ? 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
                             <div class="flex items-center gap-2 sm:gap-3 mb-2">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl {{ $todayAttendance && $todayAttendance->check_out ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center transition-colors flex-shrink-0">
-                                    <i data-lucide="clock" class="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-navy-900"></i>
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl {{ $todayAttendance && $todayAttendance->check_out ? 'bg-red-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center transition-colors flex-shrink-0">
+                                    <i data-lucide="log-out" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Jam Pulang</p>
@@ -120,7 +120,7 @@
                                     @endif
                                 </div>
                             </div>
-                            <h3 class="text-xl sm:text-2xl font-bold {{ $todayAttendance && $todayAttendance->check_out ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400' }}">
+                            <h3 class="text-xl sm:text-2xl font-bold {{ $todayAttendance && $todayAttendance->check_out ? 'text-red-700 dark:text-red-400' : 'text-slate-400' }}">
                                 @if($todayAttendance && $todayAttendance->check_out)
                                     {{ \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') }}
                                 @elseif($scheduleEnd)

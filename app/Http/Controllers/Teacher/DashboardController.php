@@ -145,7 +145,7 @@ class DashboardController extends Controller
                 'check_in'  => $todayAttendance->check_in ? Carbon::parse($todayAttendance->check_in)->format('H:i') : null,
                 'check_out' => $todayAttendance->check_out ? Carbon::parse($todayAttendance->check_out)->format('H:i') : null,
                 'status'    => $todayAttendance->status,
-                'check_out_color' => $todayAttendance->check_out ? 'green' : null,
+                'check_out_color' => $todayAttendance->check_out ? 'red' : null,
             ] : null,
             'todaySchedules'  => $todaySchedules,
             'todayClassCount' => $todayClassAttendances,
