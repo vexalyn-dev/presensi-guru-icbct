@@ -8,8 +8,16 @@
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Milker';
+            src: url('{{ asset("fonts/Milker-Regular.woff2") }}') format('woff2'),
+                 url('{{ asset("fonts/Milker-Regular.woff") }}') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
@@ -45,25 +53,24 @@
 
         .auth-credit {
             text-align: center;
-            padding: 12px 16px 14px;
-            font-size: 11px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
+            padding: 14px 16px;
+            font-size: 13px;
+            font-family: 'Milker', 'Inter', sans-serif;
+            font-weight: 400;
             color: #94a3b8;
-            letter-spacing: 0.02em;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            border-top: 1px solid rgba(148,163,184,0.1);
-            z-index: 10;
-            background: white;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: transparent;
+            position: relative;
+            z-index: 5;
+            flex-shrink: 0;
         }
 
         .auth-credit a {
             color: #94a3b8;
             text-decoration: none;
             transition: color 0.2s ease;
+            font-weight: 400;
         }
 
         .auth-credit a:hover {
@@ -565,12 +572,8 @@
             .auth-container::after { display: none !important; }
 
             .auth-credit {
-                position: relative;
-                order: 999;
-                padding: 14px 16px 18px;
-                font-size: 11px;
-                background: transparent;
-                border-top: none;
+                padding: 16px 16px 20px;
+                font-size: 13px;
             }
 
             /* ── Sembunyikan panel desktop ── */
@@ -996,8 +999,6 @@
             visibility: hidden;
             pointer-events: none;
         }
-        /* Edge Chromium */
-        input[type="password"]::-webkit-input-placeholder { }
         ::-webkit-credential-manager-button { display: none !important; }
     </style>
 
@@ -1172,8 +1173,8 @@
 
                     <!-- Remember Me & Lupa Password -->
                     <div style="display:flex;align-items:center;justify-content:space-between;margin:0.25rem 0 0.85rem;">
-                        <label class="cb-label" onclick="toggleRemember()">
-                            <div class="cb-box" id="cbBox">
+                        <label class="cb-label" for="remember">
+                            <div class="cb-box" id="cbBox" aria-hidden="true">
                                 <svg class="cb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
                                     <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -1295,12 +1296,10 @@
 
         </div>
         {{-- END .forms-container --}}
-
-        <div class="auth-credit">
-            <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Develop By VexalynDev</a>
-        </div>
     </div>
     {{-- END .auth-container --}}
+
+    <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
 
     <script>
         function toggleAuth() {
@@ -1396,30 +1395,23 @@
         }
 
         // ── Custom Checkbox Toggle ──────────────────────────
-        // Init state on load
         document.addEventListener('DOMContentLoaded', function() {
             const emailInput = document.getElementById('login-email');
             if (emailInput) emailInput.focus();
 
-            // Sync checkbox display state with native input
             const native = document.getElementById('remember');
-            const box    = document.getElementById('cbBox');
-            if (native && box && native.checked) {
-                box.classList.add('checked');
+            const box = document.getElementById('cbBox');
+
+            function syncRememberBox() {
+                if (!native || !box) return;
+                box.classList.toggle('checked', native.checked);
+            }
+
+            if (native) {
+                native.addEventListener('change', syncRememberBox);
+                syncRememberBox();
             }
         });
-
-        function toggleRemember() {
-            const native = document.getElementById('remember');
-            const box    = document.getElementById('cbBox');
-            if (!native || !box) return;
-            native.checked = !native.checked;
-            if (native.checked) {
-                box.classList.add('checked');
-            } else {
-                box.classList.remove('checked');
-            }
-        }
 
         // ── AJAX Login dengan Overlay Feedback ────────────────
         (function() {
