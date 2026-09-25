@@ -197,19 +197,11 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-1.5 flex-shrink-0">
-                        <button type="button"
-                                data-leave-id="{{ $leave->id }}"
-                                data-leave-name="{{ $leave->user->name ?? '-' }}"
-                                data-leave-type="{{ ucfirst($leave->type) }}"
-                                data-leave-start="{{ optional($leave->start_date)->format('d M Y') }}"
-                                data-leave-end="{{ optional($leave->end_date)->format('d M Y') }}"
-                                data-leave-reason="{{ $leave->reason ?? '' }}"
-                                data-leave-attachment="{{ $leave->attachment ?? '' }}"
-                                onclick="openLeaveModal(this)"
-                                class="p-1.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-lg transition-all"
-                                title="Lihat Detail">
+                        <a href="{{ route('piket.leave-approval.show', $leave) }}"
+                           class="p-1.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-lg transition-all"
+                           title="Lihat Detail">
                             <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
                 @empty
@@ -301,82 +293,5 @@ function closePiketWelcome() {
         });
     }
 })();
-
-// Leave Detail Modal
-window.openLeaveModal = function(btn) {
-    var modal = document.getElementById('leaveDetailModal');
-    if (!modal) return;
-    modal.querySelector('[data-leave-name]').textContent = btn.dataset.leaveName;
-    modal.querySelector('[data-leave-type]').textContent = btn.dataset.leaveType;
-    modal.querySelector('[data-leave-dates]').textContent = btn.dataset.leaveStart + ' — ' + btn.dataset.leaveEnd;
-    modal.querySelector('[data-leave-reason]').textContent = btn.dataset.leaveReason || 'Tidak ada keterangan';
-    var attachEl = modal.querySelector('[data-leave-attachment]');
-    var attachRow = modal.querySelector('[data-attachment-row]');
-    if (btn.dataset.leaveAttachment) {
-        attachRow.classList.remove('hidden');
-        attachEl.href = '/storage/' + btn.dataset.leaveAttachment;
-        attachEl.textContent = 'Download Lampiran';
-    } else {
-        attachRow.classList.add('hidden');
-    }
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
-};
-window.closeLeaveModal = function() {
-    var modal = document.getElementById('leaveDetailModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    }
-};
 </script>
-
-<!-- Leave Detail Modal -->
-<div id="leaveDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="display:none;">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLeaveModal()"></div>
-    <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                    <i data-lucide="file-text" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-navy-800 dark:text-white">Detail Pengajuan Izin</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400" data-leave-name></p>
-                </div>
-            </div>
-            <button onclick="closeLeaveModal()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
-                <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-            </button>
-        </div>
-        <div class="px-6 py-5 space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <p class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Jenis</p>
-                    <p class="text-sm font-bold text-navy-800 dark:text-white" data-leave-type></p>
-                </div>
-                <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <p class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1">Tanggal</p>
-                    <p class="text-sm font-bold text-navy-800 dark:text-white" data-leave-dates></p>
-                </div>
-            </div>
-            <div>
-                <p class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1.5">Alasan</p>
-                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl" data-leave-reason></p>
-            </div>
-            <div data-attachment-row class="hidden">
-                <p class="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500 mb-1.5">Lampiran</p>
-                <a data-leave-attachment href="#" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-navy-800 dark:bg-gold-500 hover:bg-navy-900 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-xl text-sm font-semibold transition-all">
-                    <i data-lucide="paperclip" class="w-4 h-4"></i>
-                    Download Lampiran
-                </a>
-            </div>
-        </div>
-        <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700 flex justify-end">
-            <button onclick="closeLeaveModal()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-semibold transition-all">
-                Tutup
-            </button>
-        </div>
-    </div>
-</div>
 @endsection
