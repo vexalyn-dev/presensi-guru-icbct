@@ -1061,7 +1061,7 @@
 
             <div class="panel-content">
                 <h1 id="panelTitle">{{ $appSettingsPanel->app_name ?? 'ICB CINTA TEKNIKA' }}</h1>
-                <p id="panelText">Sistem Presensi Guru Termodern & Terpercaya</p>
+                <p id="panelText">Sistem Presensi Guru Digital & Terpercaya</p>
                 <button class="btn-toggle" id="toggleBtn" onclick="toggleAuth()">Buat Akun</button>
             </div>
         </div>
@@ -1260,6 +1260,10 @@
         {{-- END .forms-container --}}
     </div>
     {{-- END .auth-container --}}
+
+    <div style="text-align:center; padding:16px 0 8px; font-size:12px; color:#94a3b8;">
+        <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer" style="color:#94a3b8; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#facc15'" onmouseout="this.style.color='#94a3b8'">Develop By VexalynDev</a>
+    </div>
 
     <script>
         function toggleAuth() {
