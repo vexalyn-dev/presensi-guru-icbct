@@ -77,7 +77,7 @@ class GenerateAlphaAbsences extends Command
             ->first();
 
         if ($schedule && $schedule->end_time) {
-            return Carbon::parse($today = Carbon::today()->format('Y-m-d') . ' ' . $schedule->end_time);
+            return Carbon::parse($today->format('Y-m-d') . ' ' . $schedule->end_time);
         }
 
         if ($teacher->default_check_out) {
