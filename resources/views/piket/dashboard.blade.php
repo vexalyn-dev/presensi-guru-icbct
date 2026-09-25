@@ -197,7 +197,17 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-1.5 flex-shrink-0">
-                        <button type="button" onclick="openLeaveModal({{ $leave->id }}, {{ json_encode($leave->user->name ?? '-') }}, {{ json_encode(ucfirst($leave->type)) }}, {{ json_encode(optional($leave->start_date)->format('d M Y')) }}, {{ json_encode(optional($leave->end_date)->format('d M Y')) }}, {{ json_encode($leave->reason ?? '') }}, {{ json_encode($leave->attachment ?? '') }})" class="p-1.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-lg transition-all" title="Lihat Detail">
+                        <button type="button"
+                                data-leave-id="{{ $leave->id }}"
+                                data-leave-name="{{ $leave->user->name ?? '-' }}"
+                                data-leave-type="{{ ucfirst($leave->type) }}"
+                                data-leave-start="{{ optional($leave->start_date)->format('d M Y') }}"
+                                data-leave-end="{{ optional($leave->end_date)->format('d M Y') }}"
+                                data-leave-reason="{{ $leave->reason ?? '' }}"
+                                data-leave-attachment="{{ $leave->attachment ?? '' }}"
+                                onclick="openLeaveModal(this)"
+                                class="p-1.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-lg transition-all"
+                                title="Lihat Detail">
                             <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
@@ -293,27 +303,31 @@ function closePiketWelcome() {
 })();
 
 // Leave Detail Modal
-window.openLeaveModal = function(id, name, type, startDate, endDate, reason, attachment) {
+window.openLeaveModal = function(btn) {
     var modal = document.getElementById('leaveDetailModal');
     if (!modal) return;
-    modal.querySelector('[data-leave-name]').textContent = name;
-    modal.querySelector('[data-leave-type]').textContent = type;
-    modal.querySelector('[data-leave-dates]').textContent = startDate + ' — ' + endDate;
-    modal.querySelector('[data-leave-reason]').textContent = reason || 'Tidak ada keterangan';
+    modal.querySelector('[data-leave-name]').textContent = btn.dataset.leaveName;
+    modal.querySelector('[data-leave-type]').textContent = btn.dataset.leaveType;
+    modal.querySelector('[data-leave-dates]').textContent = btn.dataset.leaveStart + ' — ' + btn.dataset.leaveEnd;
+    modal.querySelector('[data-leave-reason]').textContent = btn.dataset.leaveReason || 'Tidak ada keterangan';
     var attachEl = modal.querySelector('[data-leave-attachment]');
     var attachRow = modal.querySelector('[data-attachment-row]');
-    if (attachment) {
+    if (btn.dataset.leaveAttachment) {
         attachRow.classList.remove('hidden');
-        attachEl.href = '/storage/' + attachment;
+        attachEl.href = '/storage/' + btn.dataset.leaveAttachment;
         attachEl.textContent = 'Download Lampiran';
     } else {
         attachRow.classList.add('hidden');
     }
     modal.classList.remove('hidden');
+    modal.style.display = 'flex';
 };
 window.closeLeaveModal = function() {
     var modal = document.getElementById('leaveDetailModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
 };
 </script>
 
