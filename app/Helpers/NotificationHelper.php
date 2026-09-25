@@ -40,21 +40,6 @@ class NotificationHelper
             // ignore if broadcasting not configured
         }
 
-        // Push SSE for teacher role users
-        try {
-            if ($user->role === 'guru') {
-                \App\Http\Controllers\Teacher\SseStreamController::push($user->id, 'notification', [
-                    'title' => $title,
-                    'message' => $message,
-                    'icon' => $icon,
-                    'bg_color' => $color,
-                    'action_url' => $actionUrl,
-                ]);
-            }
-        } catch (\Throwable $e) {
-            // ignore SSE push errors
-        }
-
         return $notification;
     }
 

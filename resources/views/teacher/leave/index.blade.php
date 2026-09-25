@@ -46,7 +46,7 @@
             </div>
             <div class="min-w-0">
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Pending</p>
-                <p class="text-lg font-bold text-navy-800 dark:text-white">{{ $pending }}</p>
+                <p class="text-lg font-bold text-navy-800 dark:text-white" data-leave-stat="pending">{{ $pending }}</p>
             </div>
         </div>
         <div class="card p-4 flex items-center gap-3">
@@ -55,7 +55,7 @@
             </div>
             <div class="min-w-0">
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Disetujui</p>
-                <p class="text-lg font-bold text-navy-800 dark:text-white">{{ $approved }}</p>
+                <p class="text-lg font-bold text-navy-800 dark:text-white" data-leave-stat="approved">{{ $approved }}</p>
             </div>
         </div>
         <div class="card p-4 flex items-center gap-3">
@@ -64,7 +64,7 @@
             </div>
             <div class="min-w-0">
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Ditolak</p>
-                <p class="text-lg font-bold text-navy-800 dark:text-white">{{ $rejected }}</p>
+                <p class="text-lg font-bold text-navy-800 dark:text-white" data-leave-stat="rejected">{{ $rejected }}</p>
             </div>
         </div>
     </div>
@@ -95,7 +95,7 @@
     <!-- Leave Requests List -->
     <div class="space-y-4">
         @forelse($leaveRequests as $leave)
-        <div class="card p-4 sm:p-5 hover:shadow-lg transition-all">
+        <div class="card p-4 sm:p-5 hover:shadow-lg transition-all leave-card" data-leave-id="{{ $leave->id }}">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
                     <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0
@@ -108,7 +108,7 @@
                             <h3 class="text-sm sm:text-base font-bold text-navy-800 dark:text-white">
                                 {{ $leave->type_text }}
                             </h3>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $leave->status_badge }}">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold leave-status-badge {{ $leave->status_badge }}">
                                 {{ $leave->status_text }}
                             </span>
                         </div>
@@ -130,16 +130,16 @@
                             </div>
                         </div>
                         @if($leave->status === 'approved' && $leave->admin_notes)
-                        <div class="mt-3 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <div class="mt-3 p-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 leave-admin-notes-wrap {{ $leave->admin_notes ? '' : 'hidden' }}">
                             <p class="text-xs text-green-700 dark:text-green-300">
-                                <strong>Catatan Peninjau:</strong> {{ $leave->admin_notes }}
+                                <strong>Catatan Peninjau:</strong> <span class="leave-admin-notes">{{ $leave->admin_notes }}</span>
                             </p>
                         </div>
                         @endif
                         @if($leave->status === 'rejected' && $leave->admin_notes)
-                        <div class="mt-3 p-2.5 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                        <div class="mt-3 p-2.5 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 leave-admin-notes-wrap {{ $leave->admin_notes ? '' : 'hidden' }}">
                             <p class="text-xs text-red-700 dark:text-red-300">
-                                <strong>Ditolak:</strong> {{ $leave->admin_notes }}
+                                <strong>Ditolak:</strong> <span class="leave-admin-notes">{{ $leave->admin_notes }}</span>
                             </p>
                         </div>
                         @endif
@@ -279,6 +279,89 @@
     document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
     });
+
+    // ── Realtime AJAX Polling for Leave Status ──────────────────
+    (function() {
+        var apiEndpoint = '{{ route("teacher.leave.data") }}';
+        var lastHash = '';
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'approved': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                case 'rejected': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+                default: return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'approved': return 'Disetujui';
+                case 'rejected': return 'Ditolak';
+                default: return 'Menunggu Persetujuan';
+            }
+        }
+
+        function updateCards(leaves, stats) {
+            var cards = document.querySelectorAll('.leave-card');
+            var map = {};
+            leaves.forEach(function(l) { map[l.id] = l; });
+
+            cards.forEach(function(card) {
+                var id = card.dataset.leaveId;
+                var leave = map[id];
+                if (!leave) return;
+
+                var badge = card.querySelector('.leave-status-badge');
+                if (badge) {
+                    var newClass = getStatusClass(leave.status);
+                    if (badge.className !== newClass) {
+                        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold leave-status-badge ' + newClass;
+                        badge.textContent = leave.status_text;
+                        card.classList.add('updating');
+                        setTimeout(function() { card.classList.remove('updating'); }, 700);
+                    } else {
+                        badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold leave-status-badge ' + newClass;
+                        badge.textContent = leave.status_text;
+                    }
+                }
+
+                var notesWraps = card.querySelectorAll('.leave-admin-notes-wrap');
+                notesWraps.forEach(function(wrap) {
+                    var notesSpan = wrap.querySelector('.leave-admin-notes');
+                    if (notesSpan && leave.admin_notes) {
+                        notesSpan.textContent = leave.admin_notes;
+                        wrap.classList.remove('hidden');
+                    }
+                });
+            });
+
+            var pendingEl = document.querySelector('[data-leave-stat="pending"]');
+            var approvedEl = document.querySelector('[data-leave-stat="approved"]');
+            var rejectedEl = document.querySelector('[data-leave-stat="rejected"]');
+            if (pendingEl) pendingEl.textContent = stats.pending;
+            if (approvedEl) approvedEl.textContent = stats.approved;
+            if (rejectedEl) rejectedEl.textContent = stats.rejected;
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function refreshLeaveData() {
+            fetch(apiEndpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    var h = JSON.stringify(d.leaves.map(function(l) { return l.id + ':' + l.status; }).join('|'));
+                    if (h !== lastHash) {
+                        updateCards(d.leaves, d.stats);
+                        lastHash = h;
+                    }
+                })
+                .catch(function(e) { console.warn('Leave refresh error:', e); });
+        }
+
+        refreshLeaveData();
+        setInterval(refreshLeaveData, 3000);
+        window.addEventListener('notifications:new', function() { refreshLeaveData(); });
+    })();
 </script>
 
 <style>
@@ -289,6 +372,16 @@
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
+    }
+
+    .leave-card.updating {
+        animation: cardFlash 0.6s ease;
+    }
+
+    @keyframes cardFlash {
+        0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.5); }
+        50% { box-shadow: 0 0 0 6px rgba(59,130,246,0.15); }
+        100% { box-shadow: none; }
     }
 </style>
 @endsection

@@ -195,11 +195,6 @@ class QrCodeController extends Controller
                 ));
             }
 
-            \App\Http\Controllers\Teacher\SseStreamController::push($teacher->id, 'attendance_checkin', [
-                'check_in' => $now->format('H:i'),
-                'status' => $status,
-            ]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Presensi berhasil!',

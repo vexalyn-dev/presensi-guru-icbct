@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="fade-in space-y-3 sm:space-y-6" id="teacher-ajax-app">
+<div class="fade-in space-y-3 sm:space-y-6" id="teacher-ajax-app" data-init-endpoint="{{ route('teacher.dashboard.data') }}">
     
     <!-- Welcome Card -->
     <div class="card p-5 sm:p-8 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:to-gold-400 text-white overflow-hidden">
@@ -678,12 +678,11 @@
 
 @endsection
 
-// ── Teacher Dashboard SSE Realtime ─────────────────────────────
+// ── Teacher Dashboard Realtime AJAX ────────────────────────────
 (function() {
-    var streamUrl = '{{ route("teacher.dashboard.stream") }}';
+    var app     = document.getElementById('teacher-ajax-app');
+    var endpoint = app ? app.dataset.initEndpoint : null;
     var lastHash = '';
-    var evtSource = null;
-    var reconnectDelay = 0;
 
     function updateStats(s) {
         document.querySelectorAll('[data-key]').forEach(function(el) {
@@ -692,65 +691,18 @@
         });
     }
 
-    function handleEvent(data) {
-        if (data.stats) {
-            var h = JSON.stringify(data.stats);
-            if (h !== lastHash) {
-                updateStats(data.stats);
-                lastHash = h;
-            }
-        }
-        if (data.todayAttendance) {
-            var ci = document.querySelector('[data-key="check_in"]');
-            var co = document.querySelector('[data-key="check_out"]');
-            if (ci && data.todayAttendance.check_in) ci.textContent = data.todayAttendance.check_in;
-            if (co && data.todayAttendance.check_out) co.textContent = data.todayAttendance.check_out;
-        }
-        if (data.todaySchedules !== undefined) {
-            var ts = document.querySelector('[data-key="todaySchedules"]');
-            if (ts) ts.textContent = data.todaySchedules;
-        }
+    function refreshDashboard() {
+        if (!endpoint) return;
+        fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var h = JSON.stringify(d.stats);
+                if (h !== lastHash) { updateStats(d.stats); lastHash = h; }
+            })
+            .catch(function(e) { console.warn('Teacher dashboard refresh error:', e); });
     }
 
-    function connectStream() {
-        if (evtSource) {
-            evtSource.close();
-            evtSource = null;
-        }
-        evtSource = new EventSource(streamUrl);
-
-        evtSource.addEventListener('update', function(e) {
-            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
-        });
-        evtSource.addEventListener('attendance_checkin', function(e) {
-            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
-        });
-        evtSource.addEventListener('attendance_checkout', function(e) {
-            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
-        });
-        evtSource.addEventListener('notification', function(e) {
-            try {
-                var d = JSON.parse(e.data);
-                if (typeof refreshDashboard === 'function') refreshDashboard();
-            } catch(err) {}
-        });
-        evtSource.addEventListener('leave_approved', function(e) {
-            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
-        });
-        evtSource.addEventListener('leave_rejected', function(e) {
-            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
-        });
-
-        evtSource.onerror = function() {
-            reconnectDelay = Math.min(reconnectDelay * 2 + 1, 30);
-            console.warn('SSE reconnecting in', reconnectDelay, 's');
-            setTimeout(connectStream, reconnectDelay * 1000);
-        };
-    }
-
-    connectStream();
-
-    window.addEventListener('beforeunload', function() {
-        if (evtSource) { evtSource.close(); evtSource = null; }
-    });
+    refreshDashboard();
+    setInterval(refreshDashboard, 1000);
+    window.addEventListener('notifications:new', function() { refreshDashboard(); });
 })();

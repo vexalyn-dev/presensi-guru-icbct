@@ -20,6 +20,53 @@ class LeaveController extends Controller
         return view('teacher.leave.index', compact('leaveRequests'));
     }
 
+    public function data()
+    {
+        $leaves = LeaveRequest::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function ($leave) {
+                $statusBadge = match($leave->status) {
+                    'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                    'rejected' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                    default    => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                };
+                $statusText = match($leave->status) {
+                    'approved' => 'Disetujui',
+                    'rejected' => 'Ditolak',
+                    default    => 'Menunggu Persetujuan',
+                };
+                return [
+                    'id'           => $leave->id,
+                    'type'         => $leave->type,
+                    'type_text'    => $leave->type === 'sakit' ? 'Sakit' : 'Izin',
+                    'status'       => $leave->status,
+                    'status_badge' => $statusBadge,
+                    'status_text'  => $statusText,
+                    'reason'       => $leave->reason,
+                    'start_date'   => $leave->start_date->format('d M Y'),
+                    'end_date'     => $leave->end_date->format('d M Y'),
+                    'duration'     => $leave->duration,
+                    'created_at'   => $leave->created_at->format('d M Y H:i'),
+                    'admin_notes'  => $leave->admin_notes,
+                ];
+            });
+
+        $pending  = $leaves->where('status', 'pending')->count();
+        $approved = $leaves->where('status', 'approved')->count();
+        $rejected = $leaves->where('status', 'rejected')->count();
+
+        return response()->json([
+            'leaves'   => $leaves,
+            'stats'    => [
+                'pending'  => $pending,
+                'approved' => $approved,
+                'rejected' => $rejected,
+            ],
+        ]);
+    }
+
     public function create()
     {
         return view('teacher.leave.create');

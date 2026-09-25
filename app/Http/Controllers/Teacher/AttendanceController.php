@@ -138,11 +138,6 @@ class AttendanceController extends Controller
                 'check_in_longitude' => $request->input('longitude'),
             ]);
 
-            \App\Http\Controllers\Teacher\SseStreamController::push($user->id, 'attendance_checkin', [
-                'check_in' => $now->format('H:i'),
-                'status' => $isLate ? 'Terlambat' : 'Hadir',
-            ]);
-
             return $this->_jsonResp(true, 'Presensi masuk berhasil dicatat!', [
                 'check_in' => $now->format('H:i'),
                 'status' => $isLate ? 'Terlambat' : 'Hadir',
@@ -159,10 +154,6 @@ class AttendanceController extends Controller
                 'check_out' => $now->format('H:i:s'),
                 'check_out_latitude' => $request->input('latitude'),
                 'check_out_longitude' => $request->input('longitude'),
-            ]);
-
-            \App\Http\Controllers\Teacher\SseStreamController::push($user->id, 'attendance_checkout', [
-                'check_out' => $now->format('H:i'),
             ]);
 
             return $this->_jsonResp(true, 'Presensi pulang berhasil dicatat!', [
