@@ -18,7 +18,7 @@ class DashboardController extends Controller
             $today = Carbon::today();
 
             $totalGuru = User::where('role', 'guru')->count();
-            
+
             $hadirHariIni = Attendance::whereDate('date', $today)
                 ->whereIn('status', [
                     User::STATUS_HADIR,
@@ -57,7 +57,7 @@ class DashboardController extends Controller
             $chartTerlambatData = [];
             $chartTidakHadirData = [];
             $chartIzinData = [];
-            
+
             $stats = Attendance::selectRaw('
                 DATE(date) as date_str,
                 SUM(CASE WHEN status IN (?, ?) THEN 1 ELSE 0 END) as hadir,
@@ -117,5 +117,26 @@ class DashboardController extends Controller
                 'message' => 'Gagal memuat dashboard. Silakan coba lagi.'
             ]);
         }
+    }
+
+    public function data()
+    {
+        $today = Carbon::today();
+
+        $totalGuru = User::where('role', 'guru')->count();
+        $hadir = Attendance::whereDate('date', $today)
+            ->whereIn('status', [User::STATUS_HADIR, User::STATUS_TERLAMBAT, User::STATUS_TEPAT_WAKTU])
+            ->count();
+        $terlambat = Attendance::whereDate('date', $today)->where('status', User::STATUS_TERLAMBAT)->count();
+        $tidakHadir = Attendance::whereDate('date', $today)
+            ->whereIn('status', [User::STATUS_IZIN, User::STATUS_ALPHA, User::STATUS_SAKIT])
+            ->count();
+        $izinCuti = Attendance::whereDate('date', $today)
+            ->whereIn('status', [User::STATUS_IZIN, User::STATUS_SAKIT, User::STATUS_CUTI])
+            ->count();
+
+        return response()->json([
+            'stats' => compact('totalGuru', 'hadir', 'terlambat', 'tidakHadir', 'izinCuti'),
+        ]);
     }
 }

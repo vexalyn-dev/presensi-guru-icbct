@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="fade-in space-y-3 sm:space-y-6">
+<div class="fade-in space-y-3 sm:space-y-6" id="teacher-ajax-app" data-init-endpoint="{{ route('teacher.dashboard.data') }}">
     
     <!-- Welcome Card -->
     <div class="card p-5 sm:p-8 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:to-gold-400 text-white overflow-hidden">
@@ -12,7 +12,7 @@
                 <h2 class="text-lg sm:text-2xl font-bold mb-1.5 sm:mb-2 truncate">Selamat Datang, {{ auth()->user()->name }}! 👋</h2>
                 <p class="text-white/80 dark:text-navy-900/80 text-sm sm:text-base leading-snug break-words">
                     Semangat mengajar hari ini. Anda memiliki 
-                    <span class="font-bold">{{ $todaySchedules->count() }}</span> jadwal mengajar.
+                    <span class="font-bold" data-key="todaySchedules">{{ $todaySchedules->count() }}</span> jadwal mengajar.
                 </p>
             </div>
             <div class="flex-shrink-0">
@@ -73,7 +73,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Hadir Bulan Ini</p>
-                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['hadir'] }}</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight" data-key="hadir">{{ $stats['hadir'] }}</h3>
                     <p class="text-[9px] text-blue-500 leading-tight mt-0.5">Bulan ini</p>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Terlambat</p>
-                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['terlambat'] }}</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight" data-key="terlambat">{{ $stats['terlambat'] }}</h3>
                     <p class="text-[9px] text-yellow-600 leading-tight mt-0.5">Perlu perbaikan</p>
                 </div>
             </div>
@@ -99,7 +99,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Izin/Sakit</p>
-                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['izin'] }}</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight" data-key="izin">{{ $stats['izin'] }}</h3>
                     <p class="text-[9px] text-green-500 leading-tight mt-0.5">Disetujui</p>
                 </div>
             </div>
@@ -112,7 +112,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Alpha</p>
-                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight">{{ $stats['alpha'] }}</h3>
+                    <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight" data-key="alpha">{{ $stats['alpha'] }}</h3>
                     <p class="text-[9px] text-red-500 leading-tight mt-0.5">Tanpa keterangan</p>
                 </div>
             </div>
@@ -677,3 +677,32 @@
 </script>
 
 @endsection
+
+// ── Teacher Dashboard Realtime AJAX ────────────────────────────
+(function() {
+    var app     = document.getElementById('teacher-ajax-app');
+    var endpoint = app ? app.dataset.initEndpoint : null;
+    var lastHash = '';
+
+    function updateStats(s) {
+        document.querySelectorAll('[data-key]').forEach(function(el) {
+            var key = el.dataset.key;
+            if (s[key] !== undefined) el.textContent = s[key];
+        });
+    }
+
+    function refreshDashboard() {
+        if (!endpoint) return;
+        fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var h = JSON.stringify(d.stats);
+                if (h !== lastHash) { updateStats(d.stats); lastHash = h; }
+            })
+            .catch(function(e) { console.warn('Teacher dashboard refresh error:', e); });
+    }
+
+    refreshDashboard();
+    setInterval(refreshDashboard, 3000);
+    window.addEventListener('notifications:new', function() { refreshDashboard(); });
+})();

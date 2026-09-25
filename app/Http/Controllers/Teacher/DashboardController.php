@@ -95,4 +95,59 @@ class DashboardController extends Controller
             'stats'
         ));
     }
+
+    public function data()
+    {
+        $user = auth()->user();
+        $today = Carbon::today();
+
+        $todayAttendance = Attendance::where('user_id', $user->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        $todaySchedules = TeachingSchedule::where('user_id', $user->id)
+            ->where('day_of_week', $today->dayOfWeek)
+            ->where('is_active', true)
+            ->count();
+
+        $todayClassAttendances = ClassAttendance::where('user_id', $user->id)
+            ->whereDate('date', $today)
+            ->count();
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $stats = [
+            'hadir'     => Attendance::where('user_id', $user->id)
+                ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                ->whereIn('status', ['Hadir', 'Tepat Waktu'])
+                ->count(),
+            'terlambat' => Attendance::where('user_id', $user->id)
+                ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                ->where('status', 'Terlambat')
+                ->count(),
+            'izin'      => LeaveRequest::where('user_id', $user->id)
+                ->where('status', 'approved')
+                ->where(function ($q) use ($startOfMonth, $endOfMonth) {
+                    $q->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+                      ->orWhereBetween('end_date', [$startOfMonth, $endOfMonth]);
+                })
+                ->count(),
+            'alpha'     => Attendance::where('user_id', $user->id)
+                ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                ->where('status', 'Alpha')
+                ->count(),
+        ];
+
+        return response()->json([
+            'stats'           => $stats,
+            'todayAttendance' => $todayAttendance ? [
+                'check_in'  => $todayAttendance->check_in ? Carbon::parse($todayAttendance->check_in)->format('H:i') : null,
+                'check_out' => $todayAttendance->check_out ? Carbon::parse($todayAttendance->check_out)->format('H:i') : null,
+                'status'    => $todayAttendance->status,
+            ] : null,
+            'todaySchedules'  => $todaySchedules,
+            'todayClassCount' => $todayClassAttendances,
+        ]);
+    }
 }

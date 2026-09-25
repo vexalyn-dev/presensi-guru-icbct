@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="space-y-6">
+<div id="admin-ajax-app" class="space-y-6" data-init-endpoint="{{ route('dashboard.data') }}">
     
     <!-- Welcome Card with Enhanced Animation -->
     <div class="card-hover p-6 bg-gradient-to-r from-navy-800 via-navy-900 to-slate-900 dark:from-slate-800 dark:via-slate-900 dark:to-navy-950 rounded-2xl text-white relative overflow-hidden group animate-fade-in-up">
@@ -50,7 +50,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Guru</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $totalGuru }}</h3>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1" data-key="totalGuru">{{ $totalGuru }}</h3>
                     <div class="flex items-center gap-1.5 mt-1.5">
                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
                         <span class="text-[10px] text-green-600 dark:text-green-400 font-medium">Aktif</span>
@@ -68,7 +68,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Hadir Hari Ini</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $hadirHariIni }}</h3>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1" data-key="hadirHariIni">{{ $hadirHariIni }}</h3>
                     <div class="flex items-center gap-1.5 mt-1.5">
                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
                         <span class="text-[10px] text-green-600 dark:text-green-400 font-medium">{{ now()->locale('id')->format('d M') }}</span>
@@ -86,7 +86,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Terlambat</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $terlambat }}</h3>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1" data-key="terlambat">{{ $terlambat }}</h3>
                     <div class="flex items-center gap-1.5 mt-1.5">
                         <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></span>
                         <span class="text-[10px] text-yellow-600 dark:text-yellow-400 font-medium">Perlu perhatian</span>
@@ -104,7 +104,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Tidak Hadir</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $tidakHadir }}</h3>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1" data-key="tidakHadir">{{ $tidakHadir }}</h3>
                     <div class="flex items-center gap-1.5 mt-1.5">
                         <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
                         <span class="text-[10px] text-red-600 dark:text-red-400 font-medium">Alpha</span>
@@ -122,7 +122,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Izin/Cuti</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1">{{ $izinCuti }}</h3>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white mt-1" data-key="izinCuti">{{ $izinCuti }}</h3>
                     <div class="flex items-center gap-1.5 mt-1.5">
                         <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style="display:inline-block;min-width:6px;min-height:6px;"></span>
                         <span class="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Izin/Sakit/Cuti</span>
@@ -1577,4 +1577,33 @@ document.getElementById('admin-welcome-overlay').addEventListener('click', funct
     if (e.target === this) closeAdminWelcome();
 });
 </script>
+
+// ── Admin Dashboard Realtime AJAX ──────────────────────────────
+(function() {
+    var app     = document.getElementById('admin-ajax-app');
+    var endpoint = app ? app.dataset.initEndpoint : null;
+    var lastHash = '';
+
+    function updateStats(s) {
+        document.querySelectorAll('[data-key]').forEach(function(el) {
+            var key = el.dataset.key;
+            if (s[key] !== undefined) el.textContent = s[key];
+        });
+    }
+
+    function refreshDashboard() {
+        if (!endpoint) return;
+        fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var h = JSON.stringify(d.stats);
+                if (h !== lastHash) { updateStats(d.stats); lastHash = h; }
+            })
+            .catch(function(e) { console.warn('Admin dashboard refresh error:', e); });
+    }
+
+    refreshDashboard();
+    setInterval(refreshDashboard, 3000);
+    window.addEventListener('notifications:new', function() { refreshDashboard(); });
+})();
 @endsection

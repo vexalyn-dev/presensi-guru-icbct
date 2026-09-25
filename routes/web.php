@@ -114,6 +114,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->group(function () {
     // Admin Dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [AdminDashboardController::class, 'data'])->name('dashboard.data');
     
     // Attendance
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
@@ -265,6 +266,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // Teacher Routes
 Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->group(function () {
         Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/data', [TeacherDashboardController::class, 'data'])->name('dashboard.data');
         Route::get('/schedule', [\App\Http\Controllers\Teacher\ScheduleController::class, 'index'])->name('schedule');
         Route::get('/work-schedule', [WorkScheduleController::class, 'index'])->name('work-schedule');
         Route::get('/attendance', [\App\Http\Controllers\Teacher\AttendanceController::class, 'index'])->name('attendance');
