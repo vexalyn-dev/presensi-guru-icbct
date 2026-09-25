@@ -39,6 +39,7 @@
                         0 0 0 1px rgba(15, 23, 42, 0.05);
             overflow: hidden;
             display: flex;
+            flex-direction: column;
             min-height: 560px;
         }
 
