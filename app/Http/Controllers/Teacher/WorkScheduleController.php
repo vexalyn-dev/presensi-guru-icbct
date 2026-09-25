@@ -49,7 +49,12 @@ class WorkScheduleController extends Controller
             ];
         }
 
-        // Hitung jumlah hari kerja (unique days)
+        // Sort: today first, then by day_of_week
+        usort($scheduleData, function($a, $b) use ($today) {
+            if ($a['is_today']) return -1;
+            if ($b['is_today']) return 1;
+            return $a['day_of_week'] - $b['day_of_week'];
+        });
         $workDays = $workSchedules->pluck('day_of_week')->unique()->count();
 
         return view('teacher.work-schedule.index', compact('scheduleData', 'dayNames', 'today', 'totalWeeklyHours', 'workDays'));
