@@ -367,39 +367,6 @@
             padding: 0 1.25rem;
         }
 
-        .social-login {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-        }
-
-        .social-btn {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #E2E8F0;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            background: white;
-            text-decoration: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .social-btn:hover {
-            border-color: #FACC15;
-            transform: translateY(-5px) scale(1.1);
-            box-shadow: 0 6px 15px rgba(250, 204, 21, 0.3);
-        }
-
-        .social-btn img,
-        .social-btn svg {
-            width: 24px;
-            height: 24px;
-        }
-
         .terms-text {
             font-size: 0.75rem;
             color: #94A3B8;

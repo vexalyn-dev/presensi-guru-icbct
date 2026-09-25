@@ -22,7 +22,6 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\TeachingScheduleController;
 use App\Http\Controllers\ClassAttendanceController;
 use App\Http\Controllers\Teacher\ProfileController as TeacherProfileController;
@@ -91,10 +90,6 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
-
-// Social Login Routes
-Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect'])->name('social.redirect');
-Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {

@@ -36,7 +36,6 @@
 
 ### Authentication & Authorization
 - [x] Login dengan Email & Password
-- [x] Login dengan Google OAuth
 - [x] Multi-role (Admin, Guru, Operator, Guru Piket)
 - [x] Session management & auto-logout
 - [x] Password reset via email
@@ -155,8 +154,6 @@
 | **QR Code** | jsQR | 1.4.0 |
 | **Icons** | Lucide Icons | Latest |
 | **Charts** | Chart.js | 4.x |
-| **Excel** | PhpSpreadsheet | 5.x |
-| **Auth** | Laravel Socialite | 5.x |
 | **Issue Tracking** | GitHub Issues + ClickUp | — |
 
 </div>
@@ -181,7 +178,6 @@ erDiagram
         string role
         string photo
         string teacher_code
-        string provider
         bool is_active
     }
     ATTENDANCES {
@@ -318,11 +314,6 @@ DB_DATABASE=icb_ct_Presensi
 DB_USERNAME=root
 DB_PASSWORD=
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
-
 # GitHub Issues (Pusat Bantuan)
 GITHUB_ISSUES_TOKEN=your-github-token
 GITHUB_ISSUES_REPO=owner/repo
@@ -354,13 +345,6 @@ Akses di: **http://localhost:8000**
 
 ## ⚙️ Konfigurasi
 
-### 🔑 Google OAuth
-
-1. Buka [Google Cloud Console](https://console.cloud.google.com/)
-2. Enable **Google+ API** & buat OAuth 2.0 Client ID
-3. Set redirect URI: `http://your-domain/auth/google/callback`
-4. Isi `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` di `.env`
-
 ### 🐛 Integrasi GitHub Issues
 
 ```env
@@ -388,10 +372,6 @@ MAIL_USERNAME=your-email@gmail.com
 MAIL_PASSWORD=your-app-password
 MAIL_ENCRYPTION=tls
 ```
-
----
-
-## 🛡️ Keamanan
 
 Project ini telah melalui audit keamanan komprehensif mencakup:
 
@@ -428,11 +408,6 @@ DB_PASSWORD=your-strong-password
 # Email (Resend / SMTP)
 MAIL_MAILER=resend
 RESEND_API_KEY=your-resend-key
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_REDIRECT_URI=https://your-domain/auth/google/callback
 ```
 
 ### 🔐 Production Checklist
