@@ -264,7 +264,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // ============================================================
 
 // Teacher Routes
-Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->group(function () {
+Route::middleware(['auth', 'role:guru,guru_piket'])->prefix('teacher')->name('teacher.')->group(function () {
         Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/data', [TeacherDashboardController::class, 'data'])->name('dashboard.data');
         Route::get('/schedule', [\App\Http\Controllers\Teacher\ScheduleController::class, 'index'])->name('schedule');
