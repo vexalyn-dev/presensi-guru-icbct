@@ -14,10 +14,28 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        $teacher = Teacher::where('user_id', auth()->id())->first();
-        if (!$teacher) {
-            return redirect()->route('dashboard')->with('error', 'Profil guru tidak ditemukan.');
+        $user = auth()->user();
+
+        // Auto-create Teacher record for guru_piket users who don't have one
+        if ($user->isGuruPiket()) {
+            $teacher = Teacher::where('user_id', $user->id)->first();
+            if (!$teacher) {
+                $teacher = Teacher::create([
+                    'user_id'     => $user->id,
+                    'name'        => $user->name,
+                    'email'       => $user->email ?? null,
+                    'phone'       => $user->phone ?? null,
+                    'address'     => $user->address ?? null,
+                    'is_active'   => true,
+                ]);
+            }
+        } else {
+            $teacher = Teacher::where('user_id', $user->id)->first();
+            if (!$teacher) {
+                return redirect()->route('dashboard')->with('error', 'Profil guru tidak ditemukan.');
+            }
         }
+
         return view('teacher.profile', compact('teacher'));
     }
 
