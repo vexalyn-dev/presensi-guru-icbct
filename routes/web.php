@@ -365,13 +365,6 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     Route::post('/notifications/read-all',     [App\Http\Controllers\Piket\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 });
 
-// Piket Notifications
-Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')->group(function () {
-    Route::get('/notifications/api/unread',  [App\Http\Controllers\Piket\NotificationController::class, 'getUnread'])   ->name('notifications.api.unread');
-    Route::post('/notifications/{id}/read',  [App\Http\Controllers\Piket\NotificationController::class, 'markAsRead'])  ->name('notifications.read');
-    Route::post('/notifications/read-all',   [App\Http\Controllers\Piket\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
-});
-
 // ============================================================
 // Developer Dashboard — akses via URL secret
 // ============================================================
