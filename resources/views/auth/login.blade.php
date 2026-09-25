@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -40,6 +40,28 @@
             overflow: hidden;
             display: flex;
             min-height: 560px;
+        }
+
+        .auth-credit {
+            text-align: center;
+            padding: 12px 16px 14px;
+            font-size: 11px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 0.02em;
+            margin-top: auto;
+            border-top: 1px solid rgba(148,163,184,0.1);
+        }
+
+        .auth-credit a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .auth-credit a:hover {
+            color: #FACC15;
         }
 
         /* Panel Kiri (Navy) */
@@ -535,6 +557,12 @@
             }
             .auth-container::before,
             .auth-container::after { display: none !important; }
+
+            .auth-credit {
+                order: 999;
+                padding: 14px 16px 18px;
+                font-size: 11px;
+            }
 
             /* ── Sembunyikan panel desktop ── */
             .auth-panel { display: none !important; }
@@ -1258,12 +1286,12 @@
 
         </div>
         {{-- END .forms-container --}}
+
+        <div class="auth-credit">
+            <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Develop By VexalynDev</a>
+        </div>
     </div>
     {{-- END .auth-container --}}
-
-    <div style="text-align:center; padding:16px 0 8px; font-size:12px; color:#94a3b8;">
-        <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer" style="color:#94a3b8; text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='#facc15'" onmouseout="this.style.color='#94a3b8'">Develop By VexalynDev</a>
-    </div>
 
     <script>
         function toggleAuth() {
