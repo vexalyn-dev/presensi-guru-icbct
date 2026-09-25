@@ -51,8 +51,13 @@
             font-weight: 700;
             color: #94a3b8;
             letter-spacing: 0.02em;
-            margin-top: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             border-top: 1px solid rgba(148,163,184,0.1);
+            z-index: 10;
+            background: white;
         }
 
         .auth-credit a {
@@ -560,9 +565,12 @@
             .auth-container::after { display: none !important; }
 
             .auth-credit {
+                position: relative;
                 order: 999;
                 padding: 14px 16px 18px;
                 font-size: 11px;
+                background: transparent;
+                border-top: none;
             }
 
             /* ── Sembunyikan panel desktop ── */
