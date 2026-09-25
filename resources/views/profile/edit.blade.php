@@ -142,9 +142,9 @@
             {{-- cropped_photo_data harus di dalam form agar ikut submit --}}
             <input type="hidden" name="cropped_photo_data" id="cropped_photo_data">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 gap-5">
                 <!-- Name -->
-                <div class="md:col-span-2">
+                <div>
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                         Nama Lengkap <span class="text-red-500">*</span>
                     </label>
@@ -185,13 +185,13 @@
                     <div class="relative group">
                         <i data-lucide="phone" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
                         <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}"
-                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600" 
+                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600"
                             placeholder="08xxxxxxxx">
                     </div>
                 </div>
 
                 <!-- Address -->
-                <div class="md:col-span-2">
+                <div>
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                         Alamat Domisili
                     </label>
@@ -203,14 +203,14 @@
                 </div>
 
                 <!-- Bio -->
-                <div class="md:col-span-2">
+                <div>
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                         Bio Singkat <span class="text-slate-400 font-normal">(Opsional)</span>
                     </label>
                     <div class="relative group">
                         <i data-lucide="align-left" class="absolute left-4 top-3.5 w-4 h-4 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
                         <textarea name="bio" rows="3"
-                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all resize-none hover:border-navy-300 dark:hover:border-gold-600" 
+                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all resize-none hover:border-navy-300 dark:hover:border-gold-600"
                             placeholder="Ceritakan sedikit tentang Anda...">{{ old('bio', $user->bio) }}</textarea>
                     </div>
                 </div>
