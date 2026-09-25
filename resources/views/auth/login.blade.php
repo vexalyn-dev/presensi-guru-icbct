@@ -1094,7 +1094,7 @@
 
             <div class="panel-content">
                 <h1 id="panelTitle">{{ $appSettingsPanel->app_name ?? 'ICB CINTA TEKNIKA' }}</h1>
-                <p id="panelText">Sistem Absensi Guru Termodern & Terpercaya</p>
+                <p id="panelText">Sistem Presensi Guru Termodern & Terpercaya</p>
                 <button class="btn-toggle" id="toggleBtn" onclick="toggleAuth()">Buat Akun</button>
             </div>
         </div>

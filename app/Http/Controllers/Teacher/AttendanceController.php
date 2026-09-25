@@ -13,14 +13,14 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
-    // Absensi Harian (Datang/Pulang)
+    // Presensi Harian (Datang/Pulang)
     public function index()
     {
         $user = auth()->user();
         $today = Carbon::today();
         $todayDayOfWeek = $today->dayOfWeek;
 
-        // Absensi hari ini
+        // Presensi hari ini
         $todayAttendance = Attendance::where('user_id', $user->id)
             ->whereDate('date', $today)
             ->first();

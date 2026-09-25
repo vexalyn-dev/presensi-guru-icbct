@@ -61,8 +61,8 @@
                 </div>
                 <span class="text-[10px] sm:text-xs font-bold tracking-wide uppercase" style="color:#FDE68A;letter-spacing:0.06em;">GPS Validasi</span>
             </div>
-            <h2 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1.5 sm:mb-2">Absensi Hanya<br><span style="color:#FACC15;">Di Area Sekolah</span></h2>
-            <p class="text-[10px] sm:text-sm leading-relaxed" style="color:rgba(255,255,255,0.55);">Sistem otomatis cek lokasi sebelum absensi diproses.</p>
+            <h2 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1.5 sm:mb-2">Presensi Hanya<br><span style="color:#FACC15;">Di Area Sekolah</span></h2>
+            <p class="text-[10px] sm:text-sm leading-relaxed" style="color:rgba(255,255,255,0.55);">Sistem otomatis cek lokasi sebelum Presensi diproses.</p>
         </div>
         <div class="hidden sm:flex items-center justify-center w-36 h-36 md:w-44 md:h-44 flex-shrink-0">
             <svg viewBox="0 0 180 180" fill="none" class="w-full h-full opacity-80">

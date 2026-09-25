@@ -198,7 +198,7 @@
                             <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i data-lucide="inbox" class="w-8 h-8 text-slate-400 dark:text-slate-500"></i>
                             </div>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">Belum ada riwayat absensi</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Belum ada riwayat Presensi</p>
                         </div>
                     @else
                         <div class="space-y-3">

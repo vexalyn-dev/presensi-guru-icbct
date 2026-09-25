@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('page-title', 'Laporan Absensi')
+@section('page-title', 'Laporan Presensi')
 
 @section('content')
 <div class="fade-in space-y-6">
@@ -12,7 +12,7 @@
                 <i data-lucide="bar-chart-3" class="w-6 h-6 text-white dark:text-navy-900"></i>
             </div>
             <div>
-                <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Laporan Absensi</h1>
+                <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Laporan Presensi</h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
                     {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
                 </p>
@@ -136,8 +136,8 @@
                     <i data-lucide="file-text" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Total Absensi</p>
-                    <h3 class="text-xl font-bold text-navy-800 dark:text-white" id="stat-total">{{ $totalAbsensi }}</h3>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Total Presensi</p>
+                    <h3 class="text-xl font-bold text-navy-800 dark:text-white" id="stat-total">{{ $totalPresensi }}</h3>
                     <p class="text-[10px] text-blue-500">Laporan periode ini</p>
                 </div>
             </div>
@@ -322,7 +322,7 @@
                 }
                 
                 // Update stats
-                if (data.totalAbsensi !== undefined) document.getElementById('stat-total').textContent = data.totalAbsensi;
+                if (data.totalPresensi !== undefined) document.getElementById('stat-total').textContent = data.totalPresensi;
                 if (data.stats) {
                     document.getElementById('stat-hadir').textContent = data.stats.hadir;
                     document.getElementById('stat-terlambat').textContent = data.stats.terlambat;

@@ -45,21 +45,21 @@ class ReportController extends Controller
         $dates       = $calculated['dates'];
         $totalStats  = $calculated['totalStats'];
 
-        $totalAbsensi  = array_sum($totalStats);
+        $totalPresensi  = array_sum($totalStats);
         $totalHadir    = $totalStats['hadir'];
-        $kehadiranRate = $totalAbsensi > 0 ? round(($totalHadir / $totalAbsensi) * 100) : 0;
+        $kehadiranRate = $totalPresensi > 0 ? round(($totalHadir / $totalPresensi) * 100) : 0;
 
         if ($request->ajax()) {
             return response()->json([
                 'html'          => view('reports._table', compact('reportData', 'dates', 'reportType', 'viewMode'))->render(),
                 'stats'         => $totalStats,
-                'totalAbsensi'  => $totalAbsensi,
+                'totalPresensi'  => $totalPresensi,
                 'kehadiranRate' => $kehadiranRate,
             ]);
         }
 
         return view('reports.index', compact(
-            'reportData', 'dates', 'totalStats', 'totalAbsensi', 'kehadiranRate',
+            'reportData', 'dates', 'totalStats', 'totalPresensi', 'kehadiranRate',
             'startDate', 'endDate', 'viewMode', 'search', 'reportType'
         ));
     }
@@ -88,9 +88,9 @@ class ReportController extends Controller
         $dates      = $calculated['dates'];
         $totalStats = $calculated['totalStats'];
 
-        $totalAbsensi  = array_sum($totalStats);
+        $totalPresensi  = array_sum($totalStats);
         $totalHadir    = $totalStats['hadir'];
-        $kehadiranRate = $totalAbsensi > 0 ? round(($totalHadir / $totalAbsensi) * 100) : 0;
+        $kehadiranRate = $totalPresensi > 0 ? round(($totalHadir / $totalPresensi) * 100) : 0;
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -476,7 +476,7 @@ class ReportController extends Controller
                     $attKey     = $teacher->id . '_' . $dateStr;
                     $attendance = $attendances->get($attKey)?->first();
 
-                    // Jika ada record absensi, tampilkan langsung (tanpa syarat jadwal kerja)
+                    // Jika ada record Presensi, tampilkan langsung (tanpa syarat jadwal kerja)
                     if ($attendance) {
                         $code = match($attendance->status) {
                             'Hadir', 'Tepat Waktu' => 'H',

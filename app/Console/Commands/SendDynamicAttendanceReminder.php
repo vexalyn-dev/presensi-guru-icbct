@@ -13,7 +13,7 @@ use Carbon\Carbon;
 class SendDynamicAttendanceReminder extends Command
 {
     protected $signature = 'reminder:dynamic {--test : Mode testing}';
-    protected $description = 'Reminder absensi via WA (Masuk, Terlambat, Pulang)';
+    protected $description = 'Reminder Presensi via WA (Masuk, Terlambat, Pulang)';
 
     public function handle()
     {

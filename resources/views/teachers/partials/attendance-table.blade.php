@@ -36,7 +36,7 @@
     @empty
         <tr>
             <td colspan="4" class="px-5 py-8 text-center">
-                <p class="text-sm text-slate-500 dark:text-slate-400">Belum ada riwayat absensi</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Belum ada riwayat Presensi</p>
             </td>
         </tr>
     @endforelse

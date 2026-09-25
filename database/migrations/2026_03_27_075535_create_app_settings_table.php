@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('app_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('app_name')->default('ICB CT - Absensi Guru');
+            $table->string('app_name')->default('ICB CT - Presensi Guru');
             $table->string('app_logo')->nullable();
             $table->string('app_favicon')->nullable();
             $table->string('app_timezone')->default('Asia/Jakarta');

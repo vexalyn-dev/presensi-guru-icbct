@@ -48,7 +48,7 @@ class DashboardController extends Controller
             ->get()
             ->sortBy('day_of_week');
 
-        // Absensi hari ini
+        // Presensi hari ini
         $todayAttendance = Attendance::where('user_id', $user->id)
             ->whereDate('date', $today)
             ->first();

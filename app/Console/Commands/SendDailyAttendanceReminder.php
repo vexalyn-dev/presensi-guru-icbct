@@ -43,8 +43,8 @@ class SendDailyAttendanceReminder extends Command
                     NotificationHelper::send(
                         $teacher,
                         'warning',
-                        'Pengingat Absensi Harian',
-                        'Anda belum melakukan absensi harian hari ini. Segera lakukan presensi datang dan presensi kelas.',
+                        'Pengingat Presensi Harian',
+                        'Anda belum melakukan Presensi harian hari ini. Segera lakukan presensi datang dan presensi kelas.',
                         route('teacher.attendance'),
                         'alert-triangle',
                         'bg-orange-100 text-orange-600'

@@ -317,7 +317,7 @@
                         <div>
                             <span class="block text-sm font-bold text-navy-800 dark:text-white">Kelas Aktif</span>
                             <span class="block text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                                Kelas yang tidak aktif tidak akan muncul dalam jadwal dan tidak bisa melakukan absensi
+                                Kelas yang tidak aktif tidak akan muncul dalam jadwal dan tidak bisa melakukan Presensi
                             </span>
                         </div>
                     </label>

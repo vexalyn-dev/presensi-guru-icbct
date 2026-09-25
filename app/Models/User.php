@@ -82,7 +82,7 @@ class User extends Authenticatable
         'qr_code_path',
         'last_check_in',
         'last_check_out',
-        'status_absensi_hari_ini',
+        'status_Presensi_hari_ini',
     ];
 
     /**

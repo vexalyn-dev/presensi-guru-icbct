@@ -111,7 +111,7 @@
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Nama Aplikasi <span class="text-red-500">*</span></label>
                             <div class="relative group">
                                 <i data-lucide="app-window" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input type="text" name="app_name" value="{{ old('app_name', $settings['general']['app_name'] ?? 'ICB CT - Absensi Guru') }}" required
+                                <input type="text" name="app_name" value="{{ old('app_name', $settings['general']['app_name'] ?? 'ICB CT - Presensi Guru') }}" required
                                        class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                             </div>
                         </div>
@@ -283,7 +283,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-bold text-navy-800 dark:text-white">Aturan Presensi</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Kelola jam kerja dan validasi absensi</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Kelola jam kerja dan validasi Presensi</p>
                     </div>
                 </div>
 

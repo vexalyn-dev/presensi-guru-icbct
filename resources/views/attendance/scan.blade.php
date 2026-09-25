@@ -1,6 +1,6 @@
 @extends(activeLayout())
 
-@section('page-title', 'Scan QR Absensi')
+@section('page-title', 'Scan QR Presensi')
 
 @section('content')
     <div id="attendance-root" class="fade-in" x-data="{

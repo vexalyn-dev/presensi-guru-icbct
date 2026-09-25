@@ -25,7 +25,7 @@ class WelcomeEmail extends Mailable implements ShouldQueue
     public function __construct(User $user)
     {
         $this->user = $user;
-        $this->appName = config('app.name', 'ICB CT - Absensi Guru');
+        $this->appName = config('app.name', 'ICB CT - Presensi Guru');
         $this->dashboardUrl = $user->isTeacher()
             ? route('teacher.dashboard')
             : route('dashboard');

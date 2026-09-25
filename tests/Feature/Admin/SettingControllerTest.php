@@ -19,7 +19,7 @@ class SettingControllerTest extends TestCase
         $this->actingAs($admin);
 
         $response = $this->post(route('settings.general'), [
-            'app_name' => 'ICB CT - Absensi Guru',
+            'app_name' => 'ICB CT - Presensi Guru',
             'app_timezone' => 'Asia/Tokyo',
             'app_language' => 'en',
             'admin_email' => 'admin@example.com',

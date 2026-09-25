@@ -16,7 +16,7 @@ class SettingController extends Controller
         try {
             $appSetting = AppSetting::getInstance();
             $appSetting->update([
-                'app_name' => Setting::get('app_name', 'ICB CT - Absensi Guru'),
+                'app_name' => Setting::get('app_name', 'ICB CT - Presensi Guru'),
                 'app_timezone' => Setting::get('app_timezone', 'Asia/Jakarta'),
                 'app_language' => Setting::get('app_language', 'id'),
                 'admin_email' => Setting::get('admin_email', ''),
@@ -44,7 +44,7 @@ class SettingController extends Controller
         // Load semua settings ke array
         $settings = [
             'general' => [
-                'app_name' => Setting::get('app_name', 'ICB CT - Absensi Guru'),
+                'app_name' => Setting::get('app_name', 'ICB CT - Presensi Guru'),
                 'app_timezone' => Setting::get('app_timezone', 'Asia/Jakarta'),
                 'app_language' => Setting::get('app_language', 'id'),
                 'admin_email' => Setting::get('admin_email', ''),
@@ -318,7 +318,7 @@ class SettingController extends Controller
     {
         // Reset semua settings ke default
         $defaults = [
-            'app_name' => ['value' => 'ICB CT - Absensi Guru', 'type' => 'string'],
+            'app_name' => ['value' => 'ICB CT - Presensi Guru', 'type' => 'string'],
             'app_timezone' => ['value' => 'Asia/Jakarta', 'type' => 'string'],
             'app_language' => ['value' => 'id', 'type' => 'string'],
             'admin_email' => ['value' => '', 'type' => 'string'],

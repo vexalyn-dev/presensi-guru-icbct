@@ -263,7 +263,7 @@ class GitHubService
         }
 
         $lines[] = '---';
-        $lines[] = '*Dibuat otomatis dari Pusat Bantuan ICB CT Absensi Guru.*';
+        $lines[] = '*Dibuat otomatis dari Pusat Bantuan ICB CT Presensi Guru.*';
 
         return implode("\n", $lines);
     }

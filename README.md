@@ -20,7 +20,7 @@
 
 ## Tentang Project
 
-**ICB CT - Absensi Guru** adalah sistem presensi digital berbasis web yang dirancang khusus untuk SMK ICB Cinta Teknika. Sistem ini memungkinkan guru melakukan presensi harian dan presensi kelas dengan teknologi modern seperti QR Code scanning, GPS validation, real-time monitoring, dan audit trail lengkap.
+**ICB CT - Presensi Guru** adalah sistem presensi digital berbasis web yang dirancang khusus untuk SMK ICB Cinta Teknika. Sistem ini memungkinkan guru melakukan presensi harian dan presensi kelas dengan teknologi modern seperti QR Code scanning, GPS validation, real-time monitoring, dan audit trail lengkap.
 
 ### 🎯 Tujuan
 - ✅ Digitalisasi proses presensi guru
@@ -308,13 +308,13 @@ php artisan key:generate
 Edit file `.env`:
 
 ```env
-APP_NAME="ICB CT - Absensi Guru"
+APP_NAME="ICB CT - Presensi Guru"
 APP_URL=http://localhost:8000
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=icb_ct_absensi
+DB_DATABASE=icb_ct_Presensi
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -421,7 +421,7 @@ SESSION_SECURE_COOKIE=true         # Cookie hanya kirim via HTTPS
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=icb_ct_absensi
+DB_DATABASE=icb_ct_Presensi
 DB_USERNAME=root
 DB_PASSWORD=your-strong-password
 

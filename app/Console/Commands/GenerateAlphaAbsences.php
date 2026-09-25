@@ -31,7 +31,7 @@ class GenerateAlphaAbsences extends Command
                 ->exists();
 
             if ($hasSchedule) {
-                // Cek apakah sudah ada absensi
+                // Cek apakah sudah ada Presensi
                 $hasAttendance = Attendance::where('user_id', $teacher->id)
                     ->whereDate('date', $yesterday)
                     ->exists();

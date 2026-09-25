@@ -12,7 +12,7 @@ class SettingsSeeder extends Seeder
     {
         // Create default app settings
         AppSetting::create([
-            'app_name' => 'ICB CT - Absensi Guru',
+            'app_name' => 'ICB CT - Presensi Guru',
             'app_timezone' => 'Asia/Jakarta',
             'app_language' => 'id',
             'attendance_start_time' => '06:30',
@@ -29,7 +29,7 @@ class SettingsSeeder extends Seeder
 
         // Create settings entries
         $settings = [
-            ['key' => 'app_name', 'value' => 'ICB CT - Absensi Guru', 'type' => 'string', 'group' => 'general'],
+            ['key' => 'app_name', 'value' => 'ICB CT - Presensi Guru', 'type' => 'string', 'group' => 'general'],
             ['key' => 'app_timezone', 'value' => 'Asia/Jakarta', 'type' => 'string', 'group' => 'general'],
             ['key' => 'app_language', 'value' => 'id', 'type' => 'string', 'group' => 'general'],
             ['key' => 'attendance_start_time', 'value' => '07:30', 'type' => 'string', 'group' => 'attendance'],
