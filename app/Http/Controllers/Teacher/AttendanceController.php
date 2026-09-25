@@ -94,14 +94,6 @@ class AttendanceController extends Controller
             }
         }
 
-        // Gunakan jadwal default dari profil pengguna (TIDAK memakai TeacherSchedule)
-        $scheduleStart = $user->default_check_in ? Carbon::parse($user->default_check_in) : null;
-
-        $attendance = Attendance::firstOrCreate(
-            ['user_id' => $user->id, 'date' => $today],
-            ['status' => 'Hadir']
-        );
-
         // ===== GPS VALIDATION =====
         $gpsValidationStatus = Setting::get('gps_validation_status', 'on');
         if ($gpsValidationStatus === 'on') {
@@ -117,20 +109,31 @@ class AttendanceController extends Controller
                 return $this->_jsonResp(false, 'Anda sudah melakukan presensi masuk hari ini.');
             }
 
-            // Hitung keterlambatan berdasarkan default_check_in atau jadwal hari ini
+            // Hitung threshold terlambat: prioritas TeacherSchedule hari ini > default_check_in > setting global
             $lateThreshold = null;
-            if ($scheduleStart) {
-                $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
-                $lateThreshold = (clone $scheduleStart)->addMinutes($graceMinutes);
-            } else {
-                // Coba ambil jadwal hari ini dari TeacherSchedule
-                $todaySchedule = TeacherSchedule::where('user_id', $user->id)
-                    ->where('day_of_week', $now->dayOfWeek)
-                    ->where('is_active', true)
-                    ->first();
-                if ($todaySchedule && $todaySchedule->start_time) {
-                    $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
-                    $lateThreshold = Carbon::parse($todaySchedule->start_time)->addMinutes($graceMinutes);
+            $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
+
+            // 1. Coba dari TeacherSchedule hari ini (yang diatur admin/operator)
+            $todaySchedule = TeacherSchedule::where('user_id', $user->id)
+                ->where('day_of_week', $now->dayOfWeek)
+                ->where('is_active', true)
+                ->first();
+            if ($todaySchedule && $todaySchedule->start_time) {
+                $lateThreshold = Carbon::parse($todaySchedule->start_time)->addMinutes($graceMinutes);
+            }
+
+            // 2. Fallback ke default_check_in di profil pengguna
+            if (!$lateThreshold && $user->default_check_in) {
+                $lateThreshold = Carbon::parse($user->default_check_in)->addMinutes($graceMinutes);
+            }
+
+            // 3. Fallback ke setting global
+            if (!$lateThreshold) {
+                $startTimeStr = Setting::get('attendance_start_time', '06:30');
+                try {
+                    $lateThreshold = Carbon::parse($startTimeStr)->addMinutes($graceMinutes);
+                } catch (\Exception $e) {
+                    // ignore
                 }
             }
 
