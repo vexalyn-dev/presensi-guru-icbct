@@ -19,7 +19,7 @@
 
         {{-- ── TOGGLE VIEW ── --}}
         @if(count($scheduleData) > 0)
-        <div class="relative flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 self-start sm:self-auto select-none ml-auto sm:ml-0" style="min-width:120px;">
+        <div class="relative flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 self-start sm:self-auto select-none" style="min-width:120px;">
             <div id="toggle-indicator"></div>
             <button id="btn-list" onclick="setView('list')"
                     class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 flex-1 justify-center"
