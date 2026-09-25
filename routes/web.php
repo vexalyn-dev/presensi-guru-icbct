@@ -395,6 +395,17 @@ Route::middleware(['auth', 'role:admin'])->get('/sapu-jagat', function () {
     return 'Optimize clear sukses! Semua cache udah ludes.';
 });
 
+Route::middleware(['auth', 'role:admin'])->get('/seed-demo', function (Request $request) {
+    if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
+        abort(404);
+    }
+
+    Artisan::call('db:seed', ['--class' => 'DemoAccountSeeder']);
+    $output = Artisan::output();
+
+    return '<pre>' . $output . '</pre>';
+});
+
 Route::middleware(['auth', 'role:admin'])->get('/git-pull-rahasia', function (Request $request) {
     // Validasi key rahasia biar aman dari orang Iseng
     if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
