@@ -450,8 +450,10 @@ php artisan db:seed --class=DemoAccountSeeder
 
 | Role | Email | Password |
 |------|-------|----------|
-| Operator | `operator@smkicb.sch.id` | `operator123` |
-| Guru Piket | `piket@smkicb.sch.id` | `piket123` |
+| Admin | `admin@smkicb.sch.id` | `Adminicb123` |
+| Operator | `operator@smkicb.sch.id` | `Operatoricb123` |
+| Guru Piket | `piket@smkicb.sch.id` | `Piketicb123` |
+| Guru | `guru@smkicb.sch.id` | `Guruicb123` |
 
 ### 📡 Live Monitoring
 
