@@ -343,7 +343,7 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     Route::post('/leave-approval/{leaveRequest}/reject', [App\Http\Controllers\Admin\LeaveApprovalController::class, 'reject'])->name('leave-approval.reject');
 
     // Pengaturan (read-only view)
-    Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings');
+    Route::get('/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings');
 
     // Profil
     Route::get('/profile', [App\Http\Controllers\Teacher\ProfileController::class, 'index'])->name('profile');
