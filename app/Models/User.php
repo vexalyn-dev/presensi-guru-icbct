@@ -450,8 +450,10 @@ class User extends Authenticatable
 
         // Foto default berdasarkan role
         return match($this->role) {
-            'operator', 'guru_piket' => asset('images/default-operator.png'),
-            default                  => asset('images/default-teacher.png'),
+            'admin'        => asset('images/default-admin.png'),
+            'operator'     => asset('images/default-operator.png'),
+            'guru_piket'   => asset('images/default-piket.png'),
+            default        => asset('images/default-teacher.png'),
         };
     }
 
