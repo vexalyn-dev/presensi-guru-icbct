@@ -17,6 +17,12 @@
     // Alias kept for compatibility
     window.getMarkAsReadUrl = getNotifReadUrl;
 
+    function getNotifReadAllUrl() {
+        if (isPiket) return `/piket/notifications/read-all`;
+        if (isAdmin) return `/notifications/read-all`;
+        return `/teacher/notifications/read-all`;
+    }
+
     // Initialize Lucide icons
     function initIcons() {
         if (window.lucide) try { lucide.createIcons(); } catch(e){}

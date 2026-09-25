@@ -276,7 +276,7 @@
                                         <h3 class="text-sm font-bold text-navy-800 dark:text-white">Notifikasi</h3>
                                         @php $unreadCount = auth()->user()->notifications()->whereNull('read_at')->count(); @endphp
                                         @if($unreadCount > 0)
-                                        <button onclick="markAllNotifRead('teacher')"
+                                         <button onclick="markAllNotifRead('piket')"
                                                 class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 text-[11px] font-semibold hover:opacity-90 transition-opacity">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
                                             Tandai Dibaca
@@ -323,7 +323,7 @@
                                 
                                 <!-- Footer -->
                                 <div class="p-2.5 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 text-center sticky bottom-0">
-                                    <a href="{{ route('teacher.notifications') }}" class="text-xs font-semibold text-navy-800 dark:text-gold-400 hover:underline">
+                                     <a href="{{ route('piket.leave-approval') }}" class="text-xs font-semibold text-navy-800 dark:text-gold-400 hover:underline">
                                         Lihat Semua Notifikasi
                                     </a>
                                 </div>

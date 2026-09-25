@@ -109,6 +109,17 @@ class LeaveController extends Controller
 
         $leaveRequest = LeaveRequest::create($data);
 
+        // Notify admins & piket
+        $targets = User::whereIn('role', ['admin', 'operator', 'guru_piket'])->get();
+        foreach ($targets as $target) {
+            /** @var User $target */
+            $target->notify(new \App\Notifications\SystemNotification(
+                "Guru {$leaveRequest->user->name} mengajukan {$leaveRequest->type} ({$leaveRequest->start_date->format('d M Y')} - {$leaveRequest->end_date->format('d M Y')})",
+                'info',
+                route('leaves.show', ['leave' => $leaveRequest->id])
+            ));
+        }
+
         if (auth()->user()->isAdmin()) {
             return redirect()->route('leaves.index')->with('success', 'Pengajuan izin berhasil dikirim!');
         }

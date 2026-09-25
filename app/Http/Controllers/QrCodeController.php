@@ -184,11 +184,11 @@ class QrCodeController extends Controller
                 } catch (\Exception $e) { Log::warning('ActivityLog scan_in failed: ' . $e->getMessage()); }
             });
 
-            // Send notification to admins
-            $admins = User::whereIn('role', ['admin', 'operator'])->get();
-            foreach ($admins as $admin) {
-                /** @var User $admin */
-                $admin->notify(new SystemNotification(
+            // Send notification to admins & piket
+            $targets = User::whereIn('role', ['admin', 'operator', 'guru_piket'])->get();
+            foreach ($targets as $target) {
+                /** @var User $target */
+                $target->notify(new SystemNotification(
                     "Guru {$teacher->name} telah absen ({$status})",
                     'success',
                     route('attendance.history')
