@@ -359,7 +359,7 @@
         }
 
         refreshLeaveData();
-        setInterval(refreshLeaveData, 3000);
+        setInterval(refreshLeaveData, 1000);
         window.addEventListener('notifications:new', function() { refreshLeaveData(); });
     })();
 </script>

@@ -10,6 +10,7 @@ use App\Services\HelpdeskCardGenerator;
 use App\Services\FonnteService;
 use App\Helpers\NotificationHelper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class SupportController extends Controller
@@ -138,7 +139,7 @@ class SupportController extends Controller
                 'extra_fields'=> $extraFields,
             ]);
         } catch (\Exception $e) {
-            \Log::error('SupportTicket create failed: ' . $e->getMessage());
+            Log::error('SupportTicket create failed: ' . $e->getMessage());
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'Gagal menyimpan laporan.'], 500);
             }
@@ -164,7 +165,7 @@ class SupportController extends Controller
                 try {
                     $ticket->update(['clickup_task_url' => $clickupResult['task_url']]);
                 } catch (\Throwable $e) {
-                    \Log::info('ClickUp task created but clickup_task_url column not found yet: ' . $clickupResult['task_url']);
+                    Log::info('ClickUp task created but clickup_task_url column not found yet: ' . $clickupResult['task_url']);
                 }
             }
         }
@@ -225,7 +226,7 @@ class SupportController extends Controller
                     $ticket->update(['card_image_path' => $cardPath]);
                 }
             } catch (\Throwable $e) {
-                \Log::error('uploadCard failed to save image', ['reason' => $e->getMessage()]);
+                Log::error('uploadCard failed to save image', ['reason' => $e->getMessage()]);
             }
         }
 
@@ -246,16 +247,7 @@ class SupportController extends Controller
             $adminPhone = preg_replace('/[^0-9]/', '', (string)$rawPhone);
 
             if ($adminPhone) {
-                $prioLabel = SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? strtoupper($ticket->priority);
-                $typeLabel = SupportTicket::typeLabels()[$ticket->type]['label'] ?? ucfirst($ticket->type);
-                $roleMap   = [
-                    'admin'    => 'Admin',
-                    'operator' => 'Operator',
-                    'guru_piket' => 'Guru Piket',
-                    'guru'     => 'Guru',
-                ];
-                $roleLabel = $roleMap[$ticket->user?->role] ?? ucfirst($ticket->user?->role ?? 'Pengguna');
-                $fonnte    = new FonnteService();
+                $fonnte = new FonnteService();
 
                 // Priority emoji + warna (sesuai UI)
                 $prioEmoji = match($ticket->priority) {
@@ -264,12 +256,6 @@ class SupportController extends Controller
                     'medium'   => '⏰',
                     default    => '✅',
                 };
-                $prioColor = match($ticket->priority) {
-                    'critical' => '🔴',
-                    'high'     => '🟠',
-                    'medium'   => '🟡',
-                    default    => '🟢',
-                };
 
                 // Format pesan caption
                 $caption  = "*✦ VEXALYN*\n";
@@ -277,10 +263,8 @@ class SupportController extends Controller
                 $caption .= "*🎫 NEW SUPPORT TICKET*\n";
                 $caption .= "*`#{$ticket->ticket_id}`*\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                $caption .= "*👤 FROM* : *{$roleLabel}*\n\n";
-                $caption .= "*📂 TYPE* : *{$typeLabel}*\n\n";
                 $caption .= "*📝 SUBJECT* : *{$ticket->title}*\n\n";
-                $caption .= "*⚠️ PRIORITY* : {$prioEmoji} *".strtoupper($prioLabel)."*\n\n";
+                $caption .= "*⚠️ PRIORITY* : {$prioEmoji} *" . strtoupper(SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? $ticket->priority) . "*\n\n";
                 $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
                 $caption .= "*📄 REPORT DETAILS*\n\n";
                 $caption .= $ticket->description . "\n\n";
@@ -296,35 +280,35 @@ class SupportController extends Controller
                     }
                     $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
                 }
-            }
 
-            // Kirim gambar + caption
-            if (!empty($ticket->attachments)) {
-                foreach ($ticket->attachments as $attachment) {
-                    if (!empty($attachment['url'])) {
-                        $fonnte->sendImage($adminPhone, $attachment['url'], $caption);
-                        break;
+                // Kirim gambar + caption
+                if (!empty($ticket->attachments)) {
+                    foreach ($ticket->attachments as $attachment) {
+                        if (!empty($attachment['url'])) {
+                            $fonnte->sendImage($adminPhone, $attachment['url'], $caption);
+                            break;
+                        }
                     }
+                } else {
+                    $fonnte->sendText($adminPhone, $caption);
                 }
-            } else {
-                $fonnte->sendText($adminPhone, $caption);
-            }
 
-            // 2. Kirim notifikasi konfirmasi ke user yang lapor (jika ada nomor HP dan bukan nomor dev)
-            $userPhone = $ticket->user?->phone;
-            if ($userPhone && $userPhone !== $rawPhone) {
-                $userPhoneFormatted = preg_replace('/[^0-9]/', '', (string)$userPhone);
-                if ($userPhoneFormatted && $userPhoneFormatted !== $adminPhone) {
-                    $userCaption  = "*𝚃𝙴𝚁𝙸𝙼𝙰 𝙺𝙰𝚂𝙸𝙷 𝚂𝚄𝙳𝙰𝙷 𝙼𝙴𝙽𝙶𝙷𝚄𝙱𝚄𝙽𝙶𝙸 𝚅𝙴𝚇𝙰𝙻𝚈𝙽 𝚂𝚄𝙿𝙿𝙾𝚁𝚃 𝙲𝙴𝙽𝚃𝙴𝚁!*\n\n";
-                    $userCaption .= "_Laporan kamu sudah berhasil diterima. Saya akan segera mengecek dan menindak lanjutinya._\n\n";
-                    $userCaption .= "*Setiap laporan yang masuk sangat membantu saya untuk terus memperbaiki dan mengembangkan Presensi Guru ICB CT. ✦*\n\n";
-                    $userCaption .= "_~ Vexalyn Support_";
+                // 2. Kirim notifikasi konfirmasi ke user yang lapor (jika ada nomor HP dan bukan nomor dev)
+                $userPhone = $ticket->user?->phone;
+                if ($userPhone && $userPhone !== $rawPhone) {
+                    $userPhoneFormatted = preg_replace('/[^0-9]/', '', (string)$userPhone);
+                    if ($userPhoneFormatted && $userPhoneFormatted !== $adminPhone) {
+                        $userCaption  = "*𝚃𝙴𝚁𝙸𝙼𝙰 𝙺𝙰𝚂𝙸𝙷 𝚂𝚄𝙳𝙰𝙷 𝙼𝙴𝙽𝙶𝙷𝚄𝙱𝚄𝙽𝙶𝙸 𝚅𝙴𝚇𝙰𝙻𝚈𝙽 𝚂𝚄𝙿𝙿𝙾𝚁𝚃 𝙲𝙴𝙽𝚃𝙴𝚁!*\n\n";
+                        $userCaption .= "_Laporan kamu sudah berhasil diterima. Saya akan segera mengecek dan menindak lanjutinya._\n\n";
+                        $userCaption .= "*Setiap laporan yang masuk sangat membantu saya untuk terus memperbaiki dan mengembangkan Presensi Guru ICB CT. ✦*\n\n";
+                        $userCaption .= "_~ Vexalyn Support_";
 
-                    $fonnte->sendText($userPhoneFormatted, $userCaption);
+                        $fonnte->sendText($userPhoneFormatted, $userCaption);
+                    }
                 }
             }
         } catch (\Throwable $e) {
-            \Log::warning('Fonnte notification failed', [
+            Log::warning('Fonnte notification failed', [
                 'ticket' => $ticket->id,
                 'reason' => $e->getMessage(),
             ]);
@@ -347,7 +331,7 @@ class SupportController extends Controller
                 }
             }
         } catch (\Throwable $e) {
-            \Log::warning('Fonnte user notification failed', [
+            Log::warning('Fonnte user notification failed', [
                 'ticket' => $ticket->id,
                 'reason' => $e->getMessage(),
             ]);
@@ -385,7 +369,7 @@ class SupportController extends Controller
                 $url = route("{$prefix}.support.show", $ticket);
                 NotificationHelper::send($user, 'warning', $title, $message, $url, $cfg['icon'], $cfg['color']);
             } catch (\Throwable $e) {
-                \Log::warning('notifyAdmins gagal untuk user #' . $user->id . ': ' . $e->getMessage());
+                Log::warning('notifyAdmins gagal untuk user #' . $user->id . ': ' . $e->getMessage());
             }
         }
     }
