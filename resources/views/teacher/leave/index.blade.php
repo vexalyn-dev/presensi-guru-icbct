@@ -319,6 +319,16 @@
                     }
                 }
 
+                // Toggle delete button visibility
+                var deleteBtn = card.querySelector('.delete-trigger');
+                if (deleteBtn) {
+                    if (leave.can_delete) {
+                        deleteBtn.style.display = '';
+                    } else {
+                        deleteBtn.style.display = 'none';
+                    }
+                }
+
                 // Update admin notes visibility and content
                 var approvedWrap = card.querySelector('.leave-admin-notes-approved');
                 var rejectedWrap = card.querySelector('.leave-admin-notes-rejected');

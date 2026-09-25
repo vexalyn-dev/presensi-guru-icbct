@@ -44,6 +44,7 @@ class LeaveController extends Controller
                     'status'       => $leave->status,
                     'status_badge' => $statusBadge,
                     'status_text'  => $statusText,
+                    'can_delete'   => $leave->status === 'pending',
                     'reason'       => $leave->reason,
                     'start_date'   => $leave->start_date->format('d M Y'),
                     'end_date'     => $leave->end_date->format('d M Y'),
