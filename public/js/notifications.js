@@ -302,6 +302,7 @@
                         playNotificationSound();
                         showNotificationToast(notification);
                         refreshLeaveRequestCards();
+                        if (typeof refreshDashboard === 'function') refreshDashboard();
                         window.dispatchEvent(new CustomEvent('notifications:new', { detail: notification }));
                     }
                 });
