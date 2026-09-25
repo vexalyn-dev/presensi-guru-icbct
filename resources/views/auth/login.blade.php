@@ -9,15 +9,6 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        @font-face {
-            font-family: 'Milker';
-            src: url('{{ asset("fonts/Milker-Regular.woff2") }}') format('woff2'),
-                 url('{{ asset("fonts/Milker-Regular.woff") }}') format('woff');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
@@ -54,23 +45,25 @@
         .auth-credit {
             text-align: center;
             padding: 14px 16px;
-            font-size: 13px;
-            font-family: 'Milker', 'Inter', sans-serif;
-            font-weight: 400;
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
             color: #94a3b8;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            background: transparent;
-            position: relative;
-            z-index: 5;
-            flex-shrink: 0;
+            letter-spacing: 0.12em;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            pointer-events: none;
         }
 
         .auth-credit a {
             color: #94a3b8;
             text-decoration: none;
             transition: color 0.2s ease;
-            font-weight: 400;
+            pointer-events: auto;
         }
 
         .auth-credit a:hover {
@@ -572,8 +565,17 @@
             .auth-container::after { display: none !important; }
 
             .auth-credit {
-                padding: 16px 16px 20px;
-                font-size: 13px;
+                position: relative;
+                bottom: auto;
+                left: auto;
+                pointer-events: none;
+                padding: 16px 20px 20px;
+                font-size: 11px;
+                background: transparent;
+            }
+
+            .auth-credit a {
+                pointer-events: auto;
             }
 
             /* ── Sembunyikan panel desktop ── */
