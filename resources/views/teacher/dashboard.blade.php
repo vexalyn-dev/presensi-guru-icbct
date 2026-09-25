@@ -678,6 +678,7 @@
 
 @endsection
 
+<script>
 // ── Teacher Dashboard Realtime AJAX ────────────────────────────
 (function() {
     var app     = document.getElementById('teacher-ajax-app');
@@ -706,3 +707,4 @@
     setInterval(refreshDashboard, 1000);
     window.addEventListener('notifications:new', function() { refreshDashboard(); });
 })();
+</script>
