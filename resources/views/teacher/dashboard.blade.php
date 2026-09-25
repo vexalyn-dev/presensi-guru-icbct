@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="fade-in space-y-3 sm:space-y-6" id="teacher-ajax-app" data-init-endpoint="{{ route('teacher.dashboard.data') }}">
+<div class="fade-in space-y-3 sm:space-y-6" id="teacher-ajax-app">
     
     <!-- Welcome Card -->
     <div class="card p-5 sm:p-8 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:to-gold-400 text-white overflow-hidden">
@@ -149,7 +149,7 @@
                         </div>
                         <p class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 truncate">Jam Masuk</p>
                     </div>
-                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_in ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}">
+                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_in ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}" data-key="check_in">
                         {{ $todayAttendance->check_in ? \Carbon\Carbon::parse($todayAttendance->check_in)->format('H:i') : '--:--' }}
                     </p>
                     @if($todayAttendance->status)
@@ -180,7 +180,7 @@
                         </div>
                         <p class="text-[10px] font-semibold text-slate-600 dark:text-slate-400 truncate">Jam Pulang</p>
                     </div>
-                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_out ? 'text-blue-700 dark:text-blue-400' : 'text-slate-400' }}">
+                    <p class="text-base sm:text-xl font-bold tabular-nums {{ $todayAttendance->check_out ? 'text-blue-700 dark:text-blue-400' : 'text-slate-400' }}" data-key="check_out">
                         {{ $todayAttendance->check_out ? \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') : '--:--' }}
                     </p>
                     @if($todayAttendance->check_out_status)
@@ -678,11 +678,12 @@
 
 @endsection
 
-// ── Teacher Dashboard Realtime AJAX ────────────────────────────
+// ── Teacher Dashboard SSE Realtime ─────────────────────────────
 (function() {
-    var app     = document.getElementById('teacher-ajax-app');
-    var endpoint = app ? app.dataset.initEndpoint : null;
+    var streamUrl = '{{ route("teacher.dashboard.stream") }}';
     var lastHash = '';
+    var evtSource = null;
+    var reconnectDelay = 0;
 
     function updateStats(s) {
         document.querySelectorAll('[data-key]').forEach(function(el) {
@@ -691,18 +692,65 @@
         });
     }
 
-    function refreshDashboard() {
-        if (!endpoint) return;
-        fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                var h = JSON.stringify(d.stats);
-                if (h !== lastHash) { updateStats(d.stats); lastHash = h; }
-            })
-            .catch(function(e) { console.warn('Teacher dashboard refresh error:', e); });
+    function handleEvent(data) {
+        if (data.stats) {
+            var h = JSON.stringify(data.stats);
+            if (h !== lastHash) {
+                updateStats(data.stats);
+                lastHash = h;
+            }
+        }
+        if (data.todayAttendance) {
+            var ci = document.querySelector('[data-key="check_in"]');
+            var co = document.querySelector('[data-key="check_out"]');
+            if (ci && data.todayAttendance.check_in) ci.textContent = data.todayAttendance.check_in;
+            if (co && data.todayAttendance.check_out) co.textContent = data.todayAttendance.check_out;
+        }
+        if (data.todaySchedules !== undefined) {
+            var ts = document.querySelector('[data-key="todaySchedules"]');
+            if (ts) ts.textContent = data.todaySchedules;
+        }
     }
 
-    refreshDashboard();
-    setInterval(refreshDashboard, 1000);
-    window.addEventListener('notifications:new', function() { refreshDashboard(); });
+    function connectStream() {
+        if (evtSource) {
+            evtSource.close();
+            evtSource = null;
+        }
+        evtSource = new EventSource(streamUrl);
+
+        evtSource.addEventListener('update', function(e) {
+            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
+        });
+        evtSource.addEventListener('attendance_checkin', function(e) {
+            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
+        });
+        evtSource.addEventListener('attendance_checkout', function(e) {
+            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
+        });
+        evtSource.addEventListener('notification', function(e) {
+            try {
+                var d = JSON.parse(e.data);
+                if (typeof refreshDashboard === 'function') refreshDashboard();
+            } catch(err) {}
+        });
+        evtSource.addEventListener('leave_approved', function(e) {
+            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
+        });
+        evtSource.addEventListener('leave_rejected', function(e) {
+            try { handleEvent(JSON.parse(e.data)); } catch(err) {}
+        });
+
+        evtSource.onerror = function() {
+            reconnectDelay = Math.min(reconnectDelay * 2 + 1, 30);
+            console.warn('SSE reconnecting in', reconnectDelay, 's');
+            setTimeout(connectStream, reconnectDelay * 1000);
+        };
+    }
+
+    connectStream();
+
+    window.addEventListener('beforeunload', function() {
+        if (evtSource) { evtSource.close(); evtSource = null; }
+    });
 })();

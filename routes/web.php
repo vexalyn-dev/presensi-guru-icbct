@@ -267,6 +267,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 Route::middleware(['auth', 'role:guru'])->prefix('teacher')->name('teacher.')->group(function () {
         Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/data', [TeacherDashboardController::class, 'data'])->name('dashboard.data');
+        Route::get('/dashboard/stream', [\App\Http\Controllers\Teacher\SseStreamController::class, '__invoke'])->name('dashboard.stream');
         Route::get('/schedule', [\App\Http\Controllers\Teacher\ScheduleController::class, 'index'])->name('schedule');
         Route::get('/work-schedule', [WorkScheduleController::class, 'index'])->name('work-schedule');
         Route::get('/attendance', [\App\Http\Controllers\Teacher\AttendanceController::class, 'index'])->name('attendance');

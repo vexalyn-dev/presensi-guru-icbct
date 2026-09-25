@@ -47,6 +47,14 @@ class LeaveApprovalController extends Controller
             'bg-green-100 text-green-600'
         );
 
+        if ($leaveRequest->user?->role === 'guru') {
+            \App\Http\Controllers\Teacher\SseStreamController::push($leaveRequest->user->id, 'leave_approved', [
+                'type' => $leaveRequest->type,
+                'start_date' => optional($leaveRequest->start_date)->format('d M Y'),
+                'end_date' => optional($leaveRequest->end_date)->format('d M Y'),
+            ]);
+        }
+
         return back()->with('success', 'Pengajuan izin berhasil disetujui');
     }
 
@@ -72,6 +80,13 @@ class LeaveApprovalController extends Controller
             'x-circle',
             'bg-red-100 text-red-600'
         );
+
+        if ($leaveRequest->user?->role === 'guru') {
+            \App\Http\Controllers\Teacher\SseStreamController::push($leaveRequest->user->id, 'leave_rejected', [
+                'type' => $leaveRequest->type,
+                'reason' => request('admin_notes') ?? '-',
+            ]);
+        }
 
         return back()->with('success', 'Pengajuan izin ditolak');
     }
