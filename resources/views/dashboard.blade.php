@@ -1578,6 +1578,7 @@ document.getElementById('admin-welcome-overlay').addEventListener('click', funct
 });
 </script>
 
+<script>
 // ── Admin Dashboard Realtime AJAX ──────────────────────────────
 (function() {
     var app     = document.getElementById('admin-ajax-app');
@@ -1606,4 +1607,5 @@ document.getElementById('admin-welcome-overlay').addEventListener('click', funct
     setInterval(refreshDashboard, 1000);
     window.addEventListener('notifications:new', function() { refreshDashboard(); });
 })();
+</script>
 @endsection
