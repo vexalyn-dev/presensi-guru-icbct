@@ -317,6 +317,7 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
 
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Piket\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [App\Http\Controllers\Piket\DashboardController::class, 'data'])->name('dashboard.data');
 
     // Presensi Harian — pakai halaman scan QR admin yang sama
     Route::get('/attendance',        [QrCodeController::class, 'scan'])       ->name('attendance');

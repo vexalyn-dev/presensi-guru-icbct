@@ -1,7 +1,7 @@
 @extends('layouts.piket')
 @section('page-title', 'Dashboard Piket')
 @section('content')
-<div class="space-y-6 fade-in">
+<div id="piket-ajax-app" class="space-y-6 fade-in" data-init-endpoint="{{ route('piket.dashboard.data') }}">
 
     {{-- ── HEADER SELAMAT DATANG ── --}}
     <div class="rounded-2xl bg-gradient-to-r from-navy-800 via-navy-900 to-slate-900 p-6 text-white relative overflow-hidden">
@@ -29,7 +29,7 @@
     </div>
 
     {{-- ── STAT CARDS ── --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" data-section="stats">
         <div class="card p-5">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -37,7 +37,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Hadir</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white">{{ $hadirHariIni }}</h3>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white" data-key="hadir">{{ $hadirHariIni }}</h3>
                     <p class="text-[10px] text-green-600 dark:text-green-400 font-medium">Hari ini</p>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Terlambat</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white">{{ $terlambatHariIni }}</h3>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white" data-key="terlambat">{{ $terlambatHariIni }}</h3>
                     <p class="text-[10px] text-yellow-600 dark:text-yellow-400 font-medium">Hari ini</p>
                 </div>
             </div>
@@ -63,8 +63,8 @@
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Belum Absen</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white">{{ $belumAbsen }}</h3>
-                    <p class="text-[10px] text-red-600 dark:text-red-400 font-medium">dari {{ $totalGuru }} guru</p>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white" data-key="belumAbsen">{{ $belumAbsen }}</h3>
+                    <p class="text-[10px] text-red-600 dark:text-red-400 font-medium">dari <span data-key="totalGuru">{{ $totalGuru }}</span> guru</p>
                 </div>
             </div>
         </div>
@@ -76,7 +76,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Izin Pending</p>
-                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white">{{ $pendingCount }}</h3>
+                    <h3 class="text-2xl font-bold text-navy-800 dark:text-white" data-key="pendingCount">{{ $pendingCount }}</h3>
                     <p class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Perlu ditinjau</p>
                 </div>
             </div>
@@ -106,7 +106,7 @@
                 <div class="flex items-center gap-2">
                     <p class="text-sm font-bold text-navy-800 dark:text-white">Approval Izin</p>
                     @if($pendingCount > 0)
-                    <span class="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">{{ $pendingCount }}</span>
+                    <span class="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full" data-key="pendingBadge">{{ $pendingCount }}</span>
                     @endif
                 </div>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Terima atau tolak izin & sakit</p>
@@ -143,7 +143,7 @@
                     Lihat semua →
                 </a>
             </div>
-            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+            <div class="divide-y divide-slate-100 dark:divide-slate-800" data-section="recent">
                 @forelse($recentAttendances as $att)
                 <div class="px-5 py-3.5 flex items-center gap-3">
                     <img src="{{ $att->user->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($att->user->name ?? 'G').'&background=0F172A&color=fff&size=64' }}"
@@ -184,7 +184,7 @@
                     Lihat semua →
                 </a>
             </div>
-            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+            <div class="divide-y divide-slate-100 dark:divide-slate-800" data-section="pending">
                 @forelse($pendingLeaves as $leave)
                 <div class="px-5 py-3.5 flex items-center gap-3">
                     <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($leave->user->name ?? 'G').'&background=0F172A&color=fff&size=64' }}"
@@ -196,13 +196,11 @@
                             {{ optional($leave->start_date)->format('d M') }}–{{ optional($leave->end_date)->format('d M Y') }}
                         </p>
                     </div>
-                    <div class="flex items-center gap-1.5 flex-shrink-0">
-                        <a href="{{ route('piket.leave-approval.show', $leave) }}"
-                           class="p-1.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-lg transition-all"
-                           title="Lihat Detail">
-                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                        </a>
-                    </div>
+                    <a href="{{ route('piket.leave-approval.show', $leave) }}"
+                       class="p-1.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-lg transition-all"
+                       title="Lihat Detail">
+                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                    </a>
                 </div>
                 @empty
                 <div class="px-5 py-10 text-center">
@@ -292,6 +290,106 @@ function closePiketWelcome() {
             if (e.target === this) closePiketWelcome();
         });
     }
+})();
+
+// ── Piket Dashboard Realtime AJAX ──────────────────────────────
+(function() {
+    var app     = document.getElementById('piket-ajax-app');
+    var endpoint = app ? app.dataset.initEndpoint : null;
+    var lastRecentHash = '';
+    var lastPendingHash = '';
+
+    function renderStatusBadge(status) {
+        if (status === 'Hadir') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Hadir</span>';
+        if (status === 'Terlambat') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Terlambat</span>';
+        return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">' + (status || '-') + '</span>';
+    }
+
+    function renderRecentList(data) {
+        var el = document.querySelector('[data-section="recent"]');
+        if (!el) return;
+        if (!data || data.length === 0) {
+            el.innerHTML = '<div class="px-5 py-10 text-center"><i data-lucide="scan-line" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i><p class="text-sm text-slate-400 dark:text-slate-500">Belum ada presensi hari ini</p></div>';
+            return;
+        }
+        var html = '';
+        data.forEach(function(att) {
+            html += '<div class="px-5 py-3.5 flex items-center gap-3">'
+                  + '<img src="' + (att.photo || 'https://ui-avatars.com/api/?name=G&background=0F172A&color=fff&size=64') + '" class="w-9 h-9 rounded-lg object-cover flex-shrink-0">'
+                  + '<div class="flex-1 min-w-0">'
+                  + '<p class="text-sm font-semibold text-navy-800 dark:text-white truncate">' + att.name + '</p>'
+                  + '<p class="text-xs text-slate-500 dark:text-slate-400">Masuk: ' + att.check_in + (att.check_out ? ' · Keluar: ' + att.check_out : '') + '</p>'
+                  + '</div>'
+                  + renderStatusBadge(att.status)
+                  + '</div>';
+        });
+        el.innerHTML = html;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function renderPendingList(data) {
+        var el = document.querySelector('[data-section="pending"]');
+        if (!el) return;
+        if (!data || data.length === 0) {
+            el.innerHTML = '<div class="px-5 py-10 text-center"><i data-lucide="check-circle" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i><p class="text-sm text-slate-400 dark:text-slate-500">Tidak ada pengajuan yang menunggu</p></div>';
+            return;
+        }
+        var html = '';
+        data.forEach(function(leave) {
+            html += '<div class="px-5 py-3.5 flex items-center gap-3">'
+                  + '<img src="' + (leave.photo || 'https://ui-avatars.com/api/?name=G&background=0F172A&color=fff&size=64') + '" class="w-9 h-9 rounded-lg object-cover flex-shrink-0">'
+                  + '<div class="flex-1 min-w-0">'
+                  + '<p class="text-sm font-semibold text-navy-800 dark:text-white truncate">' + leave.name + '</p>'
+                  + '<p class="text-xs text-slate-500 dark:text-slate-400">' + leave.type + ' · ' + leave.start + '–' + leave.end + '</p>'
+                  + '</div>'
+                  + '<a href="' + leave.route + '" class="p-1.5 bg-navy-800 hover:bg-navy-900 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-900 rounded-lg transition-all" title="Lihat Detail">'
+                  + '<i data-lucide="eye" class="w-3.5 h-3.5"></i></a>'
+                  + '</div>';
+        });
+        el.innerHTML = html;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function updateStats(s) {
+        document.querySelectorAll('[data-section="stats"] [data-key]').forEach(function(el) {
+            var key = el.dataset.key;
+            if (s[key] !== undefined) el.textContent = s[key];
+        });
+    }
+
+    function computeHash(arr) {
+        return JSON.stringify(arr.map(function(a) { return a.name + a.check_in + a.status; }).join('|'));
+    }
+    function computeHashPending(arr) {
+        return JSON.stringify(arr.map(function(a) { return a.id + a.name; }).join('|'));
+    }
+
+    function refreshDashboard() {
+        if (!endpoint) return;
+        fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                updateStats(d.stats);
+
+                // Only re-render lists if data changed
+                var newRecentHash = computeHash(d.recent || []);
+                var newPendingHash = computeHashPending(d.pending || []);
+                if (newRecentHash !== lastRecentHash) {
+                    renderRecentList(d.recent);
+                    lastRecentHash = newRecentHash;
+                }
+                if (newPendingHash !== lastPendingHash) {
+                    renderPendingList(d.pending);
+                    lastPendingHash = newPendingHash;
+                }
+            })
+            .catch(function(e) { console.warn('Dashboard refresh error:', e); });
+    }
+
+    // Initial load
+    refreshDashboard();
+    // Poll every 3 seconds
+    setInterval(refreshDashboard, 3000);
 })();
 </script>
 @endsection
