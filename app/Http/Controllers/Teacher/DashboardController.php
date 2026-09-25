@@ -63,11 +63,11 @@ class DashboardController extends Controller
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth   = Carbon::now()->endOfMonth();
 
-        // Status 'Hadir' di admin scan disimpan sebagai 'Tepat Waktu', perlu cover keduanya
+        // Statistik bulan ini — 'Hadir' = Hadir + Tepat Waktu + Terlambat (semua yang masuk)
         $stats = [
             'hadir' => Attendance::where('user_id', $user->id)
                 ->whereBetween('date', [$startOfMonth, $endOfMonth])
-                ->whereIn('status', ['Hadir', 'Tepat Waktu'])
+                ->whereIn('status', ['Hadir', 'Tepat Waktu', 'Terlambat'])
                 ->count(),
             'terlambat' => Attendance::where('user_id', $user->id)
                 ->whereBetween('date', [$startOfMonth, $endOfMonth])
@@ -120,7 +120,7 @@ class DashboardController extends Controller
         $stats = [
             'hadir'     => Attendance::where('user_id', $user->id)
                 ->whereBetween('date', [$startOfMonth, $endOfMonth])
-                ->whereIn('status', ['Hadir', 'Tepat Waktu'])
+                ->whereIn('status', ['Hadir', 'Tepat Waktu', 'Terlambat'])
                 ->count(),
             'terlambat' => Attendance::where('user_id', $user->id)
                 ->whereBetween('date', [$startOfMonth, $endOfMonth])
@@ -145,6 +145,7 @@ class DashboardController extends Controller
                 'check_in'  => $todayAttendance->check_in ? Carbon::parse($todayAttendance->check_in)->format('H:i') : null,
                 'check_out' => $todayAttendance->check_out ? Carbon::parse($todayAttendance->check_out)->format('H:i') : null,
                 'status'    => $todayAttendance->status,
+                'check_out_color' => $todayAttendance->check_out ? 'green' : null,
             ] : null,
             'todaySchedules'  => $todaySchedules,
             'todayClassCount' => $todayClassAttendances,

@@ -117,20 +117,24 @@ class AttendanceController extends Controller
                 return $this->_jsonResp(false, 'Anda sudah melakukan presensi masuk hari ini.');
             }
 
+            // Hitung keterlambatan berdasarkan default_check_in atau jadwal hari ini
+            $lateThreshold = null;
             if ($scheduleStart) {
                 $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
                 $lateThreshold = (clone $scheduleStart)->addMinutes($graceMinutes);
-                $isLate = $now->format('H:i:s') > $lateThreshold->format('H:i:s');
             } else {
-                $startTimeStr = Setting::get('attendance_start_time', '06:30');
-                $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
-                try {
-                    $lateThreshold = Carbon::parse($startTimeStr)->addMinutes($graceMinutes);
-                    $isLate = $now->format('H:i:s') > $lateThreshold->format('H:i:s');
-                } catch (\Exception $e) {
-                    $isLate = false;
+                // Coba ambil jadwal hari ini dari TeacherSchedule
+                $todaySchedule = TeacherSchedule::where('user_id', $user->id)
+                    ->where('day_of_week', $now->dayOfWeek)
+                    ->where('is_active', true)
+                    ->first();
+                if ($todaySchedule && $todaySchedule->start_time) {
+                    $graceMinutes = (int) Setting::get('attendance_late_grace_period', 5);
+                    $lateThreshold = Carbon::parse($todaySchedule->start_time)->addMinutes($graceMinutes);
                 }
             }
+
+            $isLate = $lateThreshold && $now->format('H:i:s') > $lateThreshold->format('H:i:s');
             $attendance->update([
                 'check_in' => $now->format('H:i:s'),
                 'status' => $isLate ? 'Terlambat' : 'Hadir',
