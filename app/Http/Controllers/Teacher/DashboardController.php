@@ -142,9 +142,9 @@ class DashboardController extends Controller
         return response()->json([
             'stats'           => $stats,
             'todayAttendance' => $todayAttendance ? [
-                'check_in'  => $todayAttendance->check_in ? Carbon::parse($todayAttendance->check_in)->format('H:i') : null,
-                'check_out' => $todayAttendance->check_out ? Carbon::parse($todayAttendance->check_out)->format('H:i') : null,
-                'status'    => $todayAttendance->status,
+                'check_in'      => $todayAttendance->check_in ? Carbon::parse($todayAttendance->check_in)->format('H:i') : null,
+                'check_out'     => $todayAttendance->check_out ? Carbon::parse($todayAttendance->check_out)->format('H:i') : null,
+                'status'        => $todayAttendance->status,
                 'check_out_color' => $todayAttendance->check_out ? 'red' : null,
             ] : null,
             'todaySchedules'  => $todaySchedules,
