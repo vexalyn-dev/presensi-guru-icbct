@@ -1299,10 +1299,10 @@
 
         </div>
         {{-- END .forms-container --}}
+
+        <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
     </div>
     {{-- END .auth-container --}}
-
-    <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
 
     <script>
         function toggleAuth() {
