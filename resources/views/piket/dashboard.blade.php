@@ -390,6 +390,12 @@ function closePiketWelcome() {
     refreshDashboard();
     // Poll every 3 seconds
     setInterval(refreshDashboard, 3000);
+
+    // Refresh dashboard immediately when new notifications arrive
+    // (triggered by notifications.js when a new notification is detected)
+    window.addEventListener('notifications:new', function() {
+        refreshDashboard();
+    });
 })();
 </script>
 @endsection
