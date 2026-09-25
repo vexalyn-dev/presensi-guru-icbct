@@ -54,7 +54,49 @@
         .nav-item.bg-navy-800, .nav-item[class*="bg-navy-800"] {
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 12px rgba(15,23,42,0.25) !important;
         }
-        
+
+        /* ══════════════════════════════════════════
+           SIDEBAR ICON ANIMATIONS
+        ══════════════════════════════════════════ */
+        @keyframes sidebarIconBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            35% { transform: translateY(-4px) scale(1.15); }
+            65% { transform: translateY(-2px) scale(1.05); }
+        }
+        @keyframes sidebarIconShake {
+            0%, 100% { transform: rotate(0deg); }
+            15% { transform: rotate(-8deg); }
+            30% { transform: rotate(8deg); }
+            45% { transform: rotate(-6deg); }
+            60% { transform: rotate(6deg); }
+            75% { transform: rotate(-3deg); }
+            90% { transform: rotate(3deg); }
+        }
+        @keyframes sidebarIconPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.25); opacity: 0.85; }
+        }
+        @keyframes sidebarIconWiggle {
+            0%, 100% { transform: skewX(0deg); }
+            20% { transform: skewX(-12deg); }
+            40% { transform: skewX(10deg); }
+            60% { transform: skewX(-6deg); }
+            80% { transform: skewX(4deg); }
+        }
+        .sidebar-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+        .nav-item:hover .sidebar-icon {
+            animation: sidebarIconBounce 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        .sidebar-icon.shake:hover { animation: sidebarIconShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+        .sidebar-icon.pulse:hover { animation: sidebarIconPulse 0.6s ease-in-out both; }
+        .sidebar-icon.wiggle:hover { animation: sidebarIconWiggle 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+        .sidebar-icon.bounce:hover { animation: sidebarIconBounce 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
         /* Reset body margin/padding */
         body { margin: 0; padding: 0; }
 
@@ -159,7 +201,7 @@
                 <a href="{{ route('piket.dashboard') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('piket.dashboard') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Dashboard</span>
                 </a>
 
@@ -168,14 +210,14 @@
                 <a href="{{ route('piket.attendance') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('piket.attendance*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="scan-line" class="w-4 h-4"></i>
+                    <i data-lucide="scan-line" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Presensi Harian</span>
                 </a>
 
                 <a href="{{ route('piket.class-attendance.manual') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('piket.class-attendance*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="clipboard-edit" class="w-4 h-4"></i>
+                    <i data-lucide="clipboard-edit" class="w-4 h-4 sidebar-icon wiggle"></i>
                     <span>Manual Presensi</span>
                 </a>
 
@@ -184,14 +226,14 @@
                 <a href="{{ route('piket.leave-approval') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('piket.leave-approval*') || request()->routeIs('piket.leaves*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="file-check" class="w-4 h-4"></i>
+                    <i data-lucide="file-check" class="w-4 h-4 sidebar-icon pulse"></i>
                     <span>Izin &amp; Sakit</span>
                 </a>
 
                 <a href="{{ route('piket.holidays') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('piket.holidays*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="calendar-off" class="w-4 h-4"></i>
+                    <i data-lucide="calendar-off" class="w-4 h-4 sidebar-icon shake"></i>
                     <span>Kalender Libur</span>
                 </a>
 
@@ -200,7 +242,7 @@
                 <a href="{{ route('piket.support') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('piket.support*') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="life-buoy" class="w-4 h-4"></i>
+                    <i data-lucide="life-buoy" class="w-4 h-4 sidebar-icon wiggle"></i>
                     <span>Pusat Bantuan</span>
                 </a>
 
@@ -208,7 +250,7 @@
                 <a href="{{ route('download-apk') }}"
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('download-apk') ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700' }}">
-                    <i data-lucide="smartphone" class="w-4 h-4"></i>
+                    <i data-lucide="smartphone" class="w-4 h-4 sidebar-icon bounce"></i>
                     <span>Download APK</span>
                 </a>
                 @endunless
