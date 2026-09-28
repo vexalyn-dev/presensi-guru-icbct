@@ -823,66 +823,6 @@
             };
         });
 
-        function startConfetti() {
-            const canvas = document.getElementById('confetti-canvas');
-            if (!canvas) return;
-
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            const particles = [];
-            const colors = ['#10b981', '#34d399', '#6ee7b7', '#facc15', '#fde047', '#3b82f6', '#60a5fa'];
-
-            for (let i = 0; i < 150; i++) {
-                particles.push({
-                    x: canvas.width / 2,
-                    y: canvas.height / 2,
-                    vx: (Math.random() - 0.5) * 15,
-                    vy: (Math.random() - 0.5) * 15 - 5,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    size: Math.random() * 8 + 4,
-                    rotation: Math.random() * 360,
-                    rotationSpeed: (Math.random() - 0.5) * 10,
-                    life: 1,
-                    decay: Math.random() * 0.02 + 0.01
-                });
-            }
-
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                let activeParticles = false;
-
-                particles.forEach(p => {
-                    if (p.life <= 0) return;
-
-                    activeParticles = true;
-
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.3;
-                    p.rotation += p.rotationSpeed;
-                    p.life -= p.decay;
-
-                    ctx.save();
-                    ctx.translate(p.x, p.y);
-                    ctx.rotate((p.rotation * Math.PI) / 180);
-                    ctx.globalAlpha = p.life;
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
-                    ctx.restore();
-                });
-
-                if (activeParticles) {
-                    requestAnimationFrame(animate);
-                } else {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
-            }
-
-            animate();
-        }
-
         // Start Attendance explicitly
         function startAttendance() {
             const overlay = document.getElementById('camera-idle-overlay');
