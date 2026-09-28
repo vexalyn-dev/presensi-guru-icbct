@@ -10,10 +10,12 @@ class FixSessionCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Session cookie aman: secure=true karena site wajib HTTPS
-        // encrypt=false supaya gak perlu APP_KEY konsisten
+        // Deteksi HTTPS — secure=true hanya jika benar-benar via HTTPS
+        // Ini aman: di belakang reverse proxy/cPanel SSL, X-Forwarded-Proto akan terdeteksi
+        $isSecure = $request->secure() || $request->header('X-Forwarded-Proto') === 'https';
+
         config([
-            'session.secure'      => true,
+            'session.secure'      => $isSecure,
             'session.encrypt'     => false,
             'session.same_site'   => 'lax',
             'session.http_only'   => true,
