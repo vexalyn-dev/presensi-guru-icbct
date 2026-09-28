@@ -53,7 +53,7 @@
             text-transform: uppercase;
             letter-spacing: 0.12em;
             position: absolute;
-            bottom: 0;
+            bottom: 6px;
             left: 0;
             width: 100%;
             z-index: 10;
