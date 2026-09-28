@@ -212,7 +212,14 @@
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>
                         <th class="px-3 py-3 w-10">
-                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 rounded border-slate-300 text-navy-800 focus:ring-navy-800">
+                            <label class="tcb-label" style="margin:0;">
+                                <div class="tcb-box" id="selectAllBox" aria-hidden="true">
+                                    <svg class="tcb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                        <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <input type="checkbox" id="selectAll" class="tcb-native" onchange="toggleSelectAll()">
+                            </label>
                         </th>
                         <th class="px-4 py-3 text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID Guru</th>
                         <th class="px-4 py-3 text-left text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Guru</th>
@@ -240,9 +247,16 @@
         @endphp
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
             <td class="px-4 py-3">
-                <input type="checkbox" name="teacher_ids[]" value="{{ $teacher->id }}" 
-                       class="teacher-checkbox rounded border-slate-300 text-navy-600 focus:ring-navy-500"
-                       onchange="updateBulkActions()">
+                <label class="tcb-label" style="margin:0;">
+                    <div class="tcb-box" aria-hidden="true">
+                        <svg class="tcb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                            <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <input type="checkbox" name="teacher_ids[]" value="{{ $teacher->id }}"
+                           class="tcb-native teacher-checkbox"
+                           onchange="updateBulkActions()">
+                </label>
             </td>
             
             <!-- 1. ID GURU (Format: #12345) -->
@@ -444,6 +458,61 @@
 
 {{-- Dark mode styles for modals --}}
 <style>
+    /* ── CUSTOM CHECKBOX (sama persis dengan login) ── */
+    .tcb-native {
+        position: absolute;
+        opacity: 0;
+        width: 0; height: 0;
+        pointer-events: none;
+    }
+    .tcb-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px; height: 20px;
+        min-width: 20px;
+        border: 2px solid #CBD5E1;
+        border-radius: 7px;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
+        position: relative;
+        box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+    }
+    .tcb-box:hover {
+        border-color: #0F172A;
+        box-shadow: 0 0 0 4px rgba(15,23,42,0.08);
+    }
+    .tcb-box .tcb-check {
+        opacity: 0;
+        transform: scale(0) rotate(-10deg);
+        transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .tcb-box.checked {
+        background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
+        border-color: #0F172A;
+        box-shadow: 0 4px 14px rgba(15,23,42,0.28);
+        animation: tcbBounce 0.38s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .tcb-box.checked .tcb-check {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    @keyframes tcbBounce {
+        0%   { transform: scale(0.8); }
+        55%  { transform: scale(1.18); }
+        100% { transform: scale(1); }
+    }
+    .tcb-label {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+    }
+    .tcb-label:hover .tcb-box {
+        border-color: #0F172A;
+        box-shadow: 0 0 0 4px rgba(15,23,42,0.08);
+    }
     @keyframes modalSlideIn {
         from {
             opacity: 0;
@@ -524,6 +593,20 @@
     // ============================================
     document.addEventListener('DOMContentLoaded', function () {
         lucide.createIcons();
+
+        // Sync visual tcb-box saat checkbox native berubah
+        document.querySelectorAll('.teacher-checkbox').forEach(cb => {
+            cb.addEventListener('change', function() {
+                this.closest('label')?.querySelector('.tcb-box')?.classList.toggle('checked', this.checked);
+            });
+        });
+        // Sync selectAll box
+        const selectAllNative = document.getElementById('selectAll');
+        if (selectAllNative) {
+            selectAllNative.addEventListener('change', function() {
+                document.getElementById('selectAllBox')?.classList.toggle('checked', this.checked);
+            });
+        }
 
         // Delete - Cancel button & Backdrop
         document.getElementById('deleteCancelBtn').addEventListener('click', closeDeleteModal);
@@ -614,7 +697,11 @@
 
     function toggleSelectAll() {
         const all = document.getElementById('selectAll').checked;
-        document.querySelectorAll('.teacher-checkbox').forEach(cb => cb.checked = all);
+        document.querySelectorAll('.teacher-checkbox').forEach(cb => {
+            cb.checked = all;
+            cb.closest('label')?.querySelector('.tcb-box')?.classList.toggle('checked', all);
+        });
+        document.getElementById('selectAllBox')?.classList.toggle('checked', all);
         updateBulkActions();
     }
 
@@ -630,11 +717,25 @@
         } else {
             bar.classList.add('hidden');
         }
+
+        // Sync selectAll box
+        const all = document.querySelectorAll('.teacher-checkbox');
+        const allChecked = all.length > 0 && checked.length === all.length;
+        const saBox = document.getElementById('selectAllBox');
+        const saNative = document.getElementById('selectAll');
+        if (saBox && saNative) {
+            saNative.checked = allChecked;
+            saBox.classList.toggle('checked', allChecked);
+        }
     }
 
     function clearSelection() {
         document.getElementById('selectAll').checked = false;
-        document.querySelectorAll('.teacher-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('selectAllBox')?.classList.remove('checked');
+        document.querySelectorAll('.teacher-checkbox').forEach(cb => {
+            cb.checked = false;
+            cb.closest('label')?.querySelector('.tcb-box')?.classList.remove('checked');
+        });
         updateBulkActions();
     }
 
