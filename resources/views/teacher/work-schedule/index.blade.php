@@ -321,7 +321,7 @@
                 if (isToday) {
                     this.intervalId = setInterval(() => {
                         this.updateProgress();
-                    }, 10000);
+                    }, 1000);
                 }
             },
             updateProgress() {

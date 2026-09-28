@@ -396,8 +396,11 @@
                 <div class="p-3 sm:p-4 rounded-xl border-2 transition-all
                     {{ $isToday 
                         ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' 
-                        : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
-                    
+                        : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}"
+                    @if($isToday)
+                    x-data="workScheduleProgress('{{ \Carbon\Carbon::parse($work->start_time)->format('H:i') }}', '{{ \Carbon\Carbon::parse($work->end_time)->format('H:i') }}')"
+                    @endif>
+
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
                             <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0
@@ -418,7 +421,7 @@
                                 </p>
                             </div>
                         </div>
-                        
+
                         <div class="text-right flex-shrink-0">
                             @php
                                 $dayMinutes = \Carbon\Carbon::parse($work->start_time)->diffInMinutes(\Carbon\Carbon::parse($work->end_time));
@@ -433,6 +436,31 @@
                             </p>
                         </div>
                     </div>
+
+                    @if($isToday)
+                    <!-- Progress Bar Real-time -->
+                    <div class="mt-3">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-[10px] font-semibold text-purple-600 dark:text-purple-400">Progress Kerja Hari Ini</span>
+                            <span class="text-[10px] font-bold text-purple-700 dark:text-purple-300" x-text="progressPercent.toFixed(1) + '%'"></span>
+                        </div>
+                        <div class="w-full h-2 bg-purple-200 dark:bg-purple-900/50 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-1000 ease-out"
+                                 :class="progressPercent >= 100 ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-purple-600 to-purple-800 dark:from-gold-400 dark:to-gold-500'"
+                                 :style="'width: ' + Math.min(progressPercent, 100) + '%'"></div>
+                        </div>
+                        <div class="flex items-center justify-between mt-1.5">
+                            <span class="text-[9px] text-slate-400 dark:text-slate-500" x-text="currentTime"></span>
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold"
+                                  :class="{
+                                      'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400': progressPercent >= 100,
+                                      'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400': progressPercent > 0 && progressPercent < 100,
+                                      'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400': progressPercent === 0
+                                  }"
+                                  x-text="progressPercent >= 100 ? 'Selesai' : (progressPercent > 0 ? 'Sedang Berjalan' : 'Belum Dimulai')"></span>
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 @endforeach
 
@@ -484,6 +512,45 @@
         }
         viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
     })();
+</script>
+
+<script>
+    function workScheduleProgress(startTime, endTime) {
+        return {
+            currentTime: '--:--',
+            progressPercent: 0,
+            intervalId: null,
+            init() {
+                this.updateProgress();
+                this.intervalId = setInterval(() => this.updateProgress(), 1000);
+            },
+            updateProgress() {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                this.currentTime = `${hours}:${minutes}`;
+
+                const [startH, startM] = startTime.split(':').map(Number);
+                const [endH, endM] = endTime.split(':').map(Number);
+                const startMinutes = startH * 60 + startM;
+                const endMinutes = endH * 60 + endM;
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+                if (currentMinutes < startMinutes) {
+                    this.progressPercent = 0;
+                } else if (currentMinutes >= endMinutes) {
+                    this.progressPercent = 100;
+                } else {
+                    const totalDuration = endMinutes - startMinutes;
+                    const elapsed = currentMinutes - startMinutes;
+                    this.progressPercent = (elapsed / totalDuration) * 100;
+                }
+            },
+            destroy() {
+                if (this.intervalId) clearInterval(this.intervalId);
+            }
+        };
+    }
 </script>
 
 <style>
