@@ -1,4 +1,4 @@
-# <img src="public/images/logo.png" height="36" alt="ICB CT Logo" style="vertical-align:middle;"> ICB CT - Sistem Presensi Guru
+# 🏫 ICB CT — Sistem Presensi Guru
 
 <div align="center">
 
@@ -528,7 +528,38 @@ php artisan storage:link
 
 ## 🐛 Bug Reports
 
-Gunakan **Pusat Bantuan** di dalam aplikasi (menu sidebar) — laporan otomatis masuk ke GitHub Issues dan ClickUp.
+Ada bug atau kendala? Tersedia 3 jalur laporan:
+
+### 1. Pusat Bantuan (Direkomendasikan)
+Gunakan menu **Pusat Bantuan** di dalam aplikasi — laporan otomatis masuk ke GitHub Issues dan ClickUp lengkap dengan metadata (browser, OS, IP, screenshot).
+
+### 2. WhatsApp
+Hubungi developer langsung jika butuh respons cepat:
+
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat_Sekarang-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/6285183172721)
+
+> **+62 851-8317-2721** — sertakan deskripsi masalah, screenshot, dan langkah reproduksi.
+
+### 3. Email
+Kirim laporan tertulis ke:
+
+[![Email](https://img.shields.io/badge/Email-vioatmajaya@gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:vioatmajaya@gmail.com?subject=[BUG]%20ICB%20CT%20Presensi%20-%20Nama%20Bug&body=Deskripsi%20bug%3A%0A%0ALangkah%20reproduksi%3A%0A1.%20...%0A2.%20...%0A%0AExpected%20behavior%3A%0A%0AActual%20behavior%3A%0A%0AScreenshot%20%2F%20log%3A)
+
+> Subject: `[BUG] ICB CT Presensi - Deskripsi Singkat`
+
+---
+
+### Format Laporan yang Baik
+
+```
+Judul     : [BUG] Nama masalah singkat
+Deskripsi : Apa yang terjadi?
+Langkah   : 1. Buka halaman X → 2. Klik tombol Y → 3. Error muncul
+Expected  : Seharusnya terjadi apa?
+Actual    : Yang terjadi sekarang apa?
+Device    : HP/PC, Browser, OS
+Screenshot: (lampirkan jika ada)
+```
 
 ---
 
@@ -542,11 +573,29 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 <div align="center">
 
-### Made with ❤️ by
+```
+▄▄▄▄  ▄▄▄▄  ▄▄▄▄▄▄▄ ▄▄▄   ▄▄▄   ▄▄▄▄   ▄▄▄      ▄▄▄   ▄▄▄ ▄▄▄    ▄▄▄   ▄▄▄▄▄▄    ▄▄▄▄▄▄▄ ▄▄▄▄  ▄▄▄▄
+▀███  ███▀ ███▀▀▀▀▀ ████▄████ ▄██▀▀██▄ ███      ███   ███ ████▄  ███   ███▀▀██▄ ███▀▀▀▀▀ ▀███  ███▀
+ ███  ███  ███▄▄     ▀█████▀  ███  ███ ███      ▀███▄███▀ ███▀██▄███   ███  ███ ███▄▄     ███  ███
+ ███▄▄███  ███      ▄███████▄ ███▀▀███ ███        ▀███▀   ███  ▀████   ███  ███ ███       ███▄▄███
+  ▀████▀   ▀███████ ███▀ ▀███ ███  ███ ████████    ███    ███    ███   ██████▀  ▀███████   ▀████▀
+```
 
-<img src="public/images/logo-dev-banner.png" height="32" alt="Vexalyn Dev">
+### ✦ Vio Atmajaya Saputra ✦
 
-**Vio Atmajaya Saputra**
+> *Crafting clean code, elegant UI, and scalable systems.*
+
+---
+
+| | |
+|:---:|:---|
+| 🧑‍💻 **Studio** | Vexalyn Dev |
+| 📧 **Email** | vioatmajaya@gmail.com |
+| 🌐 **Website** | [vexalyndev.my.id](https://vexalyndev.my.id) |
+| 🐙 **GitHub** | [github.com/vexalyn-dev](https://github.com/vexalyn-dev) |
+| 📱 **Live App** | [presensi-guru.smkicb-teknika.sch.id](https://presensi-guru.smkicb-teknika.sch.id) |
+
+---
 
 [![GitHub](https://img.shields.io/badge/GitHub-vexalyn--dev-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vexalyn-dev)
 [![Email](https://img.shields.io/badge/Email-vioatmajaya%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:vioatmajaya@gmail.com)
@@ -591,8 +640,12 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 **⭐ Star this repo if you find it helpful!**
 
-Made with ❤️ by <img src="public/images/logo-dev-banner.png" height="16" alt="Vexalyn Dev" style="vertical-align:middle;margin-bottom:3px;"> • © 2026 ICB Cinta Teknika
+---
 
-[⬆️ Back to Top](#-icb-ct---sistem-presensi-guru)
+```
+Made with ❤️ by Vexalyn Dev  •  © 2026 ICB Cinta Teknika
+```
+
+[⬆️ Back to Top](#-icb-ct--sistem-presensi-guru)
 
 </div>
