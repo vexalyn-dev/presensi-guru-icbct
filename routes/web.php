@@ -369,8 +369,27 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
 });
 
 // ============================================================
-// Developer Dashboard — login dulu, harus role developer
+// One-time cache fix endpoint — hapus setelah selesai dipakai
+// Akses: /fix-session?secret=vexalyn-dev-2026
 // ============================================================
+Route::get('/fix-session', function () {
+    $secret = request('secret');
+    if ($secret !== config('app.developer_secret_key', '')) {
+        abort(404);
+    }
+
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('event:clear');
+
+    return response()->json([
+        'success' => true,
+        'message' => '✅ Cache berhasil dibersihkan! Silakan refresh halaman login (Ctrl+Shift+R).',
+    ]);
+});
+
 Route::middleware(['auth'])->group(function () {
     Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
         Route::get('/',                          [DeveloperController::class, 'dashboard'])       ->name('index');
