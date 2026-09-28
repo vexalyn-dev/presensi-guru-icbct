@@ -584,8 +584,22 @@
             .auth-container::after { display: none !important; }
 
             .auth-credit {
-                padding: 16px 20px 24px;
-                font-size: 11px;
+                padding: 10px 16px 18px;
+                font-size: 10px;
+                margin-top: 12px;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border-radius: 0;
+                box-shadow: none;
+                color: #64748B;
+                letter-spacing: 0.08em;
+            }
+
+            .auth-credit a {
+                color: #64748B;
             }
 
             /* ── Sembunyikan panel desktop ── */
@@ -620,7 +634,6 @@
                 pointer-events: none;
             }
 
-            /* Logo box */
             .mobile-logo-container {
                 width: 112px !important;
                 height: 112px !important;
@@ -663,7 +676,6 @@
                 position: relative; z-index: 1;
             }
 
-            /* ── Forms container: flex grow, putih ── */
             .forms-container {
                 position: relative;
                 width: 100%;
@@ -678,14 +690,13 @@
                 overflow: visible;
             }
 
-            /* ── Form card: fill sisa tinggi layar ── */
             .form-container {
                 position: relative;
                 width: 100%;
                 flex: 1;
                 min-height: 0;
                 max-height: none;
-                padding: 40px 28px 52px;
+                padding: 40px 28px 16px;
                 overflow: visible;
                 justify-content: flex-start;
                 background: transparent;
@@ -695,6 +706,10 @@
                 left: auto; right: auto;
                 opacity: 1 !important;
                 z-index: 2 !important;
+            }
+
+            form {
+                margin-bottom: 0;
             }
 
             /* Tunjuk-sembunyikan form login/register mobile */
@@ -1089,7 +1104,7 @@
                 @endif
             </div>
             <h1 id="mobileTitle">SMK ICB Cinta Teknika</h1>
-            <p id="mobileDesc">Sistem presensi digital sekolah yang mudah, cepat, dan terpercaya.</p>
+            <p id="mobileDesc">Sistem presensi digital sekolah yang mudah, cepat, dan modern.</p>
         </div>
 
         <!-- Sliding Panel (KIRI) -->
