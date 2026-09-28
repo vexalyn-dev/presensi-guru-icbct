@@ -45,26 +45,22 @@
 
         .auth-credit {
             text-align: center;
-            padding: 14px 16px;
+            padding: 14px 16px 20px;
             font-size: 11px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            position: absolute;
-            bottom: 6px;
-            left: 0;
-            width: 100%;
-            z-index: 10;
-            pointer-events: none;
+            position: relative;
+            z-index: 5;
+            margin-top: 12px;
         }
 
         .auth-credit a {
             color: #94a3b8;
             text-decoration: none;
             transition: color 0.2s ease;
-            pointer-events: auto;
         }
 
         .auth-credit a:hover {
@@ -566,17 +562,8 @@
             .auth-container::after { display: none !important; }
 
             .auth-credit {
-                position: relative;
-                bottom: auto;
-                left: auto;
-                pointer-events: none;
-                padding: 16px 20px 20px;
+                padding: 16px 20px 24px;
                 font-size: 11px;
-                background: transparent;
-            }
-
-            .auth-credit a {
-                pointer-events: auto;
             }
 
             /* ── Sembunyikan panel desktop ── */
@@ -1102,7 +1089,7 @@
 
             <div class="panel-content">
                 <h1 id="panelTitle">{{ $appSettingsPanel->app_name ?? 'ICB CINTA TEKNIKA' }}</h1>
-                <p id="panelText">Sistem Presensi Guru Digital & Terpercaya</p>
+                <p id="panelText">Sistem Presensi Guru Digital</p>
                 <button class="btn-toggle" id="toggleBtn" onclick="toggleAuth()">Buat Akun</button>
             </div>
         </div>
@@ -1299,10 +1286,10 @@
 
         </div>
         {{-- END .forms-container --}}
-
-        <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
     </div>
     {{-- END .auth-container --}}
+
+    <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
 
     <script>
         function toggleAuth() {
