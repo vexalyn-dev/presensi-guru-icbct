@@ -31,16 +31,16 @@
 
         .auth-container {
             position: relative;
-            width: 900px;
+            width: 980px;
             max-width: calc(100% - 32px);
-            background: white;
-            border-radius: 24px;
+            background: #f8fafc;
+            border-radius: 28px;
             box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18),
                         0 0 0 1px rgba(15, 23, 42, 0.05);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 560px;
+            min-height: 600px;
         }
 
         .auth-credit {
@@ -82,10 +82,11 @@
             padding: 40px 35px !important;
             text-align: center !important;
             overflow: hidden !important;
+            border-radius: 28px 0 0 28px;
         }
 
         .auth-panel.login {
-            background: linear-gradient(150deg, #080F1E 0%, #0F172A 55%, #162035 100%) !important;
+            background: linear-gradient(150deg, #050d1a 0%, #0b1a2d 52%, #101f34 100%) !important;
             transform: translateX(0) !important;
         }
 
@@ -117,22 +118,23 @@
         }
 
         .panel-content h1 {
-            font-size: 1.6rem;
+            font-size: 1.9rem;
             font-weight: 800;
             margin-bottom: 0.75rem;
-            letter-spacing: -0.3px;
+            letter-spacing: -0.35px;
             line-height: 1.3;
         }
 
         .panel-content p {
-            font-size: 0.88rem;
-            color: rgba(255,255,255,0.5);
+            font-size: 0.92rem;
+            color: rgba(255,255,255,0.72);
             margin-bottom: 2.5rem;
-            max-width: 280px;
+            max-width: 300px;
             line-height: 1.65;
         }
 
         .btn-toggle {
+            display: none;
             padding: 13px 40px;
             border: 1.5px solid rgba(255,255,255,0.4);
             background: transparent;
@@ -169,11 +171,11 @@
             right: 0;
             width: 50%;
             height: 100%;
-            padding: 35px 50px;
+            padding: 54px 60px 32px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            background: white;
+            background: #f5f5f5;
             transition: all 0.6s ease-in-out;
             overflow-y: auto;
             scrollbar-width: none;
@@ -202,20 +204,20 @@
         #registerForm.visible { opacity: 1; z-index: 2; }
 
         .form-header {
-            margin-bottom: 2.5rem;
+            margin-bottom: 2.2rem;
         }
 
         .form-header h2 {
-            font-size: 2.2rem;
+            font-size: 3.1rem;
             font-weight: 800;
             color: #0F172A;
             margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.75px;
         }
 
         .form-header p {
             color: #64748B;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
 
         .input-group {
@@ -543,12 +545,14 @@
             }
 
             /* ── Auth container: true full-screen ── */
-        .auth-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
+            .auth-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+
+            .auth-container {
                 width: 100%;
                 max-width: 100%;
                 min-height: 100vh;
@@ -562,6 +566,7 @@
                 background: transparent;
                 position: relative;
             }
+
             .auth-container::before,
             .auth-container::after { display: none !important; }
 
@@ -1094,7 +1099,7 @@
 
             <div class="panel-content">
                 <h1 id="panelTitle">{{ $appSettingsPanel->app_name ?? 'ICB CINTA TEKNIKA' }}</h1>
-                <p id="panelText">Sistem Presensi Guru Digital</p>
+                <p id="panelText">Sistem Presensi Guru Digital &amp; Terpercaya</p>
                 <button class="btn-toggle" id="toggleBtn" onclick="toggleAuth()">Buat Akun</button>
             </div>
         </div>
