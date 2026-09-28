@@ -39,7 +39,7 @@
 
         .auth-container {
             position: relative;
-            width: 820px;
+            width: 800px;
             max-width: calc(100% - 32px);
             background: #f8fafc;
             border-radius: 28px;
@@ -48,8 +48,8 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 500px;
-            margin-top: 18px;
+            min-height: 490px;
+            margin-top: 22px;
         }
 
         .auth-credit {
@@ -61,7 +61,7 @@
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            margin-top: 26px;
+            margin-top: 18px;
             width: 100%;
             display: flex;
             align-items: center;
@@ -183,7 +183,7 @@
             right: 0;
             width: 50%;
             height: 100%;
-            padding: 54px 60px 32px;
+            padding: 42px 52px 28px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -216,11 +216,11 @@
         #registerForm.visible { opacity: 1; z-index: 2; }
 
         .form-header {
-            margin-bottom: 2.2rem;
+            margin-bottom: 1.8rem;
         }
 
         .form-header h2 {
-            font-size: 2.75rem;
+            font-size: 2.5rem;
             font-weight: 800;
             color: #0F172A;
             margin-bottom: 0.5rem;
@@ -229,7 +229,7 @@
 
         .form-header p {
             color: #64748B;
-            font-size: 1rem;
+            font-size: 0.98rem;
         }
 
         .input-group {
@@ -258,6 +258,7 @@
             background: #F8FAFC;
             font-family: 'Inter', sans-serif;
             transition: all 0.2s ease;
+            height: 48px;
         }
 
         .input-wrapper input:focus {
@@ -329,7 +330,7 @@
             box-shadow: 0 4px 20px rgba(15, 23, 42, 0.25);
             margin-top: 0.75rem;
             letter-spacing: 0.02em;
-            min-height: 48px;
+            min-height: 52px;
             touch-action: manipulation;
         }
 
