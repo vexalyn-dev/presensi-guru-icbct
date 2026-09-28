@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title id="pageTitle">Login - {{ config('app.name', 'ICB CT') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
@@ -1581,7 +1582,8 @@
                 }
 
                 var fd = new FormData(form);
-                var csrfToken = document.querySelector('input[name="_token"]')?.value || '';
+                var csrfMeta = document.querySelector('meta[name="csrf-token"]')?.content;
+                var csrfToken = document.querySelector('input[name="_token"]')?.value || csrfMeta || '';
 
                 fetch(form.action, {
                     method: 'POST',
