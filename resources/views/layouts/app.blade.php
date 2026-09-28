@@ -326,15 +326,6 @@
                                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="monitor" class="w-4 h-4 sidebar-icon pulse"></i>
                     <span>Live Monitoring</span>
-                    @unless(request()->routeIs('admin.live-monitoring.*'))
-                        <span class="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20">
-                            <span class="relative flex h-1 w-1">
-                                <span class="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative h-1 w-1 rounded-full bg-emerald-500"></span>
-                            </span>
-                            <span class="text-[8px] font-bold tracking-widest text-emerald-600 dark:text-emerald-400">LIVE</span>
-                        </span>
-                    @endunless
                 </a>
             </div>
 
