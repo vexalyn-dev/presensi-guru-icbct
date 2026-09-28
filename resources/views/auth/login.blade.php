@@ -584,18 +584,12 @@
             .auth-container::after { display: none !important; }
 
             .auth-credit {
-                padding: 10px 16px 18px;
-                font-size: 10px;
-                margin-top: 12px;
-                width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: transparent;
-                border-radius: 0;
-                box-shadow: none;
-                color: #64748B;
-                letter-spacing: 0.08em;
+                display: none !important;
+                padding: 0;
+                margin: 0;
+                width: 0;
+                height: 0;
+                overflow: hidden;
             }
 
             .auth-credit a {
@@ -1431,14 +1425,21 @@
 
             const native = document.getElementById('remember');
             const box = document.getElementById('cbBox');
+            const rememberKey = 'login_remember_me';
 
             function syncRememberBox() {
                 if (!native || !box) return;
                 native.setAttribute('aria-checked', native.checked ? 'true' : 'false');
                 box.classList.toggle('checked', native.checked);
+                localStorage.setItem(rememberKey, native.checked ? '1' : '0');
             }
 
             if (native && box) {
+                const saved = localStorage.getItem(rememberKey);
+                if (saved === '1') {
+                    native.checked = true;
+                }
+
                 box.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
