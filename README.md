@@ -49,8 +49,8 @@
 - [x] Riwayat presensi 7 hari terakhir
 - [x] Statistik bulanan
 - [x] Hardware scanner support (barcode scanner USB)
-- [x] **Mode Otomatis** — scan QR langsung proses tanpa klik konfirmasi
-- [x] **Mode Manual** — perlu konfirmasi guru piket sebelum presensi tercatat
+- [x] Mode Otomatis — scan QR langsung proses tanpa klik konfirmasi
+- [x] Mode Manual — perlu konfirmasi guru piket sebelum presensi tercatat
 - [x] Auto-detect Masuk/Keluar berdasarkan status absen hari itu
 
 ### 🏫 Presensi Kelas
@@ -82,29 +82,29 @@
 - [x] Form laporan Bug, Request Fitur, Maintenance, Pertanyaan
 - [x] Auto-detect metadata: browser, OS, device, IP
 - [x] Upload lampiran: PNG, JPG, PDF, MP4 (drag & drop)
-- [x] **Integrasi GitHub Issues** — tiket otomatis masuk ke GitHub
-- [x] **Integrasi ClickUp** — tiket otomatis masuk sebagai task di ClickUp
+- [x] Integrasi GitHub Issues — tiket otomatis masuk ke GitHub
+- [x] Integrasi ClickUp — tiket otomatis masuk sebagai task di ClickUp
 - [x] Riwayat tiket dengan status tracking
 - [x] Detail tiket dengan link ke GitHub & ClickUp
 - [x] Tersedia untuk semua role
 
 ### 🔒 Keamanan & Proteksi
-- [x] **Content Security Policy (CSP)** — header anti-XSS global
-- [x] **X-Frame-Options DENY** — proteksi clickjacking
-- [x] **Rate Limiting** — login (10/menit), register (5/menit), forgot-password (3/menit)
-- [x] **CSRF Protection** — semua form POST wajib token
-- [x] **SSRF Protection** — validasi host URL di service
-- [x] **IDOR Prevention** — ownership check di semua endpoint data sensitif
-- [x] **XSS Prevention** — escaping user input di JavaScript DOM
-- [x] **Secure Session** — cookie HTTPS-only, encrypt, http_only
-- [x] **Password Enforcement** — bcrypt rounds 12, random password saat import
-- [x] **Email Enumeration Prevention** — response message seragam
-- [x] **QR Token Rotation** — token lama invalid setelah regenerate
-- [x] **PII Minimization** — QR code tanpa nama/email
-- [x] **MIME Validation** — base64 image upload diverifikasi
-- [x] **CRLF Injection Prevention** — sanitasi filename export
-- [x] **Error Message Sanitization** — exception detail tidak terekspose
-- [x] **Open Redirect Prevention** — validasi origin URL
+- [x] Content Security Policy (CSP)** — header anti-XSS global
+- [x] X-Frame-Options DENY** — proteksi clickjacking
+- [x] Rate Limiting** — login (10/menit), register (5/menit), forgot-password (3/menit)
+- [x] CSRF Protection** — semua form POST wajib token
+- [x] SSRF Protection** — validasi host URL di service
+- [x] IDOR Prevention** — ownership check di semua endpoint data sensitif
+- [x] XSS Prevention** — escaping user input di JavaScript DOM
+- [x] Secure Session** — cookie HTTPS-only, encrypt, http_only
+- [x] Password Enforcement** — bcrypt rounds 12, random password saat import
+- [x] Email Enumeration Prevention** — response message seragam
+- [x] QR Token Rotation** — token lama invalid setelah regenerate
+- [x] PII Minimization** — QR code tanpa nama/email
+- [x] MIME Validation** — base64 image upload diverifikasi
+- [x] CRLF Injection Prevention** — sanitasi filename export
+- [x] Error Message Sanitization** — exception detail tidak terekspose
+- [x] Open Redirect Prevention** — validasi origin URL
 
 ### 📱 Download APK
 - [x] Halaman download APK mobile
@@ -315,7 +315,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 # GitHub Issues (Pusat Bantuan)
-GITHUB_ISSUES_TOKEN=your-github-token
+GITHUB_ISSUES_TOKEN=token-github-lu
 GITHUB_ISSUES_REPO=owner/repo
 
 # ClickUp (Pusat Bantuan)
@@ -364,16 +364,33 @@ Setelah ubah `.env`, jalankan `php artisan config:clear`.
 
 ### 📧 Email
 
+> Bebas mau pake yang mana — SMTP atau Resend, dua-duanya didukung. Pilih sesuai selera.
+
+**Opsi 1 — SMTP** (pake Gmail atau SMTP provider lain)
+
 ```env
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
+MAIL_PASSWORD=your-app-password   # buat app password dulu di Google Account
 MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your-email@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
 ```
 
-Project ini telah melalui audit keamanan komprehensif mencakup:
+**Opsi 2 — Resend** (lebih simpel, recommended buat production)
+
+```env
+MAIL_MAILER=resend
+RESEND_API_KEY=re_xxxxxxxxxxxx    # dapet dari dashboard resend.com
+MAIL_FROM_ADDRESS=noreply@domainlu.sch.id
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+> 💡 Resend gratis sampai 3.000 email/bulan — cocok banget buat yang suka gratisan. Daftar di [resend.com](https://resend.com).
+
+Project ini udah dicek keamanannya dari berbagai sisi, ini daftarnya:
 
 | Kategori | Status |
 |----------|--------|
@@ -403,11 +420,11 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=icb_ct_Presensi
 DB_USERNAME=root
-DB_PASSWORD=your-strong-password
+DB_PASSWORD=password-db-lu kalo mau di kosongin kosongin aja
 
 # Email (Resend / SMTP)
 MAIL_MAILER=resend
-RESEND_API_KEY=your-resend-key
+RESEND_API_KEY=key-resend-lu
 ```
 
 ### 🔐 Production Checklist
@@ -437,10 +454,10 @@ php artisan view:cache
 
 | Role | Value DB | Permissions |
 |------|----------|-------------|
-| **Administrator** | `admin` | Full access (legacy, backward compatible) |
-| **Operator** | `operator` | Full access — identik dengan admin, termasuk Live Monitoring, Log Aktivitas, semua Data Master |
-| **Guru** | `guru` | Presensi Harian, Presensi Kelas, Jadwal, Riwayat, Izin, Pusat Bantuan |
-| **Guru Piket** | `guru_piket` | Presensi Harian, Manual Presensi, Approval Izin, Jadwal Kerja, Kalender Libur, Pusat Bantuan |
+| Administrator | `admin` | Full access (legacy, backward compatible) |
+| Operator | `operator` | Full access — identik dengan admin, termasuk Live Monitoring, Log Aktivitas, semua Data Master |
+| Guru | `guru` | Presensi Harian, Presensi Kelas, Jadwal, Riwayat, Izin, Pusat Bantuan |
+| Guru Piket | `guru_piket` | Presensi Harian, Manual Presensi, Approval Izin, Jadwal Kerja, Kalender Libur, Pusat Bantuan |
 
 ### 🔐 Demo Accounts
 
@@ -454,7 +471,7 @@ php artisan db:seed --class=DemoAccountSeeder
 | Operator | `operator@smkicb.sch.id` | `Operatoricb123` |
 | Guru Piket | `piket@smkicb.sch.id` | `Piketicb123` |
 | Guru | `guru@smkicb.sch.id` | `Guruicb123` |
-| **Developer** | `dev@vexalyndev.my.id` | `VexalynDev2026!` |
+| Developer | `dev@vexalyndev.my.id` | `VexalynDev2026!` |
 
 > **Developer** — login via halaman biasa, otomatis redirect ke Dev Panel.
 
@@ -538,7 +555,7 @@ Hubungi developer langsung jika butuh respons cepat:
 
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat_Sekarang-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/6283898980808)
 
-> **+62 851-8317-2721** — sertakan deskripsi masalah, screenshot, dan langkah reproduksi.
+> **+62 838-9898-0808** — sertakan deskripsi masalah, screenshot, dan langkah reproduksi.
 
 ### 3. Email
 Kirim laporan tertulis ke:
@@ -573,7 +590,7 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 <div align="center">
 
-![Vexalyn Dev](public/images/banner-vexalyn-dev.png)
+<img src="public/images/banner-vexalyn-dev.png" alt="Vexalyn Dev" style="border-radius:16px;" />
 
 ### ✦ Vio Atmajaya Saputra ✦
 
