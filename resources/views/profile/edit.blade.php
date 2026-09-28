@@ -102,9 +102,9 @@
                     </svg>
                 </div>
             </div>
-            <div class="flex-1 text-center md:text-left pt-10 md:pt-0">
-                <h2 class="text-2xl font-bold text-navy-800 dark:text-white mb-1 break-words">{{ $user->name }}</h2>
-                <p class="text-slate-500 dark:text-slate-400 mb-2">{{ $user->email }}</p>
+            <div class="flex-1 min-w-0 text-center md:text-left pt-10 md:pt-0">
+                <h2 class="profile-name text-2xl font-bold text-navy-800 dark:text-white mb-1 leading-tight" style="display:block; max-width:100%; white-space:normal; overflow-wrap:anywhere; word-break:break-word; hyphens:auto;">{{ $user->name }}</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-2" style="max-width:100%; white-space:normal; overflow-wrap:anywhere; word-break:break-word;">{{ $user->email }}</p>
                 <span class="inline-flex items-center px-3 py-1 bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300 rounded-full text-sm font-semibold">
                     {{ $user->role_name }}
                 </span>
@@ -509,15 +509,20 @@
     input, textarea, button {
         transition: all 0.2s ease-in-out;
     }
-</style>
 
-<script>
-@php
-    $defaultPhotoUrl = 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=1E3A5F&color=fff&size=200&bold=true';
-@endphp
-window.profileDefaultPhoto = '{{ $defaultPhotoUrl }}';
-</script>
+    .profile-name {
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        hyphens: auto;
+    }
+    </style>
 
-@include('partials.photo-cropper')
+    <script>
+    window.profileDefaultPhoto = 'https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=1E3A5F&color=fff&size=200&bold=true';
+    </script>
+
+    @include('partials.photo-cropper')
 
 @endsection
