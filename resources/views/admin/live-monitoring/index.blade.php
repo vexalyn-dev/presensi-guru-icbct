@@ -51,17 +51,6 @@
                            transition-transform duration-700 ease-out pointer-events-none
                            hidden dark:block"
                 ></div>
-                {{-- Status dot --}}
-                <div class="relative flex h-1.5 w-1.5 flex-shrink-0 mt-1.5">
-                    <span
-                        x-show="!lastPollFailed"
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40"
-                    ></span>
-                    <span
-                        class="relative inline-flex h-1.5 w-1.5 rounded-full transition-colors duration-300"
-                        :class="lastPollFailed ? 'bg-red-400' : 'bg-emerald-500'"
-                    ></span>
-                </div>
                 {{-- Time block --}}
                 <div class="flex flex-col leading-none select-none">
                     <span
@@ -75,18 +64,6 @@
                                tabular-nums tracking-wider"
                         x-text="displayTime"
                     ></span>
-                </div>
-                {{-- Connection status pill --}}
-                <div
-                    class="ml-1 pl-3 border-l border-slate-200 dark:border-slate-600/40"
-                >
-                    <span
-                        class="text-[9px] font-medium tracking-wide transition-colors duration-300"
-                        :class="lastPollFailed ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'"
-                    >
-                        <template x-if="!lastPollFailed">Connected</template>
-                        <template x-if="lastPollFailed">Reconnecting…</template>
-                    </span>
                 </div>
             </div>
         </div>
