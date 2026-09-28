@@ -563,12 +563,9 @@
 
             /* ── Auth container: true full-screen, no scroll ── */
             .auth-wrapper {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
+                display: block;
                 width: 100%;
                 height: 100%;
-                overflow: visible;
             }
 
             .auth-container {
@@ -582,7 +579,7 @@
                 border-radius: 0;
                 box-shadow: none;
                 border: none;
-                overflow: visible;
+                overflow: hidden;
                 background: transparent;
                 position: relative;
             }
@@ -596,17 +593,22 @@
 
             .mobile-credit {
                 display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
                 align-items: center;
                 justify-content: center;
                 gap: 0;
                 width: 100%;
-                padding: 16px 16px 28px;
-                margin-top: auto;
+                padding: 10px 16px 20px;
                 font-size: 10px;
                 font-weight: 600;
                 letter-spacing: 0.08em;
                 text-transform: uppercase;
                 color: #94a3b8;
+                background: #FFFFFF;
+                z-index: 10;
             }
 
             .mobile-credit a {
@@ -696,19 +698,20 @@
                 min-height: 0;
                 display: flex;
                 flex-direction: column;
-                justify-content: space-between;
+                justify-content: flex-start;
                 background: #FFFFFF;
                 border-radius: 32px 32px 0 0;
                 margin-top: -16px;
                 box-shadow: 0 -4px 32px rgba(15,23,42,0.18);
                 z-index: 2;
-                overflow: visible;
+                overflow: hidden;
+                padding-bottom: 48px;
             }
 
             .form-container {
                 position: relative;
                 width: 100%;
-                flex: 0 0 auto;
+                flex: 1;
                 min-height: 0;
                 max-height: none;
                 padding: 32px 28px 0;
@@ -1241,9 +1244,6 @@
             </div>
             {{-- END #loginForm --}}
 
-            {{-- Credit mobile: di luar form, push ke bawah via margin-top: auto --}}
-            <div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
-
             <!-- Register Form -->
             <div class="form-container" id="registerForm">
                 <div class="form-header">
@@ -1350,6 +1350,7 @@
     {{-- END .auth-container --}}
 
         <div class="auth-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+        <div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
     </div>
 </div>
 
