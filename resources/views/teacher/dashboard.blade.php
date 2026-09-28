@@ -445,7 +445,7 @@
                             <span class="text-[10px] font-bold text-purple-700 dark:text-purple-300" x-text="progressPercent.toFixed(1) + '%'"></span>
                         </div>
                         <div class="w-full h-2 bg-purple-200 dark:bg-purple-900/50 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full transition-all duration-1000 ease-out"
+                            <div class="h-full rounded-full transition-all duration-75 ease-linear"
                                  :class="progressPercent >= 100 ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-purple-600 to-purple-800 dark:from-gold-400 dark:to-gold-500'"
                                  :style="'width: ' + Math.min(progressPercent, 100) + '%'"></div>
                         </div>
@@ -514,44 +514,48 @@
     })();
 </script>
 
-<script>
+    <script>
     function workScheduleProgress(startTime, endTime) {
         return {
             currentTime: '--:--',
             progressPercent: 0,
-            intervalId: null,
+            rafId: null,
             init() {
                 this.updateProgress();
-                this.intervalId = setInterval(() => this.updateProgress(), 1000);
+                this.tick = () => {
+                    this.updateProgress();
+                    this.rafId = requestAnimationFrame(this.tick);
+                };
+                this.rafId = requestAnimationFrame(this.tick);
             },
             updateProgress() {
                 const now = new Date();
-                const hours = now.getHours().toString().padStart(2, '0');
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                this.currentTime = `${hours}:${minutes}`;
+                const h = now.getHours().toString().padStart(2, '0');
+                const m = now.getMinutes().toString().padStart(2, '0');
+                this.currentTime = `${h}:${m}`;
 
                 const [startH, startM] = startTime.split(':').map(Number);
                 const [endH, endM] = endTime.split(':').map(Number);
                 const startMinutes = startH * 60 + startM;
                 const endMinutes = endH * 60 + endM;
-                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                const startSeconds = startH * 3600 + startM * 60;
+                const endSeconds = endH * 3600 + endM * 60;
 
-                if (currentMinutes < startMinutes) {
+                if (currentSeconds < startSeconds) {
                     this.progressPercent = 0;
-                } else if (currentMinutes >= endMinutes) {
+                } else if (currentSeconds >= endSeconds) {
                     this.progressPercent = 100;
                 } else {
-                    const totalDuration = endMinutes - startMinutes;
-                    const elapsed = currentMinutes - startMinutes;
-                    this.progressPercent = (elapsed / totalDuration) * 100;
+                    this.progressPercent = ((currentSeconds - startSeconds) / (endSeconds - startSeconds)) * 100;
                 }
             },
             destroy() {
-                if (this.intervalId) clearInterval(this.intervalId);
+                if (this.rafId) cancelAnimationFrame(this.rafId);
             }
         };
     }
-</script>
+    </script>
 
 <style>
     /* ===== FAILSAFE ANTI-OVERFLOW ===== */
