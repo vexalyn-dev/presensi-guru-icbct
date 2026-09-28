@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AttendanceController;

@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 @section('page-title', 'Log Aktivitas')
 @section('content')
 <div class="space-y-6 fade-in">
