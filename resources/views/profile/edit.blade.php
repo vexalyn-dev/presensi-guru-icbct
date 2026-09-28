@@ -45,7 +45,7 @@
     <!-- Row 1: Profile Card (Full Width) -->
     <div class="card overflow-hidden">
         {{-- Gradient header dengan titik 3 di pojok kanan atas --}}
-        <div class="h-24 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:via-gold-500 dark:to-amber-500 relative">
+        <div class="h-32 bg-gradient-to-br from-navy-800 via-navy-900 to-slate-900 dark:from-gold-400 dark:via-gold-500 dark:to-amber-500 relative">
             <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 25% 50%,white 1px,transparent 1px),radial-gradient(circle at 75% 20%,white 1px,transparent 1px);background-size:20px 20px;"></div>
 
             {{-- 3-dot menu pojok kanan atas --}}
