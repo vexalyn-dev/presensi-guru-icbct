@@ -28,7 +28,7 @@
             <ul class="nb-tips">
                 <li>
                     <span class="nb-ico nb-ico-violet"><i data-lucide="rocket" class="w-4 h-4"></i></span>
-                    <div><strong>Deploy dan maintenance</strong><small>Jalankan migration, optimize, atau full deploy dengan satu klik.</small></div>
+                    <div><strong>Deploy dan maintenance</strong><small>Jalankan migration, optimize, atau perbaiki session dengan satu klik.</small></div>
                 </li>
                 <li>
                     <span class="nb-ico nb-ico-mint"><i data-lucide="package-check" class="w-4 h-4"></i></span>
