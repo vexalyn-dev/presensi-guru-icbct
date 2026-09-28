@@ -177,4 +177,24 @@ class AttendanceController extends Controller
         return back()->with($success ? 'success' : 'error', $message);
     }
 
+    /**
+     * Polling endpoint — dipanggil tiap 3 detik dari halaman presensi guru.
+     * Kembalikan snapshot status check_in / check_out hari ini.
+     */
+    public function pollStatus(): \Illuminate\Http\JsonResponse
+    {
+        $user = auth()->user();
+        $att  = Attendance::where('user_id', $user->id)
+                    ->whereDate('date', Carbon::today())
+                    ->first();
+
+        return response()->json([
+            'has_checkin'  => (bool) ($att?->check_in),
+            'has_checkout' => (bool) ($att?->check_out),
+            'check_in'     => $att?->check_in  ? Carbon::parse($att->check_in)->format('H:i')  : null,
+            'check_out'    => $att?->check_out ? Carbon::parse($att->check_out)->format('H:i') : null,
+            'status'       => $att?->status ?? null,
+        ]);
+    }
+
 }

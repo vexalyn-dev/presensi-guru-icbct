@@ -600,8 +600,8 @@
                 justify-content: center;
                 gap: 0;
                 width: 100%;
-                padding: 12px 16px 20px;
-                margin-top: 4px;
+                padding: 16px 16px 28px;
+                margin-top: auto;
                 font-size: 10px;
                 font-weight: 600;
                 letter-spacing: 0.08em;
@@ -696,9 +696,10 @@
                 min-height: 0;
                 display: flex;
                 flex-direction: column;
+                justify-content: space-between;
                 background: #FFFFFF;
                 border-radius: 32px 32px 0 0;
-                margin-top: -28px;
+                margin-top: -16px;
                 box-shadow: 0 -4px 32px rgba(15,23,42,0.18);
                 z-index: 2;
                 overflow: hidden;
@@ -707,12 +708,12 @@
             .form-container {
                 position: relative;
                 width: 100%;
-                flex: 1;
+                flex: 0 0 auto;
                 min-height: 0;
                 max-height: none;
-                padding: 32px 28px 8px;
+                padding: 32px 28px 0;
                 overflow: hidden;
-                justify-content: center;
+                justify-content: flex-start;
                 background: transparent;
                 border-radius: 0;
                 box-shadow: none;
@@ -1236,12 +1237,12 @@
                     </div>
 
                     <button type="submit" class="btn-submit" id="loginSubmitBtn">Masuk</button>
-
-                    {{-- Credit mobile: muncul di bawah tombol Masuk, hanya di mobile --}}
-                    <div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
                 </form>
             </div>
             {{-- END #loginForm --}}
+
+            {{-- Credit mobile: di luar form, push ke bawah via margin-top: auto --}}
+            <div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
 
             <!-- Register Form -->
             <div class="form-container" id="registerForm">

@@ -256,4 +256,219 @@
             animation: fadeIn 0.3s ease-out forwards;
         }
     </style>
+
+    {{-- ══ ATTENDANCE REALTIME MODAL ══ --}}
+    {{-- Overlay blur gelap, persis desain login --}}
+    <div id="at-overlay" style="
+        position:fixed; inset:0; z-index:9999;
+        background:rgba(10,15,30,0.82);
+        backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+        display:flex; flex-direction:column;
+        align-items:center; justify-content:center;
+        opacity:0; pointer-events:none;
+        transition:opacity 0.25s ease;">
+
+        <div style="
+            background:#fff; border-radius:24px;
+            padding:36px 40px 32px; width:240px;
+            text-align:center; box-shadow:0 24px 56px rgba(0,0,0,0.35);
+            position:relative; overflow:hidden;">
+
+            {{-- STATE: LOADING --}}
+            <div id="at-state-loading">
+                <div style="position:relative;width:72px;height:72px;margin:0 auto 20px;">
+                    <div style="position:absolute;inset:0;border-radius:50%;border:4px solid #E2E8F0;border-top-color:#0F172A;animation:atSpin 0.9s linear infinite;"></div>
+                    <div style="position:absolute;top:8px;left:8px;right:8px;bottom:8px;border-radius:50%;border:4px solid transparent;border-bottom-color:#FACC15;animation:atSpinRev 0.7s linear infinite;"></div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:16px;">
+                    <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:atBounce 0.6s ease-in-out infinite;"></span>
+                    <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:atBounce 0.6s ease-in-out 0.15s infinite;"></span>
+                    <span style="width:7px;height:7px;background:#0F172A;border-radius:50%;animation:atBounce 0.6s ease-in-out 0.3s infinite;"></span>
+                </div>
+                <p style="font-size:0.88rem;font-weight:700;color:#0F172A;margin-bottom:3px;">Memproses presensi…</p>
+                <p style="font-size:0.75rem;color:#94A3B8;font-weight:400;">Mohon tunggu sebentar</p>
+            </div>
+
+            {{-- STATE: SUCCESS CHECK-IN --}}
+            <div id="at-state-checkin" style="display:none;">
+                <div style="margin-bottom:20px;">
+                    <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:72px;height:72px;display:block;margin:0 auto;">
+                        <circle cx="36" cy="36" r="32" stroke="#22C55E" stroke-width="4"
+                                stroke-dasharray="201" stroke-dashoffset="201"
+                                style="animation:atCircleIn 0.45s ease forwards;"/>
+                        <path d="M20 36 L31 47 L52 25" stroke="#22C55E" stroke-width="4"
+                              stroke-linecap="round" stroke-linejoin="round"
+                              stroke-dasharray="60" stroke-dashoffset="60"
+                              style="animation:atCheckIn 0.4s ease 0.3s forwards;"/>
+                    </svg>
+                </div>
+                <p style="font-size:0.88rem;font-weight:700;color:#16A34A;margin-bottom:3px;">Presensi Masuk Berhasil!</p>
+                <p id="at-checkin-time" style="font-size:0.75rem;color:#94A3B8;font-weight:400;"></p>
+            </div>
+
+            {{-- STATE: SUCCESS CHECK-OUT --}}
+            <div id="at-state-checkout" style="display:none;">
+                <div style="margin-bottom:20px;">
+                    <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:72px;height:72px;display:block;margin:0 auto;">
+                        <circle cx="36" cy="36" r="32" stroke="#22C55E" stroke-width="4"
+                                stroke-dasharray="201" stroke-dashoffset="201"
+                                style="animation:atCircleIn 0.45s ease forwards;"/>
+                        <path d="M20 36 L31 47 L52 25" stroke="#22C55E" stroke-width="4"
+                              stroke-linecap="round" stroke-linejoin="round"
+                              stroke-dasharray="60" stroke-dashoffset="60"
+                              style="animation:atCheckIn 0.4s ease 0.3s forwards;"/>
+                    </svg>
+                </div>
+                <p style="font-size:0.88rem;font-weight:700;color:#16A34A;margin-bottom:3px;">Presensi Pulang Berhasil!</p>
+                <p id="at-checkout-time" style="font-size:0.75rem;color:#94A3B8;font-weight:400;"></p>
+            </div>
+
+            {{-- STATE: ALREADY SCANNED --}}
+            <div id="at-state-already" style="display:none;">
+                <div style="margin-bottom:20px;">
+                    <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"
+                         style="width:72px;height:72px;display:block;margin:0 auto;animation:atXIn 0.35s ease forwards;">
+                        <circle cx="36" cy="36" r="32" stroke="#F59E0B" stroke-width="4"/>
+                        <path d="M36 24 L36 40" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+                        <circle cx="36" cy="48" r="2.5" fill="#F59E0B"/>
+                    </svg>
+                </div>
+                <p style="font-size:0.88rem;font-weight:700;color:#D97706;margin-bottom:3px;">QR Sudah Tercatat</p>
+                <p style="font-size:0.75rem;color:#94A3B8;font-weight:400;">Presensi hari ini sudah lengkap</p>
+            </div>
+
+        </div>
+    </div>
+
+    <style>
+        @keyframes atSpin    { to { transform: rotate(360deg); } }
+        @keyframes atSpinRev { to { transform: rotate(-360deg); } }
+        @keyframes atBounce  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes atCheckIn {
+            0%   { stroke-dashoffset: 60; opacity: 0; }
+            100% { stroke-dashoffset: 0;  opacity: 1; }
+        }
+        @keyframes atCircleIn {
+            0%   { stroke-dashoffset: 180; }
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes atXIn {
+            0%   { opacity: 0; transform: scale(0.5); }
+            60%  { transform: scale(1.15); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        #at-overlay.show { opacity: 1 !important; pointer-events: all !important; }
+    </style>
+
+    <script>
+    (function () {
+        var pollUrl    = "{{ route('teacher.attendance.poll-status') }}";
+        var overlay    = document.getElementById('at-overlay');
+        var stLoad     = document.getElementById('at-state-loading');
+        var stCheckIn  = document.getElementById('at-state-checkin');
+        var stCheckOut = document.getElementById('at-state-checkout');
+        var stAlready  = document.getElementById('at-state-already');
+
+        // Snapshot state saat halaman pertama load
+        // Dari server — apa yang sudah ada sebelum polling dimulai
+        var initHasCheckIn  = {{ json_encode((bool)($todayAttendance && $todayAttendance->check_in)) }};
+        var initHasCheckOut = {{ json_encode((bool)($todayAttendance && $todayAttendance->check_out)) }};
+
+        var prevCheckIn  = initHasCheckIn;
+        var prevCheckOut = initHasCheckOut;
+        var modalVisible = false;
+        var closeTimer   = null;
+
+        function showState(name) {
+            [stLoad, stCheckIn, stCheckOut, stAlready].forEach(function(el) {
+                el.style.display = 'none';
+            });
+            var map = {
+                loading  : stLoad,
+                checkin  : stCheckIn,
+                checkout : stCheckOut,
+                already  : stAlready,
+            };
+            if (map[name]) map[name].style.display = 'block';
+        }
+
+        function showOverlay(state, timeStr) {
+            if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+
+            // Tampilkan spinner sebentar dulu
+            showState('loading');
+            overlay.classList.add('show');
+            modalVisible = true;
+
+            setTimeout(function () {
+                // Re-trigger animasi SVG dengan clone trick
+                showState(state);
+
+                if (state === 'checkin') {
+                    var el = document.getElementById('at-checkin-time');
+                    if (el) el.textContent = timeStr ? 'Jam masuk: ' + timeStr + ' WIB' : '';
+                } else if (state === 'checkout') {
+                    var el = document.getElementById('at-checkout-time');
+                    if (el) el.textContent = timeStr ? 'Jam pulang: ' + timeStr + ' WIB' : '';
+                }
+
+                // Refresh SVG animasi — clone & replace agar restart
+                var svgs = overlay.querySelectorAll('#at-state-' + (state === 'checkin' ? 'checkin' : (state === 'checkout' ? 'checkout' : 'already')) + ' svg');
+                svgs.forEach(function(svg) {
+                    var clone = svg.cloneNode(true);
+                    svg.parentNode.replaceChild(clone, svg);
+                });
+
+                closeTimer = setTimeout(function () {
+                    overlay.classList.remove('show');
+                    modalVisible = false;
+                    // Refresh halaman agar status card ter-update
+                    setTimeout(function() { window.location.reload(); }, 300);
+                }, 3000);
+            }, 800);
+        }
+
+        function poll() {
+            fetch(pollUrl, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                credentials: 'same-origin',
+            })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                if (!data) return;
+
+                var nowCheckIn  = data.has_checkin;
+                var nowCheckOut = data.has_checkout;
+
+                if (!modalVisible) {
+                    if (!prevCheckIn && nowCheckIn) {
+                        // Baru check-in
+                        showOverlay('checkin', data.check_in);
+                    } else if (prevCheckIn && !prevCheckOut && nowCheckOut) {
+                        // Baru check-out (sudah check-in sebelumnya)
+                        showOverlay('checkout', data.check_out);
+                    } else if (prevCheckIn && prevCheckOut && (nowCheckIn || nowCheckOut)) {
+                        // Sudah lengkap, scan lagi — tampilkan "sudah tercatat"
+                        // (tidak trigger ulang karena state tidak berubah)
+                    }
+                }
+
+                prevCheckIn  = nowCheckIn;
+                prevCheckOut = nowCheckOut;
+            })
+            .catch(function() { /* silent fail */ });
+        }
+
+        // Mulai polling setiap 3 detik
+        setInterval(poll, 3000);
+
+        // Klik overlay untuk tutup manual
+        overlay.addEventListener('click', function() {
+            if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+            overlay.classList.remove('show');
+            modalVisible = false;
+        });
+    })();
+    </script>
+    {{-- end at-overlay script --}}
 @endsection

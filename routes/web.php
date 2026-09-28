@@ -266,6 +266,7 @@ Route::middleware(['auth', 'role:guru,guru_piket'])->prefix('teacher')->name('te
         Route::get('/work-schedule', [WorkScheduleController::class, 'index'])->name('work-schedule');
         Route::get('/attendance', [\App\Http\Controllers\Teacher\AttendanceController::class, 'index'])->name('attendance');
         Route::post('/attendance/store', [\App\Http\Controllers\Teacher\AttendanceController::class, 'store'])->name('attendance.store');
+        Route::get('/attendance/poll-status', [\App\Http\Controllers\Teacher\AttendanceController::class, 'pollStatus'])->name('attendance.poll-status');
         
         // Class Attendance
         Route::get('/class-attendance', [TeacherClassAttendanceController::class, 'index'])->name('class-attendance');
