@@ -60,7 +60,7 @@
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            margin-top: 16px;
+            margin-top: 22px;
             width: 100%;
             display: flex;
             align-items: center;
@@ -219,7 +219,7 @@
         }
 
         .form-header h2 {
-            font-size: 3.1rem;
+            font-size: 2.75rem;
             font-weight: 800;
             color: #0F172A;
             margin-bottom: 0.5rem;
