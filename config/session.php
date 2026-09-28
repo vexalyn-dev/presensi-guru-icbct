@@ -30,17 +30,12 @@ return [
 'path' => '/',
 'domain' => env('SESSION_DOMAIN'),
     'secure' => env('SESSION_SECURE_COOKIE', false),
-'http_only' => true,
-'same_site' => 'lax',
+    'http_only' => true,
+    'same_site' => 'lax',
     /*
     |--------------------------------------------------------------------------
     | Partitioned Cookies
     |--------------------------------------------------------------------------
-    |
-    | Setting this value to true will tie the cookie to the top-level site for
-    | a cross-site context. Partitioned cookies are accepted by the browser
-    | when flagged "secure" and the Same-Site attribute is set to "none".
-    |
     */
 
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),

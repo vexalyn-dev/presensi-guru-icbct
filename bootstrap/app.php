@@ -26,12 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'maintenance.check'     => \App\Http\Middleware\CheckMaintenanceMode::class,
             'csp'                   => \App\Http\Middleware\ContentSecurityPolicy::class,
         ]);
-        // Session timeout + maintenance check global untuk semua web request
+        // Force session cookie settings agar kompatibel di semua hosting
+        $middleware->prependToGroup('web', \App\Http\Middleware\FixSessionCookie::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnforceSessionTimeout::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\CheckMaintenanceMode::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\ContentSecurityPolicy::class);
-        // Force session cookie settings agar kompatibel di semua browser/hosting
-        $middleware->appendToGroup('web', \App\Http\Middleware\FixSessionCookie::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
