@@ -28,7 +28,7 @@
             </div>
             <div class="flex items-center gap-2 text-xs text-slate-400">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Diperbarui <span class="font-medium text-slate-600 dark:text-slate-300 ml-1" x-text="updatedAt"></span>
+                <span class="font-medium text-emerald-600 dark:text-emerald-400 ml-1">Realtime</span>
             </div>
         </div>
     </div>
@@ -354,8 +354,8 @@ function liveMonitoring(initialData) {
         timerInterval: null,
 
         init() {
-            // Polling setiap 15 detik
-            this.pollInterval = setInterval(() => this.fetchData(), 15000);
+            // Polling setiap 2 detik
+            this.pollInterval = setInterval(() => this.fetchData(), 2000);
             // Tick server time setiap 1 detik
             this.timerInterval = setInterval(() => {
                 this.waktuServer = this.tickTime(this.waktuServer);
