@@ -1434,11 +1434,22 @@
 
             function syncRememberBox() {
                 if (!native || !box) return;
+                native.setAttribute('aria-checked', native.checked ? 'true' : 'false');
                 box.classList.toggle('checked', native.checked);
             }
 
-            if (native) {
+            if (native && box) {
+                box.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    native.checked = !native.checked;
+                    native.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+
                 native.addEventListener('change', syncRememberBox);
+                native.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
                 syncRememberBox();
             }
         });
