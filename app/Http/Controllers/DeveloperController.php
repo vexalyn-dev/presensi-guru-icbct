@@ -11,7 +11,6 @@ use App\Services\ApkService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Schema;
 
 class DeveloperController extends Controller
 {
@@ -223,7 +222,6 @@ class DeveloperController extends Controller
 
     /**
      * Clear semua cache (config, route, view, application cache).
-     * Dulu dikenal sebagai "sapu jagat".
      */
     public function clearCache(string $secret)
     {
@@ -353,16 +351,6 @@ class DeveloperController extends Controller
 
     private function getApkSetting(): AppSetting
     {
-        $s = AppSetting::getInstance();
-        $hasCol = Schema::hasColumn('app_settings', 'apk_file');
-        if (!$hasCol || (!$s->apk_file && Setting::get('apk_file_path'))) {
-            $s->apk_file        = Setting::get('apk_file_path');
-            $s->apk_name        = Setting::get('apk_name');
-            $s->apk_version     = Setting::get('apk_version');
-            $s->apk_min_android = Setting::get('apk_min_android');
-            $s->apk_size        = (int) Setting::get('apk_size', 0);
-            $s->apk_changelog   = Setting::get('apk_changelog');
-        }
-        return $s;
+        return AppSetting::getInstance();
     }
 }
