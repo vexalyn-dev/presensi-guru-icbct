@@ -61,6 +61,10 @@ Route::get('/', function () {
     if (Auth::check()) {
         $user = Auth::user();
 
+        if ($user->isDeveloper()) {
+            return redirect()->route('developer.index', config('app.developer_secret_key'));
+        }
+
         return $user->isTeacher()
             ? redirect()->route('teacher.dashboard')
             : redirect()->route('dashboard');
