@@ -369,6 +369,42 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
 });
 
 // ============================================================
+// Diagnostic endpoint — buka ini di browser untuk cek session
+// Akses: /debug-session?secret=vexalyn-dev-2026
+// ============================================================
+Route::get('/debug-session', function () {
+    $secret = request('secret');
+    if ($secret !== config('app.developer_secret_key', '')) {
+        abort(404);
+    }
+
+    $sessionDir = storage_path('framework/sessions');
+
+    return response()->json([
+        'php_version'        => PHP_VERSION,
+        'laravel_version'    => app()->version(),
+        'app_env'            => config('app.env'),
+        'app_key_set'        => !empty(config('app.key')),
+        'session_driver'     => config('session.driver'),
+        'session_encrypt'    => config('session.encrypt'),
+        'session_secure'     => config('session.secure'),
+        'session_cookie'     => config('session.cookie'),
+        'session_dir'        => $sessionDir,
+        'dir_exists'         => is_dir($sessionDir),
+        'dir_writable'       => is_writable($sessionDir),
+        'dir_permissions'    => is_dir($sessionDir) ? substr(sprintf('%o', fileperms($sessionDir)), -4) : 'N/A',
+        'web_server'         => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+        'request_scheme'     => $_SERVER['REQUEST_SCHEME'] ?? 'unknown',
+        'x_forwarded_proto'  => $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'none',
+        'session_started'    => session()->isStarted(),
+        'session_id'         => session()->getId() ?? 'none',
+        'cookie_icb_ct'      => request()->cookies->has('icb_ct_session') ? 'EXISTS' : 'NOT FOUND',
+        'cookie_xsrf'        => request()->cookies->has('XSRF-TOKEN') ? 'EXISTS' : 'NOT FOUND',
+        'all_cookies'        => request()->cookies->keys(),
+    ]);
+});
+
+// ============================================================
 // One-time cache fix endpoint — hapus setelah selesai dipakai
 // Akses: /fix-session?secret=vexalyn-dev-2026
 // ============================================================
@@ -378,15 +414,32 @@ Route::get('/fix-session', function () {
         abort(404);
     }
 
-    Artisan::call('config:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('event:clear');
+    $sessionDir = storage_path('framework/sessions');
+
+    // Paksa buat folder + set permission
+    @mkdir($sessionDir, 0777, true);
+    @chmod($sessionDir, 0777);
+
+    // Coba tulis file test
+    $testFile = $sessionDir . '/.write-test';
+    $canWrite = @file_put_contents($testFile, 'test', FILE_APPEND) !== false;
+    @unlink($testFile);
+
+    \Artisan::call('config:clear');
+    \Artisan::call('route:clear');
+    \Artisan::call('view:clear');
+    \Artisan::call('cache:clear');
+    \Artisan::call('event:clear');
 
     return response()->json([
-        'success' => true,
-        'message' => '✅ Cache berhasil dibersihkan! Silakan refresh halaman login (Ctrl+Shift+R).',
+        'success'  => true,
+        'message'  => '✅ Cache berhasil dibersihkan! Session dir diperbaiki.',
+        'session_dir'  => $sessionDir,
+        'dir_exists'   => is_dir($sessionDir),
+        'dir_writable' => is_writable($sessionDir),
+        'write_test'   => $canWrite,
+        'permissions'  => substr(sprintf('%o', fileperms($sessionDir) ?? 0), -4),
+        'instructions' => 'Refresh halaman login (Ctrl+Shift+R). Cek cookie di DevTools → Application → Cookies. Harusnya muncul icb_ct_session.',
     ]);
 });
 
