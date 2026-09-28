@@ -37,6 +37,9 @@ class RoleMiddleware
 
     private function redirectByRole($user): Response
     {
+        if ($user->isDeveloper()) {
+            return redirect()->route('developer.index', config('app.developer_secret_key'));
+        }
         if ($user->canAccessAdmin()) {
             return redirect()->route('dashboard');
         }

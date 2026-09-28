@@ -43,9 +43,11 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Redirect based on role
-        $defaultRoute = $user->isTeacher()
-            ? route('teacher.dashboard', absolute: false)
-            : route('dashboard', absolute: false);
+        $defaultRoute = $user->isDeveloper()
+            ? route('developer.index', config('app.developer_secret_key'))
+            : ($user->isTeacher()
+                ? route('teacher.dashboard', absolute: false)
+                : route('dashboard', absolute: false));
 
         return redirect($intended ?? $defaultRoute);
     }

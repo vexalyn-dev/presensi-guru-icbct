@@ -613,6 +613,13 @@
             return getAlpineData(document.getElementById('attendance-root'))?.scanMode || 'manual';
         }
 
+        // Ambil mode terkini dari DOM (bukan dari closure) agar selalu sesuai UI terakhir
+        function getCurrentMode() {
+            const hwInput = document.getElementById('hardware-mode-input');
+            const attInput = document.getElementById('attendance-mode-input');
+            return hwInput?.value || attInput?.value || 'masuk';
+        }
+
         function shouldSkipDuplicateAutoScan(qrData) {
             if (getScanMode() !== 'auto') return false;
             const now = Date.now();
@@ -682,9 +689,7 @@
                 if (shouldSkipDuplicateAutoScan(qrData)) return;
 
                 const scanMode = getScanMode();
-                const currentMode = scanMode === 'auto'
-                    ? 'auto'
-                    : (document.getElementById('hardware-mode-input')?.value || 'masuk');
+                const currentMode = getCurrentMode();
 
                 // Hide hardware input area dan show result container
                 document.getElementById('camera-box').classList.add('hidden');
@@ -977,7 +982,7 @@
             if (shouldSkipDuplicateAutoScan(data)) return;
             const alpineData = getAlpineData(document.getElementById('attendance-root'));
             const scanMode = alpineData?.scanMode || 'manual';
-            const currentMode = scanMode === 'auto' ? 'auto' : (alpineData?.mode || document.getElementById('attendance-mode-input')?.value || 'masuk');
+            const currentMode = getCurrentMode();
             stopCamera();
             document.getElementById('scanning-overlay').classList.add('hidden');
             document.getElementById('scanning-overlay').classList.remove('flex', 'items-center', 'justify-center');
@@ -1022,7 +1027,6 @@
                         teacher_id: teacherId,
                         token: qrToken
                     });
-                    document.getElementById('attendance-mode-input').value = currentMode;
 
                     if (scanMode === 'auto') {
                         submitAutoAttendance(teacherData);
@@ -1033,6 +1037,8 @@
                     fetch(`${attendanceStatusRoute}/${teacherId}`)
                         .then(res => res.json())
                         .then(statusData => {
+                            document.getElementById('attendance-mode-input').value = currentMode;
+
                             if (statusData.already_checked_in && currentMode === 'masuk') {
                                 showAlreadyCheckedInWarning(teacherData, statusData);
                                 return;
@@ -1042,7 +1048,9 @@
                                 // SUDAH MASUK → TAMPILKAN INFO KELUAR
                                 document.getElementById('success-title').textContent = 'Presensi Keluar';
                                 document.getElementById('success-icon-type').setAttribute('data-lucide', 'log-out');
-                                
+                                document.getElementById('btn-confirm-text').textContent = 'Konfirmasi Presensi Keluar';
+                                document.getElementById('attendance-mode-input').value = 'keluar';
+
                                 // Show check-in time
                                 qrDataEl.innerHTML += `
                                     <div class="mt-4 pt-4 border-t border-green-200 dark:border-green-800">
@@ -1053,16 +1061,34 @@
                                 `;
                                 
                                 attendanceForm.classList.remove('hidden');
+                            } else if (currentMode === 'keluar' && !statusData.already_checked_in) {
+                                // Mode keluar tapi belum ada data masuk
+                                document.getElementById('success-title').textContent = 'Presensi Keluar';
+                                document.getElementById('success-icon-type').setAttribute('data-lucide', 'log-out');
+                                document.getElementById('btn-confirm-text').textContent = 'Konfirmasi Presensi Keluar';
+                                document.getElementById('attendance-mode-input').value = 'keluar';
+                                qrDataEl.innerHTML += `
+                                    <div class="mt-4 pt-4 border-t border-yellow-200 dark:border-yellow-800">
+                                        <p class="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Guru ini belum tercatat presensi masuk hari ini. Presensi keluar tetap akan dicatat.</p>
+                                    </div>
+                                `;
+                                attendanceForm.classList.remove('hidden');
                             } else {
                                 // BELUM MASUK → TAMPILKAN INFO MASUK
                                 document.getElementById('success-title').textContent = 'Presensi Masuk';
                                 document.getElementById('success-icon-type').setAttribute('data-lucide', 'log-in');
-                                
+                                document.getElementById('btn-confirm-text').textContent = 'Konfirmasi Presensi Masuk';
+                                document.getElementById('attendance-mode-input').value = 'masuk';
                                 attendanceForm.classList.remove('hidden');
                             }
+                            
+                            if (window.lucide) lucide.createIcons();
                         })
                         .catch(err => {
                             console.error('Status check error:', err);
+                            document.getElementById('attendance-mode-input').value = currentMode;
+                            document.getElementById('btn-confirm-text').textContent =
+                                currentMode === 'keluar' ? 'Konfirmasi Presensi Keluar' : 'Konfirmasi Presensi Masuk';
                             attendanceForm.classList.remove('hidden');
                         });
                 })
