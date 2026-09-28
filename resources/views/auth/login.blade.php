@@ -1191,7 +1191,7 @@
                     <div class="input-group">
                         <label for="login-email">Email</label>
                         <div class="input-wrapper">
-                            <input type="email" id="login-email" name="email" placeholder="namakamu@email.com" required
+                            <input type="email" id="login-email" name="email" placeholder="emailkamu@gmail.com" required
                                 value="{{ old('email') }}">
                             <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1275,7 +1275,7 @@
                     <div class="input-group">
                         <label for="register-email">Email</label>
                         <div class="input-wrapper">
-                            <input type="email" id="register-email" name="email" placeholder="namakamu@email.com" required
+                            <input type="email" id="register-email" name="email" placeholder="emailkamu@gmail.com" required
                                 value="{{ old('email') }}">
                             <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
