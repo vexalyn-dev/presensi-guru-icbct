@@ -17,7 +17,7 @@ class LiveMonitoringService
      */
     public function getLiveData(): array
     {
-        $key = 'live-monitoring-' . auth()->id();
+        $key = 'live-monitoring-' . (auth()->id() ?? 'guest');
         $ttl = 1; // 1 detik — cukup untuk terasa realtime tapi hemat DB
 
         return Cache::remember($key, $ttl, function () {
@@ -55,19 +55,20 @@ class LiveMonitoringService
             ->whereNull('check_out_time')
             ->get()
             ->map(function ($ca) {
-                $checkInTs = Carbon::parse($ca->date->format('Y-m-d') . ' ' . $ca->check_in_time)->timestamp;
+                $checkInDate = $ca->date instanceof \Carbon\Carbon ? $ca->date : \Carbon\Carbon::parse($ca->date);
+                $checkInTs   = $checkInDate->setTimeFromTimeString($ca->check_in_time)->timestamp;
                 return [
                     'id'              => $ca->id,
                     'user'            => [
-                        'id'           => $ca->user->id,
-                        'name'         => $ca->user->name,
-                        'teacher_code' => $ca->user->teacher_code,
-                        'photo'        => $ca->user->photo ? asset('storage/' . $ca->user->photo) : null,
-                        'initial'      => strtoupper(substr($ca->user->name, 0, 1)),
+                        'id'           => $ca->user?->id ?? null,
+                        'name'         => $ca->user?->name ?? '-',
+                        'teacher_code' => $ca->user?->teacher_code ?? '',
+                        'photo'        => $ca->user?->photo ? asset('storage/' . $ca->user->photo) : null,
+                        'initial'      => strtoupper(substr($ca->user?->name ?? 'U', 0, 1)),
                     ],
-                    'subject'         => $ca->subject->name ?? '-',
-                    'classroom'       => $ca->classroom->name ?? '-',
-                    'classroom_code'  => $ca->classroom->code ?? '-',
+                    'subject'         => $ca->subject?->name ?? '-',
+                    'classroom'       => $ca->classroom?->name ?? '-',
+                    'classroom_code'  => $ca->classroom?->code ?? '-',
                     'period'          => $ca->period,
                     'check_in_time'   => substr($ca->check_in_time, 0, 5),
                     'timestamp_masuk' => $checkInTs,
@@ -112,14 +113,14 @@ class LiveMonitoringService
                 $terlambatMenit = (int) Carbon::parse($schedule->start_time)->diffInMinutes(Carbon::now());
                 $result[] = [
                     'user'            => [
-                        'id'           => $schedule->user->id,
-                        'name'         => $schedule->user->name,
-                        'teacher_code' => $schedule->user->teacher_code,
-                        'photo'        => $schedule->user->photo ? asset('storage/' . $schedule->user->photo) : null,
-                        'initial'      => strtoupper(substr($schedule->user->name, 0, 1)),
+                        'id'           => $schedule->user?->id ?? null,
+                        'name'         => $schedule->user?->name ?? '-',
+                        'teacher_code' => $schedule->user?->teacher_code ?? '',
+                        'photo'        => $schedule->user?->photo ? asset('storage/' . $schedule->user->photo) : null,
+                        'initial'      => strtoupper(substr($schedule->user?->name ?? 'U', 0, 1)),
                     ],
-                    'subject'         => $schedule->subject->name ?? '-',
-                    'classroom'       => $schedule->classroom->name ?? '-',
+                    'subject'         => $schedule->subject?->name ?? '-',
+                    'classroom'       => $schedule->classroom?->name ?? '-',
                     'period'          => $schedule->period,
                     'jam_mulai'       => substr($schedule->start_time ?? '', 0, 5),
                     'terlambat_menit' => max(0, $terlambatMenit),
@@ -144,17 +145,16 @@ class LiveMonitoringService
             ->whereHas('user', fn($q) => $q->where('role', 'guru'))
             ->get()
             ->map(function ($att) {
-                $checkIn = $att->check_in instanceof \Carbon\Carbon
-                    ? $att->check_in
-                    : Carbon::parse($att->date . ' ' . $att->check_in);
+                $checkInDate = $att->date instanceof \Carbon\Carbon ? $att->date : \Carbon\Carbon::parse($att->date);
+                $checkIn     = $checkInDate->setTimeFromTimeString($att->check_in);
 
                 return [
                     'user'            => [
-                        'id'           => $att->user->id,
-                        'name'         => $att->user->name,
-                        'teacher_code' => $att->user->teacher_code,
-                        'photo'        => $att->user->photo ? asset('storage/' . $att->user->photo) : null,
-                        'initial'      => strtoupper(substr($att->user->name, 0, 1)),
+                        'id'           => $att->user?->id ?? null,
+                        'name'         => $att->user?->name ?? '-',
+                        'teacher_code' => $att->user?->teacher_code ?? '',
+                        'photo'        => $att->user?->photo ? asset('storage/' . $att->user->photo) : null,
+                        'initial'      => strtoupper(substr($att->user?->name ?? 'U', 0, 1)),
                     ],
                     'check_in_time'   => $checkIn->format('H:i'),
                     'timestamp_masuk' => $checkIn->timestamp,
@@ -181,18 +181,19 @@ class LiveMonitoringService
             ->whereNotNull('check_out_time')
             ->get()
             ->map(function ($ca) {
-                $checkIn  = Carbon::parse($ca->date->format('Y-m-d') . ' ' . $ca->check_in_time);
-                $checkOut = Carbon::parse($ca->date->format('Y-m-d') . ' ' . $ca->check_out_time);
+                $inDate  = $ca->date instanceof \Carbon\Carbon ? $ca->date : \Carbon\Carbon::parse($ca->date);
+                $checkIn  = $inDate->setTimeFromTimeString($ca->check_in_time);
+                $checkOut = $inDate->setTimeFromTimeString($ca->check_out_time);
                 $durasiMenit = $checkIn->diffInMinutes($checkOut);
 
                 return [
                     'user'           => [
-                        'id'      => $ca->user->id,
-                        'name'    => $ca->user->name,
-                        'initial' => strtoupper(substr($ca->user->name, 0, 1)),
+                        'id'      => $ca->user?->id ?? null,
+                        'name'    => $ca->user?->name ?? '-',
+                        'initial' => strtoupper(substr($ca->user?->name ?? 'U', 0, 1)),
                     ],
-                    'subject'        => $ca->subject->name ?? '-',
-                    'classroom'      => $ca->classroom->name ?? '-',
+                    'subject'        => $ca->subject?->name ?? '-',
+                    'classroom'      => $ca->classroom?->name ?? '-',
                     'period'         => $ca->period,
                     'check_in_time'  => substr($ca->check_in_time, 0, 5),
                     'check_out_time' => substr($ca->check_out_time, 0, 5),

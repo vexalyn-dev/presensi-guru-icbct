@@ -52,23 +52,23 @@ class AttendanceController extends Controller
             
             $teacher = User::find($qrData['teacher_id']);
             
-            // Jika ada token, validasi token. Jika tidak ada, hanya check teacher_id
             if (!$teacher || $teacher->role !== 'guru') {
                 return $ajaxRequest
                     ? response()->json(['success' => false, 'message' => 'Guru tidak ditemukan atau role tidak valid'], 422)
                     : back()->with('error', 'Guru tidak ditemukan atau role tidak valid');
             }
 
+            if (!$teacher->is_active) {
+                return $ajaxRequest
+                    ? response()->json(['success' => false, 'message' => 'Akun guru tidak aktif. Hubungi admin.'], 403)
+                    : back()->with('error', 'Akun guru tidak aktif. Hubungi admin.');
+            }
+
+            // Jika ada token, validasi token
             if (isset($qrData['token']) && $teacher->qr_token !== $qrData['token']) {
                 return $ajaxRequest
                     ? response()->json(['success' => false, 'message' => 'QR code sudah kadaluarsa'], 422)
                     : back()->with('error', 'QR code sudah kadaluarsa');
-            }
-            
-            if (!$teacher->is_active) {
-                return $ajaxRequest
-                    ? response()->json(['success' => false, 'message' => 'Guru ini tidak aktif'], 422)
-                    : back()->with('error', 'Guru ini tidak aktif');
             }
             
         } catch (\Exception $e) {

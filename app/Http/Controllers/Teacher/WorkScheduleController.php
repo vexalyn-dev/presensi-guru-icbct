@@ -11,7 +11,6 @@ class WorkScheduleController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $today = Carbon::now()->dayOfWeek;
 
         $workSchedules = TeacherSchedule::where('user_id', $user->id)
             ->where('is_active', true)
@@ -19,14 +18,15 @@ class WorkScheduleController extends Controller
             ->get();
 
         $dayNames = [
-            0 => 'Minggu', 1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 
+            0 => 'Minggu', 1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu',
             4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu'
         ];
 
         // Hitung total jam kerja mingguan dan format data schedule
         $totalWeeklyHours = 0;
         $scheduleData = [];
-        
+        $today = \Carbon\Carbon::now()->dayOfWeek;
+
         foreach($workSchedules as $schedule) {
             $start = Carbon::parse($schedule->start_time);
             $end = Carbon::parse($schedule->end_time);

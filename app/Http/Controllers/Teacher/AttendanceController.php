@@ -144,7 +144,7 @@ class AttendanceController extends Controller
                 }
             }
 
-            $isLate = $lateThreshold && $now->format('H:i:s') > $lateThreshold->format('H:i:s');
+            $isLate = $lateThreshold ? $now->gt($lateThreshold) : false;
             $attendance->update([
                 'check_in' => $now->format('H:i:s'),
                 'status' => $isLate ? 'Terlambat' : 'Hadir',

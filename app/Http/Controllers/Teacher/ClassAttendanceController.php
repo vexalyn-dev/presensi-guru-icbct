@@ -39,9 +39,10 @@ class ClassAttendanceController extends Controller
 
         $totalClasses      = $schedules->count();
         $completedClasses  = $schedules->filter(fn ($s) => $s->classAttendances->first()?->isComplete())->count();
-        $inProgressClasses = $schedules->filter(
-            fn ($s) => $s->classAttendances->first()?->check_in_time && !$s->classAttendances->first()?->check_out_time
-        )->count();
+        $inProgressClasses = $schedules->filter(function ($s) {
+            $att = $s->classAttendances->first();
+            return $att && $att->check_in_time && !$att->check_out_time;
+        })->count();
 
         return view('teacher.class-attendance.index', compact(
             'schedules', 'totalClasses', 'completedClasses', 'inProgressClasses'
@@ -71,9 +72,10 @@ class ClassAttendanceController extends Controller
 
         $totalClasses      = $schedules->count();
         $completedClasses  = $schedules->filter(fn ($s) => $s->classAttendances->first()?->isComplete())->count();
-        $inProgressClasses = $schedules->filter(
-            fn ($s) => $s->classAttendances->first()?->check_in_time && !$s->classAttendances->first()?->check_out_time
-        )->count();
+        $inProgressClasses = $schedules->filter(function ($s) {
+            $att = $s->classAttendances->first();
+            return $att && $att->check_in_time && !$att->check_out_time;
+        })->count();
 
         // Build schedule items with status
         $items = $schedules->map(function ($schedule) use ($now) {
@@ -118,7 +120,9 @@ class ClassAttendanceController extends Controller
         $reminders = [];
 
         // Check class scans
-        $unscannedClasses = $schedules->filter(fn ($s) => !$s->classAttendances->first()?->check_in_time);
+        $unscannedClasses = $schedules->filter(function ($s) {
+            return !$s->classAttendances->first()?->check_in_time;
+        });
         foreach ($unscannedClasses as $s) {
             $className = $s->classroom->code
                 ? strtoupper(str_replace('-', ' ', $s->classroom->code))
@@ -127,9 +131,10 @@ class ClassAttendanceController extends Controller
         }
 
         // Check pending check-outs
-        $pendingOuts = $schedules->filter(
-            fn ($s) => $s->classAttendances->first()?->check_in_time && !$s->classAttendances->first()?->check_out_time
-        );
+        $pendingOuts = $schedules->filter(function ($s) {
+            $att = $s->classAttendances->first();
+            return $att && $att->check_in_time && !$att->check_out_time;
+        });
         foreach ($pendingOuts as $s) {
             $className = $s->classroom->code
                 ? strtoupper(str_replace('-', ' ', $s->classroom->code))
