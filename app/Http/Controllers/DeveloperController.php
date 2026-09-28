@@ -360,8 +360,14 @@ class DeveloperController extends Controller
      */
     public function runMigrateSecret(Request $request)
     {
-        $secret = $request->input('key');
-        if (!$secret || !hash_equals(config('app.developer_secret_key', ''), (string) $secret)) {
+        $key = (string) $request->input('key', '');
+        $developerKey = config('app.developer_secret_key', '');
+        $deployKey    = config('app.deploy_secret_key', '');
+        $allowed = $developerKey !== '' && hash_equals($developerKey, $key);
+        if (!$allowed && $deployKey !== '' && hash_equals($deployKey, $key)) {
+            $allowed = true;
+        }
+        if (!$allowed) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
