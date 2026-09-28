@@ -68,6 +68,69 @@
     </div>
 </div>
 
+{{-- ═════════════ MODAL RILIS BARU ═════════════ --}}
+<div id="nb-release-modal" class="nb-overlay" role="dialog" aria-modal="true" aria-labelledby="nb-rel-title"
+     data-open="{{ ($errors->has('version') || $errors->has('title') || $errors->has('content') || $errors->has('type')) ? '1' : '0' }}" hidden>
+    <div class="nb-modal">
+        <div class="nb-modal-top">
+            <span class="nb-sticker">Rilis baru</span>
+            <button type="button" class="nb-x" data-close-release aria-label="Tutup">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        <form action="{{ route('developer.updates.store', $secret) }}" method="POST" class="nb-modal-body">
+            @csrf
+            <div>
+                <h3 id="nb-rel-title">Umumkan perubahan</h3>
+                <p class="nb-muted" style="margin-top:6px">Tulis satu baris per perubahan. Awali dengan tanda “-” supaya tampil sebagai daftar.</p>
+            </div>
+
+            <div>
+                <label class="nb-field-label">Jenis rilis</label>
+                <div class="nb-seg" role="radiogroup">
+                    @foreach([['feature','Feature','star'],['update','Update','git-commit'],['fix','Fix','wrench'],['hotfix','Hotfix','flame']] as [$sv, $sl, $si])
+                        <label class="nb-seg-i">
+                            <input type="radio" name="type" value="{{ $sv }}" {{ old('type', 'feature') === $sv ? 'checked' : '' }}>
+                            <span class="nb-seg-b"><i data-lucide="{{ $si }}" class="w-4 h-4"></i>{{ $sl }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                @error('type')<p class="nb-err">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="nb-form-grid">
+                <div>
+                    <label class="nb-field-label" for="rel-version">Versi</label>
+                    <input id="rel-version" type="text" name="version" class="nb-input nb-mono" required placeholder="1.2.0" value="{{ old('version') }}">
+                    @error('version')<p class="nb-err">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label class="nb-field-label" for="rel-title-in">Judul</label>
+                    <input id="rel-title-in" type="text" name="title" class="nb-input" required placeholder="Menambahkan laporan baru" value="{{ old('title') }}">
+                    @error('title')<p class="nb-err">{{ $message }}</p>@enderror
+                </div>
+            </div>
+
+            <div>
+                <label class="nb-field-label" for="rel-content">Changelog</label>
+                <textarea id="rel-content" name="content" rows="5" class="nb-input" required placeholder="- Memperbaiki bug A&#10;- Menambahkan fitur B">{{ old('content') }}</textarea>
+                @error('content')<p class="nb-err">{{ $message }}</p>@enderror
+            </div>
+
+            <label class="nb-check">
+                <input type="checkbox" name="show_modal" value="1" checked>
+                <span class="nb-box"><i data-lucide="check" class="w-3 h-3"></i></span>
+                <span>Tampilkan modal ke pengguna</span>
+            </label>
+
+            <div class="nb-row-end">
+                <button type="button" class="nb-btn nb-btn-ghost" data-close-release>Batal</button>
+                <button type="submit" class="nb-btn"><i data-lucide="send" class="w-4 h-4"></i> Publikasikan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {{-- ═════════════ TAB: DASHBOARD ═════════════ --}}
 <div id="tab-dashboard" class="tab-content">
 
@@ -102,9 +165,20 @@
     </section>
 
     @if($debugOn)
-        <div class="nb-alert nb-in" style="--d:80ms">
-            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-            <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di production supaya detail error tidak terlihat pengguna.</span>
+        <div class="nb-alert nb-alert-run nb-in" style="--d:80ms" role="alert">
+            <i data-lucide="alert-triangle" class="w-5 h-5" style="flex-shrink:0"></i>
+            <div class="nb-marquee">
+                <div class="nb-marquee-track">
+                    @foreach([0, 1] as $half)
+                        <div class="nb-marquee-half" @if($half) aria-hidden="true" @endif>
+                            @foreach([0, 1, 2] as $rep)
+                                <span class="nb-marquee-item {{ $rep ? 'nb-rep' : '' }}"><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di production supaya detail error tidak terlihat pengguna.</span>
+                                <i class="nb-marquee-sep {{ $rep ? 'nb-rep' : '' }}"></i>
+                            @endforeach
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
     @endif
 
@@ -185,14 +259,14 @@
 
 {{-- ═════════════ TAB: APK MANAGER ═════════════ --}}
 <div id="tab-apk" class="tab-content">
-    <div class="nb-wrap-md">
+    <div class="nb-wrap-full">
         <header class="nb-page-head nb-in" style="--d:0ms">
             <h2>APK Manager</h2>
             <p>Unggah dan bagikan build Android terbaru ke pengguna.</p>
         </header>
 
         @if($appSetting?->apk_file)
-            <div class="nb-card nb-lift tilt-card nb-in nb-mb" style="--d:80ms">
+            <div class="nb-card nb-lift nb-in nb-mb" style="--d:80ms">
                 <div class="nb-apk">
                     <div class="nb-apk-info">
                         <span class="nb-ico nb-ico-lg nb-ico-mint"><i data-lucide="package-check" class="w-6 h-6"></i></span>
@@ -216,15 +290,25 @@
                         </form>
                     </div>
                 </div>
+                @if(!empty($appSetting->apk_min_android) || !empty($appSetting->apk_changelog))
+                    <div class="nb-apk-meta">
+                        @if(!empty($appSetting->apk_min_android))
+                            <span class="nb-pill"><i data-lucide="smartphone" class="w-4 h-4"></i> {{ $appSetting->apk_min_android }}</span>
+                        @endif
+                        @if(!empty($appSetting->apk_changelog))
+                            <span class="nb-pill"><i data-lucide="file-text" class="w-4 h-4"></i> {{ $appSetting->apk_changelog }}</span>
+                        @endif
+                    </div>
+                @endif
             </div>
         @endif
 
         <div class="nb-card nb-in" style="--d:140ms">
             <div class="nb-card-head"><h3>Unggah build baru</h3></div>
             <div class="nb-pad">
-                <form action="{{ route('developer.apk', $secret) }}" method="POST" enctype="multipart/form-data" class="nb-stack">
+                <form action="{{ route('developer.apk', $secret) }}" method="POST" enctype="multipart/form-data" class="nb-apk-form">
                     @csrf
-                    <div>
+                    <div class="nb-apk-drop">
                         <label class="nb-field-label">File APK</label>
                         <div class="nb-drop" id="apk-drop" tabindex="0" role="button"
                              onclick="document.getElementById('apk-input').click()"
@@ -240,19 +324,20 @@
                                onchange="setApkName(this.files[0])">
                     </div>
 
-                    <div class="nb-form-grid">
-                        <div><label class="nb-field-label">Nama aplikasi</label>
-                            <input type="text" name="apk_name" class="nb-input" value="{{ old('apk_name', $appSetting?->apk_name ?? '') }}" placeholder="ICB CT Mobile"></div>
-                        <div><label class="nb-field-label">Label versi</label>
-                            <input type="text" name="apk_version" class="nb-input nb-mono" value="{{ old('apk_version', $appSetting?->apk_version ?? '') }}" placeholder="1.0.0"></div>
-                        <div><label class="nb-field-label">Minimal Android</label>
-                            <input type="text" name="apk_min_android" class="nb-input" value="{{ old('apk_min_android', $appSetting?->apk_min_android ?? '') }}" placeholder="Android 8.0+"></div>
-                        <div><label class="nb-field-label">Changelog</label>
-                            <input type="text" name="apk_changelog" class="nb-input" value="{{ old('apk_changelog', $appSetting?->apk_changelog ?? '') }}" placeholder="Perbaikan bug dan peningkatan"></div>
-                    </div>
-
-                    <div class="nb-row-end">
-                        <button type="submit" class="nb-btn"><i data-lucide="save" class="w-4 h-4"></i> Simpan APK</button>
+                    <div class="nb-apk-fields">
+                        <div class="nb-form-grid">
+                            <div><label class="nb-field-label">Nama aplikasi</label>
+                                <input type="text" name="apk_name" class="nb-input" value="{{ old('apk_name', $appSetting?->apk_name ?? '') }}" placeholder="ICB CT Mobile"></div>
+                            <div><label class="nb-field-label">Label versi</label>
+                                <input type="text" name="apk_version" class="nb-input nb-mono" value="{{ old('apk_version', $appSetting?->apk_version ?? '') }}" placeholder="1.0.0"></div>
+                            <div><label class="nb-field-label">Minimal Android</label>
+                                <input type="text" name="apk_min_android" class="nb-input" value="{{ old('apk_min_android', $appSetting?->apk_min_android ?? '') }}" placeholder="Android 8.0+"></div>
+                            <div><label class="nb-field-label">Changelog</label>
+                                <input type="text" name="apk_changelog" class="nb-input" value="{{ old('apk_changelog', $appSetting?->apk_changelog ?? '') }}" placeholder="Perbaikan bug dan peningkatan"></div>
+                        </div>
+                        <div class="nb-row-end">
+                            <button type="submit" class="nb-btn"><i data-lucide="save" class="w-4 h-4"></i> Simpan APK</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -262,7 +347,7 @@
 
 {{-- ═════════════ TAB: SYSTEM STATE ═════════════ --}}
 <div id="tab-system" class="tab-content">
-    <div class="nb-wrap-md nb-stack-lg">
+    <div class="nb-wrap-full nb-stack-lg">
         <header class="nb-page-head nb-in" style="--d:0ms">
             <h2>System State</h2>
             <p>Atur ketersediaan aplikasi dan jalankan tools sistem.</p>
@@ -273,7 +358,9 @@
                 @csrf
                 <div class="nb-pad nb-split nb-bb">
                     <div>
-                        <h3 class="nb-h3">Mode maintenance</h3>
+                        <h3 class="nb-h3">Mode maintenance
+                            <span class="nb-state {{ $mOn ? 'on' : '' }}"><i></i>{{ $mOn ? 'Aktif' : 'Nonaktif' }}</span>
+                        </h3>
                         <p class="nb-muted nb-maxw">Saat aktif, pengguna biasa melihat halaman maintenance. Admin dan operator tetap bisa masuk.</p>
                     </div>
                     <label class="nb-switch">
@@ -285,7 +372,7 @@
                 </div>
                 <div class="nb-pad nb-bb">
                     <label class="nb-field-label">Pesan maintenance</label>
-                    <textarea name="maintenance_message" rows="2" class="nb-input" placeholder="Sistem sedang dalam pemeliharaan...">{{ $setting->maintenance_message }}</textarea>
+                    <textarea name="maintenance_message" rows="3" class="nb-input" placeholder="Sistem sedang dalam pemeliharaan...">{{ $setting->maintenance_message }}</textarea>
                 </div>
                 <div class="nb-pad nb-foot nb-row-end">
                     <button type="submit" class="nb-btn"><i data-lucide="save" class="w-4 h-4"></i> Simpan perubahan</button>
@@ -322,75 +409,136 @@
 </div>
 
 {{-- ═════════════ TAB: RELEASES ═════════════ --}}
+@php
+    $items = $updates instanceof \Illuminate\Pagination\AbstractPaginator ? $updates->getCollection() : collect($updates);
+    $typeMeta = [
+        'feature' => ['Feature', 'violet', 'star'],
+        'update'  => ['Update',  'sky',    'git-commit'],
+        'fix'     => ['Fix',     'sun',    'wrench'],
+        'hotfix'  => ['Hotfix',  'rose',   'flame'],
+    ];
+    $typeKey  = fn ($u) => isset($typeMeta[$u->type]) ? $u->type : 'update';
+    $counts   = $items->countBy($typeKey);
+    $latest   = $items->first();
+    $groups   = $items->groupBy(fn ($u) => $u->created_at->format('Y-m'));
+    $relError = $errors->has('version') || $errors->has('title') || $errors->has('content') || $errors->has('type');
+@endphp
 <div id="tab-releases" class="tab-content">
-    <header class="nb-page-head nb-in" style="--d:0ms">
-        <h2>Riwayat rilis</h2>
-        <p>Kelola changelog dan beri tahu pengguna soal fitur baru.</p>
-    </header>
 
-    <div class="nb-grid-rel">
-        <div class="nb-stack">
-            @forelse($updates as $u)
-                @php
-                    $tone = match($u->type) { 'feature' => 'violet', 'fix' => 'sun', 'hotfix' => 'rose', default => 'sky' };
-                    $icon = match($u->type) { 'feature' => 'star', 'fix' => 'wrench', 'hotfix' => 'flame', default => 'git-commit' };
-                @endphp
-                <article class="nb-card nb-lift tilt-card nb-in nb-release" @style(['--d:' . (min($loop->index, 6) * 60 + 80) . 'ms'])>
-                    <span class="nb-ico nb-ico-lg nb-ico-{{ $tone }}"><i data-lucide="{{ $icon }}" class="w-5 h-5"></i></span>
-                    <div class="nb-release-body">
-                        <div class="nb-split">
-                            <div class="nb-row nb-min0">
-                                <h4 class="truncate">{{ $u->title }}</h4>
-                                <span class="nb-chip">v{{ $u->version }}</span>
-                            </div>
-                            <span class="nb-mono nb-muted nb-nowrap">{{ $u->created_at->format('d M Y') }}</span>
-                        </div>
-                        <p class="nb-muted nb-pre">{{ $u->content }}</p>
-                    </div>
-                    <form action="{{ route('developer.updates.delete', [$secret, $u->id]) }}" method="POST"
-                          onsubmit="return confirmAction(this, '🗑️ Hapus log rilis ini?', 'danger')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="nb-trash" aria-label="Hapus rilis"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </form>
-                </article>
+    <div class="nb-rel-head nb-in" style="--d:0ms">
+        <header class="nb-page-head" style="margin-bottom:0">
+            <h2>Riwayat rilis</h2>
+            <p>Catatan perubahan yang dikirim ke pengguna, urut dari yang terbaru.</p>
+        </header>
+        <button type="button" class="nb-btn" data-open-release>
+            <i data-lucide="plus" class="w-4 h-4"></i> Rilis baru
+        </button>
+    </div>
+
+    <div class="nb-rel-stats">
+        <div class="nb-card nb-mini nb-in" style="--d:60ms">
+            <span class="nb-ico nb-tone-mint"><i data-lucide="layers" class="w-4 h-4"></i></span>
+            <div><p>Total rilis</p><b>{{ $items->count() }}</b></div>
+        </div>
+        <div class="nb-card nb-mini nb-in" style="--d:120ms">
+            <span class="nb-ico nb-tone-violet"><i data-lucide="tag" class="w-4 h-4"></i></span>
+            <div><p>Versi terbaru</p><b class="nb-mono">{{ $latest ? 'v'.$latest->version : '-' }}</b></div>
+        </div>
+        <div class="nb-card nb-mini nb-in" style="--d:180ms">
+            <span class="nb-ico nb-tone-violet"><i data-lucide="star" class="w-4 h-4"></i></span>
+            <div><p>Fitur baru</p><b>{{ $counts->get('feature', 0) }}</b></div>
+        </div>
+        <div class="nb-card nb-mini nb-in" style="--d:240ms">
+            <span class="nb-ico nb-tone-sun"><i data-lucide="wrench" class="w-4 h-4"></i></span>
+            <div><p>Perbaikan</p><b>{{ $counts->get('fix', 0) + $counts->get('hotfix', 0) }}</b></div>
+        </div>
+    </div>
+
+    <div class="nb-rel-grid">
+
+        {{-- Timeline --}}
+        <div class="nb-tl">
+            @forelse($groups as $ym => $rows)
+                <section class="nb-tl-group">
+                    <h3 class="nb-tl-month"><span>{{ $rows->first()->created_at->locale('id')->translatedFormat('F Y') }}</span></h3>
+                    <ol class="nb-tl-list">
+                        @foreach($rows as $u)
+                            @php
+                                $tk = $typeKey($u);
+                                [$tLabel, $tone, $tIcon] = $typeMeta[$tk];
+                                $isLatest = $latest && $u->id === $latest->id;
+                                $lines = array_values(array_filter(
+                                    array_map('trim', preg_split('/\r\n|\r|\n/', (string) $u->content)),
+                                    fn ($l) => $l !== ''
+                                ));
+                            @endphp
+                            <li class="nb-tl-item nb-in" data-type="{{ $tk }}" @style(['--d:' . (min($loop->index, 8) * 50) . 'ms'])>
+                                <span class="nb-ico nb-tl-dot nb-tone-{{ $tone }}"><i data-lucide="{{ $tIcon }}" class="w-5 h-5"></i></span>
+                                <article class="nb-card nb-lift nb-tl-card {{ $isLatest ? 'is-latest' : '' }}">
+                                    <div class="nb-tl-top">
+                                        <div class="nb-tl-title">
+                                            <h4>{{ $u->title }}</h4>
+                                            <span class="nb-chip">v{{ $u->version }}</span>
+                                            <span class="nb-badge nb-tone-{{ $tone }}">{{ $tLabel }}</span>
+                                            @if($isLatest)<span class="nb-sticker nb-sticker-sm">Terbaru</span>@endif
+                                        </div>
+                                        <div class="nb-tl-side">
+                                            <time class="nb-mono nb-muted" datetime="{{ $u->created_at->toDateString() }}">{{ $u->created_at->locale('id')->translatedFormat('d M Y') }}</time>
+                                            <form action="{{ route('developer.updates.delete', [$secret, $u->id]) }}" method="POST"
+                                                  onsubmit="return confirmAction(this, '🗑️ Hapus log rilis ini?', 'danger')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="nb-trash" aria-label="Hapus rilis {{ $u->version }}">
+                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    @if(count($lines))
+                                        <ul class="nb-cl">
+                                            @foreach($lines as $ln)
+                                                <li>{{ preg_replace('/^[-*•·]\s*/u', '', $ln) }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </article>
+                            </li>
+                        @endforeach
+                    </ol>
+                </section>
             @empty
                 <div class="nb-card nb-empty nb-in" style="--d:80ms">
                     <span class="nb-ico nb-ico-lg nb-ico-violet"><i data-lucide="history" class="w-6 h-6"></i></span>
                     <h4>Belum ada riwayat rilis</h4>
-                    <p class="nb-muted">Buat rilis pertamamu lewat form di samping.</p>
+                    <p class="nb-muted">Rilis pertamamu akan muncul di sini sebagai timeline.</p>
+                    <button type="button" class="nb-btn" data-open-release><i data-lucide="plus" class="w-4 h-4"></i> Buat rilis pertama</button>
                 </div>
             @endforelse
-        </div>
 
-        <div>
-            <div class="nb-card nb-in nb-sticky" style="--d:140ms">
-                <div class="nb-card-head"><h3>Buat rilis baru</h3></div>
-                <div class="nb-pad">
-                    <form action="{{ route('developer.updates.store', $secret) }}" method="POST" class="nb-stack">
-                        @csrf
-                        <div><label class="nb-field-label">Versi</label>
-                            <input type="text" name="version" class="nb-input nb-mono" required placeholder="1.2.0"></div>
-                        <div><label class="nb-field-label">Tipe</label>
-                            <select name="type" class="nb-input">
-                                <option value="feature">✨ Feature</option>
-                                <option value="update">🔄 Update</option>
-                                <option value="fix">🔧 Fix</option>
-                                <option value="hotfix">🔥 Hotfix</option>
-                            </select></div>
-                        <div><label class="nb-field-label">Judul</label>
-                            <input type="text" name="title" class="nb-input" required placeholder="Menambahkan laporan baru"></div>
-                        <div><label class="nb-field-label">Changelog</label>
-                            <textarea name="content" rows="4" class="nb-input" required placeholder="- Memperbaiki bug A&#10;- Menambahkan fitur B"></textarea></div>
-                        <label class="nb-check">
-                            <input type="checkbox" name="show_modal" value="1" checked>
-                            <span class="nb-box"><i data-lucide="check" class="w-3 h-3"></i></span>
-                            <span>Tampilkan modal ke pengguna</span>
-                        </label>
-                        <button type="submit" class="nb-btn nb-btn-block"><i data-lucide="send" class="w-4 h-4"></i> Publikasikan</button>
-                    </form>
-                </div>
+            <div class="nb-card nb-empty" id="nb-tl-empty" hidden>
+                <span class="nb-ico nb-ico-lg nb-ico-sun"><i data-lucide="search-x" class="w-6 h-6"></i></span>
+                <h4>Tidak ada rilis dengan jenis ini</h4>
+                <p class="nb-muted">Pilih jenis lain di filter untuk melihat rilis lainnya.</p>
             </div>
         </div>
+
+        {{-- Filter --}}
+        <aside class="nb-rel-aside">
+            <div class="nb-card nb-in nb-sticky" style="--d:140ms">
+                <div class="nb-card-head"><h3>Filter jenis rilis</h3></div>
+                <div class="nb-fbtns">
+                    <button type="button" class="nb-fbtn active" data-filter="all">
+                        <span class="nb-fico nb-tone-mint"><i data-lucide="layers" class="w-4 h-4"></i></span>
+                        Semua <small>{{ $items->count() }}</small>
+                    </button>
+                    @foreach($typeMeta as $key => [$fLabel, $fTone, $fIcon])
+                        <button type="button" class="nb-fbtn" data-filter="{{ $key }}">
+                            <span class="nb-fico nb-tone-{{ $fTone }}"><i data-lucide="{{ $fIcon }}" class="w-4 h-4"></i></span>
+                            {{ $fLabel }} <small>{{ $counts->get($key, 0) }}</small>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        </aside>
     </div>
 </div>
 
@@ -428,7 +576,14 @@
     $$('[data-close-welcome]').forEach(b => b.addEventListener('click', closeWelcome));
     welcome.addEventListener('click', e => { if (e.target === welcome) closeWelcome(); });
     $('#nb-open-welcome')?.addEventListener('click', () => openOverlay(welcome));
-    if (safe(() => localStorage.getItem(KEY)) !== today) setTimeout(() => openOverlay(welcome), 450);
+    const relErr = !!document.querySelector('#nb-release-modal[data-open="1"]');
+    const seen = safe(() => sessionStorage.getItem('dev_welcome_seen'));
+    if (!relErr && !seen && safe(() => localStorage.getItem(KEY)) !== today) {
+        setTimeout(() => {
+            openOverlay(welcome);
+            safe(() => sessionStorage.setItem('dev_welcome_seen', '1'));
+        }, 450);
+    }
 
     /* ───── Modal konfirmasi ───── */
     const box = $('#nb-confirm');
@@ -458,11 +613,44 @@
         else if (el.href) window.location.href = el.href;
     });
 
+    /* ───── Modal rilis baru ───── */
+    const rel = $('#nb-release-modal');
+    const openRel = () => openOverlay(rel);
+    const closeRel = () => closeOverlay(rel);
+    $$('[data-open-release]').forEach(b => b.addEventListener('click', openRel));
+    $$('[data-close-release]').forEach(b => b.addEventListener('click', closeRel));
+    rel.addEventListener('click', e => { if (e.target === rel) closeRel(); });
+    if (rel.dataset.open === '1') setTimeout(openRel, 300);
+
     document.addEventListener('keydown', e => {
         if (e.key !== 'Escape') return;
         if (!box.hidden) closeConfirm();
+        else if (!rel.hidden) closeRel();
         else if (!welcome.hidden) closeWelcome();
     });
+
+    /* ───── Filter timeline rilis ───── */
+    const fbtns = $$('[data-filter]');
+    const tlItems = $$('.nb-tl-item');
+    const tlGroups = $$('.nb-tl-group');
+    const tlEmpty = $('#nb-tl-empty');
+    fbtns.forEach(btn => btn.addEventListener('click', () => {
+        const f = btn.dataset.filter;
+        fbtns.forEach(b => b.classList.toggle('active', b === btn));
+        let shown = 0;
+        tlItems.forEach((it, i) => {
+            const ok = f === 'all' || it.dataset.type === f;
+            it.hidden = !ok;
+            if (!ok) return;
+            shown++;
+            it.style.setProperty('--d', Math.min(i, 8) * 40 + 'ms');
+            it.classList.remove('nb-in');
+            void it.offsetWidth;
+            it.classList.add('nb-in');
+        });
+        tlGroups.forEach(g => { g.hidden = !g.querySelector('.nb-tl-item:not([hidden])'); });
+        if (tlEmpty && tlItems.length) tlEmpty.hidden = shown > 0;
+    }));
 
     /* ───── Upload APK ───── */
     window.setApkName = function (file) {
