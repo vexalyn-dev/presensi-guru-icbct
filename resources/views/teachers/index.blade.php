@@ -191,16 +191,33 @@
     </div>
 
     <!-- Bulk Actions -->
-    <div id="bulkActions" class="hidden card p-4 bg-gold-50 dark:bg-gold-900/20 border border-gold-200 dark:border-gold-800">
+    <div id="bulkActions" class="hidden card p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
         <div class="flex items-center justify-between">
-            <p class="text-sm text-gold-800 dark:text-gold-300">
-                <span id="selectedCount">0</span> guru dipilih
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-navy-800 text-white text-xs font-bold" id="selectedCount">0</span>
+                <span>guru dipilih</span>
             </p>
             <div class="flex items-center gap-2">
-                <button onclick="bulkToggleStatus(true)" class="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors">Aktifkan</button>
-                <button onclick="bulkToggleStatus(false)" class="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors">Nonaktifkan</button>
-                <button onclick="triggerBulkDelete()" class="px-3 py-1.5 bg-slate-700 text-white text-xs font-medium rounded-lg hover:bg-slate-800 transition-colors">Hapus</button>
-                <button onclick="clearSelection()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg hover:bg-slate-300 transition-colors">Batal</button>
+                <button onclick="bulkToggleStatus(true)"
+                    class="bulk-btn px-4 py-2 bg-green-500 hover:bg-green-600 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all duration-150 shadow-sm hover:shadow-md hover:shadow-green-500/30 flex items-center gap-1.5">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Aktifkan
+                </button>
+                <button onclick="bulkToggleStatus(false)"
+                    class="bulk-btn px-4 py-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all duration-150 shadow-sm hover:shadow-md hover:shadow-orange-500/30 flex items-center gap-1.5">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 9v6m4-6v6"/><circle cx="12" cy="12" r="9" stroke-width="2"/></svg>
+                    Nonaktifkan
+                </button>
+                <button onclick="triggerBulkDelete()"
+                    class="bulk-btn px-4 py-2 bg-red-500 hover:bg-red-600 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all duration-150 shadow-sm hover:shadow-md hover:shadow-red-500/30 flex items-center gap-1.5">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                    Hapus
+                </button>
+                <button onclick="clearSelection()"
+                    class="bulk-btn px-4 py-2 bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 active:scale-95 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-600 transition-all duration-150 flex items-center gap-1.5">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Batal
+                </button>
             </div>
         </div>
     </div>
@@ -513,6 +530,60 @@
         border-color: #0F172A;
         box-shadow: 0 0 0 4px rgba(15,23,42,0.08);
     }
+
+    /* ── BULK ACTION BAR ANIMATION ── */
+    #bulkActions {
+        overflow: hidden;
+        transform-origin: bottom center;
+    }
+    #bulkActions.bar-enter {
+        animation: barSlideUp 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    #bulkActions.bar-leave {
+        animation: barSlideDown 0.22s cubic-bezier(0.55, 0, 1, 0.45) both;
+    }
+    @keyframes barSlideUp {
+        from { opacity: 0; transform: translateY(16px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes barSlideDown {
+        from { opacity: 1; transform: translateY(0) scale(1); }
+        to   { opacity: 0; transform: translateY(12px) scale(0.97); }
+    }
+
+    /* Stagger animasi tombol di bulk bar */
+    #bulkActions .bulk-btn {
+        opacity: 0;
+        transform: translateX(-10px);
+        animation: btnSlideIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    #bulkActions .bulk-btn:nth-child(1) { animation-delay: 0.08s; }
+    #bulkActions .bulk-btn:nth-child(2) { animation-delay: 0.14s; }
+    #bulkActions .bulk-btn:nth-child(3) { animation-delay: 0.20s; }
+    #bulkActions .bulk-btn:nth-child(4) { animation-delay: 0.26s; }
+    @keyframes btnSlideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── ROW SELECTED HIGHLIGHT ── */
+    tr.row-selected {
+        background: linear-gradient(90deg, rgba(15,23,42,0.04) 0%, rgba(99,102,241,0.04) 100%) !important;
+        position: relative;
+    }
+    tr.row-selected::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, #0F172A, #1E3A8A);
+        border-radius: 0 2px 2px 0;
+        animation: rowAccent 0.2s ease both;
+    }
+    @keyframes rowAccent {
+        from { transform: scaleY(0); opacity: 0; }
+        to   { transform: scaleY(1); opacity: 1; }
+    }
     @keyframes modalSlideIn {
         from {
             opacity: 0;
@@ -711,12 +782,37 @@
 
         const bar   = document.getElementById('bulkActions');
         const count = document.getElementById('selectedCount');
+
         if (selectedTeachers.length > 0) {
-            bar.classList.remove('hidden');
+            if (bar.classList.contains('hidden')) {
+                bar.classList.remove('hidden');
+                // Reset animasi stagger tombol setiap kali bar muncul
+                bar.querySelectorAll('.bulk-btn').forEach(btn => {
+                    btn.style.animation = 'none';
+                    btn.offsetHeight; // reflow
+                    btn.style.animation = '';
+                });
+                bar.classList.remove('bar-leave');
+                bar.classList.add('bar-enter');
+            }
             count.textContent = selectedTeachers.length;
         } else {
-            bar.classList.add('hidden');
+            if (!bar.classList.contains('hidden')) {
+                bar.classList.remove('bar-enter');
+                bar.classList.add('bar-leave');
+                bar.addEventListener('animationend', function handler() {
+                    bar.classList.add('hidden');
+                    bar.classList.remove('bar-leave');
+                    bar.removeEventListener('animationend', handler);
+                });
+            }
         }
+
+        // Row highlight
+        document.querySelectorAll('.teacher-checkbox').forEach(cb => {
+            const row = cb.closest('tr');
+            if (row) row.classList.toggle('row-selected', cb.checked);
+        });
 
         // Sync selectAll box
         const all = document.querySelectorAll('.teacher-checkbox');

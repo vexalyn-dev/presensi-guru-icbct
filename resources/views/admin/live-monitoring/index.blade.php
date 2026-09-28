@@ -38,13 +38,22 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <div class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-sm">
-                <span class="text-slate-400 text-xs mr-1">Server</span>
-                <span class="text-emerald-600 dark:text-emerald-400 font-bold" x-text="waktuServer"></span>
-            </div>
-            <div class="flex items-center gap-2 text-xs text-slate-400">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="font-medium text-emerald-600 dark:text-emerald-400 ml-1">Realtime</span>
+            <div class="relative flex items-center gap-3 px-4 py-2.5 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-700 border border-slate-700/40 shadow-md shadow-black/10 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"></div>
+                <div class="relative flex h-2 w-2 flex-shrink-0">
+                    <span x-show="!lastPollFailed" class="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
+                    <span
+                        class="relative h-2 w-2 rounded-full transition-colors duration-300"
+                        :class="lastPollFailed ? 'bg-red-500' : 'bg-emerald-400'"
+                    ></span>
+                </div>
+                <div class="flex flex-col leading-none select-none">
+                    <span class="text-[9px] font-semibold tracking-widest text-slate-500 uppercase mb-0.5">Realtime</span>
+                    <span
+                        class="text-sm font-mono font-bold text-emerald-400 tabular-nums tracking-wider"
+                        x-text="displayTime"
+                    ></span>
+                </div>
             </div>
         </div>
     </div>

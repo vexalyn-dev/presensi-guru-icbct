@@ -320,16 +320,21 @@
                 </a>
 
                 <a href="{{ route('admin.live-monitoring.index') }}"
-                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('admin.live-monitoring.*')
-                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                           {{ request()->routeIs('admin.live-monitoring.*')
+                               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                               : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
                     <i data-lucide="monitor" class="w-4 h-4 sidebar-icon pulse"></i>
                     <span>Live Monitoring</span>
-                    <span class="ml-auto flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
+                    @unless(request()->routeIs('admin.live-monitoring.*'))
+                        <span class="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20">
+                            <span class="relative flex h-1.5 w-1.5">
+                                <span class="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            </span>
+                            <span class="text-[9px] font-bold tracking-widest text-emerald-600 dark:text-emerald-400">LIVE</span>
+                        </span>
+                    @endunless
                 </a>
             </div>
 
