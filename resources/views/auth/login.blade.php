@@ -39,7 +39,7 @@
 
         .auth-container {
             position: relative;
-            width: 860px;
+            width: 820px;
             max-width: calc(100% - 32px);
             background: #f8fafc;
             border-radius: 28px;
@@ -48,7 +48,8 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 520px;
+            min-height: 500px;
+            margin-top: 18px;
         }
 
         .auth-credit {
@@ -60,7 +61,7 @@
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            margin-top: 22px;
+            margin-top: 26px;
             width: 100%;
             display: flex;
             align-items: center;
@@ -1310,7 +1311,7 @@
     </div>
     {{-- END .auth-container --}}
 
-        <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+        <div class="auth-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
     </div>
 </div>
 
