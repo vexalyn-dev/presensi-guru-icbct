@@ -392,14 +392,11 @@
                     <span class="nb-ico nb-ico-lg nb-ico-sun"><i data-lucide="zap" class="w-5 h-5"></i></span>
                     <div><b>Optimize</b><small>Bangun ulang cache config, route, dan view</small></div>
                 </a>
-                <form action="{{ route('developer.deploy', $secret) }}" method="POST"
-                      onsubmit="return confirmAction(this, '🚀 Jalankan full deploy?\ngit pull → composer → migrate → optimize')">
-                    @csrf
-                    <button type="submit" class="nb-tool nb-tool-primary">
-                        <span class="nb-ico nb-ico-lg nb-ico-white"><i data-lucide="rocket" class="w-5 h-5"></i></span>
-                        <div><b>Full deploy</b><small>git pull, composer, migrate, cache</small></div>
-                    </button>
-                </form>
+                <a href="{{ url('/fix-session?secret=' . $secret) }}"
+                   onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="nb-tool">
+                    <span class="nb-ico nb-ico-lg nb-ico-amber"><i data-lucide="wrench" class="w-5 h-5"></i></span>
+                    <div><b>Fix Session</b><small>Perbaiki session dir + clear semua cache</small></div>
+                </a>
             </div>
         </div>
     </div>
