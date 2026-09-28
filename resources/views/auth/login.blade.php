@@ -52,9 +52,8 @@
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            position: relative;
-            z-index: 5;
             margin-top: 12px;
+            width: 100%;
         }
 
         .auth-credit a {
@@ -544,7 +543,12 @@
             }
 
             /* ── Auth container: true full-screen ── */
-            .auth-container {
+        .auth-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
                 width: 100%;
                 max-width: 100%;
                 min-height: 100vh;
@@ -1045,6 +1049,7 @@
     </div>
 </div>
 
+    <div class="auth-wrapper">
     <div class="auth-container">
         <!-- Mobile Header Panel -->
         <div class="mobile-header" id="mobileHeader" style="display: none;">
@@ -1128,7 +1133,7 @@
                     <div class="input-group">
                         <label for="login-email">Email</label>
                         <div class="input-wrapper">
-                            <input type="email" id="login-email" name="email" placeholder="nama@email.com" required
+                            <input type="email" id="login-email" name="email" placeholder="namakamu@email.com" required
                                 value="{{ old('email') }}">
                             <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1212,7 +1217,7 @@
                     <div class="input-group">
                         <label for="register-email">Email</label>
                         <div class="input-wrapper">
-                            <input type="email" id="register-email" name="email" placeholder="nama@email.com" required
+                            <input type="email" id="register-email" name="email" placeholder="namakamu@email.com" required
                                 value="{{ old('email') }}">
                             <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1289,7 +1294,9 @@
     </div>
     {{-- END .auth-container --}}
 
+    </div>
     <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+</div>
 
     <script>
         function toggleAuth() {
