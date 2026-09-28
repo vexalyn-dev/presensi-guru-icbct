@@ -355,7 +355,7 @@ function liveMonitoring(initialData) {
 
         init() {
             // Polling setiap 2 detik
-            this.pollInterval = setInterval(() => this.fetchData(), 2000);
+            this.pollInterval = setInterval(() => this.fetchData(), 800);
             // Tick server time setiap 1 detik
             this.timerInterval = setInterval(() => {
                 this.waktuServer = this.tickTime(this.waktuServer);

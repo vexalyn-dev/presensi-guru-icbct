@@ -7,28 +7,35 @@ use App\Models\ClassAttendance;
 use App\Models\TeachingSchedule;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class LiveMonitoringService
 {
     /**
-     * Ambil semua data monitoring real-time
+     * Ambil semua data monitoring real-time.
+     * Dicache 1 detik agar DB tidak dipukul tiap 800ms polling.
      */
     public function getLiveData(): array
     {
-        $now          = Carbon::now();
-        $today        = $now->toDateString();
-        $dayOfWeek    = $now->dayOfWeek; // 0=Sunday, 1=Monday, ..., 6=Saturday
-        $currentTime  = $now->format('H:i:s');
+        $key = 'live-monitoring-' . auth()->id();
+        $ttl = 1; // 1 detik — cukup untuk terasa realtime tapi hemat DB
 
-        return [
-            'sedang_mengajar'   => $this->getSedangMengajar($today, $currentTime),
-            'belum_scan_masuk'  => $this->getBelumScanMasuk($today, $dayOfWeek, $currentTime),
-            'belum_scan_keluar' => $this->getBelumScanKeluar($today),
-            'sudah_selesai'     => $this->getSudahSelesai($today),
-            'stats'             => $this->getStats($today),
-            'waktu_server'      => $now->format('H:i:s'),
-            'updated_at'        => $now->format('H:i:s'),
-        ];
+        return Cache::remember($key, $ttl, function () {
+            $now          = Carbon::now();
+            $today        = $now->toDateString();
+            $dayOfWeek    = $now->dayOfWeek;
+            $currentTime  = $now->format('H:i:s');
+
+            return [
+                'sedang_mengajar'   => $this->getSedangMengajar($today, $currentTime),
+                'belum_scan_masuk'  => $this->getBelumScanMasuk($today, $dayOfWeek, $currentTime),
+                'belum_scan_keluar' => $this->getBelumScanKeluar($today),
+                'sudah_selesai'     => $this->getSudahSelesai($today),
+                'stats'             => $this->getStats($today),
+                'waktu_server'      => $now->format('H:i:s'),
+                'updated_at'        => $now->format('H:i:s'),
+            ];
+        });
     }
 
     /**
@@ -74,6 +81,8 @@ class LiveMonitoringService
     /**
      * 2. Guru yang punya jadwal hari ini tapi BELUM SCAN MASUK
      * Ada TeachingSchedule hari ini yang jam mulainya sudah lewat, tapi tidak ada ClassAttendance
+     *
+     * FIXED: N+1 query dihilangkan dengan batch query semua ClassAttendance hari ini sekali.
      */
     private function getBelumScanMasuk(string $today, int $dayOfWeek, string $currentTime): array
     {
@@ -88,16 +97,18 @@ class LiveMonitoringService
             ->where('start_time', '<=', $currentTime)
             ->get();
 
+        // Batch query: ambil semua ClassAttendance yang sudah scan masuk hari ini SEKALI DOANG
+        $sudahScanSet = ClassAttendance::whereDate('date', $today)
+            ->whereNotNull('check_in_time')
+            ->get()
+            ->keyBy(fn($ca) => $ca->user_id . ':' . $ca->period);
+
         $result = [];
         foreach ($schedules as $schedule) {
-            // Cek apakah sudah scan masuk hari ini
-            $sudahScan = ClassAttendance::where('user_id', $schedule->user_id)
-                ->whereDate('date', $today)
-                ->where('period', $schedule->period)
-                ->whereNotNull('check_in_time')
-                ->exists();
+            $key = $schedule->user_id . ':' . $schedule->period;
 
-            if (!$sudahScan) {
+            // Cek lewat array lookup, tanpa query tambahan
+            if (!$sudahScanSet->has($key)) {
                 $terlambatMenit = (int) Carbon::parse($schedule->start_time)->diffInMinutes(Carbon::now());
                 $result[] = [
                     'user'            => [
