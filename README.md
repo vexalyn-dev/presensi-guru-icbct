@@ -454,6 +454,9 @@ php artisan db:seed --class=DemoAccountSeeder
 | Operator | `operator@smkicb.sch.id` | `Operatoricb123` |
 | Guru Piket | `piket@smkicb.sch.id` | `Piketicb123` |
 | Guru | `guru@smkicb.sch.id` | `Guruicb123` |
+| **Developer** | `dev@vexalyndev.my.id` | `VexalynDev2026!` |
+
+> **Developer** — login via halaman biasa, otomatis redirect ke Dev Panel.
 
 ### 📡 Live Monitoring
 
