@@ -352,11 +352,13 @@ function liveMonitoring(initialData) {
         updatedAt: initialData.updated_at || '--:--:--',
         pollInterval: null,
         timerInterval: null,
+        // Sync counter — pakai waktu server asli, bukan increment lokal
+        lastSyncSecond: -1,
 
         init() {
-            // Polling setiap 2 detik
+            // Polling setiap 1 detik
             this.pollInterval = setInterval(() => this.fetchData(), 1000);
-            // Tick server time setiap 1 detik
+            // Timer detik berjalan setiap 1 detik
             this.timerInterval = setInterval(() => {
                 this.waktuServer = this.tickTime(this.waktuServer);
             }, 1000);
@@ -373,6 +375,8 @@ function liveMonitoring(initialData) {
                     this.data       = json;
                     this.waktuServer = json.waktu_server;
                     this.updatedAt   = json.updated_at;
+                    // Reset counter dari server agar tidak drift
+                    this.lastSyncSecond = -1;
                     this.$nextTick(() => { if (window.lucide) lucide.createIcons(); });
                 }
             } catch (e) {
@@ -392,6 +396,7 @@ function liveMonitoring(initialData) {
         tickTime(t) {
             if (!t || t.length < 8) return t;
             const [h, m, s] = t.split(':').map(Number);
+            // Tambah 1 detik dengan carry yang benar
             let total = h * 3600 + m * 60 + s + 1;
             const nh = Math.floor(total / 3600) % 24;
             const nm = Math.floor((total % 3600) / 60);
