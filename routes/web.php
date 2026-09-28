@@ -381,7 +381,7 @@ Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->get('/run-migrate-secret', function (Request $request) {
     // Lu cuma bisa akses kalo bawa key yang bener
-    if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
+    if ($request->input('key') !== config('app.deploy_secret_key')) {
         abort(404);
     }
 
@@ -396,7 +396,7 @@ Route::middleware(['auth', 'role:admin'])->get('/sapu-jagat', function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->get('/seed-demo', function (Request $request) {
-    if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
+    if ($request->input('key') !== config('app.deploy_secret_key')) {
         abort(404);
     }
 
@@ -408,7 +408,7 @@ Route::middleware(['auth', 'role:admin'])->get('/seed-demo', function (Request $
 
 Route::middleware(['auth', 'role:admin'])->get('/git-pull-rahasia', function (Request $request) {
     // Validasi key rahasia biar aman dari orang Iseng
-    if ($request->input('key') !== env('DEPLOY_SECRET_KEY')) {
+    if ($request->input('key') !== config('app.deploy_secret_key')) {
         abort(404);
     }
 

@@ -123,4 +123,15 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Secret Access Keys
+    |--------------------------------------------------------------------------
+    | Dibaca via config() agar tetap bekerja saat config:cache aktif di production.
+    | Jangan pernah panggil env() langsung di controller/service.
+    */
+
+    'developer_secret_key' => env('DEVELOPER_SECRET_KEY', ''),
+    'deploy_secret_key'    => env('DEPLOY_SECRET_KEY', ''),
+
 ];
