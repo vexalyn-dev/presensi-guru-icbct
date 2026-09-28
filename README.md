@@ -5,7 +5,7 @@
 ![Version](https://img.shields.io/badge/version-2.3.0-blue?style=for-the-badge&logo=appveyor)
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+![License](https://img.shields.io/badge/license-CC%20BY--NC%204.0-orange?style=for-the-badge)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge&logo=github)
 ![Views](https://komarev.com/ghpvc/?username=vexalyn-dev&repo=presensi-guru-icbct&label=Views&color=0e75b6&style=for-the-badge)
 [![Stars](https://img.shields.io/github/stars/vexalyn-dev/presensi-guru-icbct?style=for-the-badge&color=yellow&logo=github)](https://github.com/vexalyn-dev/presensi-guru-icbct/stargazers)
@@ -582,7 +582,20 @@ Screenshot: (lampirkan jika ada)
 
 ## 📄 License
 
-MIT License — lihat [LICENSE](LICENSE) untuk detail.
+Project ini dilisensikan di bawah **Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0)**.
+
+Intinya gini:
+
+- ✅ **Boleh** dipake buat keperluan pribadi, belajar, atau tugas sekolah/kampus
+- ✅ **Boleh** dimodifikasi sesuai kebutuhan
+- ✅ **Boleh** disebarkan ulang, asal tetap kasih kredit ke developernya
+- ❌ **Nggak boleh** dijual atau dikomersialisasi tanpa izin tertulis
+- ❌ **Nggak boleh** hapus credit atau ngaku-ngaku ini project lo sendiri
+- ❌ **Nggak boleh** reupload ulang dengan nama/identitas berbeda seolah-olah lu yang bikin
+
+> Minimal satu hal yang gampang banget: **hargain developernya**. Kalau mau modif silakan, kalau mau pake buat tugas juga boleh tapi yang penting jangan hapus creditnya dan jangan ngaku ini buatan lo. Sesederhana itu. 🙏
+
+Lihat [LICENSE](LICENSE) untuk teks lengkapnya.
 
 ---
 
