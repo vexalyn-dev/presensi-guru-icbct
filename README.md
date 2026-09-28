@@ -583,7 +583,7 @@ MIT License — lihat [LICENSE](LICENSE) untuk detail.
 
 | | |
 |:---:|:---|
-| 🧑‍💻 **Studio** | Vexalyn Dev |
+| 🧑‍💻 **Developer** | Vexalyn Dev |
 | 📧 **Email** | vioatmajaya@gmail.com |
 | 🌐 **Website** | [vexalyndev.my.id](https://vexalyndev.my.id) |
 | 🐙 **GitHub** | [github.com/vexalyn-dev](https://github.com/vexalyn-dev) |
