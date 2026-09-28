@@ -584,12 +584,20 @@
             .auth-container::after { display: none !important; }
 
             .auth-credit {
-                display: none !important;
-                padding: 0;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                padding: 10px 16px 18px;
                 margin: 0;
-                width: 0;
-                height: 0;
-                overflow: hidden;
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #64748B;
+                background: transparent;
+                border-radius: 0;
+                box-shadow: none;
             }
 
             .auth-credit a {
@@ -690,7 +698,7 @@
                 flex: 1;
                 min-height: 0;
                 max-height: none;
-                padding: 40px 28px 16px;
+                padding: 40px 28px 8px;
                 overflow: visible;
                 justify-content: flex-start;
                 background: transparent;
@@ -704,6 +712,10 @@
 
             form {
                 margin-bottom: 0;
+            }
+
+            .btn-submit {
+                margin-bottom: 8px !important;
             }
 
             /* Tunjuk-sembunyikan form login/register mobile */
@@ -1421,37 +1433,66 @@
         // ── Custom Checkbox Toggle ──────────────────────────
         document.addEventListener('DOMContentLoaded', function() {
             const emailInput = document.getElementById('login-email');
-            if (emailInput) emailInput.focus();
-
             const native = document.getElementById('remember');
             const box = document.getElementById('cbBox');
             const rememberKey = 'login_remember_me';
+            const emailKey = 'login_saved_email';
 
             function syncRememberBox() {
                 if (!native || !box) return;
                 native.setAttribute('aria-checked', native.checked ? 'true' : 'false');
                 box.classList.toggle('checked', native.checked);
-                localStorage.setItem(rememberKey, native.checked ? '1' : '0');
+
+                if (native.checked) {
+                    localStorage.setItem(rememberKey, '1');
+                    if (emailInput && emailInput.value.trim()) {
+                        localStorage.setItem(emailKey, emailInput.value.trim());
+                    }
+                } else {
+                    localStorage.setItem(rememberKey, '0');
+                    localStorage.removeItem(emailKey);
+                }
             }
 
-            if (native && box) {
-                const saved = localStorage.getItem(rememberKey);
-                if (saved === '1') {
-                    native.checked = true;
+            if (emailInput) {
+                const savedRemember = localStorage.getItem(rememberKey) === '1';
+                const savedEmail = localStorage.getItem(emailKey) || '';
+
+                if (savedRemember && savedEmail) {
+                    emailInput.value = savedEmail;
+                    if (native) native.checked = true;
                 }
 
-                box.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    native.checked = !native.checked;
-                    native.dispatchEvent(new Event('change', { bubbles: true }));
+                if (native) {
+                    native.addEventListener('change', syncRememberBox);
+                    native.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
+                    if (savedRemember) {
+                        native.checked = true;
+                    }
+                }
+
+                emailInput.addEventListener('input', function() {
+                    if (native && native.checked && emailInput.value.trim()) {
+                        localStorage.setItem(emailKey, emailInput.value.trim());
+                    }
                 });
 
-                native.addEventListener('change', syncRememberBox);
-                native.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-                syncRememberBox();
+                if (native && box) {
+                    box.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        native.checked = !native.checked;
+                        native.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                }
+
+                if (native) {
+                    syncRememberBox();
+                }
+
+                emailInput.focus();
             }
         });
 
@@ -1507,6 +1548,17 @@
                 // Tampilkan overlay + spinner
                 showState('loading');
                 overlay.classList.add('show');
+
+                if (document.getElementById('remember')?.checked) {
+                    const emailValue = document.getElementById('login-email')?.value.trim();
+                    if (emailValue) {
+                        localStorage.setItem('login_saved_email', emailValue);
+                        localStorage.setItem('login_remember_me', '1');
+                    }
+                } else {
+                    localStorage.setItem('login_remember_me', '0');
+                    localStorage.removeItem('login_saved_email');
+                }
 
                 var fd = new FormData(form);
                 var csrfToken = document.querySelector('input[name="_token"]')?.value || '';
