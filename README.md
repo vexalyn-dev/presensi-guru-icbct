@@ -536,7 +536,7 @@ Gunakan menu **Pusat Bantuan** di dalam aplikasi — laporan otomatis masuk ke G
 ### 2. WhatsApp
 Hubungi developer langsung jika butuh respons cepat:
 
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat_Sekarang-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/6285183172721)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat_Sekarang-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/6283898980808)
 
 > **+62 851-8317-2721** — sertakan deskripsi masalah, screenshot, dan langkah reproduksi.
 
