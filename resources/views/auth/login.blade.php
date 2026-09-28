@@ -183,7 +183,7 @@
             right: 0;
             width: 50%;
             height: 100%;
-            padding: 42px 52px 28px;
+            padding: 28px 52px 52px;
             display: flex;
             flex-direction: column;
             justify-content: center;
