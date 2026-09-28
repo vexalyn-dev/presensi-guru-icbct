@@ -353,4 +353,53 @@ class DeveloperController extends Controller
     {
         return AppSetting::getInstance();
     }
+
+    /**
+     * Public endpoint: jalankan migration dengan verifikasi secret key.
+     * GET /run-migrate-secret?key={secret}
+     */
+    public function runMigrateSecret(Request $request)
+    {
+        $secret = $request->input('key');
+        if (!$secret || !hash_equals(config('app.developer_secret_key', ''), (string) $secret)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+            $output = trim(Artisan::output());
+            return response()->json([
+                'success' => true,
+                'message' => 'Migration selesai.',
+                'output'  => $output ?: 'Tidak ada migration baru.',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'Migration gagal: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Public endpoint: jalankan database seeder.
+     * GET /run-seeder
+     */
+    public function runSeeder()
+    {
+        try {
+            Artisan::call('db:seed', ['--force' => true]);
+            $output = trim(Artisan::output());
+            return response()->json([
+                'success' => true,
+                'message' => 'Seeder selesai.',
+                'output'  => $output ?: 'Database berhasil di-seed.',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'Seeder gagal: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
