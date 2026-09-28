@@ -52,14 +52,14 @@
                            hidden dark:block"
                 ></div>
                 {{-- Status dot --}}
-                <div class="relative flex h-2.5 w-2.5 flex-shrink-0">
+                <div class="relative flex h-1.5 w-1.5 flex-shrink-0 mt-1.5">
                     <span
                         x-show="!lastPollFailed"
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50"
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40"
                     ></span>
                     <span
-                        class="relative inline-flex h-2.5 w-2.5 rounded-full transition-colors duration-300"
-                        :class="lastPollFailed ? 'bg-red-500' : 'bg-emerald-500'"
+                        class="relative inline-flex h-1.5 w-1.5 rounded-full transition-colors duration-300"
+                        :class="lastPollFailed ? 'bg-red-400' : 'bg-emerald-500'"
                     ></span>
                 </div>
                 {{-- Time block --}}
