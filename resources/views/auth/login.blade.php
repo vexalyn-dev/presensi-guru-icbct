@@ -29,9 +29,17 @@
             overflow-y: auto;
         }
 
+        .auth-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
         .auth-container {
             position: relative;
-            width: 980px;
+            width: 860px;
             max-width: calc(100% - 32px);
             background: #f8fafc;
             border-radius: 28px;
@@ -40,7 +48,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 600px;
+            min-height: 520px;
         }
 
         .auth-credit {
@@ -52,8 +60,11 @@
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            margin-top: 12px;
+            margin-top: 16px;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .auth-credit a {
@@ -1099,7 +1110,7 @@
 
             <div class="panel-content">
                 <h1 id="panelTitle">{{ $appSettingsPanel->app_name ?? 'ICB CINTA TEKNIKA' }}</h1>
-                <p id="panelText">Sistem Presensi Guru Digital &amp; Terpercaya</p>
+                <p id="panelText">Sistem Presensi Guru Digital</p>
                 <button class="btn-toggle" id="toggleBtn" onclick="toggleAuth()">Buat Akun</button>
             </div>
         </div>
@@ -1299,8 +1310,8 @@
     </div>
     {{-- END .auth-container --}}
 
+        <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
     </div>
-    <div class="auth-credit">Develop By <a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
 </div>
 
     <script>
