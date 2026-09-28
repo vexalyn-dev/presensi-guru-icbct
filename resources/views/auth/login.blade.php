@@ -568,7 +568,7 @@
                 align-items: center;
                 width: 100%;
                 height: 100%;
-                overflow: hidden;
+                overflow: visible;
             }
 
             .auth-container {
@@ -582,7 +582,7 @@
                 border-radius: 0;
                 box-shadow: none;
                 border: none;
-                overflow: hidden;
+                overflow: visible;
                 background: transparent;
                 position: relative;
             }
@@ -712,7 +712,7 @@
                 min-height: 0;
                 max-height: none;
                 padding: 32px 28px 0;
-                overflow: hidden;
+                overflow: visible;
                 justify-content: flex-start;
                 background: transparent;
                 border-radius: 0;
