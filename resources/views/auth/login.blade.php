@@ -511,6 +511,8 @@
         }
 
         /* Register Link Styling */
+        .mobile-credit { display: none; }
+
         .register-link {
             text-align: center;
             margin-top: 1.5rem;
@@ -584,24 +586,27 @@
             .auth-container::after { display: none !important; }
 
             .auth-credit {
+                display: none !important;
+            }
+
+            .mobile-credit {
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
+                gap: 4px;
                 width: 100%;
-                padding: 10px 16px 18px;
-                margin: 0;
+                padding: 12px 16px 20px;
+                margin-top: 4px;
                 font-size: 10px;
                 font-weight: 600;
                 letter-spacing: 0.08em;
                 text-transform: uppercase;
-                color: #64748B;
-                background: transparent;
-                border-radius: 0;
-                box-shadow: none;
+                color: #94a3b8;
             }
 
-            .auth-credit a {
-                color: #64748B;
+            .mobile-credit a {
+                color: #94a3b8;
+                text-decoration: none;
             }
 
             /* ── Sembunyikan panel desktop ── */
@@ -1224,6 +1229,9 @@
                     </div>
 
                     <button type="submit" class="btn-submit" id="loginSubmitBtn">Masuk</button>
+
+                    {{-- Credit mobile: muncul di bawah tombol Masuk, hanya di mobile --}}
+                    <div class="mobile-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
                 </form>
             </div>
             {{-- END #loginForm --}}
@@ -1333,7 +1341,7 @@
     </div>
     {{-- END .auth-container --}}
 
-        <div class="auth-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+        <div class="auth-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
     </div>
 </div>
 
