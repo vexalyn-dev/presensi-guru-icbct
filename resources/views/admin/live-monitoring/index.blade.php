@@ -40,16 +40,16 @@
         <div class="flex items-center gap-3">
             <div
                 class="group relative flex items-center gap-3 px-4 py-2.5 rounded-2xl
-                       bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900
-                       dark:from-slate-800 dark:via-slate-700 dark:to-slate-800
-                       border border-white/[0.06] dark:border-white/[0.08]
-                       shadow-lg shadow-black/20 overflow-hidden"
+                       bg-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-800
+                       border border-slate-200 dark:border-slate-600/40
+                       shadow-sm dark:shadow-lg dark:shadow-black/20 overflow-hidden"
             >
-                {{-- Shimmer sweep on hover --}}
+                {{-- Shimmer sweep on hover (only visible in dark mode) --}}
                 <div
                     class="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.05] to-transparent
                            -translate-x-full group-hover:translate-x-full
-                           transition-transform duration-700 ease-out pointer-events-none"
+                           transition-transform duration-700 ease-out pointer-events-none
+                           hidden dark:block"
                 ></div>
                 {{-- Status dot --}}
                 <div class="relative flex h-2.5 w-2.5 flex-shrink-0">
@@ -59,29 +59,30 @@
                     ></span>
                     <span
                         class="relative inline-flex h-2.5 w-2.5 rounded-full transition-colors duration-300"
-                        :class="lastPollFailed ? 'bg-red-500' : 'bg-emerald-400'"
+                        :class="lastPollFailed ? 'bg-red-500' : 'bg-emerald-500'"
                     ></span>
                 </div>
                 {{-- Time block --}}
                 <div class="flex flex-col leading-none select-none">
                     <span
-                        class="text-[8px] font-bold tracking-[0.25em] text-slate-500 dark:text-slate-400 uppercase mb-1"
+                        class="text-[8px] font-bold tracking-[0.25em] text-slate-400 dark:text-slate-400 uppercase mb-1"
                     >
                         Server Time
                     </span>
                     <span
-                        class="text-base font-mono font-semibold text-emerald-400 dark:text-emerald-300
+                        class="text-base font-mono font-semibold
+                               text-slate-700 dark:text-emerald-400
                                tabular-nums tracking-wider"
                         x-text="displayTime"
                     ></span>
                 </div>
                 {{-- Connection status pill --}}
                 <div
-                    class="ml-1 pl-3 border-l border-white/[0.08] dark:border-white/[0.1]"
+                    class="ml-1 pl-3 border-l border-slate-200 dark:border-slate-600/40"
                 >
                     <span
                         class="text-[9px] font-medium tracking-wide transition-colors duration-300"
-                        :class="lastPollFailed ? 'text-red-400' : 'text-slate-400 dark:text-slate-500'"
+                        :class="lastPollFailed ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'"
                     >
                         <template x-if="!lastPollFailed">Connected</template>
                         <template x-if="lastPollFailed">Reconnecting…</template>
