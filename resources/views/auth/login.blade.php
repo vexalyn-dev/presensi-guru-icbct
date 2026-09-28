@@ -220,7 +220,7 @@
         }
 
         .form-header h2 {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #0F172A;
             margin-bottom: 0.5rem;
