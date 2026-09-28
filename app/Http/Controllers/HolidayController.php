@@ -127,7 +127,8 @@ class HolidayController extends Controller
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             return back()->with('error', 'Koneksi ke API gagal. Periksa koneksi internet Anda.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('fetchNationalHolidays error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat mengambil data libur nasional. Silakan coba lagi.');
         }
     }
 }

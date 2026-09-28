@@ -273,7 +273,8 @@ class QrCodeController extends Controller
 
             return back()->with('success', 'QR Code berhasil diperbarui!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal memperbarui QR Code: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('QR regenerate error for teacher ' . $teacher->id . ': ' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui QR Code. Silakan coba lagi.');
         }
     }
 }

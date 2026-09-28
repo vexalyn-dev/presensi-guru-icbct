@@ -205,6 +205,8 @@ class HistoryController extends Controller
                 ->get();
 
             $filename = 'Riwayat_Presensi_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $user->name) . '_' . $startDate . '_' . $endDate . '.csv';
+            // CRLF injection prevention
+            $filename = preg_replace('/[\r\n]/', '', $filename);
             
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -235,6 +237,8 @@ class HistoryController extends Controller
                 ->get();
 
             $filename = 'Riwayat_Presensi_Kelas_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $user->name) . '_' . $startDate . '_' . $endDate . '.csv';
+            // CRLF injection prevention
+            $filename = preg_replace('/[\r\n]/', '', $filename);
             
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="' . $filename . '"');

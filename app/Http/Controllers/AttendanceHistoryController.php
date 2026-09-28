@@ -294,6 +294,9 @@ class AttendanceHistoryController extends Controller
 
         $filename = 'Laporan_Riwayat_Presensi_' . date('Y-m-d') . '.xlsx';
 
+        // CRLF injection prevention: strip carriage-return / line-feed dari filename
+        $filename = preg_replace('/[\r\n]/', '', $filename);
+
         $writer = new Xlsx($spreadsheet);
 
         return response()->stream(function() use ($writer) {

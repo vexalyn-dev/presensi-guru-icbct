@@ -411,6 +411,9 @@ class ReportController extends Controller
         // Output Excel
         $filename = 'Laporan_' . ($reportType === 'daily' ? 'Harian' : 'Kelas') . '_' . Carbon::parse($startDate)->format('dmY') . '_' . Carbon::parse($endDate)->format('dmY') . '.xlsx';
 
+        // CRLF injection prevention
+        $filename = preg_replace('/[\r\n]/', '', $filename);
+
         $writer = new Xlsx($spreadsheet);
 
         return response()->stream(function() use ($writer) {

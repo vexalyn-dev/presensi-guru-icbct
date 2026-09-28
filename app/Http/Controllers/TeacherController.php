@@ -397,11 +397,13 @@ class TeacherController extends Controller
                 ->with('error', "Import gagal. Semua baris error: {$errorSummary}");
 
         } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('importExcel reader error: ' . $e->getMessage());
             return redirect()->route('teachers.index')
-                ->with('error', 'Gagal membaca file Excel: ' . $e->getMessage());
+                ->with('error', 'Gagal membaca file Excel. Pastikan format file valid (.xlsx atau .xls).');
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('importExcel error: ' . $e->getMessage());
             return redirect()->route('teachers.index')
-                ->with('error', 'Import gagal: ' . $e->getMessage());
+                ->with('error', 'Import gagal karena kesalahan sistem. Silakan coba lagi atau hubungi administrator.');
         }
     }
 

@@ -106,6 +106,8 @@ class AttendanceReportController extends Controller
         $sheet->setAutoFilter('A3:J' . ($row - 1));
 
         $filename = 'laporan_presensi_' . str_pad($month, 2, '0', STR_PAD_LEFT) . '_' . $year . '.xlsx';
+        // CRLF injection prevention
+        $filename = preg_replace('/[\r\n]/', '', $filename);
         $writer   = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 
         return response()->streamDownload(function() use ($writer) {

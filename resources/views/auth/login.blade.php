@@ -550,6 +550,7 @@
             html, body {
                 min-height: 100%;
                 height: 100%;
+                overflow: hidden;
                 background: #0A1628;
                 margin: 0; padding: 0;
             }
@@ -557,27 +558,31 @@
                 align-items: flex-start;
                 padding: 0;
                 justify-content: flex-start;
+                overflow: hidden;
             }
 
-            /* ── Auth container: true full-screen ── */
+            /* ── Auth container: true full-screen, no scroll ── */
             .auth-wrapper {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 width: 100%;
+                height: 100%;
+                overflow: hidden;
             }
 
             .auth-container {
                 width: 100%;
                 max-width: 100%;
-                min-height: 100vh;
-                min-height: 100svh;
+                height: 100vh;
+                height: 100svh;
+                min-height: unset;
                 display: flex;
                 flex-direction: column;
                 border-radius: 0;
                 box-shadow: none;
                 border: none;
-                overflow: visible;
+                overflow: hidden;
                 background: transparent;
                 position: relative;
             }
@@ -593,7 +598,7 @@
                 display: flex !important;
                 align-items: center;
                 justify-content: center;
-                gap: 4px;
+                gap: 0;
                 width: 100%;
                 padding: 12px 16px 20px;
                 margin-top: 4px;
@@ -607,6 +612,7 @@
             .mobile-credit a {
                 color: #94a3b8;
                 text-decoration: none;
+                margin-left: 4px;
             }
 
             /* ── Sembunyikan panel desktop ── */
@@ -618,7 +624,7 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                padding: 56px 32px 52px;
+                padding: 36px 32px 32px;
                 background: linear-gradient(160deg, #080F1E 0%, #0F172A 60%, #162035 100%);
                 border-radius: 0;
                 text-align: center;
@@ -642,8 +648,8 @@
             }
 
             .mobile-logo-container {
-                width: 112px !important;
-                height: 112px !important;
+                width: 90px !important;
+                height: 90px !important;
                 margin: 0 auto 24px !important;
                 border-radius: 30px !important;
                 background: rgba(255,255,255,0.04) !important;
@@ -687,6 +693,7 @@
                 position: relative;
                 width: 100%;
                 flex: 1;
+                min-height: 0;
                 display: flex;
                 flex-direction: column;
                 background: #FFFFFF;
@@ -694,7 +701,7 @@
                 margin-top: -28px;
                 box-shadow: 0 -4px 32px rgba(15,23,42,0.18);
                 z-index: 2;
-                overflow: visible;
+                overflow: hidden;
             }
 
             .form-container {
@@ -703,9 +710,9 @@
                 flex: 1;
                 min-height: 0;
                 max-height: none;
-                padding: 40px 28px 8px;
-                overflow: visible;
-                justify-content: flex-start;
+                padding: 32px 28px 8px;
+                overflow: hidden;
+                justify-content: center;
                 background: transparent;
                 border-radius: 0;
                 box-shadow: none;
@@ -734,9 +741,9 @@
             #registerForm { display: none !important; }
             #registerForm.visible { display: flex !important; flex-direction: column; opacity: 1 !important; }
 
-            /* ── Form header: lebih lega ── */
+            /* ── Form header: compact ── */
             .form-header {
-                margin-bottom: 32px;
+                margin-bottom: 20px;
                 text-align: left;
             }
             .form-header h2 {
@@ -752,8 +759,8 @@
                 line-height: 1.55;
             }
 
-            /* ── Input groups: spacing lega ── */
-            .input-group { margin-bottom: 20px; }
+            /* ── Input groups: spacing lebih compact ── */
+            .input-group { margin-bottom: 14px; }
             .input-group label {
                 display: block;
                 font-size: 0.82rem !important;
@@ -763,7 +770,7 @@
                 letter-spacing: 0.01em;
             }
             .input-wrapper input {
-                height: 54px !important;
+                height: 50px !important;
                 padding: 0 52px 0 48px !important;
                 border-radius: 14px !important;
                 border: 1.5px solid #E2E8F0 !important;
@@ -808,13 +815,13 @@
 
             /* Remember+LupaPassword row spacing */
             .input-group + div[style*="flex"] {
-                margin: 4px 0 24px !important;
+                margin: 2px 0 16px !important;
             }
 
-            /* ── Submit button: tinggi & menonjol ── */
+            /* ── Submit button ── */
             .btn-submit {
                 width: 100%;
-                height: 56px !important;
+                height: 52px !important;
                 border-radius: 16px !important;
                 font-size: 1.05rem !important;
                 font-weight: 700 !important;
@@ -839,21 +846,21 @@
 
         /* ── 480px ke bawah ── */
         @media (max-width: 480px) {
-            .mobile-header { padding: 48px 24px 44px; }
-            .mobile-logo-container { width: 100px !important; height: 100px !important; }
-            .form-container { padding: 36px 22px 48px; }
-            .form-header { margin-bottom: 28px; }
-            .form-header h2 { font-size: 1.65rem !important; }
+            .mobile-header { padding: 32px 24px 28px; }
+            .mobile-logo-container { width: 90px !important; height: 90px !important; }
+            .form-container { padding: 28px 22px 8px; }
+            .form-header { margin-bottom: 18px; }
+            .form-header h2 { font-size: 1.6rem !important; }
         }
 
         /* ── 390px ke bawah ── */
         @media (max-width: 390px) {
-            .mobile-header { padding: 40px 20px 36px; }
-            .mobile-logo-container { width: 92px !important; height: 92px !important; }
-            .form-container { padding: 30px 18px 44px; }
-            .form-header h2 { font-size: 1.5rem !important; }
-            .input-wrapper input { height: 50px !important; }
-            .btn-submit { height: 52px !important; }
+            .mobile-header { padding: 28px 20px 24px; }
+            .mobile-logo-container { width: 82px !important; height: 82px !important; }
+            .form-container { padding: 24px 18px 8px; }
+            .form-header h2 { font-size: 1.45rem !important; }
+            .input-wrapper input { height: 48px !important; }
+            .btn-submit { height: 50px !important; }
         }
         /* ── PAGE TRANSITION LOADING OVERLAY ── */
         #pt-overlay {
@@ -1231,7 +1238,7 @@
                     <button type="submit" class="btn-submit" id="loginSubmitBtn">Masuk</button>
 
                     {{-- Credit mobile: muncul di bawah tombol Masuk, hanya di mobile --}}
-                    <div class="mobile-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+                    <div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
                 </form>
             </div>
             {{-- END #loginForm --}}

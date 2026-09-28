@@ -30,13 +30,24 @@ class AuthenticatedSessionController extends Controller
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
-        // Redirect based on role
-        if ($user->isTeacher()) {
-            return redirect()->intended(route('teacher.dashboard', absolute: false));
+
+        // Open redirect prevention: intended() URL harus berupa path internal (tidak ada host external)
+        $intended = session()->pull('url.intended');
+        if ($intended) {
+            $parsedHost = parse_url($intended, PHP_URL_HOST);
+            $appHost    = parse_url(config('app.url'), PHP_URL_HOST);
+            // Buang intended jika mengarah ke host lain atau bukan relative path
+            if ($parsedHost !== null && $parsedHost !== $appHost) {
+                $intended = null;
+            }
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirect based on role
+        $defaultRoute = $user->isTeacher()
+            ? route('teacher.dashboard', absolute: false)
+            : route('dashboard', absolute: false);
+
+        return redirect($intended ?? $defaultRoute);
     }
 
     /**

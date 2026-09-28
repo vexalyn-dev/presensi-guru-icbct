@@ -65,9 +65,21 @@ class ProfileController extends Controller
             $photoPath = null;
             $deletePhoto = true;
         } elseif ($croppedData && str_starts_with($croppedData, 'data:image')) {
+            // Validate MIME type from data URI header
+            if (!preg_match('/^data:image\/(jpeg|png|gif|webp);base64,/', $croppedData)) {
+                return back()->with('error', 'Format gambar tidak didukung. Gunakan JPEG, PNG, GIF, atau WebP.');
+            }
             // Decode base64 and save as JPEG
             $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $croppedData);
             $imageData = base64_decode($imageData);
+            // Verify actual image via magic bytes (prevent polyglot/disguised files)
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $detectedType = finfo_buffer($finfo, $imageData);
+            finfo_close($finfo);
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($detectedType, $allowedMimes, true)) {
+                return back()->with('error', 'File bukan gambar yang valid.');
+            }
             $filename = 'teachers/' . uniqid('photo_', true) . '.jpg';
             // Delete old photos
             if ($teacher && $teacher->photo) {
@@ -126,7 +138,7 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'current_password' => 'required',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
         ]);
 
         $user = auth()->user();
