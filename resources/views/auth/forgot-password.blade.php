@@ -18,20 +18,37 @@
         /* ─── DESKTOP LAYOUT ─── */
         body {
             min-height: 100vh;
-            display: grid;
-            place-items: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
             padding: 24px 16px;
             background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
         }
 
-        .page-card {
+        /* ── Wrapper luar (card + credit) ── */
+        .auth-wrapper {
             width: 100%;
-            max-width: 440px;
-            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── LANDSCAPE CARD (mirip login) ── */
+        .page-card {
+            position: relative;
+            width: 800px;
+            max-width: calc(100% - 32px);
+            background: #f8fafc;
             border-radius: 28px;
-            box-shadow: 0 32px 64px -12px rgba(15,23,42,0.16),
+            box-shadow: 0 25px 50px -12px rgba(15,23,42,0.18),
                         0 0 0 1px rgba(15,23,42,0.05);
             overflow: hidden;
+            display: flex;
+            flex-direction: row;
+            min-height: 480px;
+            margin-top: 22px;
             animation: cardIn 0.45s cubic-bezier(0.22,1,0.36,1) both;
         }
         @keyframes cardIn {
@@ -39,28 +56,37 @@
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Top navy band */
-        .card-top {
-            background: linear-gradient(150deg, #080F1E 0%, #0F172A 60%, #162035 100%);
-            padding: 40px 40px 36px;
+        /* ── Panel Kiri (Navy) ── */
+        .card-panel {
+            width: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(150deg, #050d1a 0%, #0b1a2d 52%, #101f34 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 35px;
             text-align: center;
             position: relative;
             overflow: hidden;
         }
-        .card-top::before {
+        .card-panel::before {
             content: ''; position: absolute; top: -80px; right: -80px;
+            width: 320px; height: 320px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(250,204,21,0.09) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .card-panel::after {
+            content: ''; position: absolute; bottom: -80px; left: -80px;
             width: 280px; height: 280px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(250,204,21,0.1) 0%, transparent 65%);
-        }
-        .card-top::after {
-            content: ''; position: absolute; bottom: -60px; left: -60px;
-            width: 200px; height: 200px; border-radius: 50%;
             background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 65%);
+            pointer-events: none;
         }
+
         .icon-box {
-            width: 72px; height: 72px; margin: 0 auto 18px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.05);
+            width: 110px; height: 110px; margin: 0 auto 22px;
+            border-radius: 22px;
+            background: rgba(255,255,255,0.04);
             border: 1.5px solid rgba(250,204,21,0.28);
             box-shadow: 0 16px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.07);
             display: flex; align-items: center; justify-content: center;
@@ -69,24 +95,39 @@
         }
         .icon-box img { width: 78%; height: 78%; object-fit: contain;
             filter: drop-shadow(0 3px 10px rgba(0,0,0,0.3)); }
-        .card-top h1 {
-            font-size: 1.1rem; font-weight: 800; color: #fff;
-            letter-spacing: -0.2px; position: relative; z-index: 1; margin-bottom: 4px;
+
+        .panel-title {
+            font-size: 1.5rem; font-weight: 800; color: #fff;
+            letter-spacing: -0.3px; position: relative; z-index: 1;
+            margin-bottom: 8px; line-height: 1.3;
         }
-        .card-top p {
-            font-size: 0.78rem; color: rgba(255,255,255,0.42);
-            position: relative; z-index: 1;
+        .panel-sub {
+            font-size: 0.85rem; color: rgba(255,255,255,0.45);
+            position: relative; z-index: 1; line-height: 1.65;
+            max-width: 240px; margin: 0 auto;
         }
 
-        /* Body */
-        .card-body { padding: 36px 40px 32px; }
+        /* ── Panel Kanan (Form) ── */
+        .card-body {
+            width: 50%;
+            flex-shrink: 0;
+            padding: 42px 52px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #f5f5f5;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .card-body::-webkit-scrollbar { display: none; }
 
         .section-title {
-            font-size: 1.3rem; font-weight: 800; color: #0F172A;
-            letter-spacing: -0.4px; margin-bottom: 6px;
+            font-size: 1.8rem; font-weight: 800; color: #0F172A;
+            letter-spacing: -0.5px; margin-bottom: 6px;
         }
         .section-sub {
-            font-size: 0.84rem; color: #64748B;
+            font-size: 0.88rem; color: #64748B;
             line-height: 1.65; margin-bottom: 28px;
         }
 
@@ -108,13 +149,14 @@
         }
         .input-wrap { position: relative; }
         .input-wrap input {
-            width: 100%; height: 52px;
+            width: 100%; height: 48px;
             padding: 0 18px 0 46px;
             border: 1.5px solid #E2E8F0; border-radius: 14px;
             font-size: 0.92rem; font-family: inherit;
             color: #0F172A; background: #F8FAFC;
             transition: all 0.2s; outline: none;
             -webkit-appearance: none;
+            appearance: none;
         }
         .input-wrap input::placeholder { color: #94A3B8; }
         .input-wrap input:focus {
@@ -132,18 +174,19 @@
 
         /* Button */
         .btn-primary {
-            width: 100%; height: 54px;
+            width: 100%; height: 52px;
             background: #0F172A;
-            color: #fff; border: none; border-radius: 14px;
+            color: #fff; border: none; border-radius: 12px;
             font-size: 0.98rem; font-weight: 700; font-family: inherit;
             letter-spacing: 0.02em; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px;
             transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
-            box-shadow: 0 6px 20px rgba(15,23,42,0.22);
+            box-shadow: 0 4px 20px rgba(15,23,42,0.25);
+            margin-top: 0.75rem;
             -webkit-tap-highlight-color: transparent;
             position: relative; overflow: hidden;
         }
-        .btn-primary:hover { background: #1a2540; box-shadow: 0 10px 28px rgba(15,23,42,0.3); transform: translateY(-1px); }
+        .btn-primary:hover { background: #1a2540; box-shadow: 0 10px 30px rgba(15,23,42,0.35); transform: translateY(-2px); }
         .btn-primary:active { transform: scale(0.98); }
         .btn-primary.loading { pointer-events: none; }
         .btn-primary .btn-text { transition: opacity 0.15s; }
@@ -161,7 +204,7 @@
         /* Back link */
         .back-link {
             display: flex; align-items: center; justify-content: center;
-            gap: 6px; margin-top: 20px;
+            gap: 6px; margin-top: 18px;
             font-size: 0.84rem; font-weight: 600;
             color: #64748B; text-decoration: none; transition: color 0.2s;
         }
@@ -175,25 +218,44 @@
             to   { opacity: 1; transform: translateY(0); }
         }
         .sent-icon {
-            width: 76px; height: 76px; margin: 0 auto 20px;
+            width: 72px; height: 72px; margin: 0 auto 18px;
             background: #F0FDF4; border: 1.5px solid #BBF7D0;
-            border-radius: 22px;
+            border-radius: 20px;
             display: flex; align-items: center; justify-content: center;
         }
         .sent-title { font-size: 1.2rem; font-weight: 800; color: #0F172A; margin-bottom: 10px; }
-        .sent-desc { font-size: 0.84rem; color: #64748B; line-height: 1.65; margin-bottom: 28px; }
+        .sent-desc { font-size: 0.84rem; color: #64748B; line-height: 1.65; margin-bottom: 24px; }
         .sent-email {
             display: inline-block; font-weight: 700; color: #0F172A;
             background: #F1F5F9; padding: 2px 10px; border-radius: 6px;
         }
 
-        /* Footer */
-        .card-footer {
-            padding: 14px 40px 18px;
-            border-top: 1px solid #F1F5F9; text-align: center;
+        /* ── Credit Desktop ── */
+        .auth-credit {
+            text-align: center;
+            padding: 14px 16px 20px;
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-top: 18px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .footer-text { font-size: 0.72rem; color: #94A3B8; }
-        .footer-text span { color: #F59E0B; font-weight: 600; }
+        .auth-credit a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            margin-left: 4px;
+        }
+        .auth-credit a:hover { color: #FACC15; }
+
+        /* ── Credit Mobile (hidden on desktop) ── */
+        .mobile-credit { display: none; }
 
         /* ════════════════════════════════════════
            MOBILE REDESIGN ≤ 768px
@@ -210,6 +272,43 @@
                 align-items: stretch;
             }
 
+            .auth-wrapper {
+                display: block;
+                width: 100%;
+            }
+
+            /* Desktop credit: sembunyikan */
+            .auth-credit { display: none !important; }
+
+            /* Mobile credit: fixed di bawah */
+            .mobile-credit {
+                display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                align-items: center;
+                justify-content: center;
+                gap: 0;
+                width: 100%;
+                padding: 10px 16px 20px;
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #94a3b8;
+                background: #FFFFFF;
+                z-index: 9999;
+                will-change: transform;
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+            }
+            .mobile-credit a {
+                color: #94a3b8;
+                text-decoration: none;
+                margin-left: 4px;
+            }
+
             /* Page card: full-screen flex column */
             .page-card {
                 max-width: 100%; width: 100%;
@@ -218,31 +317,58 @@
                 box-shadow: none;
                 display: flex; flex-direction: column;
                 animation: none;
+                margin-top: 0;
             }
 
-            /* Top band: lebih tinggi di mobile */
-            .card-top {
+            /* Sembunyikan panel kiri di mobile */
+            .card-panel { display: none !important; }
+
+            /* Buat top band dari card-body header — pakai pseudo mobile header */
+            /* Sebenarnya panel sudah hidden, kita inject mobile-header terpisah */
+            .mobile-header-band {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
                 padding: 56px 28px 52px;
+                background: linear-gradient(150deg, #080F1E 0%, #0F172A 60%, #162035 100%);
+                text-align: center;
+                position: relative;
+                overflow: hidden;
                 flex-shrink: 0;
-                border-radius: 0;
             }
-            .icon-box {
-                width: 108px; height: 108px;
-                border-radius: 28px; margin-bottom: 22px;
+            .mobile-header-band::before {
+                content: ''; position: absolute; top: -80px; right: -80px;
+                width: 300px; height: 300px; border-radius: 50%;
+                background: radial-gradient(circle, rgba(250,204,21,0.09) 0%, transparent 65%);
+                pointer-events: none;
             }
-            .icon-box img { width: 80%; height: 80%; }
-            .card-top h1 { font-size: 1.35rem; margin-bottom: 8px; }
-            .card-top p  { font-size: 0.84rem; }
+            .mobile-header-band::after {
+                content: ''; position: absolute; bottom: -60px; left: -60px;
+                width: 240px; height: 240px; border-radius: 50%;
+                background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 65%);
+                pointer-events: none;
+            }
+            .mobile-header-band .icon-box {
+                width: 108px !important; height: 108px !important;
+                border-radius: 28px !important; margin-bottom: 22px !important;
+                display: flex !important;
+            }
+            .mobile-header-band .icon-box img { width: 80% !important; height: 80% !important; }
+            .mobile-header-band .panel-title { font-size: 1.35rem !important; margin-bottom: 8px !important; }
+            .mobile-header-band .panel-sub  { font-size: 0.84rem !important; }
 
-            /* White card: overlap header, flex:1 agar penuh */
+            /* Card body: overlap header, flex:1 */
             .card-body {
+                width: 100%;
                 flex: 1;
-                padding: 40px 28px 52px;
+                padding: 40px 28px 80px;
                 background: #FFFFFF;
                 border-radius: 32px 32px 0 0;
                 margin-top: -28px;
                 box-shadow: 0 -4px 32px rgba(15,23,42,0.18);
                 position: relative; z-index: 2;
+                justify-content: flex-start;
             }
 
             .section-title { font-size: 1.75rem; margin-bottom: 8px; }
@@ -257,32 +383,23 @@
             .input-icon { left: 16px; width: 19px; height: 19px; }
 
             .btn-primary { height: 56px; border-radius: 16px; font-size: 1.02rem; }
-
             .back-link { margin-top: 24px; font-size: 0.88rem; }
             .sent-icon { width: 84px; height: 84px; border-radius: 24px; }
             .sent-title { font-size: 1.35rem; }
             .sent-desc  { font-size: 0.88rem; margin-bottom: 32px; }
-
-            /* Footer tenggelam di bawah */
-            .card-footer {
-                padding: 16px 28px 28px;
-                border-top: 1px solid #F1F5F9;
-                background: #FFFFFF;
-                flex-shrink: 0;
-            }
         }
 
         @media (max-width: 480px) {
-            .card-top { padding: 48px 24px 44px; }
-            .icon-box { width: 96px; height: 96px; }
-            .card-body { padding: 36px 22px 48px; }
+            .mobile-header-band { padding: 48px 24px 44px; }
+            .mobile-header-band .icon-box { width: 96px !important; height: 96px !important; }
+            .card-body { padding: 36px 22px 80px; }
             .section-title { font-size: 1.6rem; }
         }
 
         @media (max-width: 390px) {
-            .card-top { padding: 40px 20px 36px; }
-            .icon-box { width: 88px; height: 88px; }
-            .card-body { padding: 30px 18px 44px; }
+            .mobile-header-band { padding: 40px 20px 36px; }
+            .mobile-header-band .icon-box { width: 88px !important; height: 88px !important; }
+            .card-body { padding: 30px 18px 80px; }
             .section-title { font-size: 1.45rem; }
             .input-wrap input { height: 52px; }
             .btn-primary { height: 52px; }
@@ -291,33 +408,51 @@
 </head>
 <body>
 
+<div class="auth-wrapper">
 <div class="page-card">
 
-    <!-- Top Band -->
-    <div class="card-top">
-        @php
-            $appSettings = null;
-            try { $appSettings = \App\Models\AppSetting::getInstance(); } catch (\Throwable $e) {}
-        @endphp
+    @php
+        $appSettings = null;
+        try { $appSettings = \App\Models\AppSetting::getInstance(); } catch (\Throwable $e) {}
+    @endphp
+
+    <!-- Panel Kiri (Desktop) -->
+    <div class="card-panel">
         <div class="icon-box">
             @if($appSettings && $appSettings->app_logo)
                 <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo">
             @else
-                <svg width="32" height="32" fill="none" stroke="#FACC15" stroke-width="2" viewBox="0 0 24 24">
+                <svg width="40" height="40" fill="none" stroke="#FACC15" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                 </svg>
             @endif
         </div>
-        <h1>{{ $appSettings->app_name ?? config('app.name', 'ICB CINTA TEKNIKA') }}</h1>
-        <p>Reset Password Akun Anda</p>
+        <p class="panel-title">{{ $appSettings->app_name ?? config('app.name', 'ICB CINTA TEKNIKA') }}</p>
+        <p class="panel-sub">Reset password akun Anda dengan mudah dan aman.</p>
     </div>
 
-    <!-- Body -->
+    <!-- Mobile Header Band (hanya tampil di mobile) -->
+    <div class="mobile-header-band" style="display:none;">
+        <div class="icon-box">
+            @if($appSettings && $appSettings->app_logo)
+                <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo">
+            @else
+                <svg width="40" height="40" fill="none" stroke="#FACC15" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                </svg>
+            @endif
+        </div>
+        <p class="panel-title">{{ $appSettings->app_name ?? config('app.name', 'ICB CINTA TEKNIKA') }}</p>
+        <p class="panel-sub">Reset Password Akun Anda</p>
+    </div>
+
+    <!-- Panel Kanan (Form) -->
     <div class="card-body">
 
         {{-- Form state --}}
-        <div id="formState" @if(session('status')) style="display:none" @endif>
+        <div id="formState" @if(session('status')) hidden @endif>
             <p class="section-title">Lupa Password?</p>
             <p class="section-sub">Masukkan email terdaftar dan kami akan mengirimkan link untuk mereset password Anda.</p>
 
@@ -388,18 +523,32 @@
         </div>
 
     </div>
-
-    <!-- Footer -->
-    <div class="card-footer">
-        <p class="footer-text">© {{ date('Y') }} <span>{{ config('app.name', 'ICB CT') }}</span> · Sistem Presensi Digital</p>
-    </div>
+    {{-- END .page-card --}}
 </div>
 
+    <!-- Credit Desktop -->
+    <div class="auth-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+</div>
+{{-- END .auth-wrapper --}}
+
+<!-- Credit Mobile (fixed, di luar semua container) -->
+<div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+
 <script>
-    @if(session('status'))
+    // Tampilkan mobile-header-band hanya di mobile
+    (function() {
+        if (window.innerWidth <= 768) {
+            var mh = document.querySelector('.mobile-header-band');
+            if (mh) mh.style.display = 'flex';
+        }
+    })();
+
+    var _hasStatus = <?php echo session('status') ? 'true' : 'false'; ?>;
+    if (_hasStatus) {
+        document.getElementById('formState').removeAttribute('hidden');
         document.getElementById('formState').style.display = 'none';
         document.getElementById('sentState').classList.add('active');
-    @endif
+    }
 
     document.getElementById('fpForm')?.addEventListener('submit', function() {
         const btn = document.getElementById('fpBtn');
