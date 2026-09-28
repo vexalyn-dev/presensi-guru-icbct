@@ -10,15 +10,16 @@ class FixSessionCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Paksa session cookie non-secure + non-encrypt untuk kompatibilitas maksimal
+        // Session cookie aman: secure=true karena site wajib HTTPS
+        // encrypt=false supaya gak perlu APP_KEY konsisten
         config([
-            'session.secure'           => false,
-            'session.encrypt'          => false,
-            'session.same_site'        => 'lax',
-            'session.http_only'        => true,
-            'session.cookie'           => 'icb_ct_session',
-            'session.path'             => '/',
-            'session.domain'           => null,
+            'session.secure'      => true,
+            'session.encrypt'     => false,
+            'session.same_site'   => 'lax',
+            'session.http_only'   => true,
+            'session.cookie'      => 'icb_ct_session',
+            'session.path'        => '/',
+            'session.domain'      => null,
         ]);
 
         return $next($request);

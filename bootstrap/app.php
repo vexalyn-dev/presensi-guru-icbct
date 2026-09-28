@@ -26,8 +26,23 @@ return Application::configure(basePath: dirname(__DIR__))
             'maintenance.check'     => \App\Http\Middleware\CheckMaintenanceMode::class,
             'csp'                   => \App\Http\Middleware\ContentSecurityPolicy::class,
         ]);
-        // Force session cookie settings agar kompatibel di semua hosting
+
+        // Trust reverse proxy / CDN (Cloudflare, cPanel SSL terminator, dll)
+        // Pastikan Laravel terdeteksi sebagai HTTPS meskipun request datang dari HTTP internal
+        $middleware->trustProxies(at: '*');
+
+        // Force HTTPS — redirect semua HTTP ke HTTPS
+        $middleware->appendToGroup('web', function ($request, $next) {
+            if (!$request->secure() && app()->environment('production')) {
+                return redirect()->secure($request->path());
+            }
+            return $next($request);
+        });
+
+        // Fix session cookie — dijalankan sebelum StartSession agar config override efektif
         $middleware->prependToGroup('web', \App\Http\Middleware\FixSessionCookie::class);
+
+        // Session timeout + maintenance check global untuk semua web request
         $middleware->appendToGroup('web', \App\Http\Middleware\EnforceSessionTimeout::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\CheckMaintenanceMode::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\ContentSecurityPolicy::class);
