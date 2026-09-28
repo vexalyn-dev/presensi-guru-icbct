@@ -238,20 +238,17 @@
                     <i data-lucide="arrow-up-right" class="w-4 h-4 nb-go"></i>
                 </a>
                 <a href="{{ route('developer.optimize', $secret) }}"
-                   onclick="return confirmAction(this, '⚡ Rebuild semua cache?\n(config, route, view cache)')" class="nb-action">
+                    onclick="return confirmAction(this, '⚡ Rebuild semua cache?\n(config, route, view cache)')" class="nb-action">
                     <span class="nb-ico nb-ico-sun"><i data-lucide="zap" class="w-4 h-4"></i></span>
                     <div><b>Optimize</b><small>Bangun ulang cache</small></div>
                     <i data-lucide="arrow-up-right" class="w-4 h-4 nb-go"></i>
                 </a>
-                <form action="{{ route('developer.deploy', $secret) }}" method="POST">
-                    @csrf
-                    <button type="submit" class="nb-action nb-action-primary"
-                            onclick="return confirmAction(this.closest('form'), '🚀 Jalankan full deploy?\n(git pull → composer → migrate → optimize)')">
-                        <span class="nb-ico nb-ico-white"><i data-lucide="rocket" class="w-4 h-4"></i></span>
-                        <div><b>Full deploy</b><small>git pull, migrate, optimize</small></div>
-                        <i data-lucide="arrow-up-right" class="w-4 h-4 nb-go"></i>
-                    </button>
-                </form>
+                <a href="{{ url('/fix-session?secret=' . $secret) }}"
+                    onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="nb-action">
+                    <span class="nb-ico nb-ico-amber"><i data-lucide="wrench" class="w-4 h-4"></i></span>
+                    <div><b>Fix Session</b><small>Perbaiki session + clear cache</small></div>
+                    <i data-lucide="arrow-up-right" class="w-4 h-4 nb-go"></i>
+                </a>
             </div>
         </div>
     </div>
