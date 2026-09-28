@@ -39,20 +39,18 @@
         </div>
         <div class="flex items-center gap-3">
             <div
-                class="group relative flex items-center gap-3 px-4 py-2.5 rounded-2xl
+                class="group relative flex justify-center items-center gap-3 px-4 py-2.5 rounded-2xl
                        bg-white dark:from-slate-800 dark:via-slate-700 dark:to-slate-800
                        border border-slate-200 dark:border-slate-600/40
                        shadow-sm dark:shadow-lg dark:shadow-black/20 overflow-hidden"
             >
-                {{-- Shimmer sweep on hover (only visible in dark mode) --}}
                 <div
                     class="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.05] to-transparent
                            -translate-x-full group-hover:translate-x-full
                            transition-transform duration-700 ease-out pointer-events-none
                            hidden dark:block"
                 ></div>
-                {{-- Time block --}}
-                <div class="flex flex-col leading-none select-none">
+                <div class="flex flex-col items-center leading-none select-none">
                     <span
                         class="text-[8px] font-bold tracking-[0.25em] text-slate-400 dark:text-slate-400 uppercase mb-1"
                     >
