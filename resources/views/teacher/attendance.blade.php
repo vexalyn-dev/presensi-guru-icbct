@@ -258,6 +258,17 @@
     </style>
 
     {{-- ══ ATTENDANCE REALTIME MODAL ══ --}}
+    {{-- Data config untuk JS — inject via hidden element, bukan di dalam script block --}}
+    @php
+        $jsHasCheckIn  = (!empty($todayAttendance) && !empty($todayAttendance->check_in))  ? 'true' : 'false';
+        $jsHasCheckOut = (!empty($todayAttendance) && !empty($todayAttendance->check_out)) ? 'true' : 'false';
+    @endphp
+    <div id="at-config"
+         data-poll-url="{{ url('/teacher/attendance/poll-status') }}"
+         data-has-checkin="{{ $jsHasCheckIn }}"
+         data-has-checkout="{{ $jsHasCheckOut }}"
+         style="display:none;"></div>
+
     {{-- Overlay blur gelap, persis desain login --}}
     <div id="at-overlay" style="
         position:fixed; inset:0; z-index:9999;
@@ -362,17 +373,16 @@
 
     <script>
     (function () {
-        var pollUrl    = "{{ route('teacher.attendance.poll-status') }}";
+        var cfg        = document.getElementById('at-config');
+        var pollUrl    = cfg ? cfg.dataset.pollUrl    : '/teacher/attendance/poll-status';
         var overlay    = document.getElementById('at-overlay');
         var stLoad     = document.getElementById('at-state-loading');
         var stCheckIn  = document.getElementById('at-state-checkin');
         var stCheckOut = document.getElementById('at-state-checkout');
         var stAlready  = document.getElementById('at-state-already');
 
-        // Snapshot state saat halaman pertama load
-        // Dari server — apa yang sudah ada sebelum polling dimulai
-        var initHasCheckIn  = {{ json_encode((bool)($todayAttendance && $todayAttendance->check_in)) }};
-        var initHasCheckOut = {{ json_encode((bool)($todayAttendance && $todayAttendance->check_out)) }};
+        var initHasCheckIn  = cfg && cfg.dataset.hasCheckin  === 'true';
+        var initHasCheckOut = cfg && cfg.dataset.hasCheckout === 'true';
 
         var prevCheckIn  = initHasCheckIn;
         var prevCheckOut = initHasCheckOut;
@@ -383,25 +393,17 @@
             [stLoad, stCheckIn, stCheckOut, stAlready].forEach(function(el) {
                 el.style.display = 'none';
             });
-            var map = {
-                loading  : stLoad,
-                checkin  : stCheckIn,
-                checkout : stCheckOut,
-                already  : stAlready,
-            };
+            var map = { loading: stLoad, checkin: stCheckIn, checkout: stCheckOut, already: stAlready };
             if (map[name]) map[name].style.display = 'block';
         }
 
         function showOverlay(state, timeStr) {
             if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
-
-            // Tampilkan spinner sebentar dulu
             showState('loading');
             overlay.classList.add('show');
             modalVisible = true;
 
             setTimeout(function () {
-                // Re-trigger animasi SVG dengan clone trick
                 showState(state);
 
                 if (state === 'checkin') {
@@ -412,17 +414,17 @@
                     if (el) el.textContent = timeStr ? 'Jam pulang: ' + timeStr + ' WIB' : '';
                 }
 
-                // Refresh SVG animasi — clone & replace agar restart
-                var svgs = overlay.querySelectorAll('#at-state-' + (state === 'checkin' ? 'checkin' : (state === 'checkout' ? 'checkout' : 'already')) + ' svg');
-                svgs.forEach(function(svg) {
-                    var clone = svg.cloneNode(true);
-                    svg.parentNode.replaceChild(clone, svg);
-                });
+                // Clone SVG agar animasi restart
+                var stateId = state === 'checkin' ? 'at-state-checkin' : (state === 'checkout' ? 'at-state-checkout' : 'at-state-already');
+                var svgEl = document.querySelector('#' + stateId + ' svg');
+                if (svgEl) {
+                    var clone = svgEl.cloneNode(true);
+                    svgEl.parentNode.replaceChild(clone, svgEl);
+                }
 
                 closeTimer = setTimeout(function () {
                     overlay.classList.remove('show');
                     modalVisible = false;
-                    // Refresh halaman agar status card ter-update
                     setTimeout(function() { window.location.reload(); }, 300);
                 }, 3000);
             }, 800);
@@ -435,22 +437,15 @@
             })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
-                if (!data) return;
+                if (!data || modalVisible) return;
 
                 var nowCheckIn  = data.has_checkin;
                 var nowCheckOut = data.has_checkout;
 
-                if (!modalVisible) {
-                    if (!prevCheckIn && nowCheckIn) {
-                        // Baru check-in
-                        showOverlay('checkin', data.check_in);
-                    } else if (prevCheckIn && !prevCheckOut && nowCheckOut) {
-                        // Baru check-out (sudah check-in sebelumnya)
-                        showOverlay('checkout', data.check_out);
-                    } else if (prevCheckIn && prevCheckOut && (nowCheckIn || nowCheckOut)) {
-                        // Sudah lengkap, scan lagi — tampilkan "sudah tercatat"
-                        // (tidak trigger ulang karena state tidak berubah)
-                    }
+                if (!prevCheckIn && nowCheckIn) {
+                    showOverlay('checkin', data.check_in);
+                } else if (prevCheckIn && !prevCheckOut && nowCheckOut) {
+                    showOverlay('checkout', data.check_out);
                 }
 
                 prevCheckIn  = nowCheckIn;
@@ -459,10 +454,8 @@
             .catch(function() { /* silent fail */ });
         }
 
-        // Mulai polling setiap 3 detik
         setInterval(poll, 3000);
 
-        // Klik overlay untuk tutup manual
         overlay.addEventListener('click', function() {
             if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
             overlay.classList.remove('show');
@@ -470,5 +463,4 @@
         });
     })();
     </script>
-    {{-- end at-overlay script --}}
 @endsection

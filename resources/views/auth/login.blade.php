@@ -702,7 +702,7 @@
                 margin-top: -16px;
                 box-shadow: 0 -4px 32px rgba(15,23,42,0.18);
                 z-index: 2;
-                overflow: hidden;
+                overflow: visible;
             }
 
             .form-container {
