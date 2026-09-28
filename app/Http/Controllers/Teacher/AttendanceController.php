@@ -152,12 +152,14 @@ class AttendanceController extends Controller
                 'check_in_longitude' => $request->input('longitude'),
             ]);
 
-            return $this->_jsonResp(true, 'Presensi masuk berhasil dicatat!', [
-                'check_in' => $now->format('H:i'),
-                'check_in_ts' => $now->timestamp,
-                'status' => $isLate ? 'Terlambat' : 'Hadir',
-                'mode' => 'masuk',
-            ]);
+        return response()->json([
+            'success'      => true,
+            'message'      => 'Presensi masuk berhasil dicatat!',
+            'check_in'     => $now->format('H:i'),
+            'check_in_ts'  => $now->timestamp,
+            'status'       => $isLate ? 'Terlambat' : 'Hadir',
+            'mode'         => 'masuk',
+        ]);
         } else {
             $attendance = Attendance::where('user_id', $user->id)
                 ->whereDate('date', $today)
@@ -179,11 +181,13 @@ class AttendanceController extends Controller
                 'check_out_longitude' => $request->input('longitude'),
             ]);
 
-            return $this->_jsonResp(true, 'Presensi pulang berhasil dicatat!', [
-                'check_out' => $now->format('H:i'),
-                'check_out_ts' => $now->timestamp,
-                'mode' => 'keluar',
-            ]);
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Presensi pulang berhasil dicatat!',
+            'check_out'  => $now->format('H:i'),
+            'check_out_ts' => $now->timestamp,
+            'mode'       => 'keluar',
+        ]);
         }
     }
 
@@ -196,9 +200,8 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Polling endpoint — dipanggil tiap 500ms dari halaman presensi guru.
-     * Pakai Unix timestamp agar JS bisa deteksi perubahan meskipun halaman
-     * di-load setelah scan sudah terjadi.
+     * Polling endpoint — dipanggil tiap 300ms dari halaman presensi guru.
+     * Menambahkan fields tambahan untuk deteksi state yang lebih akurat.
      */
     public function pollStatus(): \Illuminate\Http\JsonResponse
     {
@@ -207,14 +210,20 @@ class AttendanceController extends Controller
                     ->whereDate('date', Carbon::today())
                     ->first();
 
+        $hasCheckIn  = (bool) ($att?->check_in);
+        $hasCheckOut = (bool) ($att?->check_out);
+
         return response()->json([
-            'has_checkin'   => (bool) ($att?->check_in),
-            'has_checkout'  => (bool) ($att?->check_out),
+            'has_checkin'   => $hasCheckIn,
+            'has_checkout'  => $hasCheckOut,
             'check_in'      => $att?->check_in  ? Carbon::parse($att->check_in)->format('H:i')  : null,
             'check_out'     => $att?->check_out ? Carbon::parse($att->check_out)->format('H:i') : null,
             'check_in_ts'   => $att?->check_in  ? Carbon::parse($att->check_in)->timestamp  : null,
             'check_out_ts'  => $att?->check_out ? Carbon::parse($att->check_out)->timestamp : null,
             'status'        => $att?->status ?? null,
+            // Fields untuk deteksi state modal
+            'checkin_done'  => $hasCheckIn && !$hasCheckOut,   // baru masuk, belum pulang
+            'both_done'     => $hasCheckIn && $hasCheckOut,     // sudah lengkap
         ]);
     }
 

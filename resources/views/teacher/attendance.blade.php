@@ -398,6 +398,7 @@
         var prevCheckInTs  = null;
         var prevCheckOutTs = null;
         var initialized    = false;
+        var lastKnownState = null; // 'none'|'checkin'|'checkout'|'both'
 
         function showState(name) {
             ['at-state-loading','at-state-checkin','at-state-checkout','at-state-already','at-state-failed']
@@ -541,6 +542,29 @@
 
                 prevCheckInTs  = ciTs;
                 prevCheckOutTs = coTs;
+
+                // Detect state untuk modal "sudah scan"
+                var newState = 'none';
+                if (ciTs && coTs) newState = 'both';
+                else if (ciTs) newState = 'checkin';
+                else if (coTs) newState = 'checkout';
+
+                if (newState !== lastKnownState && newState !== 'none' && !modalVisible) {
+                    // State berubah (scan baru terjadi tapi timestamp sudah tercatat sebelumnya)
+                    lastKnownState = newState;
+                    updateStatusBar(data);
+                    if (newState === 'both') {
+                        showOverlay('already', null, { check_in: data.check_in, check_out: data.check_out });
+                    } else if (newState === 'checkin') {
+                        showOverlay('checkin', data.check_in);
+                    } else if (newState === 'checkout') {
+                        showOverlay('checkout', data.check_out);
+                    }
+                    schedulePoll();
+                    return;
+                }
+                lastKnownState = newState;
+
                 schedulePoll();
             })
             .catch(function () { schedulePoll(); });
