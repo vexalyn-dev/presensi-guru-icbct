@@ -12,6 +12,11 @@ class LoginController extends Controller
 {
     private function redirectByRole(\App\Models\User $user)
     {
+        if ($user->isDeveloper()) {
+            return redirect()->route('developer.index', config('app.developer_secret_key'))
+                ->with('success', 'Selamat datang, Developer!');
+        }
+
         if ($user->isGuruPiket()) {
             return redirect()->route('piket.dashboard')
                 ->with('show_welcome', true)
@@ -70,6 +75,7 @@ class LoginController extends Controller
             // AJAX request — return JSON dengan redirect URL
             if ($request->expectsJson() || $request->ajax()) {
                 $redirectUrl = match(true) {
+                    $user->isDeveloper()    => route('developer.index', config('app.developer_secret_key')),
                     $user->isGuruPiket()    => route('piket.dashboard'),
                     $user->isTeacher()      => route('teacher.dashboard'),
                     $user->canAccessAdmin() => route('dashboard'),

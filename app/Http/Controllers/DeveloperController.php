@@ -21,6 +21,11 @@ class DeveloperController extends Controller
      */
     private function verifySecret(string $secret): bool
     {
+        // Harus login + role developer + secret key cocok
+        $user = auth()->user();
+        if (!$user || !$user->isDeveloper()) {
+            abort(403);
+        }
         $key = config('app.developer_secret_key', '');
         return $key !== '' && hash_equals($key, $secret);
     }

@@ -197,6 +197,12 @@ class User extends Authenticatable
     public const ROLE_GURU       = 'guru';
     public const ROLE_OPERATOR   = 'operator';
     public const ROLE_GURU_PIKET = 'guru_piket';
+    public const ROLE_DEVELOPER  = 'developer';
+
+    public function isDeveloper(): bool
+    {
+        return $this->role === self::ROLE_DEVELOPER;
+    }
 
     /**
      * Operator = full access seperti admin

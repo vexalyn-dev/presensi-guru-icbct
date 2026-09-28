@@ -365,20 +365,22 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
 });
 
 // ============================================================
-// Developer Dashboard — akses via URL secret (no auth required)
+// Developer Dashboard — login dulu, harus role developer
 // ============================================================
-Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
-    Route::get('/',                          [DeveloperController::class, 'dashboard'])       ->name('index');
-    Route::post('/apk',                      [DeveloperController::class, 'updateApk'])       ->name('apk');
-    Route::delete('/apk',                    [DeveloperController::class, 'deleteApk'])       ->name('apk.delete');
-    Route::post('/maintenance',              [DeveloperController::class, 'toggleMaintenance'])->name('maintenance');
-    Route::get('/clear-cache',               [DeveloperController::class, 'clearCache'])      ->name('clear-cache');
-    Route::get('/migrate',                   [DeveloperController::class, 'migrate'])         ->name('migrate');
-    Route::get('/optimize',                  [DeveloperController::class, 'optimize'])        ->name('optimize');
-    Route::post('/deploy',                   [DeveloperController::class, 'deploy'])          ->name('deploy');
-    Route::post('/updates',                  [DeveloperController::class, 'storeUpdate'])     ->name('updates.store');
-    Route::delete('/updates/{id}',           [DeveloperController::class, 'deleteUpdate'])    ->name('updates.delete');
-    Route::get('/card-preview/{ticketId?}',  [DeveloperController::class, 'cardPreview'])     ->name('card-preview');
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
+        Route::get('/',                          [DeveloperController::class, 'dashboard'])       ->name('index');
+        Route::post('/apk',                      [DeveloperController::class, 'updateApk'])       ->name('apk');
+        Route::delete('/apk',                    [DeveloperController::class, 'deleteApk'])       ->name('apk.delete');
+        Route::post('/maintenance',              [DeveloperController::class, 'toggleMaintenance'])->name('maintenance');
+        Route::get('/clear-cache',               [DeveloperController::class, 'clearCache'])      ->name('clear-cache');
+        Route::get('/migrate',                   [DeveloperController::class, 'migrate'])         ->name('migrate');
+        Route::get('/optimize',                  [DeveloperController::class, 'optimize'])        ->name('optimize');
+        Route::post('/deploy',                   [DeveloperController::class, 'deploy'])          ->name('deploy');
+        Route::post('/updates',                  [DeveloperController::class, 'storeUpdate'])     ->name('updates.store');
+        Route::delete('/updates/{id}',           [DeveloperController::class, 'deleteUpdate'])    ->name('updates.delete');
+        Route::get('/card-preview/{ticketId?}',  [DeveloperController::class, 'cardPreview'])     ->name('card-preview');
+    });
 });
 
 
