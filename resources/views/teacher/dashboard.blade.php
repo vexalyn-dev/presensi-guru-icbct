@@ -387,6 +387,27 @@
         </div>
 
         @if($workSchedule->count() > 0)
+
+            <!-- Summary Card -->
+            <div class="p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800 mb-3 sm:mb-4">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-[10px] sm:text-xs text-purple-600 dark:text-purple-400 font-semibold truncate">Total Jam Kerja Mingguan</p>
+                        <p class="text-xl sm:text-2xl font-bold text-purple-800 dark:text-purple-300">
+                            @php
+                                $totalMinutes = $workSchedule->sum(fn($w) => \Carbon\Carbon::parse($w->start_time)->diffInMinutes(\Carbon\Carbon::parse($w->end_time)));
+                                $totalWeeklyHoursClean = $totalMinutes / 60;
+                                $totalWeeklyHoursDisplay = (floor($totalWeeklyHoursClean) == $totalWeeklyHoursClean) ? number_format($totalWeeklyHoursClean, 0) : number_format($totalWeeklyHoursClean, 1);
+                            @endphp
+                            {{ $totalWeeklyHoursDisplay }} Jam
+                        </p>
+                    </div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="clock" class="w-5 h-5 sm:w-6 sm:h-6 text-white"></i>
+                    </div>
+                </div>
+            </div>
+
             <div class="space-y-2.5 sm:space-y-3">
                 @foreach($workSchedule as $work)
                 @php
@@ -463,26 +484,6 @@
                     @endif
                 </div>
                 @endforeach
-
-                <!-- Summary -->
-                <div class="mt-3 sm:mt-4 p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="min-w-0">
-                            <p class="text-[10px] sm:text-xs text-purple-600 dark:text-purple-400 font-semibold truncate">Total Jam Kerja Mingguan</p>
-                            <p class="text-xl sm:text-2xl font-bold text-purple-800 dark:text-purple-300">
-                                @php
-                                    $totalMinutes = $workSchedule->sum(fn($w) => \Carbon\Carbon::parse($w->start_time)->diffInMinutes(\Carbon\Carbon::parse($w->end_time)));
-                                    $totalWeeklyHoursClean = $totalMinutes / 60;
-                                    $totalWeeklyHoursDisplay = (floor($totalWeeklyHoursClean) == $totalWeeklyHoursClean) ? number_format($totalWeeklyHoursClean, 0) : number_format($totalWeeklyHoursClean, 1);
-                                @endphp
-                                {{ $totalWeeklyHoursDisplay }} Jam
-                            </p>
-                        </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="clock" class="w-5 h-5 sm:w-6 sm:h-6 text-white"></i>
-                        </div>
-                    </div>
-                </div>
             </div>
         @else
             <div class="text-center py-8 sm:py-12">
