@@ -1,0 +1,21 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "intelephense.diagnostics.undefinedMethods": false,
+  "intelephense.environment.includePaths": [
+    "app/Models"
+  ],
+  "qwen-code.apiKey": "sk-06a257f129c54b26b93f977f10491142",
+  "qwen-code.codingPlanRegion": "global",
+  "qwen-code.provider": "api-key",
+  "files.associations": {
+    "*.blade.php": "html"
+  },
+  "emmet.includeLanguages": {
+    "blade": "html"
+  },
+  "javascript.validate.enable": false,
+  "php.validate.enable": false
+}
