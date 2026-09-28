@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AttendanceController;
@@ -364,63 +364,20 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
 });
 
 // ============================================================
-// Developer Dashboard — akses via URL secret
+// Developer Dashboard — akses via URL secret (no auth required)
 // ============================================================
 Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
-    Route::get('/',              [DeveloperController::class, 'dashboard'])          ->name('index');
-    Route::post('/apk',          [DeveloperController::class, 'updateApk'])          ->name('apk');
-    Route::delete('/apk',        [DeveloperController::class, 'deleteApk'])          ->name('apk.delete');
-    Route::post('/maintenance',  [DeveloperController::class, 'toggleMaintenance'])  ->name('maintenance');
-    Route::get('/clear-cache',   [DeveloperController::class, 'clearCache'])         ->name('clear-cache');
-    Route::post('/updates',      [DeveloperController::class, 'storeUpdate'])        ->name('updates.store');
-    Route::delete('/updates/{id}',[DeveloperController::class, 'deleteUpdate'])      ->name('updates.delete');
-    Route::get('/card-preview/{ticketId?}', [DeveloperController::class, 'cardPreview'])->name('card-preview');
-    Route::post('/deploy',       [DeveloperController::class, 'deploy'])           ->name('deploy');
-    Route::get('/optimize',      [DeveloperController::class, 'optimize'])         ->name('optimize');
+    Route::get('/',                          [DeveloperController::class, 'dashboard'])       ->name('index');
+    Route::post('/apk',                      [DeveloperController::class, 'updateApk'])       ->name('apk');
+    Route::delete('/apk',                    [DeveloperController::class, 'deleteApk'])       ->name('apk.delete');
+    Route::post('/maintenance',              [DeveloperController::class, 'toggleMaintenance'])->name('maintenance');
+    Route::get('/clear-cache',               [DeveloperController::class, 'clearCache'])      ->name('clear-cache');
+    Route::get('/migrate',                   [DeveloperController::class, 'migrate'])         ->name('migrate');
+    Route::get('/optimize',                  [DeveloperController::class, 'optimize'])        ->name('optimize');
+    Route::post('/deploy',                   [DeveloperController::class, 'deploy'])          ->name('deploy');
+    Route::post('/updates',                  [DeveloperController::class, 'storeUpdate'])     ->name('updates.store');
+    Route::delete('/updates/{id}',           [DeveloperController::class, 'deleteUpdate'])    ->name('updates.delete');
+    Route::get('/card-preview/{ticketId?}',  [DeveloperController::class, 'cardPreview'])     ->name('card-preview');
 });
 
-Route::middleware(['auth', 'role:admin'])->get('/run-migrate-secret', function (Request $request) {
-    // Lu cuma bisa akses kalo bawa key yang bener
-    if ($request->input('key') !== config('app.deploy_secret_key')) {
-        abort(404);
-    }
 
-    Artisan::call('migrate', ['--force' => true]);
-    return '<pre>' . Artisan::output() . '</pre>';
-});
-
-Route::middleware(['auth', 'role:admin'])->get('/sapu-jagat', function () {
-    Artisan::call('optimize:clear');
-
-    return 'Optimize clear sukses! Semua cache udah ludes.';
-});
-
-Route::middleware(['auth', 'role:admin'])->get('/seed-demo', function (Request $request) {
-    if ($request->input('key') !== config('app.deploy_secret_key')) {
-        abort(404);
-    }
-
-    Artisan::call('db:seed', ['--class' => 'DemoAccountSeeder']);
-    $output = Artisan::output();
-
-    return '<pre>' . $output . '</pre>';
-});
-
-Route::middleware(['auth', 'role:admin'])->get('/git-pull-rahasia', function (Request $request) {
-    // Validasi key rahasia biar aman dari orang Iseng
-    if ($request->input('key') !== config('app.deploy_secret_key')) {
-        abort(404);
-    }
-
-    // Pindah ke folder project lalu git pull
-    $path = base_path(); // Otomatis ngambil path root project Laravel lu
-    $command = "cd {$path} && git pull origin main 2>&1";
-
-    $output = [];
-    $exitCode = null;
-    
-    // Pakai passthru atau system sebagai alternatif pengganti shell_exec
-    passthru($command, $exitCode);
-
-    return '<pre>Exit Code: ' . $exitCode . '</pre>';
-});
