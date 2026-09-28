@@ -142,25 +142,7 @@
 
 ## 📸 Screenshots
 
-> Tampilan lengkap semua halaman ada di [`docs/`](docs/README.md)
-
-<div align="center">
-
-| Login | Dashboard Admin | Live Monitoring |
-|:-----:|:---------------:|:---------------:|
-| ![Login](docs/screenshots/auth/login.png) | ![Dashboard](docs/screenshots/admin/dashboard.png) | ![Live Monitoring](docs/screenshots/admin/live-monitoring.png) |
-
-| Dashboard Guru | Presensi Kelas | Log Aktivitas |
-|:--------------:|:--------------:|:-------------:|
-| ![Guru](docs/screenshots/guru/dashboard.png) | ![Kelas](docs/screenshots/guru/class-attendance.png) | ![Log](docs/screenshots/admin/activity-log.png) |
-
-| Mobile Login | Mobile Dashboard | Mobile Presensi |
-|:------------:|:----------------:|:---------------:|
-| ![M Login](docs/screenshots/mobile/login.png) | ![M Dashboard](docs/screenshots/mobile/dashboard.png) | ![M Presensi](docs/screenshots/mobile/attendance.png) |
-
-</div>
-
-> 📌 Screenshot belum tersedia? Lihat [cara nambahinnya](docs/README.md#cara-nambahin-screenshot).
+Tampilan lengkap semua halaman ada di **[`docs/`](docs/README.md)**.
 
 ---
 
