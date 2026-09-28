@@ -608,7 +608,10 @@
                 text-transform: uppercase;
                 color: #94a3b8;
                 background: #FFFFFF;
-                z-index: 10;
+                z-index: 9999;
+                will-change: transform;
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
             }
 
             .mobile-credit a {
@@ -1350,9 +1353,9 @@
     {{-- END .auth-container --}}
 
         <div class="auth-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
-        <div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
     </div>
 </div>
+<div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
 
     <script>
         function toggleAuth() {
