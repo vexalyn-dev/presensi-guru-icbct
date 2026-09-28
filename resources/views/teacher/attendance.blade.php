@@ -345,7 +345,20 @@
                     </svg>
                 </div>
                 <p style="font-size:0.88rem;font-weight:700;color:#D97706;margin-bottom:3px;">QR Sudah Tercatat</p>
-                <p style="font-size:0.75rem;color:#94A3B8;font-weight:400;">Presensi hari ini sudah lengkap</p>
+                <p id="at-already-info" style="font-size:0.75rem;color:#94A3B8;font-weight:400;">Presensi hari ini sudah lengkap</p>
+            </div>
+
+            {{-- STATE: FAILED --}}
+            <div id="at-state-failed" style="display:none;">
+                <div style="margin-bottom:20px;">
+                    <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"
+                         style="width:72px;height:72px;display:block;margin:0 auto;animation:atXIn 0.35s ease forwards;">
+                        <circle cx="36" cy="36" r="32" stroke="#EF4444" stroke-width="4"/>
+                        <path d="M24 24 L48 48 M48 24 L24 48" stroke="#EF4444" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <p style="font-size:0.88rem;font-weight:700;color:#DC2626;margin-bottom:3px;" id="at-fail-title">Gagal!</p>
+                <p id="at-fail-sub" style="font-size:0.75rem;color:#94A3B8;font-weight:400;">Silakan coba lagi</p>
             </div>
 
         </div>
@@ -373,32 +386,47 @@
 
     <script>
     (function () {
-        var cfg        = document.getElementById('at-config');
-        var pollUrl    = cfg ? cfg.dataset.pollUrl    : '/teacher/attendance/poll-status';
-        var overlay    = document.getElementById('at-overlay');
-        var stLoad     = document.getElementById('at-state-loading');
-        var stCheckIn  = document.getElementById('at-state-checkin');
-        var stCheckOut = document.getElementById('at-state-checkout');
-        var stAlready  = document.getElementById('at-state-already');
+        var cfg     = document.getElementById('at-config');
+        var pollUrl = cfg ? cfg.dataset.pollUrl : '/teacher/attendance/poll-status';
+        var overlay = document.getElementById('at-overlay');
 
-        var initHasCheckIn  = cfg && cfg.dataset.hasCheckin  === 'true';
-        var initHasCheckOut = cfg && cfg.dataset.hasCheckout === 'true';
-
-        var prevCheckIn  = initHasCheckIn;
-        var prevCheckOut = initHasCheckOut;
         var modalVisible = false;
         var closeTimer   = null;
 
+        // Polling lebih cepat: 300ms
+        var POLL_MS      = 300;
+        var prevCheckInTs  = null;
+        var prevCheckOutTs = null;
+        var initialized    = false;
+
         function showState(name) {
-            [stLoad, stCheckIn, stCheckOut, stAlready].forEach(function(el) {
-                el.style.display = 'none';
-            });
-            var map = { loading: stLoad, checkin: stCheckIn, checkout: stCheckOut, already: stAlready };
-            if (map[name]) map[name].style.display = 'block';
+            ['at-state-loading','at-state-checkin','at-state-checkout','at-state-already','at-state-failed']
+                .forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+            var el = document.getElementById('at-state-' + name);
+            if (el) el.style.display = 'block';
         }
 
-        function showOverlay(state, timeStr) {
+        function restartSvgAnim(stateId) {
+            var svgEl = document.querySelector('#' + stateId + ' svg');
+            if (svgEl) {
+                var clone = svgEl.cloneNode(true);
+                svgEl.parentNode.replaceChild(clone, svgEl);
+            }
+        }
+
+        function closeModal(callback) {
             if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+            overlay.classList.remove('show');
+            modalVisible = false;
+            if (callback) setTimeout(callback, 350);
+        }
+
+        function showOverlay(state, timeStr, extra) {
+            if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+
             showState('loading');
             overlay.classList.add('show');
             modalVisible = true;
@@ -409,25 +437,62 @@
                 if (state === 'checkin') {
                     var el = document.getElementById('at-checkin-time');
                     if (el) el.textContent = timeStr ? 'Jam masuk: ' + timeStr + ' WIB' : '';
+                    restartSvgAnim('at-state-checkin');
                 } else if (state === 'checkout') {
                     var el = document.getElementById('at-checkout-time');
                     if (el) el.textContent = timeStr ? 'Jam pulang: ' + timeStr + ' WIB' : '';
+                    restartSvgAnim('at-state-checkout');
+                } else if (state === 'already') {
+                    var infoEl = document.getElementById('at-already-info');
+                    if (infoEl && extra) {
+                        var msg = extra.check_in ? 'Sudah scan masuk: ' + extra.check_in + ' WIB' : '';
+                        msg += extra.check_out ? ' & pulang: ' + extra.check_out + ' WIB' : '';
+                        infoEl.textContent = msg || 'Presensi hari ini sudah lengkap';
+                    }
+                    restartSvgAnim('at-state-already');
+                } else if (state === 'failed') {
+                    var titleEl = document.getElementById('at-fail-title');
+                    var subEl   = document.getElementById('at-fail-sub');
+                    if (titleEl && extra && extra.message) titleEl.textContent = extra.message;
+                    if (subEl) subEl.textContent = extra && extra.retry ? 'Silakan coba lagi' : 'Hubungi operator jika masalah berlanjut';
+                    restartSvgAnim('at-state-failed');
                 }
 
-                // Clone SVG agar animasi restart
-                var stateId = state === 'checkin' ? 'at-state-checkin' : (state === 'checkout' ? 'at-state-checkout' : 'at-state-already');
-                var svgEl = document.querySelector('#' + stateId + ' svg');
-                if (svgEl) {
-                    var clone = svgEl.cloneNode(true);
-                    svgEl.parentNode.replaceChild(clone, svgEl);
-                }
-
+                // Tutup otomatis, tanpa reload halaman
                 closeTimer = setTimeout(function () {
-                    overlay.classList.remove('show');
-                    modalVisible = false;
-                    setTimeout(function() { window.location.reload(); }, 300);
+                    closeModal();
                 }, 3000);
-            }, 800);
+            }, 600);
+        }
+
+        var pollTimer = null;
+
+        function schedulePoll() {
+            if (pollTimer) clearTimeout(pollTimer);
+            pollTimer = setTimeout(function() { poll(); }, POLL_MS);
+        }
+
+        function updateStatusBar(data) {
+            // Update jam masuk
+            var ciEl = document.querySelector('[data-key="check_in_time"]');
+            if (ciEl && data.check_in) {
+                ciEl.textContent = data.check_in;
+                ciEl.classList.remove('text-slate-400');
+                ciEl.classList.add('text-green-700', 'dark:text-green-400');
+            }
+            // Update jam pulang
+            var coEl = document.querySelector('[data-key="check_out_time"]');
+            if (coEl && data.check_out) {
+                coEl.textContent = data.check_out;
+                coEl.classList.remove('text-slate-400');
+                coEl.classList.add('text-red-700', 'dark:text-red-400');
+            }
+            // Update status badge
+            var badgeEl = document.querySelector('[data-key="status_badge"]');
+            if (badgeEl && data.status) {
+                var label = data.status === 'Tepat Waktu' ? 'Hadir' : data.status;
+                badgeEl.textContent = label;
+            }
         }
 
         function poll() {
@@ -435,31 +500,57 @@
                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
                 credentials: 'same-origin',
             })
-            .then(function(r) { return r.ok ? r.json() : null; })
-            .then(function(data) {
-                if (!data || modalVisible) return;
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data) { schedulePoll(); return; }
 
-                var nowCheckIn  = data.has_checkin;
-                var nowCheckOut = data.has_checkout;
+                var ciTs = data.check_in_ts  || null;
+                var coTs = data.check_out_ts || null;
 
-                if (!prevCheckIn && nowCheckIn) {
-                    showOverlay('checkin', data.check_in);
-                } else if (prevCheckIn && !prevCheckOut && nowCheckOut) {
-                    showOverlay('checkout', data.check_out);
+                if (!initialized) {
+                    prevCheckInTs  = ciTs;
+                    prevCheckOutTs = coTs;
+                    initialized    = true;
+                    updateStatusBar(data);
+                    schedulePoll();
+                    return;
                 }
 
-                prevCheckIn  = nowCheckIn;
-                prevCheckOut = nowCheckOut;
+                if (modalVisible) { schedulePoll(); return; }
+
+                var now = Math.floor(Date.now() / 1000);
+                var GRACE_SEC = 120;
+
+                // Check-in baru
+                if (ciTs && ciTs !== prevCheckInTs && (now - ciTs) <= GRACE_SEC) {
+                    prevCheckInTs = ciTs;
+                    updateStatusBar(data);
+                    showOverlay('checkin', data.check_in);
+                    schedulePoll();
+                    return;
+                }
+
+                // Check-out baru
+                if (coTs && coTs !== prevCheckOutTs && (now - coTs) <= GRACE_SEC) {
+                    prevCheckOutTs = coTs;
+                    updateStatusBar(data);
+                    showOverlay('checkout', data.check_out);
+                    schedulePoll();
+                    return;
+                }
+
+                prevCheckInTs  = ciTs;
+                prevCheckOutTs = coTs;
+                schedulePoll();
             })
-            .catch(function() { /* silent fail */ });
+            .catch(function () { schedulePoll(); });
         }
 
-        setInterval(poll, 3000);
+        schedulePoll();
 
-        overlay.addEventListener('click', function() {
-            if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
-            overlay.classList.remove('show');
-            modalVisible = false;
+        // Klik overlay tutup manual
+        overlay.addEventListener('click', function () {
+            closeModal();
         });
     })();
     </script>

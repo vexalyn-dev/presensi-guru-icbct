@@ -105,8 +105,15 @@ class AttendanceController extends Controller
         // ===== END GPS VALIDATION =====
 
         if ($validated['mode'] === 'masuk') {
+            $attendance = Attendance::where('user_id', $user->id)
+                ->whereDate('date', $today)
+                ->firstOrCreate(['user_id' => $user->id, 'date' => $today]);
+
             if ($attendance->check_in) {
-                return $this->_jsonResp(false, 'Anda sudah melakukan presensi masuk hari ini.');
+                return $this->_jsonResp(false, 'Anda sudah melakukan presensi masuk hari ini.', [
+                    'already_scanned' => true,
+                    'check_in' => Carbon::parse($attendance->check_in)->format('H:i'),
+                ]);
             }
 
             // Hitung threshold terlambat: prioritas TeacherSchedule hari ini > default_check_in > setting global
@@ -147,14 +154,23 @@ class AttendanceController extends Controller
 
             return $this->_jsonResp(true, 'Presensi masuk berhasil dicatat!', [
                 'check_in' => $now->format('H:i'),
+                'check_in_ts' => $now->timestamp,
                 'status' => $isLate ? 'Terlambat' : 'Hadir',
+                'mode' => 'masuk',
             ]);
         } else {
-            if (!$attendance->check_in) {
-                return $this->_jsonResp(false, 'Anda belum melakukan presensi masuk.');
+            $attendance = Attendance::where('user_id', $user->id)
+                ->whereDate('date', $today)
+                ->first();
+
+            if (!$attendance || !$attendance->check_in) {
+                return $this->_jsonResp(false, 'Anda belum melakukan presensi masuk.', ['already_scanned' => false]);
             }
             if ($attendance->check_out) {
-                return $this->_jsonResp(false, 'Anda sudah melakukan presensi pulang hari ini.');
+                return $this->_jsonResp(false, 'Anda sudah melakukan presensi pulang hari ini.', [
+                    'already_scanned' => true,
+                    'check_out' => Carbon::parse($attendance->check_out)->format('H:i'),
+                ]);
             }
 
             $attendance->update([
@@ -165,6 +181,8 @@ class AttendanceController extends Controller
 
             return $this->_jsonResp(true, 'Presensi pulang berhasil dicatat!', [
                 'check_out' => $now->format('H:i'),
+                'check_out_ts' => $now->timestamp,
+                'mode' => 'keluar',
             ]);
         }
     }
@@ -178,8 +196,9 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Polling endpoint — dipanggil tiap 3 detik dari halaman presensi guru.
-     * Kembalikan snapshot status check_in / check_out hari ini.
+     * Polling endpoint — dipanggil tiap 500ms dari halaman presensi guru.
+     * Pakai Unix timestamp agar JS bisa deteksi perubahan meskipun halaman
+     * di-load setelah scan sudah terjadi.
      */
     public function pollStatus(): \Illuminate\Http\JsonResponse
     {
@@ -189,11 +208,13 @@ class AttendanceController extends Controller
                     ->first();
 
         return response()->json([
-            'has_checkin'  => (bool) ($att?->check_in),
-            'has_checkout' => (bool) ($att?->check_out),
-            'check_in'     => $att?->check_in  ? Carbon::parse($att->check_in)->format('H:i')  : null,
-            'check_out'    => $att?->check_out ? Carbon::parse($att->check_out)->format('H:i') : null,
-            'status'       => $att?->status ?? null,
+            'has_checkin'   => (bool) ($att?->check_in),
+            'has_checkout'  => (bool) ($att?->check_out),
+            'check_in'      => $att?->check_in  ? Carbon::parse($att->check_in)->format('H:i')  : null,
+            'check_out'     => $att?->check_out ? Carbon::parse($att->check_out)->format('H:i') : null,
+            'check_in_ts'   => $att?->check_in  ? Carbon::parse($att->check_in)->timestamp  : null,
+            'check_out_ts'  => $att?->check_out ? Carbon::parse($att->check_out)->timestamp : null,
+            'status'        => $att?->status ?? null,
         ]);
     }
 
