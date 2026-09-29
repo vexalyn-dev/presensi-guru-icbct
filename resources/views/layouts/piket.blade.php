@@ -533,68 +533,61 @@
 
     {{-- Release Modal --}}
     @if($latestUpdate && $latestUpdate->show_modal)
-    <div id="release-modal" class="rel-modal-overlay" style="display:none;">
-        <div class="rel-modal-backdrop" onclick="closeReleaseModal()"></div>
-        <div class="rel-modal-box">
-            <div class="rel-modal-top">
-                <span class="rel-version">{{ $latestUpdate->version }}</span>
-                <button class="rel-close" onclick="closeReleaseModal()">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
+    <div id="release-modal" style="display:none;position:fixed;inset:0;z-index:9998;align-items:center;justify-content:center;padding:16px;">
+        <div onclick="closeReleaseModal()" style="position:absolute;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);"></div>
+        <div id="release-modal-box" style="position:relative;width:100%;max-width:440px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 32px 64px rgba(15,23,42,.4);animation:relSlideIn .35s cubic-bezier(.34,1.56,.64,1);">
+            <div style="padding:20px 24px 18px;background:linear-gradient(135deg,#0F172A 0%,#1E3A8A 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <span style="font-size:.7rem;font-weight:700;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;font-family:monospace;margin-bottom:6px;display:inline-block;">{{ $latestUpdate->version }}</span>
+                    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;vertical-align:middle;margin-left:8px;" class="rel-badge-{{ $latestUpdate->type }}">
+                        <i data-lucide="{{ $latestUpdate->type === 'feature' ? 'star' : ($latestUpdate->type === 'fix' ? 'wrench' : ($latestUpdate->type === 'hotfix' ? 'flame' : 'git-commit')) }}" class="w-3 h-3"></i>
+                        {{ ucfirst($latestUpdate->type) }}
+                    </div>
+                </div>
+                <button onclick="closeReleaseModal()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0;"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div class="rel-modal-body">
-                <h2 class="rel-title">{{ $latestUpdate->title }}</h2>
-                <div class="rel-type-badge rel-type-{{ $latestUpdate->type }}">
-                    <i data-lucide="{{ $latestUpdate->type === 'feature' ? 'star' : ($latestUpdate->type === 'fix' ? 'wrench' : ($latestUpdate->type === 'hotfix' ? 'flame' : 'git-commit')) }}" class="w-3 h-3"></i>
-                    {{ ucfirst($latestUpdate->type) }}
-                </div>
-                <div class="rel-changelog">
-                    {!! nl2br(e($latestUpdate->content)) !!}
-                </div>
-                <button class="rel-btn" onclick="closeReleaseModal()">
+            <div style="padding:22px 24px 24px;">
+                <h2 style="font-size:1.05rem;font-weight:800;color:#0F172A;margin:0 0 14px;line-height:1.4;">{{ $latestUpdate->title }}</h2>
+                <div style="font-size:.85rem;color:#475569;line-height:1.75;margin-bottom:18px;white-space:pre-wrap;word-break:break-word;font-family:inherit;">{!! nl2br(e($latestUpdate->content)) !!}</div>
+                <button onclick="closeReleaseModal()" style="width:100%;padding:12px;border:none;border-radius:14px;background:linear-gradient(135deg,#0F172A,#1E3A8A);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s;">
                     <i data-lucide="check-circle" class="w-4 h-4"></i>
                     Mengerti
                 </button>
             </div>
         </div>
     </div>
-    @endif
-
     <style>
-        .rel-modal-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px}
-        .rel-modal-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-        .rel-modal-box{position:relative;width:100%;max-width:420px;background:#fff dark:bg-slate-800;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.35);animation:relSlideIn .35s cubic-bezier(.34,1.56,.64,1)}
-        .rel-modal-top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#0F172A 0%,#1E3A8A 100%);color:#fff}
-        .rel-version{font-size:.75rem;font-weight:700;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;font-family:monospace}
-        .rel-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
-        .rel-close:hover{background:rgba(255,255,255,.25)}
-        .rel-modal-body{padding:22px}
-        .rel-title{font-size:1.1rem;font-weight:700;color:#0F172A;margin:0 0 12px;line-height:1.4}
-        .dark .rel-title{color:#F1F5F9}
-        .rel-type-badge{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:20px;margin-bottom:14px}
-        .rel-type-feature{background:#EEF2FF;color:#4338CA}
-        .rel-type-update{background:#F0F9FF;color:#0369A1}
-        .rel-type-fix{background:#F0FDF4;color:#15803D}
-        .rel-type-hotfix{background:#FEF2F2;color:#DC2626}
-        .rel-changelog{font-size:.85rem;color:#475569;line-height:1.7;margin-bottom:18px;white-space:pre-wrap;word-break:break-word}
-        .dark .rel-changelog{color:#94A3B8}
-        .rel-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#0F172A,#1E3A8A);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:opacity .2s}
-        .rel-btn:hover{opacity:.9}
         @keyframes relSlideIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
+        .rel-badge-feature{background:rgba(76,29,149,.15);color:#7c3aed;border:1px solid rgba(124,92,255,.25)}
+        .rel-badge-update{background:rgba(3,105,161,.12);color:#0369a1;border:1px solid rgba(3,105,161,.25)}
+        .rel-badge-fix{background:rgba(21,128,61,.12);color:#15803d;border:1px solid rgba(21,128,61,.25)}
+        .rel-badge-hotfix{background:rgba(220,38,38,.12);color:#dc2626;border:1px solid rgba(220,38,38,.25)}
+        html.dark .rel-badge-feature{background:rgba(76,29,149,.2);color:#a78bfa;border-color:rgba(124,92,255,.3)}
+        html.dark .rel-badge-update{background:rgba(3,105,161,.2);color:#38bdf8;border-color:rgba(56,189,248,.3)}
+        html.dark .rel-badge-fix{background:rgba(21,128,61,.2);color:#4ade80;border-color:rgba(74,222,128,.3)}
+        html.dark .rel-badge-hotfix{background:rgba(220,38,38,.2);color:#f87171;border-color:rgba(248,113,113,.3)}
     </style>
-
     <script>
     function closeReleaseModal() {
-        document.getElementById('release-modal').style.display = 'none';
+        var m = document.getElementById('release-modal');
+        if (m) { m.style.transition = 'opacity .2s'; m.style.opacity = '0'; setTimeout(function(){ m.style.display = 'none'; }, 200); }
     }
     @if($latestUpdate && $latestUpdate->show_modal)
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            var m = document.getElementById('release-modal');
-            if (m) m.style.display = 'flex';
+    (function(){
+        var KEY = 'rel_modal_shown_{{ auth()->check() ? md5(auth()->id()) : 'guest' }}';
+        var shown = null;
+        try { shown = sessionStorage.getItem(KEY); } catch(e) {}
+        if (shown) return;
+        var m = document.getElementById('release-modal');
+        if (!m) return;
+        function show() {
+            m.style.display = 'flex';
+            requestAnimationFrame(function() { m.style.opacity = '1'; });
             if (window.lucide) lucide.createIcons();
-        }, 400);
-    });
+            try { sessionStorage.setItem(KEY, '1'); } catch(e) {}
+        }
+        var t = setTimeout(show, 600);
+    })();
     @endif
     </script>
 
