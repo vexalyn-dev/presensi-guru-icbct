@@ -8,19 +8,19 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-4">
-            <a href="{{ route('subjects.index') }}"
-                class="group flex items-center gap-2.5 px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
-                <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
-                <span>Kembali</span>
-            </a>
+            <div class="w-12 h-12 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-2xl flex items-center justify-center shadow-lg shadow-navy-800/30 dark:shadow-gold-400/30">
+                <i data-lucide="book-open" class="w-6 h-6 text-white dark:text-navy-900"></i>
+            </div>
             <div>
                 <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Tambah Mata Pelajaran</h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Isi form di bawah untuk menambahkan mapel baru</p>
             </div>
         </div>
-        <div class="w-12 h-12 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-2xl flex items-center justify-center shadow-lg shadow-navy-800/30 dark:shadow-gold-400/30 hidden sm:flex">
-            <i data-lucide="book-open" class="w-6 h-6 text-white dark:text-navy-900"></i>
-        </div>
+        <a href="{{ route('subjects.index') }}"
+            class="group flex items-center gap-2.5 px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+            <span>Kembali</span>
+        </a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
