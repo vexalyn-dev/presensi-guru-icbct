@@ -180,8 +180,7 @@
                                                          <!-- Avatar -->
                                                          <img :src="teacher.photo_url"
                                                               :alt="teacher.name"
-                                                              class="w-10 h-10 rounded-full object-cover flex-shrink-0 border-2 border-slate-200 dark:border-slate-600"
-                                                              @error="this.$el.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(teacher.name) + '&background=0F172A&color=fff'">
+                                                              class="w-10 h-10 rounded-full object-cover flex-shrink-0 border-2 border-slate-200 dark:border-slate-600">
                                                         
                                                         <!-- Teacher Info -->
                                                         <div class="flex-1 min-w-0">
