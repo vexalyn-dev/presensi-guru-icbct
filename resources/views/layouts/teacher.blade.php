@@ -565,6 +565,74 @@
         @keyframes ptSpinRev { to { transform: rotate(-360deg); } }
         @keyframes ptBounce  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     </style>
+
+    {{-- Release Modal --}}
+    @if($latestUpdate && $latestUpdate->show_modal)
+    <div id="release-modal" class="rel-modal-overlay" style="display:none;">
+        <div class="rel-modal-backdrop" onclick="closeReleaseModal()"></div>
+        <div class="rel-modal-box">
+            <div class="rel-modal-top">
+                <span class="rel-version">{{ $latestUpdate->version }}</span>
+                <button class="rel-close" onclick="closeReleaseModal()">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="rel-modal-body">
+                <h2 class="rel-title">{{ $latestUpdate->title }}</h2>
+                <div class="rel-type-badge rel-type-{{ $latestUpdate->type }}">
+                    <i data-lucide="{{ $latestUpdate->type === 'feature' ? 'star' : $latestUpdate->type === 'fix' ? 'wrench' : $latestUpdate->type === 'hotfix' ? 'flame' : 'git-commit' }}" class="w-3 h-3"></i>
+                    {{ ucfirst($latestUpdate->type) }}
+                </div>
+                <div class="rel-changelog">
+                    {!! nl2br(e($latestUpdate->content)) !!}
+                </div>
+                <button class="rel-btn" onclick="closeReleaseModal()">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <style>
+        .rel-modal-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px}
+        .rel-modal-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+        .rel-modal-box{position:relative;width:100%;max-width:420px;background:#fff dark:bg-slate-800;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.35);animation:relSlideIn .35s cubic-bezier(.34,1.56,.64,1)}
+        .rel-modal-top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#0F172A 0%,#1E3A8A 100%);color:#fff}
+        .rel-version{font-size:.75rem;font-weight:700;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;font-family:monospace}
+        .rel-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+        .rel-close:hover{background:rgba(255,255,255,.25)}
+        .rel-modal-body{padding:22px}
+        .rel-title{font-size:1.1rem;font-weight:700;color:#0F172A;margin:0 0 12px;line-height:1.4}
+        .dark .rel-title{color:#F1F5F9}
+        .rel-type-badge{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:20px;margin-bottom:14px}
+        .rel-type-feature{background:#EEF2FF;color:#4338CA}
+        .rel-type-update{background:#F0F9FF;color:#0369A1}
+        .rel-type-fix{background:#F0FDF4;color:#15803D}
+        .rel-type-hotfix{background:#FEF2F2;color:#DC2626}
+        .rel-changelog{font-size:.85rem;color:#475569;line-height:1.7;margin-bottom:18px;white-space:pre-wrap;word-break:break-word}
+        .dark .rel-changelog{color:#94A3B8}
+        .rel-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#0F172A,#1E3A8A);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+        .rel-btn:hover{opacity:.9}
+        @keyframes relSlideIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
+    </style>
+
+    <script>
+    function closeReleaseModal() {
+        document.getElementById('release-modal').style.display = 'none';
+    }
+    @if($latestUpdate && $latestUpdate->show_modal)
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var m = document.getElementById('release-modal');
+            if (m) m.style.display = 'flex';
+            if (window.lucide) lucide.createIcons();
+        }, 400);
+    });
+    @endif
+    </script>
+
     <script>
     (function() {
         var logoutForms = document.querySelectorAll('form[action*="logout"]');

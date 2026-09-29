@@ -15,7 +15,17 @@ class DeveloperUpdate extends Model
 
     public static function latest_active()
     {
-        return static::where('is_active', true)->orderByDesc('id')->first();
+        return static::where('is_active', true)
+                     ->where('show_modal', true)
+                     ->orderByDesc('id')
+                     ->first();
+    }
+
+    public static function latest_user_visible()
+    {
+        return static::where('is_active', true)
+                     ->orderByDesc('id')
+                     ->first();
     }
 
     public function getTypeColorAttribute(): string
