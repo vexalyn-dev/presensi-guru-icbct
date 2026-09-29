@@ -580,7 +580,7 @@
             <div class="rel-modal-body">
                 <h2 class="rel-title">{{ $latestUpdate->title }}</h2>
                 <div class="rel-type-badge rel-type-{{ $latestUpdate->type }}">
-                    <i data-lucide="{{ $latestUpdate->type === 'feature' ? 'star' : $latestUpdate->type === 'fix' ? 'wrench' : $latestUpdate->type === 'hotfix' ? 'flame' : 'git-commit' }}" class="w-3 h-3"></i>
+                    <i data-lucide="{{ $latestUpdate->type === 'feature' ? 'star' : ($latestUpdate->type === 'fix' ? 'wrench' : ($latestUpdate->type === 'hotfix' ? 'flame' : 'git-commit')) }}" class="w-3 h-3"></i>
                     {{ ucfirst($latestUpdate->type) }}
                 </div>
                 <div class="rel-changelog">
