@@ -128,16 +128,26 @@
                                         <div class="absolute left-4 top-1/2 -translate-y-1/2">
                                             <i data-lucide="users" class="w-5 h-5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
                                         </div>
-                                        <div class="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 flex items-center justify-between min-h-[56px]"
+                                        <div class="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 min-h-[56px]"
                                              :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-navy-500 dark:border-gold-500': open}">
-                                            <span class="truncate"
-                                                  x-text="selected.length > 0 ? selected.length + ' guru dipilih' : 'Pilih Guru Pengampu'">
-                                                Pilih Guru Pengampu
-                                            </span>
-                                            <i data-lucide="chevron-down"
-                                               class="w-5 h-5 text-slate-400 transition-transform duration-200"
-                                               :class="{'rotate-180': open}"></i>
+                                            <!-- Show selected names -->
+                                            <template x-if="selected.length > 0">
+                                                <div class="flex flex-wrap gap-1.5 items-center">
+                                                    <template x-for="tid in selected" :key="tid">
+                                                        <template x-for="teacher in teachers" :key="teacher.id">
+                                                            <span x-show="teacher.id == tid" x-text="teacher.name" class="inline-flex items-center gap-1 px-2 py-0.5 bg-navy-100 dark:bg-navy-900/40 text-navy-700 dark:text-navy-300 rounded-md text-xs font-medium">
+                                                                <i data-lucide="check" class="w-3 h-3"></i>
+                                                                <span x-text="teacher.name"></span>
+                                                            </span>
+                                                        </template>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih Guru Pengampu</span>
                                         </div>
+                                        <i data-lucide="chevron-down"
+                                           class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-transform duration-300"
+                                           :class="{'rotate-180': open}"></i>
                                     </div>
 
                                     <!-- Dropdown Menu -->
@@ -169,14 +179,10 @@
                                                        :class="selected.includes(teacher.id) ? 'bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800' : ''">
 
                                                     <!-- Checkbox -->
-                                                    <div class="relative flex-shrink-0">
-                                                        <input type="checkbox"
-                                                               :value="teacher.id"
-                                                               x-model="selected"
-                                                               class="w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer appearance-none checked:bg-navy-600 checked:border-navy-600 transition-all">
-                                                        <i data-lucide="check" class="absolute inset-0 w-5 h-5 text-white pointer-events-none opacity-0 transition-opacity"
-                                                           :class="selected.includes(teacher.id) ? 'opacity-100' : ''"></i>
-                                                    </div>
+                                                    <input type="checkbox"
+                                                           :value="teacher.id"
+                                                           x-model="selected"
+                                                           class="w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer transition-all duration-200">
 
                                                     <!-- Avatar -->
                                                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0">
@@ -263,7 +269,8 @@
                                              :class="isActive ? 'opacity-100' : 'opacity-70'">
                                             <div class="absolute inset-0 rounded-full transition-colors duration-300"
                                                  :class="isActive ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'"></div>
-                                            <div class="absolute top-1 left-1 w-7 h-7 bg-white rounded-full shadow-md transition-all duration-300 transform"
+                                            <div class="absolute top-1 left-1 w-7 h-7 bg-white rounded-full shadow-md transition-all duration-300 ease-in-out"
+                                                 style="transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);"
                                                  :class="isActive ? 'translate-x-7' : 'translate-x-0'"></div>
                                         </div>
                                     </label>
@@ -379,34 +386,6 @@
     }
     .overflow-y-auto::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
-    }
-
-    input[type="checkbox"].w-5.h-5 {
-        appearance: none;
-        -webkit-appearance: none;
-        width: 20px;
-        height: 20px;
-        border: 2px solid theme('colors.slate.300');
-        border-radius: 4px;
-        background: white;
-        cursor: pointer;
-        position: relative;
-        transition: all 0.15s ease;
-    }
-    .dark input[type="checkbox"].w-5.h-5 {
-        border-color: theme('colors.slate.600');
-        background: theme('colors.slate.800');
-    }
-    input[type="checkbox"].w-5.h-5:checked {
-        background: theme('colors.navy.600', #1e3a5f);
-        border-color: theme('colors.navy.600', #1e3a5f);
-    }
-    input[type="checkbox"].w-5.h-5:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px theme('colors.navy.100', #dbeafe);
-    }
-    .dark input[type="checkbox"].w-5.h-5:focus {
-        box-shadow: 0 0 0 3px theme('colors.navy.900', #1e3a5f);
     }
 </style>
 @endsection
