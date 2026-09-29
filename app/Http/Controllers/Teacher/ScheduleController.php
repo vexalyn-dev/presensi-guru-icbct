@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\TeachingSchedule;
+use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
@@ -24,6 +25,6 @@ class ScheduleController extends Controller
             4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', 0 => 'Minggu'
         ];
 
-        return view('teacher.schedule', compact('schedules', 'dayNames'));
+        return view('teacher.schedule', compact('schedules', 'dayNames', 'today'));
     }
 }
