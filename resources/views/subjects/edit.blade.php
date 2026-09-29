@@ -131,16 +131,22 @@
                                             <div class="absolute left-4 top-1/2 -translate-y-1/2">
                                                 <i data-lucide="users" class="w-5 h-5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
                                             </div>
-                                            <div class="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 flex items-center justify-between min-h-[56px]"
-                                                 :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-navy-500 dark:border-gold-500': open}">
-                                                <span class="truncate" 
-                                                      x-text="selected.length > 0 ? selected.length + ' guru dipilih' : 'Pilih Guru Pengampu'">
-                                                    {{ $subject->teachers->count() > 0 ? $subject->teachers->count() . ' guru dipilih' : 'Pilih Guru Pengampu' }}
-                                                </span>
-                                                <i data-lucide="chevron-down" 
-                                                   class="w-5 h-5 text-slate-400 transition-transform duration-200"
-                                                   :class="{'rotate-180': open}"></i>
-                                            </div>
+                                             <div class="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 min-h-[52px] flex items-center gap-2"
+                                                  :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-blue-400 dark:border-blue-500': open, 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700': selected.length > 0}">
+                                                 <!-- Selected: comma-separated names -->
+                                                 <template x-if="selected.length > 0">
+                                                     <div class="flex items-center gap-2 w-full">
+                                                         <i data-lucide="user" class="w-4 h-4 text-blue-500 flex-shrink-0"></i>
+                                                         <span class="text-blue-700 dark:text-blue-300 font-semibold truncate"
+                                                               x-text="selected.map(id => teachers.find(t => t.id == id)?.name).filter(Boolean).join(', ')"></span>
+                                                     </div>
+                                                 </template>
+                                                  <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih Guru Pengampu</span>
+                                                 </div>
+                                                 <i data-lucide="chevron-down"
+                                                    class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-transform duration-300"
+                                                    :class="{'rotate-180': open}"></i>
+                                             </div>
                                         </div>
 
                                         <!-- Dropdown Menu -->
@@ -151,7 +157,7 @@
                                              x-transition:leave="transition ease-in duration-150"
                                              x-transition:leave-start="opacity-100 scale-100"
                                              x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                             class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                              class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden subject-dropdown"
                                              x-cloak>
 
                                             <!-- Search Input -->
@@ -172,10 +178,17 @@
                                                            :class="selected.includes(teacher.id) ? 'bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800' : ''">
                                                         
                                                         <!-- Checkbox -->
-                                                        <input type="checkbox" 
+                                                        <input type="checkbox"
                                                                :value="teacher.id"
                                                                x-model="selected"
-                                                               class="w-5 h-5 rounded border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer">
+                                                               class="cb-nichek">
+                                                        <div class="cb-box flex-shrink-0"
+                                                             :class="selected.includes(teacher.id) ? 'checked' : ''"
+                                                             @click.stop>
+                                                            <svg class="cb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                                                <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                            </svg>
+                                                        </div>
                                                         
                                                          <!-- Avatar -->
                                                          <img :src="teacher.photo_url"
@@ -378,8 +391,79 @@
         .dark .overflow-y-auto::-webkit-scrollbar-thumb {
             background: #475569;
         }
-        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-    </style>
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* ── Custom Checkbox (login page style) ── */
+    .cb-nichek {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+    }
+    .cb-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        border: 2px solid #cbd5e1;
+        border-radius: 7px;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
+        position: relative;
+        box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+    }
+    .dark .cb-box {
+        border-color: #475569;
+        background: #1e293b;
+    }
+    .cb-box:hover {
+        border-color: #0f172a;
+        box-shadow: 0 0 0 4px rgba(15,23,42,0.08);
+    }
+    .dark .cb-box:hover {
+        border-color: #94a3b8;
+    }
+    .cb-box .cb-check {
+        opacity: 0;
+        transform: scale(0) rotate(-10deg);
+        transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .cb-box.checked {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        border-color: #0f172a;
+        box-shadow: 0 4px 14px rgba(15,23,42,0.28);
+        animation: cbBounce 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .dark .cb-box.checked {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-color: #3b82f6;
+        box-shadow: 0 4px 14px rgba(59,130,246,0.3);
+    }
+    .cb-box.checked .cb-check {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    @keyframes cbBounce {
+        0%   { transform: scale(0.8); }
+        55%  { transform: scale(1.18); }
+        100% { transform: scale(1); }
+    }
+
+    /* ── Dropdown scroll fix ── */
+    .subject-dropdown {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 9999 !important;
+        max-height: 280px !important;
+        overflow-y: auto !important;
+    }
+</style>
 @endsection
