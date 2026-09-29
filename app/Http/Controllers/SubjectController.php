@@ -76,12 +76,20 @@ class SubjectController extends Controller
         $validated['code'] = 'MP-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
 
         $validated['is_active'] = $request->has('is_active');
+        $validated['category'] = 'Umum';
 
         $subject = Subject::create($validated);
 
-        // Sync multiple teachers
+        // Sync teacher from single select (create form) or array (edit form)
+        $teacherIds = [];
+        if ($request->filled('teacher_id')) {
+            $teacherIds[] = (int) $request->teacher_id;
+        }
         if ($request->filled('teacher_ids')) {
-            $subject->teachers()->sync($request->teacher_ids);
+            $teacherIds = array_merge($teacherIds, array_map('intval', $request->teacher_ids));
+        }
+        if (!empty($teacherIds)) {
+            $subject->teachers()->sync(array_unique($teacherIds));
         }
 
         return redirect()->route('subjects.index')->with('success', 'Mata pelajaran berhasil ditambahkan.');
