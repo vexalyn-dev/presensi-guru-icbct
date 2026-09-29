@@ -689,10 +689,12 @@ body.nb ::selection { background: var(--violet); color: #fff; }
             <div class="nb-top-r">
                 <span class="nb-clock" id="live-clock">--:--:--</span>
                 <span class="nb-env"><i></i><span>{{ ucfirst(app()->environment()) }}</span></span>
-                <a href="{{ url()->previous() === url()->current() ? url('/') : url()->previous() }}"
-                   class="nb-icon-btn" aria-label="Keluar dari panel">
-                    <i data-lucide="log-out" class="w-4 h-4"></i>
-                </a>
+                <form action="{{ route('logout') }}" method="POST" style="display:inline;" onsubmit="return confirmAction(this, 'Yakin ingin keluar dari developer panel?')">
+                    @csrf
+                    <button type="submit" class="nb-icon-btn" aria-label="Logout">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </form>
             </div>
         </header>
 

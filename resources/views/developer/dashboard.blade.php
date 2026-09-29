@@ -319,6 +319,7 @@
                         </div>
                         <input type="file" id="apk-input" name="apk_file" accept=".apk" class="hidden"
                                onchange="setApkName(this.files[0])">
+                        @error('apk_file')<p class="nb-err" style="margin-top:4px">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="nb-apk-fields">

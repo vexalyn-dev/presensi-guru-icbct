@@ -126,7 +126,12 @@ class DeveloperController extends Controller
         }
 
         if (!empty($data)) {
-            try { $apkSetting->update($data); } catch (\Throwable $e) {}
+            try {
+                $apkSetting->update($data);
+            } catch (\Throwable $e) {
+                \Log::error('APK update failed: ' . $e->getMessage());
+                return back()->with('error', '❌ Gagal menyimpan metadata APK: ' . substr($e->getMessage(), 0, 100));
+            }
         }
 
         return back()->with('success', '✅ APK berhasil disimpan!');
