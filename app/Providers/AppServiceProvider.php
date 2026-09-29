@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
 
         view()->composer(['layouts.app', 'layouts.teacher', 'layouts.piket'], function ($view) {
             try {
-                $latestUpdate = DeveloperUpdate::latest_user_visible();
+                $latestUpdate = DeveloperUpdate::latest_active();
             } catch (\Throwable $e) {
                 $latestUpdate = null;
             }

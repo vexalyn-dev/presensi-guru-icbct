@@ -21,13 +21,6 @@ class DeveloperUpdate extends Model
                      ->first();
     }
 
-    public static function latest_user_visible()
-    {
-        return static::where('is_active', true)
-                     ->orderByDesc('id')
-                     ->first();
-    }
-
     public function getTypeColorAttribute(): string
     {
         return match($this->type) {

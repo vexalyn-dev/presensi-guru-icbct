@@ -389,10 +389,21 @@ class DeveloperController extends Controller
 
     /**
      * Public endpoint: jalankan database seeder.
-     * GET /run-seeder
+     * GET /run-seeder?key={secret}
      */
-    public function runSeeder()
+    public function runSeeder(Request $request)
     {
+        $key = (string) $request->input('key', '');
+        $developerKey = config('app.developer_secret_key', '');
+        $deployKey    = config('app.deploy_secret_key', '');
+        $allowed = $developerKey !== '' && hash_equals($developerKey, $key);
+        if (!$allowed && $deployKey !== '' && hash_equals($deployKey, $key)) {
+            $allowed = true;
+        }
+        if (!$allowed) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         try {
             Artisan::call('db:seed', ['--force' => true]);
             $output = trim(Artisan::output());

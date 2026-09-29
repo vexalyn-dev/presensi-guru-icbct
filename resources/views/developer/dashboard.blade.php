@@ -571,11 +571,12 @@
     welcome.addEventListener('click', e => { if (e.target === welcome) closeWelcome(); });
     $('#nb-open-welcome')?.addEventListener('click', () => openOverlay(welcome));
     const relErr = !!document.querySelector('#nb-release-modal[data-open="1"]');
-    const seen = safe(() => sessionStorage.getItem('dev_welcome_seen'));
-    if (!relErr && !seen && safe(() => localStorage.getItem(KEY)) !== today) {
+    const KEY = 'dev_panel_welcome_seen';
+    const seen = safe(() => localStorage.getItem(KEY));
+    if (!relErr && !seen && safe(() => localStorage.getItem(KEY + '_skip')) !== today) {
         setTimeout(() => {
             openOverlay(welcome);
-            safe(() => sessionStorage.setItem('dev_welcome_seen', '1'));
+            safe(() => localStorage.setItem(KEY, '1'));
         }, 450);
     }
 
