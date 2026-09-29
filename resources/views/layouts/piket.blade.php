@@ -540,7 +540,8 @@
                 <div>
                     <span style="font-size:.7rem;font-weight:700;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;font-family:monospace;margin-bottom:6px;display:inline-block;">{{ $latestUpdate->version }}</span>
                     <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;vertical-align:middle;margin-left:8px;" class="rel-badge-{{ $latestUpdate->type }}">
-                        <i data-lucide="{{ $latestUpdate->type === 'feature' ? 'star' : ($latestUpdate->type === 'fix' ? 'wrench' : ($latestUpdate->type === 'hotfix' ? 'flame' : 'git-commit')) }}" class="w-3 h-3"></i>
+                        @php $relIcon = match($latestUpdate->type) { 'feature' => 'star', 'fix' => 'wrench', 'hotfix' => 'flame', default => 'git-commit' }; @endphp
+                        <i data-lucide="{{ $relIcon }}" class="w-3 h-3"></i>
                         {{ ucfirst($latestUpdate->type) }}
                     </div>
                 </div>
@@ -572,12 +573,9 @@
         var m = document.getElementById('release-modal');
         if (m) { m.style.transition = 'opacity .2s'; m.style.opacity = '0'; setTimeout(function(){ m.style.display = 'none'; }, 200); }
     }
-    @if($latestUpdate && $latestUpdate->show_modal)
     (function(){
         var KEY = 'rel_modal_shown_{{ auth()->check() ? md5(auth()->id()) : 'guest' }}';
-        var shown = null;
-        try { shown = sessionStorage.getItem(KEY); } catch(e) {}
-        if (shown) return;
+        if (sessionStorage.getItem(KEY)) return;
         var m = document.getElementById('release-modal');
         if (!m) return;
         function show() {
@@ -586,9 +584,8 @@
             if (window.lucide) lucide.createIcons();
             try { sessionStorage.setItem(KEY, '1'); } catch(e) {}
         }
-        var t = setTimeout(show, 600);
+        setTimeout(show, 600);
     })();
-    @endif
     </script>
 
     <script>
