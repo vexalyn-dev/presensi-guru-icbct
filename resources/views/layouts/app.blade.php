@@ -932,6 +932,7 @@
         setTimeout(show, 600);
     })();
     </script>
+    @endif
 
     <script>
     (function() {
