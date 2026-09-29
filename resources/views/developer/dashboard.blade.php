@@ -398,6 +398,16 @@
                     <span class="nb-ico nb-ico-lg nb-ico-amber"><i data-lucide="wrench" class="w-5 h-5"></i></span>
                     <div><b>Fix Session</b><small>Perbaiki session dir + clear semua cache</small></div>
                 </a>
+                <button type="button" class="nb-tool" id="debug-toggle-btn"
+                        data-debug="{{ $stats['debug'] ? '1' : '0' }}">
+                    <span class="nb-ico nb-ico-lg nb-ico-rose" id="debug-toggle-ico">
+                        <i data-lucide="bug" class="w-5 h-5"></i>
+                    </span>
+                    <div>
+                        <b id="debug-toggle-label">Debug ON</b>
+                        <small id="debug-toggle-desc">Klik untuk mematikan debug</small>
+                    </div>
+                </button>
             </div>
         </div>
     </div>
@@ -572,12 +582,12 @@
     welcome.addEventListener('click', e => { if (e.target === welcome) closeWelcome(); });
     $('#nb-open-welcome')?.addEventListener('click', () => openOverlay(welcome));
     const relErr = !!document.querySelector('#nb-release-modal[data-open="1"]');
-    const KEY = 'dev_panel_welcome_seen';
-    const seen = safe(() => localStorage.getItem(KEY));
+    const WELCOME_SEEN_KEY = 'dev_panel_welcome_seen';
+    const seen = safe(() => localStorage.getItem(WELCOME_SEEN_KEY));
     if (!relErr && !seen && safe(() => localStorage.getItem(KEY + '_skip')) !== today) {
         setTimeout(() => {
             openOverlay(welcome);
-            safe(() => localStorage.setItem(KEY, '1'));
+            safe(() => localStorage.setItem(WELCOME_SEEN_KEY, '1'));
         }, 450);
     }
 
@@ -664,6 +674,32 @@
         $('#apk-input').files = dt.files;
         setApkName(files[0]);
     };
+
+    /* ───── Debug toggle ───── */
+    const dbgBtn = $('#debug-toggle-btn');
+    if (dbgBtn) {
+        const updateDebugUI = (on) => {
+            document.getElementById('debug-toggle-label').textContent = on ? 'Debug ON' : 'Debug OFF';
+            document.getElementById('debug-toggle-desc').textContent  = on ? 'Klik untuk mematikan debug' : 'Klik untuk menyalakan debug';
+            const ico = document.getElementById('debug-toggle-ico');
+            ico.className = 'nb-ico nb-ico-lg ' + (on ? 'nb-ico-rose' : 'nb-ico-mint');
+            dbgBtn.dataset.debug = on ? '1' : '0';
+        };
+        updateDebugUI(dbgBtn.dataset.debug === '1');
+
+        dbgBtn.addEventListener('click', () => {
+            const next = dbgBtn.dataset.debug !== '1';
+            if (!confirm(next ? '⚠️ Nyalakan APP_DEBUG?\nSemua error detail akan terlihat ke pengguna!' : 'Matikan APP_DEBUG?\nDetail error akan disembunyikan.')) return;
+            const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            fetch('/dev-panel/{{ $secret }}/toggle-debug', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
+                body: JSON.stringify({ debug: next })
+            }).then(r => r.json())
+              .then(() => { updateDebugUI(next); location.reload(); })
+              .catch(e => alert('Gagal toggle debug: ' + e.message));
+        });
+    }
 
     /* ───── Hitung naik saat angka terlihat ───── */
     function countUp(el) {

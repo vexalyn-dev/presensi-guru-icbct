@@ -315,6 +315,42 @@ class DeveloperController extends Controller
         return back()->with('success', implode(' → ', $steps));
     }
 
+    /**
+     * Toggle APP_DEBUG via env file edit + config cache rebuild.
+     */
+    public function toggleDebug(string $secret, Request $request)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $target = (bool) $request->input('debug');
+        $envPath = base_path('.env');
+
+        try {
+            $envContent = file_get_contents($envPath);
+            $envContent = preg_replace(
+                '/^APP_DEBUG=.*/m',
+                'APP_DEBUG=' . ($target ? 'true' : 'false'),
+                $envContent
+            );
+            file_put_contents($envPath, $envContent);
+        } catch (\Throwable $e) {
+            return back()->with('error', '❌ Gagal menulis .env: ' . $e->getMessage());
+        }
+
+        try {
+            Artisan::call('config:clear');
+            Artisan::call('config:cache');
+            Artisan::call('view:clear');
+            Artisan::call('route:clear');
+        } catch (\Throwable $e) {
+            return back()->with('error', '❌ Gagal rebuild cache: ' . $e->getMessage());
+        }
+
+        return back()->with('success', $target
+            ? '⚠️ Debug mode AKTIFkan — refresh halaman untuk melihat perubahan.'
+            : '✅ Debug mode MATIKAN — refresh halaman untuk melihat perubahan.');
+    }
+
     // ─────────────────────────────────────────────
     // CARD PREVIEW (support)
     // ─────────────────────────────────────────────
