@@ -128,19 +128,14 @@
                                         <div class="absolute left-4 top-1/2 -translate-y-1/2">
                                             <i data-lucide="users" class="w-5 h-5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
                                         </div>
-                                        <div class="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 min-h-[56px]"
+                                        <div class="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 min-h-[52px] flex items-center"
                                              :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-navy-500 dark:border-gold-500': open}">
-                                            <!-- Show selected names -->
+                                            <!-- Selected: single pill with comma-separated names -->
                                             <template x-if="selected.length > 0">
-                                                <div class="flex flex-wrap gap-1.5 items-center">
-                                                    <template x-for="tid in selected" :key="tid">
-                                                        <template x-for="teacher in teachers" :key="teacher.id">
-                                                            <span x-show="teacher.id == tid" x-text="teacher.name" class="inline-flex items-center gap-1 px-2 py-0.5 bg-navy-100 dark:bg-navy-900/40 text-navy-700 dark:text-navy-300 rounded-md text-xs font-medium">
-                                                                <i data-lucide="check" class="w-3 h-3"></i>
-                                                                <span x-text="teacher.name"></span>
-                                                            </span>
-                                                        </template>
-                                                    </template>
+                                                <div class="flex items-center gap-2 w-full">
+                                                    <i data-lucide="user" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+                                                    <span class="text-navy-700 dark:text-navy-200 font-medium truncate"
+                                                          x-text="selected.map(id => teachers.find(t => t.id == id)?.name).filter(Boolean).join(', ')"></span>
                                                 </div>
                                             </template>
                                             <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih Guru Pengampu</span>
@@ -185,9 +180,10 @@
                                                            class="w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer transition-all duration-200">
 
                                                     <!-- Avatar -->
-                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0">
-                                                        <span x-text="teacher.name.charAt(0).toUpperCase()"></span>
-                                                    </div>
+                                                    <img :src="teacher.photo_url"
+                                                         :alt="teacher.name"
+                                                         class="w-10 h-10 rounded-full object-cover flex-shrink-0 border-2 border-slate-200 dark:border-slate-600"
+                                                         @error="this.$el.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(teacher.name) + '&background=0F172A&color=fff'">
 
                                                     <!-- Info -->
                                                     <div class="flex-1 min-w-0">

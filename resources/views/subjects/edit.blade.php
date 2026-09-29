@@ -177,10 +177,11 @@
                                                                x-model="selected"
                                                                class="w-5 h-5 rounded border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer">
                                                         
-                                                        <!-- Avatar -->
-                                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0">
-                                                            <span x-text="teacher.name.charAt(0).toUpperCase()"></span>
-                                                        </div>
+                                                         <!-- Avatar -->
+                                                         <img :src="teacher.photo_url"
+                                                              :alt="teacher.name"
+                                                              class="w-10 h-10 rounded-full object-cover flex-shrink-0 border-2 border-slate-200 dark:border-slate-600"
+                                                              @error="this.$el.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(teacher.name) + '&background=0F172A&color=fff'">
                                                         
                                                         <!-- Teacher Info -->
                                                         <div class="flex-1 min-w-0">
