@@ -243,8 +243,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon/apple-touch-icon-180x180.png') }}">
     <link rel="manifest" href="{{ asset('favicon/manifest.webmanifest') }}">
     <meta name="theme-color" content="#0f172a">
-    <meta name="msapplication-TileColor" content="#0f172a">
-    <meta name="msapplication-config" content="{{ asset('favicon/browserconfig.xml') }}">
     <!-- Favicon Dynamic dari AppSetting (fallback) -->
     @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
     @if($appSettings && $appSettings->app_favicon)
