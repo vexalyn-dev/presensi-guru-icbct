@@ -116,7 +116,7 @@
                 </div>
                 <div>
                     <p class="font-bold">Diteruskan Langsung ke WhatsApp</p>
-                    <p class="text-xs text-green-700 dark:text-green-400 mt-0.5">Pertanyaan kamu akan langsung diteruskan ke WhatsApp Developer (tanpa terhubung ke ClickUp & GitHub).</p>
+                    <p class="text-xs text-green-700 dark:text-green-400 mt-0.5">Pertanyaan kamu akan langsung diteruskan ke WhatsApp Developer.</p>
                 </div>
             </div>
 

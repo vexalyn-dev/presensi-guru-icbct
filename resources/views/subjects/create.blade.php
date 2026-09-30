@@ -177,14 +177,7 @@
                                                         <input type="checkbox"
                                                                :value="teacher.id"
                                                                x-model="selected"
-                                                               class="cb-nichek">
-                                                        <div class="cb-box flex-shrink-0"
-                                                             :class="selected.includes(teacher.id) ? 'checked' : ''"
-                                                             @click.stop="selected.includes(teacher.id) ? selected.splice(selected.indexOf(teacher.id), 1) : selected.push(teacher.id)">
-                                                            <svg class="cb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
-                                                                <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                            </svg>
-                                                        </div>
+                                                               class="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 text-navy-600 focus:ring-navy-500 cursor-pointer transition-all duration-150">
 
                                                     <!-- Avatar -->
                                                     <img :src="teacher.photo_url"
@@ -388,82 +381,6 @@
     }
     .overflow-y-auto::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
-    }
-
-    /* ── Custom Checkbox (login page style) ── */
-    .cb-nichek {
-        position: absolute !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 22px !important;
-        height: 22px !important;
-    }
-    .cb-box {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 22px !important;
-        height: 22px !important;
-        min-width: 22px !important;
-        border: 2px solid #cbd5e1 !important;
-        border-radius: 7px !important;
-        background: #fff !important;
-        cursor: pointer !important;
-        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s !important;
-        position: relative !important;
-        box-shadow: 0 1px 3px rgba(15,23,42,0.06) !important;
-        flex-shrink: 0 !important;
-        z-index: 10 !important;
-    }
-    .dark .cb-box {
-        border-color: #475569 !important;
-        background: #1e293b !important;
-    }
-    .cb-box:hover {
-        border-color: #0f172a !important;
-        box-shadow: 0 0 0 4px rgba(15,23,42,0.08) !important;
-    }
-    .dark .cb-box:hover {
-        border-color: #94a3b8 !important;
-    }
-    .cb-box .cb-check {
-        opacity: 0 !important;
-        transform: scale(0) rotate(-10deg) !important;
-        transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        pointer-events: none !important;
-    }
-    .cb-box.checked {
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
-        border-color: #0f172a !important;
-        box-shadow: 0 4px 14px rgba(15,23,42,0.28) !important;
-        animation: cbBounce 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    }
-    .dark .cb-box.checked {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 4px 14px rgba(59,130,246,0.3) !important;
-    }
-    .cb-box.checked .cb-check {
-        opacity: 1 !important;
-        transform: scale(1) rotate(0deg) !important;
-    }
-    @keyframes cbBounce {
-        0%   { transform: scale(0.8); }
-        55%  { transform: scale(1.18); }
-        100% { transform: scale(1); }
-    }
-
-    /* ── Dropdown scroll fix ── */
-    .subject-dropdown {
-        position: absolute !important;
-        top: 100% !important;
-        left: 0 !important;
-        right: 0 !important;
-        z-index: 9999 !important;
-        max-height: 280px !important;
-        overflow-y: auto !important;
     }
 </style>
 @endsection
