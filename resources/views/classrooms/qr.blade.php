@@ -142,7 +142,7 @@
             ctx.font = 'bold 26px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(className.toUpperCase(), CW / 2, 340);
+            ctx.fillText(className.toUpperCase(), CW / 2, 350);
 
             // Center the QR inside the template's scan frame.
             const QR_SIZE = 360;
