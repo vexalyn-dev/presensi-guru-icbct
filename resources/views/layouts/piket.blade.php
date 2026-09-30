@@ -353,7 +353,8 @@
                                     class="flex items-center gap-1.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-1 sm:p-1.5 pr-1.5 sm:pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
                                 <img src="{{ auth()->user()->photo_url }}" 
                                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
-                                     onerror="this.src='{{ asset('images/default-operator.png') }}'">
+                                     data-default-src="{{ asset('images/default-operator.png') }}"
+                                     onerror="this.onerror=null; this.src=this.dataset.defaultSrc;">
                                 <div class="hidden sm:block text-left">
                                     <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[120px]">{{ auth()->user()->name }}</p>
                                     <div class="flex items-center gap-1.5 mt-0.5">
@@ -394,7 +395,8 @@
                                     <div class="flex items-center gap-3">
                                         <img src="{{ auth()->user()->photo_url }}"
                                              class="w-10 h-10 rounded-full object-cover border-2 border-white/30 flex-shrink-0"
-                                             onerror="this.src='{{ asset('images/default-operator.png') }}'">
+                                             data-default-src="{{ asset('images/default-operator.png') }}"
+                                             onerror="this.onerror=null; this.src=this.dataset.defaultSrc;">
                                         <div class="min-w-0">
                                             <p class="text-sm font-bold text-white truncate">{{ auth()->user()->name }}</p>
                                             <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
@@ -455,25 +457,36 @@
         $autoLogoutMinutes = ($autoLogoutVal !== 'off' && is_numeric($autoLogoutVal)) ? (int) $autoLogoutVal : 0;
     @endphp
     @if($autoLogoutMinutes > 0)
+    <div id="auto-logout-config"
+         data-minutes="{{ $autoLogoutMinutes }}"
+         data-login-url="{{ route('login') }}"
+         style="display:none;"></div>
     <script>
         (function() {
-            const timeoutMs = {{ $autoLogoutMinutes }} * 60 * 1000;
-            let logoutTimer;
+            var config = document.getElementById('auto-logout-config');
+            if (!config) return;
+
+            var timeoutMs = Number(config.dataset.minutes || 0) * 60 * 1000;
+            var loginUrl = config.dataset.loginUrl || '/login';
+            var logoutTimer;
+
             function resetLogoutTimer() {
                 clearTimeout(logoutTimer);
-                logoutTimer = setTimeout(() => {
-                    alert('Sesi Anda telah berakhir karena tidak ada aktivitas selama {{ $autoLogoutMinutes }} menit.');
-                    const logoutForm = document.querySelector('form[action*="logout"]');
+                logoutTimer = setTimeout(function() {
+                    alert('Sesi Anda telah berakhir karena tidak ada aktivitas selama ' + Number(config.dataset.minutes || 0) + ' menit.');
+                    var logoutForm = document.querySelector('form[action*="logout"]');
                     if (logoutForm) {
                         logoutForm.submit();
                     } else {
-                        window.location.href = "{{ route('login') }}";
+                        window.location.href = loginUrl;
                     }
                 }, timeoutMs);
             }
-            ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+
+            ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(function(evt) {
                 window.addEventListener(evt, resetLogoutTimer, { passive: true });
             });
+
             resetLogoutTimer();
         })();
     </script>
@@ -554,10 +567,12 @@
         if (m) { m.style.transition = 'opacity .2s'; m.style.opacity = '0'; setTimeout(function(){ m.style.display = 'none'; }, 200); }
     }
     (function(){
-        var KEY = {{ json_encode($releaseModalSessionKey) }};
-        if (sessionStorage.getItem(KEY)) return;
         var m = document.getElementById('release-modal');
         if (!m) return;
+
+        var KEY = m.dataset.sessionKey || 'rel_modal_shown_guest';
+        if (sessionStorage.getItem(KEY)) return;
+
         function show() {
             m.style.display = 'flex';
             requestAnimationFrame(function() { m.style.opacity = '1'; });
