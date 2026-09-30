@@ -121,13 +121,25 @@
     @endif
 
     {{-- GRAFIK --}}
-    <div class="card p-5" style="animation: slideUp 0.4s ease-out 0.35s both;">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-navy-800 dark:text-white">Tren Sesi Mengajar</h3>
-            <span class="text-xs text-slate-400">{{ $selectedMonthLabel }}</span>
+    <div class="card p-6" style="animation: slideUp 0.4s ease-out 0.35s both;">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div>
+                <h3 class="text-sm font-bold text-navy-800 dark:text-white tracking-tight">Tren Sesi Mengajar</h3>
+                <p class="text-xs text-slate-400 mt-0.5">{{ $selectedMonthLabel }}</p>
+            </div>
+            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl p-1" x-data="{ period: 30 }">
+                @foreach([3=>'3H', 7=>'7H', 14=>'14H', 30=>'30H'] as $days => $label)
+                <button @click="period = {{ $days }}; updateChart({{ $days }})"
+                        :class="period === {{ $days }} ? 'bg-white dark:bg-slate-700 shadow-sm text-navy-800 dark:text-gold-400' : 'text-slate-500 dark:text-slate-400 hover:text-navy-800 dark:hover:text-white'"
+                        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200">{{ $label }}</button>
+                @endforeach
+            </div>
         </div>
         @if(count($chartData) > 0)
-        <canvas id="trendChart" style="max-height:220px;"></canvas>
+        <div class="relative" style="height:260px;">
+            <canvas id="trendChart"></canvas>
+        </div>
+        <div id="chartSubtitle" class="text-xs text-slate-400 mt-2 text-right transition-all duration-300"></div>
         @else
         <div class="flex flex-col items-center justify-center py-10 gap-3">
             <i data-lucide="bar-chart-2" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i>
@@ -213,45 +225,113 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.lucide) lucide.createIcons();
 
     @if(count($chartData) > 0)
-    var isDark    = document.documentElement.classList.contains('dark');
-    var gridColor = isDark ? 'rgba(148,163,184,0.08)' : 'rgba(148,163,184,0.2)';
-    var tickColor = isDark ? '#94a3b8' : '#64748b';
+    var isDark   = document.documentElement.classList.contains('dark');
+    var allLabels    = {!! json_encode(array_map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'), array_keys($chartData))) !!};
+    var allLabelsFull = {!! json_encode(array_map(fn($d) => \Carbon\Carbon::parse($d)->locale('id')->isoFormat('dddd, D MMMM YYYY'), array_keys($chartData))) !!};
+    var allData      = {!! json_encode(array_values($chartData)) !!};
+    var chart;
+    var monthMaxDay = {{ \Carbon\Carbon::createFromDate($year, $month, 1)->daysInMonth }};
 
-    var ctx = document.getElementById('trendChart');
-    if (!ctx) return;
+    function buildGradient(ctx, h) {
+        var g = ctx.createLinearGradient(0, 0, 0, h || 260);
+        g.addColorStop(0, 'rgba(99,102,241,0.35)');
+        g.addColorStop(0.5, 'rgba(99,102,241,0.10)');
+        g.addColorStop(1, 'rgba(99,102,241,0.00)');
+        return g;
+    }
+    function getPeriodLabel(days) {
+        var now  = new Date({{ $year }}, {{ $month }} - 1, monthMaxDay);
+        var start = new Date(now);
+        start.setDate(start.getDate() - days + 1);
+        var opts = { day: '2-digit', month: 'short' };
+        return 'Periode: ' + start.toLocaleDateString('id-ID', opts) + ' — ' + now.toLocaleDateString('id-ID', opts);
+    }
+    function updateChart(days) {
+        var now  = new Date({{ $year }}, {{ $month }} - 1, monthMaxDay);
+        var cutoff = new Date(now);
+        cutoff.setDate(cutoff.getDate() - days + 1);
+        cutoff.setHours(0,0,0,0);
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {!! json_encode(array_map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'), array_keys($chartData))) !!},
-            datasets: [{
-                label: 'Sesi Mengajar',
-                data: {!! json_encode(array_values($chartData)) !!},
-                borderColor: '#3b82f6',
-                backgroundColor: function(ctx) {
-                    var g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 200);
-                    g.addColorStop(0, 'rgba(59,130,246,0.18)');
-                    g.addColorStop(1, 'rgba(59,130,246,0)');
-                    return g;
-                },
-                fill: true, tension: 0.45,
-                pointBackgroundColor: '#3b82f6',
-                pointRadius: 4, pointHoverRadius: 7,
-                borderWidth: 2.5,
-            }]
-        },
-        options: {
-            responsive: true, animation: { duration: 800, easing: 'easeOutQuart' },
-            plugins: {
-                legend: { labels: { color: tickColor, font: { size: 12 } } },
-                tooltip: { mode: 'index', intersect: false, backgroundColor: isDark ? '#1e293b' : '#fff', titleColor: isDark ? '#f1f5f9' : '#1e3a5f', bodyColor: isDark ? '#94a3b8' : '#475569', borderColor: isDark ? '#334155' : '#e2e8f0', borderWidth: 1 }
+        var labels = [], data = [], labelsFull = [];
+        allLabels.forEach(function(l, i) {
+            var d = new Date(l.split(' ').reverse().join(' ') + 'T00:00:00');
+            if (d >= cutoff) { labels.push(l); data.push(allData[i]); labelsFull.push(allLabelsFull[i]); }
+        });
+
+        var ctx = document.getElementById('trendChart').getContext('2d');
+        if (chart) { chart.destroy(); }
+
+        var gridColor = isDark ? 'rgba(148,163,184,0.08)' : 'rgba(148,163,184,0.15)';
+        var tickColor = isDark ? '#94a3b8' : '#64748b';
+        var pointSize = days <= 7 ? 6 : 5;
+
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sesi Mengajar',
+                    data: data,
+                    borderColor: '#6366f1',
+                    backgroundColor: buildGradient(ctx),
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: isDark ? '#0f172a' : '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: pointSize,
+                    pointHoverRadius: 9,
+                    pointHoverBackgroundColor: '#818cf8',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 3,
+                }]
             },
-            scales: {
-                y: { beginAtZero: true, ticks: { color: tickColor, stepSize: 1 }, grid: { color: gridColor } },
-                x: { ticks: { color: tickColor }, grid: { color: gridColor } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 900, easing: 'easeOutQuart' },
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                        titleColor: isDark ? '#f1f5f9' : '#0f172a',
+                        bodyColor: isDark ? '#94a3b8' : '#475569',
+                        borderColor: isDark ? '#334155' : '#e2e8f0',
+                        borderWidth: 1,
+                        cornerRadius: 12,
+                        padding: 14,
+                        titleFont: { size: 13, weight: '700', family: 'Inter, sans-serif' },
+                        bodyFont: { size: 12, family: 'Inter, sans-serif' },
+                        boxPadding: 6,
+                        usePointStyle: true,
+                        callbacks: {
+                            title: function(items) { return labelsFull[items[0].dataIndex]; },
+                            label: function(item) { return ' ' + item.parsed.y + ' sesi mengajar'; }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: tickColor, stepSize: 1, font: { size: 11, family: 'Inter' }, padding: 8 },
+                        grid: { color: gridColor, drawBorder: false },
+                        border: { display: false },
+                    },
+                    x: {
+                        ticks: { color: tickColor, font: { size: 11, family: 'Inter' }, padding: 6, maxRotation: 0 },
+                        grid: { display: false },
+                        border: { display: false },
+                    }
+                }
             }
-        }
-    });
+        });
+
+        document.getElementById('chartSubtitle').textContent = getPeriodLabel(days);
+    }
+
+    updateChart(30);
     @endif
 });
 </script>
