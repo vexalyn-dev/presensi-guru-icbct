@@ -344,15 +344,6 @@
                         t.name.toLowerCase().includes(this.search.toLowerCase()) ||
                         t.email.toLowerCase().includes(this.search.toLowerCase())
                     );
-                },
-
-                positionDropdown(triggerEl) {
-                    const dd = this.$refs.dropdown;
-                    if (!dd) return;
-                    const rect = triggerEl.getBoundingClientRect();
-                    dd.style.left = rect.left + 'px';
-                    dd.style.top = (rect.bottom + 6) + 'px';
-                    dd.style.width = Math.min(rect.width, window.innerWidth - 32) + 'px';
                 }
             }));
         });

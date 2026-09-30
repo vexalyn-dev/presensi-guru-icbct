@@ -123,41 +123,39 @@
                                      @click.outside="open = false">
 
                                     <!-- Dropdown Trigger -->
-                                    <div @click="open = !open; $nextTick(() => { const dd = document.querySelector('[data-dropdown-target]'); if(dd) { const r = $el.getBoundingClientRect(); dd.style.left = r.left+'px'; dd.style.top = (r.bottom+6)+'px'; dd.style.width = Math.min(r.width, window.innerWidth-32)+'px'; } })"
+                                    <div @click="open = !open"
                                          class="relative group cursor-pointer">
                                         <div class="absolute left-4 top-1/2 -translate-y-1/2">
                                             <i data-lucide="users" class="w-5 h-5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
                                         </div>
-                                         <div class="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 min-h-[52px] flex items-center gap-2"
-                                              :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-blue-400 dark:border-blue-500': open, 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700': selected.length > 0}">
-                                             <!-- Selected: comma-separated names in blue pill -->
-                                             <template x-if="selected.length > 0">
-                                                 <div class="flex items-center gap-2 w-full">
-                                                     <i data-lucide="user" class="w-4 h-4 text-blue-500 flex-shrink-0"></i>
-                                                     <span class="text-blue-700 dark:text-blue-300 font-semibold truncate"
-                                                           x-text="selected.map(id => teachers.find(t => t.id == id)?.name).filter(Boolean).join(', ')"></span>
-                                                 </div>
-                                             </template>
-                                             <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih Guru Pengampu</span>
-                                         </div>
+                                        <div class="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 min-h-[52px] flex items-center gap-2"
+                                             :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-blue-400 dark:border-blue-500': open, 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700': selected.length > 0}">
+                                            <!-- Selected: comma-separated names in blue pill -->
+                                            <template x-if="selected.length > 0">
+                                                <div class="flex items-center gap-2 w-full">
+                                                    <i data-lucide="user" class="w-4 h-4 text-blue-500 flex-shrink-0"></i>
+                                                    <span class="text-blue-700 dark:text-blue-300 font-semibold truncate"
+                                                          x-text="selected.map(id => teachers.find(t => t.id == id)?.name).filter(Boolean).join(', ')"></span>
+                                                </div>
+                                            </template>
+                                            <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih Guru Pengampu</span>
+                                        </div>
                                         <i data-lucide="chevron-down"
                                            class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-transform duration-300"
                                            :class="{'rotate-180': open}"></i>
                                     </div>
 
                                     <!-- Dropdown Menu -->
-                                    <div data-dropdown-target
-                                         x-show="open"
+                                    <div x-show="open"
                                          x-transition:enter="transition ease-out duration-150"
-                                         x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+                                         x-transition:enter-start="opacity-0 -translate-y-1 scale-98"
                                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                                          x-transition:leave="transition ease-in duration-100"
-                                         x-transition:leave-start="opacity-100 scale-100"
-                                         x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                         class="fixed z-[9999] w-[calc(100%-2rem)] sm:w-full max-w-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                         x-transition:leave-start="opacity-100"
+                                         x-transition:leave-end="opacity-0 -translate-y-1"
+                                         class="absolute left-0 right-0 top-full z-50 mt-2 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
                                          x-cloak
-                                         @click.stop
-                                         @keydown.escape="open = false">
+                                         @click.stop>
 
                                         <!-- Search -->
                                         <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
