@@ -252,16 +252,17 @@ document.addEventListener('DOMContentLoaded', function() {
         var ctx = canvasEl.getContext('2d');
         if (chart) { chart.destroy(); }
 
-        var gridColor = isDark ? 'rgba(148,163,184,0.08)' : 'rgba(148,163,184,0.15)';
+        var gridColor = isDark ? 'rgba(148,163,184,0.10)' : 'rgba(15,23,42,0.08)';
         var tickColor = isDark ? '#94a3b8' : '#64748b';
-        var pointSize = days <= 7 ? 6 : 5;
+        var accentColor = isDark ? '#facc15' : '#0f172a';
+        var areaColor = isDark ? 'rgba(250,204,21,0.24)' : 'rgba(15,23,42,0.16)';
 
         // Build gradient using actual canvas dimensions
         var gradHeight = canvasEl.height || 280;
         var grad = ctx.createLinearGradient(0, 0, 0, gradHeight);
-        grad.addColorStop(0, 'rgba(99,102,241,0.35)');
-        grad.addColorStop(0.6, 'rgba(99,102,241,0.10)');
-        grad.addColorStop(1, 'rgba(99,102,241,0.00)');
+        grad.addColorStop(0, areaColor);
+        grad.addColorStop(0.65, isDark ? 'rgba(250,204,21,0.08)' : 'rgba(15,23,42,0.05)');
+        grad.addColorStop(1, isDark ? 'rgba(250,204,21,0.00)' : 'rgba(15,23,42,0.00)');
 
         chart = new Chart(ctx, {
             type: 'line',
@@ -270,21 +271,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Sesi Mengajar',
                     data: data,
-                    borderColor: '#6366f1',
+                    borderColor: accentColor,
                     backgroundColor: grad,
                     fill: true,
-                    tension: 0.4,
-                    borderWidth: 3,
-                    pointBackgroundColor: '#6366f1',
+                    tension: 0.38,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: accentColor,
                     pointBorderColor: isDark ? '#0f172a' : '#ffffff',
                     pointBorderWidth: 2,
-                    pointRadius: pointSize,
-                    pointHoverRadius: 9,
-                    pointHoverBackgroundColor: '#818cf8',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 3,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: accentColor,
+                    pointHoverBorderColor: isDark ? '#0f172a' : '#ffffff',
+                    pointHoverBorderWidth: 2,
                 }]
             },
+            plugins: [{
+                id: 'performanceCrosshair',
+                afterDraw: function(chartInstance) {
+                    var activePoints = chartInstance.tooltip.getActiveElements();
+                    if (!activePoints.length) return;
+
+                    var x = activePoints[0].element.x;
+                    var chartArea = chartInstance.chartArea;
+                    var context = chartInstance.ctx;
+                    context.save();
+                    context.beginPath();
+                    context.setLineDash([3, 4]);
+                    context.strokeStyle = isDark ? 'rgba(250,204,21,0.28)' : 'rgba(15,23,42,0.20)';
+                    context.lineWidth = 1;
+                    context.moveTo(x, chartArea.top);
+                    context.lineTo(x, chartArea.bottom);
+                    context.stroke();
+                    context.restore();
+                }
+            }],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -293,20 +314,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                        backgroundColor: isDark ? '#0f172a' : '#ffffff',
                         titleColor: isDark ? '#f1f5f9' : '#0f172a',
                         bodyColor: isDark ? '#94a3b8' : '#475569',
-                        borderColor: isDark ? '#334155' : '#e2e8f0',
+                        borderColor: isDark ? 'rgba(250,204,21,0.24)' : 'rgba(15,23,42,0.12)',
                         borderWidth: 1,
-                        cornerRadius: 12,
+                        cornerRadius: 10,
                         padding: 14,
                         titleFont: { size: 13, weight: '700', family: 'Inter, sans-serif' },
                         bodyFont: { size: 12, family: 'Inter, sans-serif' },
                         boxPadding: 6,
                         usePointStyle: true,
+                        displayColors: false,
                         callbacks: {
-                            title: function(items) { return labelsFull[items[0].dataIndex]; },
-                            label: function(item) { return ' ' + item.parsed.y + ' sesi mengajar'; }
+                            title: function(items) { return items[0].parsed.y + ' sesi mengajar'; },
+                            label: function(item) { return labelsFull[item.dataIndex]; }
                         }
                     }
                 },
@@ -318,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         border: { display: false },
                     },
                     x: {
-                        ticks: { color: tickColor, font: { size: 11, family: 'Inter' }, padding: 6, maxRotation: 0 },
+                        ticks: { color: tickColor, font: { size: 11, family: 'Inter' }, padding: 8, maxRotation: 0, maxTicksLimit: days <= 7 ? 7 : 6 },
                         grid: { display: false },
                         border: { display: false },
                     }
