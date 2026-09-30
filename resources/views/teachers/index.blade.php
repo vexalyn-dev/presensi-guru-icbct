@@ -79,7 +79,7 @@
                 <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                 <input type="text" id="teacherSearch" name="search" value="{{ request('search') }}" placeholder="Cari nama, kode guru, telepon..."
                        class="w-full pl-11 pr-4 py-3 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 transition-all shadow-sm hover:shadow-md"
-                       oninput="filterTeachers(this.value)"
+                       oninput="debounceSearch(this.value)"
                 />
             </div>
 
@@ -248,7 +248,7 @@
                         <th class="px-4 py-3 text-center text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tbody id="teacherTbody" class="divide-y divide-slate-200 dark:divide-slate-700">
     @forelse($teachers as $teacher)
         @php
             $idGuru = $teacher->id_guru ?: 'GURU-' . str_pad($teacher->id, 5, '0', STR_PAD_LEFT);
@@ -265,15 +265,8 @@
             $mapelNames = $mapelObjs->pluck('name')->filter()->unique()->values();
             $mapel = count($mapelNames) > 0 ? $mapelNames : (optional($teacher->teacher)->major_specialty ?? $teacher->subject);
             $mapel = $mapel instanceof \Illuminate\Support\Collection ? $mapel->join(', ') : ($mapel ?: '');
-            $searchText = strtolower(
-                ($teacher->name ?? '') . ' ' .
-                ($teacher->teacher_code ?? '') . ' ' .
-                ($teacher->phone ?? '') . ' ' .
-                ($teacher->email ?? '') . ' ' .
-                $mapel
-            );
         @endphp
-        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors teacher-row" data-search="{{ $searchText }}">
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
             <td class="px-4 py-3">
                 <label class="tcb-label" style="margin:0;">
                     <div class="tcb-box" aria-hidden="true">
@@ -371,23 +364,17 @@
             </td>
         </tr>
     @endforelse
-    <tr id="teacherNoResults" class="hidden">
-        <td colspan="8" class="px-4 py-12 text-center">
-            <i data-lucide="search-x" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ditemukan</p>
-            <button onclick="clearSearch()" class="text-xs text-navy-600 dark:text-gold-400 hover:underline mt-2 inline-block">Hapus Pencarian</button>
-        </td>
-    </tr>
 </tbody>
             </table>
         </div>
 
         @if($teachers->hasPages())
             <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
-                <nav class="flex items-center gap-1">
+                <nav id="teacherPagination" class="flex items-center gap-1">
                     @foreach ($teachers->linkCollection() as $link)
                         @if ($link['url'])
                             <a href="{{ $link['url'] }}"
+                               data-page-link
                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $link['active'] ? 'bg-navy-800 text-white dark:bg-gold-500 dark:text-navy-900' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
                                 {!! $link['label'] !!}
                             </a>
@@ -1036,24 +1023,126 @@
         document.body.style.overflow = '';
     }
 
-    function filterTeachers(query) {
-        const q = (query || '').toLowerCase().trim();
-        const rows = document.querySelectorAll('.teacher-row');
-        let visible = 0;
+    // ── AJAX Live Search (search across ALL pages) ──
+    let _searchTimeout = null;
+    let _isSearching = false;
 
-        rows.forEach(row => {
-            const text = (row.dataset.search || '').toLowerCase();
-            const match = !q || text.includes(q);
-            row.classList.toggle('hidden', !match);
-            if (match) visible++;
+    function debounceSearch(query) {
+        clearTimeout(_searchTimeout);
+        _searchTimeout = setTimeout(() => performSearch(query), 300);
+    }
+
+    function performSearch(query) {
+        if (_isSearching) return;
+        _isSearching = true;
+
+        const tbody = document.getElementById('teacherTbody');
+        const pagination = document.getElementById('teacherPagination');
+
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center">
+            <div class="flex flex-col items-center gap-3">
+                <div class="w-8 h-8 border-[3px] border-slate-200 dark:border-slate-700 border-t-navy-800 dark:border-t-gold-400 rounded-full animate-spin"></div>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Mencari...</p>
+            </div>
+        </td></tr>`;
+        if (pagination) pagination.innerHTML = '';
+
+        const params = new URLSearchParams({ search: query });
+        const currentPage = new URLSearchParams(window.location.search).get('page');
+        if (currentPage && currentPage !== '1') params.set('page', currentPage);
+
+        fetch(`{{ route('teachers.search') }}?${params.toString()}`, {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                tbody.innerHTML = data.html;
+                if (pagination) {
+                    if (data.total > 15) {
+                        pagination.innerHTML = buildPagination(data.page, query);
+                        attachPaginationListeners();
+                    } else {
+                        pagination.innerHTML = '';
+                    }
+                }
+                if (window.lucide) lucide.createIcons();
+                updateBulkActions();
+            }
+        })
+        .catch(err => {
+            console.error('Search error:', err);
+            tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center text-red-500">Gagal memuat data. Coba lagi.</td></tr>`;
+        })
+        .finally(() => { _isSearching = false; });
+    }
+
+    function buildPagination(currentPage, query) {
+        let html = '';
+        if (currentPage > 1) {
+            html += `<a href="#" data-page="${currentPage - 1}" class="pag-link px-4 py-2 rounded-lg text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Prev</a>`;
+        } else {
+            html += `<span class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed">Prev</span>`;
+        }
+        for (let i = Math.max(1, currentPage - 2); i <= Math.min(currentPage + 2, 10); i++) {
+            if (i === currentPage) {
+                html += `<span class="px-4 py-2 rounded-lg text-sm font-medium bg-navy-800 text-white dark:bg-gold-500 dark:text-navy-900">${i}</span>`;
+            } else {
+                html += `<a href="#" data-page="${i}" class="pag-link px-4 py-2 rounded-lg text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">${i}</a>`;
+            }
+        }
+        html += `<a href="#" data-page="${currentPage + 1}" class="pag-link px-4 py-2 rounded-lg text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Next</a>`;
+        return html;
+    }
+
+    function attachPaginationListeners() {
+        document.querySelectorAll('.pag-link').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const page = link.dataset.page;
+                const tbody = document.getElementById('teacherTbody');
+                const pagination = document.getElementById('teacherPagination');
+                tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="w-8 h-8 border-[3px] border-slate-200 dark:border-slate-700 border-t-navy-800 dark:border-t-gold-400 rounded-full animate-spin"></div>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Memuat...</p>
+                    </div>
+                </td></tr>`;
+                pagination.innerHTML = '';
+                const query = document.getElementById('teacherSearch')?.value || '';
+                const params = new URLSearchParams({ search: query });
+                params.set('page', page);
+                fetch(`{{ route('teachers.search') }}?${params.toString()}`, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        tbody.innerHTML = data.html;
+                        if (pagination && data.total > 15) {
+                            pagination.innerHTML = buildPagination(parseInt(page), query);
+                            attachPaginationListeners();
+                        } else {
+                            pagination.innerHTML = '';
+                        }
+                        if (window.lucide) lucide.createIcons();
+                        updateBulkActions();
+                    }
+                })
+                .catch(() => {
+                    tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center text-red-500">Gagal memuat data.</td></tr>`;
+                });
+            });
         });
-
-        document.getElementById('teacherNoResults').classList.toggle('hidden', visible > 0);
     }
 
     function clearSearch() {
         const input = document.getElementById('teacherSearch');
-        if (input) { input.value = ''; input.dispatchEvent(new Event('input')); }
+        if (input) {
+            input.value = '';
+            performSearch('');
+        }
     }
+</script>
 </script>
 @endsection

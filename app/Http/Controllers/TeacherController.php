@@ -56,6 +56,39 @@ class TeacherController extends Controller
         return view('teachers.index', compact('teachers', 'stats'));
     }
 
+    public function search(Request $request)
+    {
+        $query = User::where('role', 'guru')->with(['teacher.subjects']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('teacher_code', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        $teachers = $query->orderBy('name', 'asc')->paginate(15)->withQueryString();
+        $page = (int)$request->input('page', 1);
+
+        return response()->json([
+            'success' => true,
+            'html'    => view('teachers.partials.teacher-table', compact('teachers'))->render(),
+            'page'    => $page,
+            'total'   => $teachers->total(),
+        ]);
+    }
+
     public function create()
     {
         $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
