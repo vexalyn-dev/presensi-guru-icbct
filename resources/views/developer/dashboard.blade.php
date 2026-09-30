@@ -414,13 +414,6 @@
                         <small id="debug-toggle-desc">Klik untuk mematikan debug</small>
                     </div>
                 </button>
-                <button type="button" class="nb-tool" id="deploy-btn" style="--d:300ms">
-                    <span class="nb-ico nb-ico-lg nb-ico-violet"><i data-lucide="rocket" class="w-5 h-5"></i></span>
-                    <div>
-                        <b id="deploy-label">Deploy</b>
-                        <small id="deploy-desc">Git pull + composer + migrate + cache</small>
-                    </div>
-                </button>
             </div>
         </div>
     </div>
@@ -731,63 +724,33 @@
                 next
             );
             if (!confirmed) return;
+            const label = document.getElementById('debug-toggle-label');
+            const desc  = document.getElementById('debug-toggle-desc');
+            const ico   = document.getElementById('debug-toggle-ico');
+            label.textContent = 'Memproses...';
+            desc.textContent  = 'Mohon tunggu';
+            dbgBtn.style.pointerEvents = 'none';
+            dbgBtn.style.opacity = '0.6';
             const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
             fetch('/dev-panel/{{ $secret }}/toggle-debug', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
                 body: JSON.stringify({ debug: next })
             })
-            .then(r => r.json())
-            .then(() => { updateDebugUI(next); location.reload(); })
-            .catch(e => alert('Gagal toggle debug: ' + e.message));
-        });
-    }
-
-    /* ───── Deploy button ───── */
-    const deployBtn = $('#deploy-btn');
-    if (deployBtn) {
-        deployBtn.addEventListener('click', async () => {
-            const confirmed = await confirmModal(
-                '🚀 Deploy ke production?\nGit pull, composer install, migrate, dan rebuild cache.\nTunggu hingga selesai — jangan tutup halaman.',
-                false
-            );
-            if (!confirmed) return;
-            const label = $('#deploy-label');
-            const desc  = $('#deploy-desc');
-            const ico   = deployBtn.querySelector('.nb-ico i');
-            label.textContent = 'Deploying...';
-            desc.textContent  = 'Mohon tunggu sebentar';
-            deployBtn.style.pointerEvents = 'none';
-            deployBtn.style.opacity = '0.6';
-            if (ico) { ico.setAttribute('data-lucide', 'loader'); }
-            if (window.lucide) lucide.createIcons();
-            const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            fetch('/dev-panel/{{ $secret }}/deploy', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
+            .then(r => {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.text();
             })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    label.textContent = 'Deploy Selesai';
-                    desc.textContent  = data.message || 'Semua step berhasil';
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    label.textContent = 'Deploy Gagal';
-                    desc.textContent  = data.error || 'Terjadi kesalahan';
-                }
-                deployBtn.style.pointerEvents = '';
-                deployBtn.style.opacity = '';
-                if (ico) { ico.setAttribute('data-lucide', 'rocket'); }
-                if (window.lucide) lucide.createIcons();
+            .then(text => {
+                updateDebugUI(next);
+                location.reload();
             })
             .catch(e => {
-                label.textContent = 'Error';
-                desc.textContent  = e.message;
-                deployBtn.style.pointerEvents = '';
-                deployBtn.style.opacity = '';
-                if (ico) { ico.setAttribute('data-lucide', 'rocket'); }
-                if (window.lucide) lucide.createIcons();
+                label.textContent = 'Debug ' + (next ? 'ON' : 'OFF');
+                desc.textContent  = next ? 'Klik untuk mematikan debug' : 'Klik untuk menyalakan debug';
+                dbgBtn.style.pointerEvents = '';
+                dbgBtn.style.opacity = '';
+                confirmModal('Gagal toggle debug: ' + e.message, true).then(() => {});
             });
         });
     }
