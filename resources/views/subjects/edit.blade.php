@@ -338,7 +338,7 @@
                     if (!this.search) return this.teachers;
                     return this.teachers.filter(t =>
                         t.name.toLowerCase().includes(this.search.toLowerCase()) ||
-                        t.email.toLowerCase().includes(this.search.toLowerCase())
+                        (t.email && t.email.toLowerCase().includes(this.search.toLowerCase()))
                     );
                 }
             }));
