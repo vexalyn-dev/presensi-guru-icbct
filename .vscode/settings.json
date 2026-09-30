@@ -16,6 +16,6 @@
   "emmet.includeLanguages": {
     "blade": "html"
   },
-  "javascript.validate.enable": false,
+  "js/ts.validate.enabled": false,
   "php.validate.enable": false
 }
