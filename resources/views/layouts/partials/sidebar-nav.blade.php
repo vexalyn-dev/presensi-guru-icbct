@@ -114,23 +114,6 @@
         <span>Log Aktivitas</span>
     </a>
 
-    {{--
-    <a href="{{ route('messages.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                      {{ request()->routeIs('messages.*')
-                          ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
-                          : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-        <i data-lucide="message-square" class="w-4 h-4"></i>
-        <span>Pesan CS</span>
-        @php
-        $unreadCount = \App\Models\Message::where('is_read', false)
-        ->where('sender_id', '!=', Auth::id())
-        ->count();
-        @endphp
-        @if($unreadCount > 0)
-        <span class="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{{ $unreadCount }}</span>
-        @endif
-    </a>
-    --}}
 
     <p class="px-3 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 mt-5">Lainnya
     </p>
@@ -154,17 +137,6 @@
         <i data-lucide="layout-dashboard" class="w-4 h-4 sidebar-icon bounce"></i>
         <span>Beranda</span>
     </a>
-
-
-{{--
-    <a href="{{ route('teacher.schedule') }}" class="nav-item flex items_center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200"
-                       {{ request()->routeIs('teacher.schedule')
-            ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
-            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}>
-        <i data-lucide="calendar" class="w-4 h-4"></i>
-        <span>Jadwal Mengajar</span>
-    </a>
---}}
 
     <a href="{{ route('teacher.attendance') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                       {{ request()->routeIs('teacher.attendance')
