@@ -22,6 +22,12 @@ class CheckMaintenanceMode
             return $next($request);
         }
 
+        // Developer — bypass maintenance sepenuhnya (termasuk saat belum login)
+        // Auth dicek manual di DeveloperController::verifySecret()
+        if ($request->routeIs('developer.*')) {
+            return $next($request);
+        }
+
         try {
             $setting = AppSetting::getInstance();
 
