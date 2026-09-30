@@ -3,8 +3,8 @@
 @section('page-title', 'Izin & Sakit')
 
 @section('content')
-<div class="fade-in space-y-6">
-    
+<div x-data="leaveApp()" class="fade-in space-y-6">
+
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center gap-4">
@@ -16,6 +16,45 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400">Kelola pengajuan izin dan sakit guru</p>
             </div>
         </div>
+    </div>
+
+    <!-- Bulk Action Bar -->
+    <div x-show="selectedIds.length > 0"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0 -translate-y-2"
+         class="sticky top-16 z-30 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-xl p-3 shadow-lg flex items-center gap-3">
+        <span class="text-sm font-semibold text-navy-800 dark:text-white flex items-center gap-2">
+            <i data-lucide="check-square" class="w-4 h-4 text-blue-500"></i>
+            <span x-text="selectedIds.length + ' dipilih'"></span>
+        </span>
+        <div class="flex-1"></div>
+        <form :action="routeBulkApprove" method="POST" class="inline" id="bulk-approve-form">
+            @csrf
+            <template x-for="id in selectedIds" :key="id">
+                <input type="hidden" name="ids[]" :value="id">
+            </template>
+            <input type="hidden" name="admin_notes" value="Disetujui secara massal">
+            <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5">
+                <i data-lucide="check" class="w-4 h-4"></i> Setujui Semua
+            </button>
+        </form>
+        <form :action="routeBulkReject" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menolak semua pengajuan yang dipilih?')">
+            @csrf
+            <input type="hidden" name="admin_notes" value="Ditolak secara massal">
+            <template x-for="id in selectedIds" :key="id">
+                <input type="hidden" name="ids[]" :value="id">
+            </template>
+            <button type="submit" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5">
+                <i data-lucide="x" class="w-4 h-4"></i> Tolak Semua
+            </button>
+        </form>
+        <button type="button" @click="clearSelection()" class="px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-semibold transition-all">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
     </div>
 
     <!-- Alerts -->
@@ -102,11 +141,18 @@
         <div class="card p-5 hover:shadow-lg transition-all cursor-context-menu"
              data-leave-id="{{ $leave->id }}"
              data-delete-url="{{ route('teacher.leave.destroy', $leave) }}"
+             :class="selectedIds.includes({{ $leave->id }}) ? 'ring-2 ring-blue-400 dark:ring-blue-500 bg-blue-50/50 dark:bg-blue-900/10' : ''"
              oncontextmenu="showLeaveContextMenu(event, this)">
             <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-4 flex-1">
-                        <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($leave->user->name) }}"
-                             class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
+                    <!-- Checkbox -->
+                    <input type="checkbox"
+                           :value="{{ $leave->id }}"
+                           x-model="selectedIds"
+                           class="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer accent-navy-600"
+                           :disabled="{{ $leave->status !== 'pending' ? 'true' : 'false' }}">
+                    <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($leave->user->name) }}"
+                         class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 class="text-base font-bold text-navy-800 dark:text-white">{{ $leave->user->name }}</h3>
@@ -186,6 +232,31 @@
 </div>
 
 <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('leaveApp', () => ({
+            selectedIds: [],
+            get routeBulkApprove() {
+                return '{{ route('leaves.bulk-approve') }}';
+            },
+            get routeBulkReject() {
+                return '{{ route('leaves.bulk-reject') }}';
+            },
+            clearSelection() {
+                this.selectedIds = [];
+            },
+            toggleAll(pendingIds) {
+                const allSelected = pendingIds.every(id => this.selectedIds.includes(id));
+                if (allSelected) {
+                    this.selectedIds = this.selectedIds.filter(id => !pendingIds.includes(id));
+                } else {
+                    pendingIds.forEach(id => {
+                        if (!this.selectedIds.includes(id)) this.selectedIds.push(id);
+                    });
+                }
+            }
+        }));
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
     });
@@ -273,9 +344,12 @@
         ` : '';
 
         const renderLeave = leave => `
-            <div class="card p-5 hover:shadow-lg transition-all">
+            <div class="card p-5 hover:shadow-lg transition-all" data-leave-id="${leave.id}">
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex items-start gap-4 flex-1">
+                        <input type="checkbox" value="${leave.id}"
+                               class="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer accent-navy-600"
+                               ${leave.status !== 'pending' ? 'disabled' : ''}>
                         <img src="${esc(leave.teacher_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.teacher_name)}`)}"
                              class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                         <div class="flex-1 min-w-0">
