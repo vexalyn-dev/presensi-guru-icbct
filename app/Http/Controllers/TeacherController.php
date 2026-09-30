@@ -22,7 +22,7 @@ class TeacherController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::where('role', 'guru')->with('teacher');
+        $query = User::where('role', 'guru')->with(['teacher.subjects']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -181,13 +181,17 @@ class TeacherController extends Controller
             abort(403);
         }
 
-        // Load teacher relation
-        $teacher->load('teacher');
+        // Load teacher relation with subjects
+        $teacher->load(['teacher', 'teacher.subjects']);
 
         // Fetch active subjects dynamically
         $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
-        
-        $teacherSubject = $teacher->subject;
+
+        // Get current subject(s) from pivot table, fallback to major_specialty / user.subject
+        $teacherSubjects = $teacher->teacher?->subjects;
+        $teacherSubject = $teacherSubjects
+            ? $teacherSubjects->pluck('name')->filter()->first()
+            : ($teacher->teacher?->major_specialty ?? $teacher->subject);
         
         return view('teachers.edit', compact('teacher', 'subjects', 'teacherSubject'));
     }
@@ -246,37 +250,31 @@ class TeacherController extends Controller
 
         // Update teacher record (sync major_specialty with subject)
         if ($teacher->teacher) {
-            $oldMajorSpecialty = $teacher->teacher->major_specialty;
-            $newMajorSpecialty = $validated['subject'] ?? null;
-            
             $teacher->teacher->update([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
                 'address' => $validated['address'] ?? null,
-                'major_specialty' => $newMajorSpecialty,
+                'major_specialty' => $validated['subject'] ?? null,
                 'is_active' => $request->has('is_active') ? (bool)$request->is_active : $teacher->is_active,
             ]);
-            
-            // Auto-sync to subject_teacher pivot table when major_specialty changes
-            if ($oldMajorSpecialty !== $newMajorSpecialty) {
-                // Remove ALL old subject mappings (untuk guru ini)
-                // Karena kita mau replace dengan yang baru
-                $teacher->teacher->subjects()->detach();
-                
-                // Add new subject mapping
-                if ($newMajorSpecialty) {
-                    $newSubject = \App\Models\Subject::where('name', 'LIKE', '%' . $newMajorSpecialty . '%')->first();
-                    
-                    // Fallback: coba cari dengan case-insensitive exact match
-                    if (!$newSubject) {
-                        $newSubject = \App\Models\Subject::whereRaw('LOWER(name) = ?', [strtolower($newMajorSpecialty)])->first();
-                    }
-                    
-                    if ($newSubject) {
-                        $teacher->teacher->subjects()->attach($newSubject->id);
-                    }
+
+            // Sync pivot table with the selected subject name
+            $subjectName = trim($validated['subject'] ?? '');
+            if ($subjectName) {
+                // Find subject by exact name first, then case-insensitive
+                $subject = \App\Models\Subject::where('name', $subjectName)->first();
+                if (!$subject) {
+                    $subject = \App\Models\Subject::whereRaw('LOWER(name) = ?', [strtolower($subjectName)])->first();
                 }
+                if ($subject) {
+                    // Detach all old subjects, attach new one
+                    $teacher->teacher->subjects()->detach();
+                    $teacher->teacher->subjects()->attach($subject->id);
+                }
+            } else {
+                // Clear all subjects from pivot if empty
+                $teacher->teacher->subjects()->detach();
             }
         }
 

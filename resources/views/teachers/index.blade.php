@@ -260,7 +260,10 @@
             }
 
             $displayCode = 'SMKICBCT-' . $numericId;
-            $mapel = optional($teacher->teacher)->major_specialty ?? $teacher->subject;
+            $mapelObjs = optional($teacher->teacher)->subjects ?? collect();
+            $mapelNames = $mapelObjs->pluck('name')->filter()->unique()->values();
+            $mapel = count($mapelNames) > 0 ? $mapelNames : (optional($teacher->teacher)->major_specialty ?? $teacher->subject);
+            $mapel = $mapel instanceof \Illuminate\Support\Collection ? $mapel->join(', ') : ($mapel ?: '');
         @endphp
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
             <td class="px-4 py-3">
