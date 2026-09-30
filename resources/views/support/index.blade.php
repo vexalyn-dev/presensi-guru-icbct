@@ -26,7 +26,7 @@
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Pusat Bantuan</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Laporkan masalah atau kirim permintaan ke tim developer</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Laporkan masalah atau kirim permintaan ke developer</p>
             </div>
         </div>
         <a href="{{ route($rp . '.history') }}"
