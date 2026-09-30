@@ -168,7 +168,11 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = className.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_') + '.png';
+                const fileName = className.trim()
+                    .replace(/[<>:"|?*\u0000-\u001F]/g, '')
+                    .replace(/[\\/]/g, '')
+                    .replace(/\s+/g, ' ') || 'QR Code';
+                a.download = fileName + '.png';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
