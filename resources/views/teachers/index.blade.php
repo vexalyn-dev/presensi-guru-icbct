@@ -77,8 +77,9 @@
         <form action="{{ route('teachers.index') }}" method="GET" id="filterForm" class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             <div class="relative flex-1 lg:w-80">
                 <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, kode guru, telepon..."
+                <input type="text" id="teacherSearch" name="search" value="{{ request('search') }}" placeholder="Cari nama, kode guru, telepon..."
                        class="w-full pl-11 pr-4 py-3 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 transition-all shadow-sm hover:shadow-md"
+                       oninput="filterTeachers(this.value)"
                 />
             </div>
 
@@ -264,8 +265,15 @@
             $mapelNames = $mapelObjs->pluck('name')->filter()->unique()->values();
             $mapel = count($mapelNames) > 0 ? $mapelNames : (optional($teacher->teacher)->major_specialty ?? $teacher->subject);
             $mapel = $mapel instanceof \Illuminate\Support\Collection ? $mapel->join(', ') : ($mapel ?: '');
+            $searchText = strtolower(
+                ($teacher->name ?? '') . ' ' .
+                ($teacher->teacher_code ?? '') . ' ' .
+                ($teacher->phone ?? '') . ' ' .
+                ($teacher->email ?? '') . ' ' .
+                $mapel
+            );
         @endphp
-        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors teacher-row" data-search="{{ $searchText }}">
             <td class="px-4 py-3">
                 <label class="tcb-label" style="margin:0;">
                     <div class="tcb-box" aria-hidden="true">
@@ -363,6 +371,13 @@
             </td>
         </tr>
     @endforelse
+    <tr id="teacherNoResults" class="hidden">
+        <td colspan="8" class="px-4 py-12 text-center">
+            <i data-lucide="search-x" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"></i>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ditemukan</p>
+            <button onclick="clearSearch()" class="text-xs text-navy-600 dark:text-gold-400 hover:underline mt-2 inline-block">Hapus Pencarian</button>
+        </td>
+    </tr>
 </tbody>
             </table>
         </div>
@@ -1019,6 +1034,26 @@
         modal.classList.remove('flex');
         modal.classList.add('hidden');
         document.body.style.overflow = '';
+    }
+
+    function filterTeachers(query) {
+        const q = (query || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.teacher-row');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const text = (row.dataset.search || '').toLowerCase();
+            const match = !q || text.includes(q);
+            row.classList.toggle('hidden', !match);
+            if (match) visible++;
+        });
+
+        document.getElementById('teacherNoResults').classList.toggle('hidden', visible > 0);
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('teacherSearch');
+        if (input) { input.value = ''; input.dispatchEvent(new Event('input')); }
     }
 </script>
 @endsection
