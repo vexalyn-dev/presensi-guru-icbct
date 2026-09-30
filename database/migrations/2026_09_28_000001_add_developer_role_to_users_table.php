@@ -10,8 +10,9 @@ return new class extends Migration
         DB::statement("ALTER TABLE `users` MODIFY COLUMN `role` ENUM('admin','guru','operator','guru_piket','developer') NOT NULL DEFAULT 'guru'");
 
         // Update developer account role
+        $devEmail = env('DEV_EMAIL', 'dev@vexalyndev.my.id');
         DB::table('users')
-            ->where('email', 'dev@vexalyndev.my.id')
+            ->where('email', $devEmail)
             ->update(['role' => 'developer']);
     }
 
