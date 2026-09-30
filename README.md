@@ -2,17 +2,20 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.3.0-blue?style=for-the-badge&logo=appveyor)
+![Version](https://img.shields.io/badge/version-3.2.4-blue?style=for-the-badge&logo=appveyor)
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/license-CC%20BY--NC%204.0-orange?style=for-the-badge)
-![Build](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge&logo=github)
 ![Views](https://komarev.com/ghpvc/?username=vexalyn-dev&repo=presensi-guru-icbct&label=Views&color=0e75b6&style=for-the-badge)
 [![Stars](https://img.shields.io/github/stars/vexalyn-dev/presensi-guru-icbct?style=for-the-badge&color=yellow&logo=github)](https://github.com/vexalyn-dev/presensi-guru-icbct/stargazers)
+[![Forks](https://img.shields.io/github/forks/vexalyn-dev/presensi-guru-icbct?style=for-the-badge&logo=github&color=8A2BE2)](https://github.com/vexalyn-dev/presensi-guru-icbct/forks)
+[![Contributors](https://img.shields.io/github/contributors/vexalyn-dev/presensi-guru-icbct?style=for-the-badge&color=2ea44f)](https://github.com/vexalyn-dev/presensi-guru-icbct/graphs/contributors)
+[![Last Commit](https://img.shields.io/github/last-commit/vexalyn-dev/presensi-guru-icbct?style=for-the-badge&logo=github)](https://github.com/vexalyn-dev/presensi-guru-icbct/commits/main)
+[![Open Issues](https://img.shields.io/github/issues/vexalyn-dev/presensi-guru-icbct?style=for-the-badge&logo=github&color=orange)](https://github.com/vexalyn-dev/presensi-guru-icbct/issues)
 
-**Sistem Presensi Digital Modern untuk SMK ICB Cinta Teknika**
+## Sistem Presensi Digital Modern untuk SMK ICB Cinta Teknika
 
-[🚀 Fitur](#-fitur-unggulan) • [📦 Instalasi](#-instalasi) • [📖 Dokumentasi](#dokumentasi) • [🤝 Kontribusi](#-kontribusi)
+[🚀 Fitur](#-fitur-unggulan) • [📦 Instalasi](#-instalasi) • [📖 Dokumentasi](docs/README.md) • [🤝 Kontribusi](#-kontribusi)
 
 </div>
 
@@ -23,6 +26,7 @@
 **ICB CT - Presensi Guru** adalah sistem presensi digital berbasis web yang dirancang khusus untuk SMK ICB Cinta Teknika. Sistem ini memungkinkan guru melakukan presensi harian dan presensi kelas dengan teknologi modern seperti QR Code scanning, GPS validation, real-time monitoring, dan audit trail lengkap.
 
 ### 🎯 Tujuan
+
 - ✅ Digitalisasi proses presensi guru
 - ✅ Meningkatkan akurasi data kehadiran
 - ✅ Memudahkan monitoring real-time
@@ -35,6 +39,7 @@
 ## ✨ Fitur Unggulan
 
 ### Authentication & Authorization
+
 - [x] Login dengan Email & Password
 - [x] Multi-role (Admin, Guru, Operator, Guru Piket)
 - [x] Session management & auto-logout
@@ -42,6 +47,7 @@
 - [x] Modal sambutan saat login pertama
 
 ### Presensi Harian
+
 - [x] Absen masuk & pulang dengan GPS validation
 - [x] Radius-based validation (configurable)
 - [x] Deteksi keterlambatan otomatis
@@ -54,6 +60,7 @@
 - [x] Auto-detect Masuk/Keluar berdasarkan status absen hari itu
 
 ### 🏫 Presensi Kelas
+
 - [x] QR Code scanning real-time via kamera
 - [x] Mode Masuk & Keluar
 - [x] Support shared space (Aula, Gor, Mushola)
@@ -63,6 +70,7 @@
 - [x] **Download QR Code bergambar template** — generate gambar kelas ke file `.png` menggunakan HTML5 Canvas (overlay QR ke desain template `public/images/qr-code.png`, ukuran 707×1000 px, nama kelas otomatis di bagian bawah)
 
 ### 📡 Live Monitoring
+
 - [x] Dashboard real-time siapa yang sedang mengajar
 - [x] Daftar guru yang belum scan masuk (dengan indikator keterlambatan)
 - [x] Daftar guru yang masih di sekolah (belum scan keluar)
@@ -71,6 +79,7 @@
 - [x] Summary stats: Total Guru, Sudah Masuk, Sedang Mengajar, Belum Masuk, Sudah Keluar
 
 ### 🔍 Log Aktivitas
+
 - [x] Audit trail seluruh aktivitas sistem
 - [x] Log presensi masuk/keluar harian & kelas
 - [x] Log login/logout & perubahan data
@@ -80,6 +89,7 @@
 - [x] Cleanup log lama (configurable)
 
 ### 🆘 Pusat Bantuan
+
 - [x] Form laporan Bug, Request Fitur, Maintenance, Pertanyaan
 - [x] Auto-detect metadata: browser, OS, device, IP
 - [x] Upload lampiran: PNG, JPG, PDF, MP4 (drag & drop)
@@ -90,6 +100,7 @@
 - [x] Tersedia untuk semua role
 
 ### 🔒 Keamanan & Proteksi
+
 - [x] Content Security Policy (CSP)** — header anti-XSS global
 - [x] X-Frame-Options DENY** — proteksi clickjacking
 - [x] Rate Limiting** — login (10/menit), register (5/menit), forgot-password (3/menit)
@@ -108,6 +119,7 @@
 - [x] Open Redirect Prevention** — validasi origin URL
 
 ### 📱 Download APK
+
 - [x] Halaman download APK mobile
 - [x] Banner slider 4 slide dengan Netflix-style transition
 - [x] Upload & manajemen APK dari Settings
@@ -115,6 +127,7 @@
 - [x] Info versi, min Android, ukuran tampil otomatis dari DB
 
 ### ⚙️ Pengaturan Sistem
+
 - [x] Identitas sekolah (nama, logo, favicon)
 - [x] Zona waktu & bahasa (40+ timezone, 20+ bahasa)
 - [x] Konfigurasi radius GPS dengan visualisasi peta
@@ -123,6 +136,7 @@
 - [x] **Tab Aplikasi** — manajemen APK mobile (upload, versi, changelog)
 
 ### Laporan & Export
+
 - [x] Laporan harian, mingguan, bulanan
 - [x] Export ke Excel (presensi harian & kelas)
 - [x] Export Log Aktivitas ke Excel (dengan header & styling)
@@ -131,6 +145,7 @@
 - [x] Visualisasi data dengan chart
 
 ### 🎨 UI/UX Modern
+
 - [x] Responsive design (mobile-first)
 - [x] Dark mode support
 - [x] Smooth animations & transitions
@@ -152,7 +167,7 @@ Tampilan lengkap semua halaman ada di **[`docs/`](docs/README.md)**.
 <div align="center">
 
 | Category | Technology | Version |
-|----------|-----------|---------|
+| ---------- | ----------- | --------- |
 | **Backend** | Laravel | 12.x |
 | **Frontend** | Alpine.js | 3.x |
 | **Styling** | Tailwind CSS | 3.x |
@@ -346,7 +361,7 @@ php artisan storage:link
 php artisan serve
 ```
 
-Akses di: **http://localhost:8000**
+Akses di: **<http://localhost:8000>**
 
 ---
 
@@ -400,7 +415,7 @@ MAIL_FROM_NAME="${APP_NAME}"
 Project ini udah dicek keamanannya dari berbagai sisi, ini daftarnya:
 
 | Kategori | Status |
-|----------|--------|
+| ---------- | -------- |
 | SQL Injection | ✅ Dilindungi ORM Laravel |
 | XSS (Stored/Reflected) | ✅ CSP + escaping DOM |
 | CSRF | ✅ Token wajib di semua form |
@@ -460,7 +475,7 @@ php artisan view:cache
 ### 👥 Roles & Permissions
 
 | Role | Value DB | Permissions |
-|------|----------|-------------|
+| ------ | ---------- | ------------- |
 | Administrator | `admin` | Full access (legacy, backward compatible) |
 | Operator | `operator` | Full access — identik dengan admin, termasuk Live Monitoring, Log Aktivitas, semua Data Master |
 | Guru | `guru` | Presensi Harian, Presensi Kelas, Jadwal, Riwayat, Izin, Pusat Bantuan |
@@ -473,7 +488,7 @@ php artisan db:seed --class=DemoAccountSeeder
 ```
 
 | Role | Email | Password |
-|------|-------|----------|
+| ------ | ------- | ---------- |
 | Admin | `admin@smkicb.sch.id` | `Adminicb123` |
 | Operator | `operator@smkicb.sch.id` | `Operatoricb123` |
 | Guru Piket | `piket@smkicb.sch.id` | `Piketicb123` |
@@ -482,6 +497,7 @@ php artisan db:seed --class=DemoAccountSeeder
 
 > **Developer** — login via halaman biasa, otomatis redirect ke Dev Panel.
 > Akun developer dikonfigurasi via `.env`:
+>
 > ```env
 > DEV_EMAIL=dev@vexalyndev.my.id
 > DEV_PASSWORD=VexalynDev2026!
@@ -489,17 +505,17 @@ php artisan db:seed --class=DemoAccountSeeder
 > DEV_TEACHER_CODE=DEV-001
 > ```
 
-### 📡 Live Monitoring
+### 📡 Live Monitoring API
 
-```
+```http
 GET /admin/live-monitoring         → Halaman view
 GET /admin/live-monitoring/refresh → JSON data (polling endpoint)
 ```
 
-### 🔍 Log Aktivitas
+### 🔍 Log Aktivitas API
 
 | Type | Category | Label |
-|------|----------|-------|
+| ------ | ---------- | ------- |
 | `scan_in_daily` | attendance | Masuk Harian |
 | `scan_out_daily` | attendance | Keluar Harian |
 | `scan_in` | attendance | Masuk Kelas |
@@ -562,9 +578,11 @@ php artisan storage:link
 Ada bug atau kendala? Tersedia 3 jalur laporan:
 
 ### 1. Pusat Bantuan (Direkomendasikan)
+
 Gunakan menu **Pusat Bantuan** di dalam aplikasi — laporan otomatis masuk ke GitHub Issues dan ClickUp lengkap dengan metadata (browser, OS, IP, screenshot).
 
 ### 2. WhatsApp
+
 Hubungi developer langsung jika butuh respons cepat:
 
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat_Sekarang-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/6283898980808)
@@ -572,6 +590,7 @@ Hubungi developer langsung jika butuh respons cepat:
 > **+62 838-9898-0808** — sertakan deskripsi masalah, screenshot, dan langkah reproduksi.
 
 ### 3. Email
+
 Kirim laporan tertulis ke:
 
 [![Email](https://img.shields.io/badge/Email-vioatmajaya@gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:vioatmajaya@gmail.com?subject=[BUG]%20ICB%20CT%20Presensi%20-%20Nama%20Bug&body=Deskripsi%20bug%3A%0A%0ALangkah%20reproduksi%3A%0A1.%20...%0A2.%20...%0A%0AExpected%20behavior%3A%0A%0AActual%20behavior%3A%0A%0AScreenshot%20%2F%20log%3A)
@@ -582,7 +601,7 @@ Kirim laporan tertulis ke:
 
 ### Format Laporan yang Baik
 
-```
+```text
 Judul     : [BUG] Nama masalah singkat
 Deskripsi : Apa yang terjadi?
 Langkah   : 1. Buka halaman X → 2. Klik tombol Y → 3. Error muncul
@@ -626,9 +645,9 @@ Lihat [LICENSE](LICENSE) untuk teks lengkapnya.
 ---
 
 | | |
-|:---:|:---|
+| :---: | :--- |
 | 🧑‍💻 **Developer** | Vexalyn Dev |
-| 📧 **Email** | vioatmajaya@gmail.com |
+| 📧 **Email** | <vioatmajaya@gmail.com> |
 | 🌐 **Website** | [vexalyndev.my.id](https://vexalyndev.my.id) |
 | 🐙 **GitHub** | [github.com/vexalyn-dev](https://github.com/vexalyn-dev) |
 | 📱 **Live App** | [presensi-guru.smkicb-teknika.sch.id](https://presensi-guru.smkicb-teknika.sch.id) |
@@ -668,7 +687,7 @@ Lihat [LICENSE](LICENSE) untuk teks lengkapnya.
 
 ## 📞 Contact
 
-- 📧 **Email:** vioatmajaya@gmail.com
+- 📧 **Email:** <vioatmajaya@gmail.com>
 - 🌐 **Website:** [vexalyndev.my.id](https://vexalyndev.my.id/)
 - 📱 **Live App:** [presensi-guru.smkicb-teknika.sch.id](https://presensi-guru.smkicb-teknika.sch.id)
 
@@ -680,7 +699,7 @@ Lihat [LICENSE](LICENSE) untuk teks lengkapnya.
 
 ---
 
-```
+```text
 Made with ❤️ by Vexalyn Dev  •  © 2026 ICB Cinta Teknika
 ```
 
