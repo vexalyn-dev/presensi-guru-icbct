@@ -393,8 +393,8 @@
         var modalVisible = false;
         var closeTimer   = null;
 
-        // Polling lebih cepat: 300ms
-        var POLL_MS      = 300;
+        // Polling: 100ms untuk update status bar real-time
+        var POLL_MS      = 100;
         var prevCheckInTs  = null;
         var prevCheckOutTs = null;
         var initialized    = false;
@@ -432,8 +432,8 @@
             overlay.classList.add('show');
             modalVisible = true;
 
-            setTimeout(function () {
-                showState(state);
+            // Langsung tampilkan state tanpa delay — server sudah confirm berhasil
+            showState(state);
 
                 if (state === 'checkin') {
                     var el = document.getElementById('at-checkin-time');
@@ -463,7 +463,6 @@
                 closeTimer = setTimeout(function () {
                     closeModal();
                 }, 3000);
-            }, 200);
         }
 
         var pollTimer = null;
