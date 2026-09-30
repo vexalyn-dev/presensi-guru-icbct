@@ -26,35 +26,24 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0 -translate-y-2"
-         class="sticky top-16 z-30 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-xl p-3 shadow-lg flex items-center gap-3">
+         class="sticky top-16 z-30 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800 rounded-xl p-3 shadow-lg flex items-center gap-3">
         <span class="text-sm font-semibold text-navy-800 dark:text-white flex items-center gap-2">
-            <i data-lucide="check-square" class="w-4 h-4 text-blue-500"></i>
+            <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
             <span x-text="selectedIds.length + ' dipilih'"></span>
         </span>
         <div class="flex-1"></div>
-        <form :action="routeBulkApprove" method="POST" class="inline" id="bulk-approve-form">
+        <button type="button" @click="clearSelection()" class="px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5">
+            <i data-lucide="x" class="w-4 h-4"></i> Batal
+        </button>
+        <form :action="routeBulkDelete" method="POST" onsubmit="return confirm('Hapus ' + selectedIds.length + ' pengajuan ini? Tindakan tidak bisa dibatalkan.')">
             @csrf
-            <template x-for="id in selectedIds" :key="id">
-                <input type="hidden" name="ids[]" :value="id">
-            </template>
-            <input type="hidden" name="admin_notes" value="Disetujui secara massal">
-            <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5">
-                <i data-lucide="check" class="w-4 h-4"></i> Setujui Semua
-            </button>
-        </form>
-        <form :action="routeBulkReject" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menolak semua pengajuan yang dipilih?')">
-            @csrf
-            <input type="hidden" name="admin_notes" value="Ditolak secara massal">
             <template x-for="id in selectedIds" :key="id">
                 <input type="hidden" name="ids[]" :value="id">
             </template>
             <button type="submit" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5">
-                <i data-lucide="x" class="w-4 h-4"></i> Tolak Semua
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Hapus {{ selectedIds.length }}
             </button>
         </form>
-        <button type="button" @click="clearSelection()" class="px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-semibold transition-all">
-            <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
     </div>
 
     <!-- Alerts -->
@@ -138,7 +127,7 @@
     <!-- Leave Requests List -->
     <div class="space-y-4" id="leave-requests-list" data-latest-url="{{ route($routeLatest) }}">
         @forelse($leaveRequests as $leave)
-        <div class="card p-5 hover:shadow-lg transition-all cursor-context-menu"
+        <div class="card p-5 hover:shadow-lg transition-all"
              data-leave-id="{{ $leave->id }}"
              data-delete-url="{{ route('teacher.leave.destroy', $leave) }}"
              :class="selectedIds.includes({{ $leave->id }}) ? 'ring-2 ring-blue-400 dark:ring-blue-500 bg-blue-50/50 dark:bg-blue-900/10' : ''"
@@ -149,8 +138,7 @@
                     <input type="checkbox"
                            :value="{{ $leave->id }}"
                            x-model="selectedIds"
-                           class="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer accent-navy-600"
-                           :disabled="{{ $leave->status !== 'pending' ? 'true' : 'false' }}">
+                           class="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer accent-navy-600">
                     <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($leave->user->name) }}"
                          class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                     <div class="flex-1 min-w-0">
@@ -235,11 +223,8 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('leaveApp', () => ({
             selectedIds: [],
-            get routeBulkApprove() {
-                return '{{ route('leaves.bulk-approve') }}';
-            },
-            get routeBulkReject() {
-                return '{{ route('leaves.bulk-reject') }}';
+            get routeBulkDelete() {
+                return '{{ route('leaves.bulk-delete') }}';
             },
             clearSelection() {
                 this.selectedIds = [];
@@ -348,8 +333,7 @@
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex items-start gap-4 flex-1">
                         <input type="checkbox" value="${leave.id}"
-                               class="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer accent-navy-600"
-                               ${leave.status !== 'pending' ? 'disabled' : ''}>
+                               class="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer accent-navy-600">
                         <img src="${esc(leave.teacher_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.teacher_name)}`)}"
                              class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                         <div class="flex-1 min-w-0">

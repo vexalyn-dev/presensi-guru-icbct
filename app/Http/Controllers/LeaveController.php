@@ -194,63 +194,12 @@ class LeaveController extends Controller
         return back()->with('success', 'Pengajuan ditolak');
     }
 
-    public function bulkApprove(Request $request)
+    public function bulkDelete(Request $request)
     {
         $request->validate(['ids' => 'required|array|min:1']);
         $ids = array_map('intval', $request->ids);
 
-        $count = LeaveRequest::whereIn('id', $ids)
-            ->where('status', 'pending')
-            ->update([
-                'status'      => 'approved',
-                'admin_notes' => request('admin_notes', 'Disetujui secara massal'),
-                'approved_by' => auth()->id(),
-                'approved_at' => now(),
-            ]);
-
-        $affected = LeaveRequest::whereIn('id', $ids)->get();
-        foreach ($affected as $leave) {
-            \App\Helpers\NotificationHelper::send(
-                $leave->user,
-                'success',
-                'Pengajuan ' . ucfirst($leave->type) . ' Disetujui',
-                'Pengajuan ' . $leave->type . ' Anda (tgl ' . $leave->start_date->format('d M Y') . ' - ' . $leave->end_date->format('d M Y') . ') telah disetujui.',
-                route('teacher.leave.show', ['leaveRequest' => $leave->id]),
-                'check-circle',
-                'bg-green-100 text-green-600'
-            );
-        }
-
-        return back()->with('success', "{$count} pengajuan berhasil disetujui.");
-    }
-
-    public function bulkReject(Request $request)
-    {
-        $request->validate(['ids' => 'required|array|min:1']);
-        $ids = array_map('intval', $request->ids);
-
-        $count = LeaveRequest::whereIn('id', $ids)
-            ->where('status', 'pending')
-            ->update([
-                'status'      => 'rejected',
-                'admin_notes' => request('admin_notes', 'Ditolak secara massal'),
-                'approved_by' => auth()->id(),
-                'approved_at' => now(),
-            ]);
-
-        $affected = LeaveRequest::whereIn('id', $ids)->get();
-        foreach ($affected as $leave) {
-            \App\Helpers\NotificationHelper::send(
-                $leave->user,
-                'error',
-                'Pengajuan ' . ucfirst($leave->type) . ' Ditolak',
-                'Pengajuan ' . $leave->type . ' Anda ditolak. Alasan: ' . (request('admin_notes', '-') ?? '-'),
-                route('teacher.leave.show', ['leaveRequest' => $leave->id]),
-                'x-circle',
-                'bg-red-100 text-red-600'
-            );
-        }
-
-        return back()->with('success', "{$count} pengajuan berhasil ditolak.");
+        $count = LeaveRequest::whereIn('id', $ids)->delete();
+        return back()->with('success', "{$count} pengajuan berhasil dihapus.");
     }
 }
