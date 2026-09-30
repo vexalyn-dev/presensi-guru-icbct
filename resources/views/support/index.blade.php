@@ -13,6 +13,7 @@
     $logoUrl = ($appSettings && $appSettings->app_logo) ? asset('storage/' . $appSettings->app_logo) : '';
 @endphp
 <script>
+    // @ts-nocheck
     var APP_LOGO_URL = @json($logoUrl);
     var UPLOAD_CARD_ROUTE_TEMPLATE = @json(route('support.upload-card', ['ticket' => 'PLACEHOLDER']));
 </script>
@@ -110,7 +111,7 @@
             <input type="hidden" name="meta_user_agent" id="meta_user_agent">
 
             {{-- WA Direct Notice for Pertanyaan --}}
-            <div id="wa-notice" class="hidden p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-3 text-sm text-green-800 dark:text-green-300 font-medium">
+            <div id="wa-notice" style="display:none;" class="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-3 text-sm text-green-800 dark:text-green-300 font-medium">
                 <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
                     <i data-lucide="message-square" class="w-4 h-4 text-green-600 dark:text-green-400"></i>
                 </div>
@@ -134,64 +135,89 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Prioritas <span class="text-red-500">*</span></label>
-                    <div class="relative" id="priority-dropdown">
+                    <div x-data="{
+                        menuOpen: false,
+                        selected: {{ old('priority') ? "'" . e(old('priority')) . "'" : 'null' }},
+                        opts: @json([
+                            ['value'=>'low',      'label'=>'Rendah',  'dot'=>'bg-green-500',  'bg'=>'bg-green-100 dark:bg-green-900/30',  'text'=>'text-green-700 dark:text-green-400',  'icon'=>'circle-check'],
+                            ['value'=>'medium',   'label'=>'Sedang',  'dot'=>'bg-amber-500',  'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'text'=>'text-amber-700 dark:text-amber-400',  'icon'=>'alert-circle'],
+                            ['value'=>'high',     'label'=>'Tinggi',  'dot'=>'bg-orange-500', 'bg'=>'bg-orange-100 dark:bg-orange-900/30','text'=>'text-orange-700 dark:text-orange-400','icon'=>'alert-triangle'],
+                            ['value'=>'critical', 'label'=>'Kritis',  'dot'=>'bg-red-500',    'bg'=>'bg-red-100 dark:bg-red-900/30',      'text'=>'text-red-700 dark:text-red-400',      'icon'=>'flame'],
+                        ]),
+                        select(opt) {
+                            this.selected = opt.value;
+                            document.getElementById('priority-input').value = opt.value;
+                            var lbl = document.getElementById('priority-label');
+                            lbl.innerHTML = '<div class="w-6 h-6 rounded-lg '+opt.bg+' flex items-center justify-center flex-shrink-0"><i data-lucide="'+opt.icon+'" class="w-3.5 h-3.5 '+opt.text+'"></i></div><span class="font-semibold text-navy-800 dark:text-white">'+opt.label+'</span>';
+                            this.menuOpen = false;
+                            this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+                        }
+                    }" @click.outside="menuOpen = false" class="relative" id="priority-dropdown">
                         <input type="hidden" name="priority" id="priority-input" value="{{ old('priority') }}">
-                        <button type="button" onclick="toggleDropdown('priority-menu')"
+                        <button type="button" @click="menuOpen = !menuOpen"
                                 class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
                             <span id="priority-label" class="flex items-center gap-2.5 text-slate-400 dark:text-slate-400">-- Pilih Prioritas --</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0" id="priority-chevron"></i>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0" id="priority-chevron" :class="{ 'rotate-180': menuOpen }"></i>
                         </button>
-                        <div id="priority-menu"
-                             class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
-                            @foreach([
-                                ['value'=>'low',      'label'=>'Rendah',  'dot'=>'bg-green-500',  'bg'=>'bg-green-100 dark:bg-green-900/30',  'text'=>'text-green-700 dark:text-green-400',  'icon'=>'circle-check'],
-                                ['value'=>'medium',   'label'=>'Sedang',  'dot'=>'bg-amber-500',  'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'text'=>'text-amber-700 dark:text-amber-400',  'icon'=>'alert-circle'],
-                                ['value'=>'high',     'label'=>'Tinggi',  'dot'=>'bg-orange-500', 'bg'=>'bg-orange-100 dark:bg-orange-900/30','text'=>'text-orange-700 dark:text-orange-400','icon'=>'alert-triangle'],
-                                ['value'=>'critical', 'label'=>'Kritis',  'dot'=>'bg-red-500',    'bg'=>'bg-red-100 dark:bg-red-900/30',      'text'=>'text-red-700 dark:text-red-400',      'icon'=>'flame'],
-                            ] as $opt)
-                            <button type="button"
-                                    onclick="selectPriority('{{ $opt['value'] }}', '{{ $opt['label'] }}', '{{ $opt['bg'] }}', '{{ $opt['text'] }}', '{{ $opt['icon'] }}')"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                <div class="w-7 h-7 rounded-lg {{ $opt['bg'] }} flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="{{ $opt['icon'] }}" class="w-3.5 h-3.5 {{ $opt['text'] }}"></i>
-                                </div>
-                                <span class="{{ $opt['text'] }} font-semibold">{{ $opt['label'] }}</span>
-                            </button>
-                            @endforeach
+                        <div x-show="menuOpen" x-transition
+                             class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden"
+                             style="display:none;">
+                            <template x-for="opt in opts" :key="opt.value">
+                                <button type="button" @click="select(opt)"
+                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <div class="w-7 h-7 rounded-lg" :class="opt.bg + ' flex items-center justify-center flex-shrink-0'">
+                                        <i data-lucide="circle-check" :class="opt.icon + ' w-3.5 h-3.5 ' + opt.text" x-show="false"></i>
+                                        <i :data-lucide="opt.icon" :class="opt.text + ' w-3.5 h-3.5'"></i>
+                                    </div>
+                                    <span :class="opt.text + ' font-semibold'" x-text="opt.label"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     @error('priority')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                 </div>
                 <div id="category-field">
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Kategori <span class="text-red-500">*</span></label>
-                    <div class="relative" id="category-dropdown">
+                    <div x-data="{
+                        menuOpen: false,
+                        selected: {{ old('category') ? "'" . e(old('category')) . "'" : 'null' }},
+                        opts: @json([
+                            ['v'=>'UI',        'icon'=>'layout',       'bg'=>'bg-blue-100 dark:bg-blue-900/30',    'c'=>'text-blue-600 dark:text-blue-400'],
+                            ['v'=>'Login',     'icon'=>'log-in',       'bg'=>'bg-purple-100 dark:bg-purple-900/30','c'=>'text-purple-600 dark:text-purple-400'],
+                            ['v'=>'Presensi',  'icon'=>'scan-line',    'bg'=>'bg-green-100 dark:bg-green-900/30',  'c'=>'text-green-600 dark:text-green-400'],
+                            ['v'=>'Database',  'icon'=>'database',     'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'c'=>'text-amber-600 dark:text-amber-400'],
+                            ['v'=>'API',       'icon'=>'code-2',       'bg'=>'bg-cyan-100 dark:bg-cyan-900/30',    'c'=>'text-cyan-600 dark:text-cyan-400'],
+                            ['v'=>'Performa',  'icon'=>'zap',          'bg'=>'bg-orange-100 dark:bg-orange-900/30','c'=>'text-orange-600 dark:text-orange-400'],
+                            ['v'=>'Keamanan',  'icon'=>'shield-alert', 'bg'=>'bg-red-100 dark:bg-red-900/30',      'c'=>'text-red-600 dark:text-red-400'],
+                            ['v'=>'Lainnya',   'icon'=>'more-horizontal','bg'=>'bg-slate-100 dark:bg-slate-700',   'c'=>'text-slate-600 dark:text-slate-400'],
+                        ]),
+                        select(opt) {
+                            this.selected = opt.v;
+                            document.getElementById('category-input').value = opt.v;
+                            var lbl = document.getElementById('category-label');
+                            lbl.innerHTML = '<div class="w-6 h-6 rounded-lg '+opt.bg+' flex items-center justify-center flex-shrink-0"><i data-lucide="'+opt.icon+'" class="w-3.5 h-3.5 '+opt.c+'"></i></div><span class="font-semibold text-navy-800 dark:text-white">'+opt.v+'</span>';
+                            this.menuOpen = false;
+                            this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+                        }
+                    }" @click.outside="menuOpen = false" class="relative" id="category-dropdown">
                         <input type="hidden" name="category" id="category-input" value="{{ old('category') }}">
-                        <button type="button" onclick="toggleDropdown('category-menu')"
+                        <button type="button" @click="menuOpen = !menuOpen"
                                 class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
                             <span id="category-label" class="flex items-center gap-2.5 text-slate-400 dark:text-slate-400">-- Pilih Kategori --</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0" id="category-chevron"></i>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0" id="category-chevron" :class="{ 'rotate-180': menuOpen }"></i>
                         </button>
-                        <div id="category-menu"
-                             class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
-                            @foreach([
-                                ['v'=>'UI',        'icon'=>'layout',       'bg'=>'bg-blue-100 dark:bg-blue-900/30',    'c'=>'text-blue-600 dark:text-blue-400'],
-                                ['v'=>'Login',     'icon'=>'log-in',       'bg'=>'bg-purple-100 dark:bg-purple-900/30','c'=>'text-purple-600 dark:text-purple-400'],
-                                ['v'=>'Presensi',  'icon'=>'scan-line',    'bg'=>'bg-green-100 dark:bg-green-900/30',  'c'=>'text-green-600 dark:text-green-400'],
-                                ['v'=>'Database',  'icon'=>'database',     'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'c'=>'text-amber-600 dark:text-amber-400'],
-                                ['v'=>'API',       'icon'=>'code-2',       'bg'=>'bg-cyan-100 dark:bg-cyan-900/30',    'c'=>'text-cyan-600 dark:text-cyan-400'],
-                                ['v'=>'Performa',  'icon'=>'zap',          'bg'=>'bg-orange-100 dark:bg-orange-900/30','c'=>'text-orange-600 dark:text-orange-400'],
-                                ['v'=>'Keamanan',  'icon'=>'shield-alert', 'bg'=>'bg-red-100 dark:bg-red-900/30',      'c'=>'text-red-600 dark:text-red-400'],
-                                ['v'=>'Lainnya',   'icon'=>'more-horizontal','bg'=>'bg-slate-100 dark:bg-slate-700',   'c'=>'text-slate-600 dark:text-slate-400'],
-                            ] as $cat)
-                            <button type="button"
-                                    onclick="selectCategory('{{ $cat['v'] }}', '{{ $cat['icon'] }}', '{{ $cat['bg'] }}', '{{ $cat['c'] }}')"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
-                                <div class="w-7 h-7 rounded-lg {{ $cat['bg'] }} flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="{{ $cat['icon'] }}" class="w-3.5 h-3.5 {{ $cat['c'] }}"></i>
-                                </div>
-                                {{ $cat['v'] }}
-                            </button>
-                            @endforeach
+                        <div x-show="menuOpen" x-transition
+                             class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden"
+                             style="display:none;">
+                            <template x-for="cat in opts" :key="cat.v">
+                                <button type="button" @click="select(cat)"
+                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
+                                    <div class="w-7 h-7 rounded-lg" :class="cat.bg + ' flex items-center justify-center flex-shrink-0'">
+                                        <i :data-lucide="cat.icon" :class="cat.c + ' w-3.5 h-3.5'"></i>
+                                    </div>
+                                    <span x-text="cat.v"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
                     @error('category')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
@@ -235,29 +261,40 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Tingkat Dampak</label>
-                        <div class="relative" id="impact-dropdown">
+                        <div x-data="{
+                            menuOpen: false,
+                            opts: @json([
+                                ['v'=>'Hanya saya',             'icon'=>'user',         'bg'=>'bg-slate-100 dark:bg-slate-700',     'c'=>'text-slate-600 dark:text-slate-400'],
+                                ['v'=>'Beberapa pengguna',      'icon'=>'users',        'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'c'=>'text-amber-600 dark:text-amber-400'],
+                                ['v'=>'Semua pengguna',         'icon'=>'users-round',  'bg'=>'bg-orange-100 dark:bg-orange-900/30','c'=>'text-orange-600 dark:text-orange-400'],
+                                ['v'=>'Seluruh sistem terganggu','icon'=>'alert-octagon','bg'=>'bg-red-100 dark:bg-red-900/30',     'c'=>'text-red-600 dark:text-red-400'],
+                            ]),
+                            select(opt) {
+                                document.getElementById('impact-input').value = opt.v;
+                                var lbl = document.getElementById('impact-label');
+                                lbl.innerHTML = '<div class="w-6 h-6 rounded-lg '+opt.bg+' flex items-center justify-center flex-shrink-0"><i data-lucide="'+opt.icon+'" class="w-3.5 h-3.5 '+opt.c+'"></i></div><span class="font-semibold text-navy-800 dark:text-white">'+opt.v+'</span>';
+                                this.menuOpen = false;
+                                this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+                            }
+                        }" @click.outside="menuOpen = false" class="relative" id="impact-dropdown">
                             <input type="hidden" name="impact_level" id="impact-input">
-                            <button type="button" onclick="toggleDropdown('impact-menu')"
+                            <button type="button" @click="menuOpen = !menuOpen"
                                     class="w-full flex items-center justify-between px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm transition-all hover:bg-white dark:hover:bg-slate-700 focus:outline-none">
                                 <span id="impact-label" class="flex items-center gap-2.5 text-slate-400">-- Pilih Dampak --</span>
-                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform" id="impact-chevron"></i>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 flex-shrink-0 transition-transform" id="impact-chevron" :class="{ 'rotate-180': menuOpen }"></i>
                             </button>
-                            <div id="impact-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden">
-                                @foreach([
-                                    ['v'=>'Hanya saya',             'icon'=>'user',         'bg'=>'bg-slate-100 dark:bg-slate-700',     'c'=>'text-slate-600 dark:text-slate-400'],
-                                    ['v'=>'Beberapa pengguna',      'icon'=>'users',        'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'c'=>'text-amber-600 dark:text-amber-400'],
-                                    ['v'=>'Semua pengguna',         'icon'=>'users-round',  'bg'=>'bg-orange-100 dark:bg-orange-900/30','c'=>'text-orange-600 dark:text-orange-400'],
-                                    ['v'=>'Seluruh sistem terganggu','icon'=>'alert-octagon','bg'=>'bg-red-100 dark:bg-red-900/30',     'c'=>'text-red-600 dark:text-red-400'],
-                                ] as $imp)
-                                <button type="button"
-                                        onclick="selectImpact('{{ $imp['v'] }}', '{{ $imp['icon'] }}', '{{ $imp['bg'] }}', '{{ $imp['c'] }}')"
-                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
-                                    <div class="w-7 h-7 rounded-lg {{ $imp['bg'] }} flex items-center justify-center flex-shrink-0">
-                                        <i data-lucide="{{ $imp['icon'] }}" class="w-3.5 h-3.5 {{ $imp['c'] }}"></i>
-                                    </div>
-                                    {{ $imp['v'] }}
-                                </button>
-                                @endforeach
+                            <div x-show="menuOpen" x-transition
+                                 class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-40 overflow-hidden"
+                                 style="display:none;">
+                                <template x-for="imp in opts" :key="imp.v">
+                                    <button type="button" @click="select(imp)"
+                                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
+                                        <div class="w-7 h-7 rounded-lg" :class="imp.bg + ' flex items-center justify-center flex-shrink-0'">
+                                            <i :data-lucide="imp.icon" :class="imp.c + ' w-3.5 h-3.5'"></i>
+                                        </div>
+                                        <span x-text="imp.v"></span>
+                                    </button>
+                                </template>
                             </div>
                         </div>
                     </div>
