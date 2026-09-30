@@ -19,14 +19,14 @@ class DeveloperAccountSeeder extends Seeder
         $role = in_array('developer', $validRoles, true) ? 'developer' : 'admin';
 
         User::updateOrCreate(
-            ['email' => env('DEV_EMAIL', 'dev@vexalyndev.my.id')],
+            ['email' => env('DEV_EMAIL')],
             [
-                'name'         => 'Vexalyn Dev',
-                'email'        => env('DEV_EMAIL', 'dev@vexalyndev.my.id'),
-                'password'     => Hash::make(env('DEV_PASSWORD', 'VexalynDev2026!')),
+                'name'         => env('DEV_NAME', 'Developer'),
+                'email'        => env('DEV_EMAIL'),
+                'password'     => Hash::make(env('DEV_PASSWORD')),
                 'role'         => $role,
                 'is_active'    => true,
-                'teacher_code' => 'DEV-001',
+                'teacher_code' => env('DEV_TEACHER_CODE', 'DEV-001'),
             ]
         );
     }
