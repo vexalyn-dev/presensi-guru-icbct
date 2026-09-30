@@ -37,7 +37,7 @@
                     </div>
                 </td>
                 <td class="px-4 py-3 border-r border-slate-200 dark:border-slate-700">
-                    <p class="text-xs text-slate-700 dark:text-slate-300">{{ $report['teacher']->major_specialty ?? '-' }}</p>
+                    <p class="text-xs text-slate-700 dark:text-slate-300">{{ $report['teacher']->subjects_list ?? '-' }}</p>
                 </td>
                 @if($reportType === 'class')
                 <td class="px-2 py-3 border-r border-slate-200 dark:border-slate-700">

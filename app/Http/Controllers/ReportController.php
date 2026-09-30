@@ -238,7 +238,7 @@ class ReportController extends Controller
             $teacher = $data['user'];
             $sheet->setCellValue('A' . $row, $no++);
             $sheet->setCellValue('B' . $row, $teacher->name);
-            $sheet->setCellValue('C' . $row, $data['teacher']?->major_specialty ?? '-');
+            $sheet->setCellValue('C' . $row, $data['teacher']->subjects_list ?? '-');
 
             if ($reportType === 'class') {
                 $classroom = $data['all_classrooms'] ?? '-';
@@ -435,7 +435,7 @@ class ReportController extends Controller
         if ($search) {
             $teachersQuery->where('name', 'like', "%{$search}%");
         }
-        $teachers = $teachersQuery->with('teacher')->orderBy('name')->get();
+        $teachers = $teachersQuery->with(['teacher', 'teacher.subjects'])->orderBy('name')->get();
         $teacherIds = $teachers->pluck('id');
 
         $dates = [];

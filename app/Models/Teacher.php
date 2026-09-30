@@ -74,6 +74,17 @@ class Teacher extends Model
                     ->withTimestamps();
     }
 
+    public function getSubjectsListAttribute()
+    {
+        if ($this->subjects) {
+            return $this->subjects->pluck('name')->filter()->join(', ');
+        }
+        if ($this->major_specialty) {
+            return $this->major_specialty;
+        }
+        return '';
+    }
+
     public function getPhotoUrlAttribute()
     {
         if ($this->photo) {
