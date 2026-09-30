@@ -11,14 +11,24 @@ class CheckMaintenanceMode
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Bypass untuk route login & asset agar tidak infinite redirect
         if ($request->routeIs('login', 'logout', 'password.*')) {
             return $next($request);
         }
 
-        // Admin & Operator & Developer selalu bisa akses — bypass maintenance
         $user = $request->user();
         if ($user && ($user->canAccessAdmin() || $user->isDeveloper())) {
+            return $next($request);
+        }
+
+        $envMode = env('MAINTENANCE_MODE');
+
+        if ($envMode === 'true') {
+            $message = env('MAINTENANCE_MESSAGE')
+                ?? 'Sistem sedang dalam pemeliharaan. Mohon tunggu sebentar.';
+            return response()->view('errors.maintenance', ['message' => $message], 503);
+        }
+
+        if ($envMode === 'false') {
             return $next($request);
         }
 
