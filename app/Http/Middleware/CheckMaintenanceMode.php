@@ -22,6 +22,11 @@ class CheckMaintenanceMode
             return $next($request);
         }
 
+        // Developer panel access via secret key — bypass maintenance sepenuhnya
+        if ($request->routeIs('developer.*') && $user) {
+            return $next($request);
+        }
+
         try {
             $setting = AppSetting::getInstance();
 
