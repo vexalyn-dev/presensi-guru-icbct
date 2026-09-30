@@ -148,7 +148,6 @@
                                                     class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-transform duration-300"
                                                     :class="{'rotate-180': open}"></i>
                                              </div>
-                                        </div>
 
                                          <!-- Dropdown Menu -->
                                          <div x-show="open"

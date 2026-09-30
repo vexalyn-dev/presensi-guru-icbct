@@ -3,7 +3,7 @@
 @section('page-title', 'Tambah Mata Pelajaran')
 
 @section('content')
-<div class="fade-in" x-data="createSubject()">
+<div class="fade-in" x-data="createSubject(@js($teachers ?? []))">
 
     <!-- Page Header -->
     <div class="flex items-center justify-between mb-8">
@@ -316,10 +316,10 @@
 
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('createSubject', () => ({
+        Alpine.data('createSubject', (teachers) => ({
             subjectName: '',
             isActive: true,
-            teachers: @json($teachers ?? []),
+            teachers,
 
             updateSubjectName() {
                 // ready untuk preview
