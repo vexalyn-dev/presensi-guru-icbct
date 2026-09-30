@@ -226,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     @if(count($chartData) > 0)
     var isDark   = document.documentElement.classList.contains('dark');
+    var allDates     = {!! json_encode(array_keys($chartData)) !!};
     var allLabels    = {!! json_encode(array_map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'), array_keys($chartData))) !!};
     var allLabelsFull = {!! json_encode(array_map(fn($d) => \Carbon\Carbon::parse($d)->locale('id')->isoFormat('dddd, D MMMM YYYY'), array_keys($chartData))) !!};
     var allData      = {!! json_encode(array_values($chartData)) !!};
@@ -239,9 +240,9 @@ document.addEventListener('DOMContentLoaded', function() {
         cutoff.setHours(0,0,0,0);
 
         var labels = [], data = [], labelsFull = [];
-        allLabels.forEach(function(l, i) {
-            var d = new Date(l.split(' ').reverse().join(' ') + 'T00:00:00');
-            if (d >= cutoff) { labels.push(l); data.push(allData[i]); labelsFull.push(allLabelsFull[i]); }
+        allDates.forEach(function(date, i) {
+            var d = new Date(date + 'T00:00:00');
+            if (d >= cutoff) { labels.push(allLabels[i]); data.push(allData[i]); labelsFull.push(allLabelsFull[i]); }
         });
 
         var canvasEl = document.getElementById('trendChart');
