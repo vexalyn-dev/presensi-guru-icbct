@@ -136,8 +136,8 @@
             </div>
         </div>
         @if(count($chartData) > 0)
-        <div class="relative" style="height:260px;">
-            <canvas id="trendChart"></canvas>
+        <div style="height:280px;position:relative;">
+            <canvas id="trendChart" style="width:100%!important;height:100%!important;"></canvas>
         </div>
         <div id="chartSubtitle" class="text-xs text-slate-400 mt-2 text-right transition-all duration-300"></div>
         @else
@@ -244,12 +244,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (d >= cutoff) { labels.push(l); data.push(allData[i]); labelsFull.push(allLabelsFull[i]); }
         });
 
-        var ctx = document.getElementById('trendChart').getContext('2d');
+        var canvasEl = document.getElementById('trendChart');
+        var ctx = canvasEl.getContext('2d');
         if (chart) { chart.destroy(); }
 
         var gridColor = isDark ? 'rgba(148,163,184,0.08)' : 'rgba(148,163,184,0.15)';
         var tickColor = isDark ? '#94a3b8' : '#64748b';
         var pointSize = days <= 7 ? 6 : 5;
+
+        // Pre-build gradient once
+        var grad = ctx.createLinearGradient(0, 0, 0, canvasEl.height || 280);
+        grad.addColorStop(0, 'rgba(99,102,241,0.40)');
+        grad.addColorStop(0.6, 'rgba(99,102,241,0.12)');
+        grad.addColorStop(1, 'rgba(99,102,241,0.00)');
 
         chart = new Chart(ctx, {
             type: 'line',
@@ -259,16 +266,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     label: 'Sesi Mengajar',
                     data: data,
                     borderColor: '#6366f1',
-                    backgroundColor: function(ctx) {
-                        var g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height || 260);
-                        g.addColorStop(0, 'rgba(99,102,241,0.35)');
-                        g.addColorStop(0.5, 'rgba(99,102,241,0.10)');
-                        g.addColorStop(1, 'rgba(99,102,241,0.00)');
-                        return g;
-                    },
+                    backgroundColor: grad,
                     fill: true,
                     tension: 0.4,
-                    borderWidth: 2.5,
+                    borderWidth: 3,
                     pointBackgroundColor: '#6366f1',
                     pointBorderColor: isDark ? '#0f172a' : '#ffffff',
                     pointBorderWidth: 2,
@@ -282,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: { duration: 900, easing: 'easeOutQuart' },
+                animation: { duration: 800, easing: 'easeOutQuart' },
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { display: false },
