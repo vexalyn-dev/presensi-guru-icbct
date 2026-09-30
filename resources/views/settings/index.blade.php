@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('page-title', 'Pengaturan')
+@section('meta-description', 'Pengaturan sistem presensi — identitas sekolah, zona GPS, theme warna, notifikasi email, dan manajemen APK mobile.')
 
 @section('content')
 <!-- Leaflet CSS & JS -->

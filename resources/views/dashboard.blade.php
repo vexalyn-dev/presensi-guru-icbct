@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('page-title', 'Dashboard')
+@section('meta-description', 'Dashboard monitoring presensi guru real-time — lihat siapa yang sedang mengajar, daftar guru belum scan, dan summary kehadiran hari ini.')
 
 @section('content')
 <div id="admin-ajax-app" class="space-y-6" data-init-endpoint="{{ route('dashboard.data') }}">

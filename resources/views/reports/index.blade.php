@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('page-title', 'Laporan Presensi')
+@section('meta-description', 'Laporan presensi harian dan kelas guru SMK ICB Cinta Teknika — filter per tanggal, export Excel, dan lihat heatmap kehadiran.')
 
 @section('content')
 <div class="fade-in space-y-6">

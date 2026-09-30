@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title id="pageTitle">Login - {{ config('app.name', 'ICB CT') }}</title>
+    <meta name="description" content="Login ke sistem presensi guru SMK ICB Cinta Teknika. Presensi harian dan kelas via QR Code dengan validasi GPS.">
+    <meta property="og:title" content="Login - ICB CT Presensi Guru">
+    <meta property="og:description" content="Login ke sistem presensi guru SMK ICB Cinta Teknika. Presensi harian dan kelas via QR Code dengan validasi GPS.">
+    <meta property="og:image" content="{{ asset('images/logo.png') }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Login - ICB CT Presensi Guru">
+    <meta name="twitter:description" content="Login ke sistem presensi guru SMK ICB Cinta Teknika.">
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">

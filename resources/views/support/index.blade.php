@@ -1,5 +1,6 @@
 @extends(activeLayout())
 @section('page-title', 'Pusat Bantuan')
+@section('meta-description', 'Lapor bug, request fitur, atau maintenance ke developer — integrated dengan GitHub Issues dan ClickUp.')
 @php
     $user = auth()->user();
     $rp = $user->canAccessAdmin() ? 'admin.support' : ($user->isGuruPiket() ? 'piket.support' : 'teacher.support');

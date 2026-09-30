@@ -1,6 +1,7 @@
 @extends(activeLayout())
 
 @section('page-title', 'Scan QR Presensi')
+@section('meta-description', 'Scan QR Code untuk presensi kelas — mode masuk dan keluar dengan validasi GPS dan timer durasi mengajar.')
 
 @section('content')
     <div id="attendance-root" class="fade-in" x-data="{

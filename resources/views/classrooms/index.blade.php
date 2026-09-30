@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('page-title', 'Data Kelas')
+@section('meta-description', 'Kelola data kelas dan ruang kelas SMK ICB Cinta Teknika — atur kelas utama, shared space, dan generate QR Code per kelas.')
 
 @section('content')
     <div class="fade-in space-y-6">

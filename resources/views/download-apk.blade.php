@@ -1,5 +1,6 @@
 @extends(activeLayout())
 @section('page-title', 'Download Aplikasi')
+@section('meta-description', 'Download aplikasi Android presensi guru SMK ICB Cinta Teknika — instal langsung dan scan QR kelas dari HP.')
 @section('content')
 @php
     $apkSetting = \App\Models\AppSetting::getInstance();

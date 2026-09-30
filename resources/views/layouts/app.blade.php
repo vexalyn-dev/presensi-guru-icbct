@@ -4,7 +4,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'ICB CT') }}</title>
+    <title>@yield('page-title', config('app.name')) . ' - ' . config('app.name')</title>
+
+    <!-- SEO Meta -->
+    <meta name="description" content="@yield('meta-description', 'Sistem Presensi Digital Guru — SMK ICB Cinta Teknika. Presensi harian, presensi kelas, monitoring real-time, jadwal mengajar, dan laporan lengkap.')">
+    <meta name="keywords" content="absensi, presensi, guru, SMK, ICB, Cinta Teknika, QR Code, kehadiran">
+    <meta property="og:title" content="@yield('page-title', config('app.name')) . ' - ' . config('app.name')">
+    <meta property="og:description" content="@yield('meta-description', 'Sistem Presensi Digital Guru — SMK ICB Cinta Teknika. Presensi harian, presensi kelas, monitoring real-time, jadwal mengajar, dan laporan lengkap.')">
+    <meta property="og:image" content="{{ asset('images/logo.png') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ICB CT Presensi Guru">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('page-title', config('app.name')) . ' - ' . config('app.name')">
+    <meta name="twitter:description" content="@yield('meta-description', 'Sistem Presensi Digital Guru — SMK ICB Cinta Teknika. Presensi harian, presensi kelas, monitoring real-time, jadwal mengajar, dan laporan lengkap.')">
+    <meta name="twitter:image" content="{{ asset('images/logo.png') }}">
+    <meta name="robots" content="index, follow">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -221,7 +236,10 @@
         }
     </style>
 
-    <!-- Favicon Dynamic dari AppSetting -->
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}" sizes="32x32">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}" sizes="180x180">
+    <!-- Favicon Dynamic dari AppSetting (fallback) -->
     @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
     @if($appSettings && $appSettings->app_favicon)
         <link rel="icon" type="image/png" href="{{ asset('storage/' . $appSettings->app_favicon) }}?v={{ time() }}">
