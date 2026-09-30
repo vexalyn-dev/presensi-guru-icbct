@@ -176,6 +176,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
     Route::post('/leaves/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])->name('leaves.approve');
     Route::post('/leaves/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])->name('leaves.reject');
+    Route::post('/leaves/bulk-delete', [LeaveController::class, 'bulkDelete'])->name('leaves.bulk-delete');
 
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

@@ -3,7 +3,8 @@
 @section('page-title', 'Izin & Sakit')
 
 @section('content')
-<div x-data="leaveApp()" class="fade-in space-y-6">
+<div x-data="leaveApp()" class="fade-in space-y-6"
+    data-bulk-delete-url="{{ request()->routeIs('piket.*') ? route('piket.leaves.bulk-delete') : route('leaves.bulk-delete') }}">
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -225,7 +226,7 @@
         Alpine.data('leaveApp', () => ({
             selectedIds: [],
             get routeBulkDelete() {
-                return '{{ route('leaves.bulk-delete') }}';
+                return document.querySelector('[data-bulk-delete-url]')?.dataset.bulkDeleteUrl ?? '';
             },
             clearSelection() {
                 this.selectedIds = [];
