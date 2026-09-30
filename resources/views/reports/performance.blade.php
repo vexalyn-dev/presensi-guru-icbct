@@ -136,8 +136,8 @@
             </div>
         </div>
         @if(count($chartData) > 0)
-        <div style="height:280px;position:relative;">
-            <canvas id="trendChart" style="width:100%!important;height:100%!important;"></canvas>
+        <div style="height:280px;position:relative;width:100%;">
+            <canvas id="trendChart" style="width:100%;height:100%;"></canvas>
         </div>
         <div id="chartSubtitle" class="text-xs text-slate-400 mt-2 text-right transition-all duration-300"></div>
         @else
@@ -245,6 +245,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         var canvasEl = document.getElementById('trendChart');
+        if (!canvasEl) return;
+        canvasEl.setAttribute('width', canvasEl.parentElement.offsetWidth);
+        canvasEl.setAttribute('height', canvasEl.parentElement.offsetHeight || 280);
         var ctx = canvasEl.getContext('2d');
         if (chart) { chart.destroy(); }
 
@@ -252,10 +255,11 @@ document.addEventListener('DOMContentLoaded', function() {
         var tickColor = isDark ? '#94a3b8' : '#64748b';
         var pointSize = days <= 7 ? 6 : 5;
 
-        // Pre-build gradient once
-        var grad = ctx.createLinearGradient(0, 0, 0, canvasEl.height || 280);
-        grad.addColorStop(0, 'rgba(99,102,241,0.40)');
-        grad.addColorStop(0.6, 'rgba(99,102,241,0.12)');
+        // Build gradient using actual canvas dimensions
+        var gradHeight = canvasEl.height || 280;
+        var grad = ctx.createLinearGradient(0, 0, 0, gradHeight);
+        grad.addColorStop(0, 'rgba(99,102,241,0.35)');
+        grad.addColorStop(0.6, 'rgba(99,102,241,0.10)');
         grad.addColorStop(1, 'rgba(99,102,241,0.00)');
 
         chart = new Chart(ctx, {
