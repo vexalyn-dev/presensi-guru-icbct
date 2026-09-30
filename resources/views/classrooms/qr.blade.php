@@ -145,9 +145,9 @@
             ctx.fillText(className.toUpperCase(), CW / 2, 325);
 
             // Center the QR inside the template's scan frame.
-            const QR_SIZE = 390;
+            const QR_SIZE = 360;
             const QR_X = (CW - QR_SIZE) / 2;
-            const QR_Y = 433;
+            const QR_Y = 448;
 
             // Convert SVG to Image
             const svgData = new XMLSerializer().serializeToString(svg);
