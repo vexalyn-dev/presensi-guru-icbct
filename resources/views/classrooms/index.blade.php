@@ -164,7 +164,7 @@
 
     <!-- Delete Confirmation Modal -->
     <div id="delete-modal"
-        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl transform transition-all">
             <div class="flex items-center gap-4 mb-5">
                 <div
@@ -210,11 +210,13 @@
             deleteUrl = `/classrooms/${classroomId}`;
             document.getElementById('delete-message').textContent = `Yakin ingin menghapus kelas "${className}"? Data yang dihapus tidak dapat dikembalikan.`;
             document.getElementById('delete-modal').classList.remove('hidden');
+            document.getElementById('delete-modal').classList.add('flex');
             if (window.lucide) lucide.createIcons();
         }
 
         function closeDeleteModal() {
             document.getElementById('delete-modal').classList.add('hidden');
+            document.getElementById('delete-modal').classList.remove('flex');
             deleteUrl = '';
         }
 

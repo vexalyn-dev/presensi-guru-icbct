@@ -51,7 +51,7 @@
                             <div class="absolute bottom-2 right-2 w-8 h-8 border-b-4 border-r-4 border-navy-800 dark:border-gold-400 rounded-br-lg"></div>
 
                             <!-- QR Code -->
-                            <div id="qr-code-container" class="flex items-center justify-center">
+                            <div id="qr-code-container" class="flex items-center justify-center" data-template-url="{{ asset('images/qr-code.png') }}">
                                 {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(420)->color(10, 37, 64)->generate($classroom->qr_data) !!}
                             </div>
                         </div>
@@ -115,7 +115,7 @@
             if (!svg) { alert('QR Code tidak ditemukan!'); return; }
 
             const className = document.getElementById('classroomNameData').value;
-            const templateUrl = '{{ asset('images/qr-code.png') }}';
+            const templateUrl = document.getElementById('qr-code-container').dataset.templateUrl;
 
             // Canvas: half of template (1414x2000 -> 707x1000)
             const CW = 707, CH = 1000;
