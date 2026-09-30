@@ -965,7 +965,7 @@
                                             <i data-lucide="calendar" class="w-4 h-4 text-slate-400 transition-colors" :class="open ? 'text-navy-800 dark:text-gold-500' : ''"></i>
                                         </div>
 
-                                        <input type="hidden" name="schedules[new_\${index}][day_of_week]" x-model="value">
+                                        <input type="hidden" name="schedules[new_${index}][day_of_week]" x-model="value">
 
                                         <button type="button" @click="open = !open"
                                                 class="w-full pl-9 pr-8 py-2.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 rounded-lg text-sm font-medium focus:outline-none transition-all text-left flex items-center justify-between"
@@ -1025,7 +1025,7 @@
                                             <i data-lucide="school" class="w-4 h-4 text-slate-400 transition-colors" :class="open ? 'text-navy-800 dark:text-gold-500' : ''"></i>
                                         </div>
 
-                                        <input type="hidden" name="schedules[new_\${index}][classroom_id]" x-model="value" required>
+                                        <input type="hidden" name="schedules[new_${index}][classroom_id]" x-model="value" required>
 
                                         <button type="button" @click="open = !open"
                                                 class="w-full pl-9 pr-8 py-2.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 rounded-lg text-sm font-medium focus:outline-none transition-all text-left flex items-center justify-between"
@@ -1085,7 +1085,7 @@
                                             <i data-lucide="clock-4" class="w-4 h-4 text-slate-400 transition-colors" :class="open ? 'text-navy-800 dark:text-gold-500' : ''"></i>
                                         </div>
 
-                                        <input type="hidden" name="schedules[new_\${index}][period]" x-model="value" required>
+                                        <input type="hidden" name="schedules[new_${index}][period]" x-model="value" required>
 
                                         <button type="button" @click="open = !open"
                                                 class="w-full pl-9 pr-8 py-2.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 rounded-lg text-sm font-medium focus:outline-none transition-all text-left flex items-center justify-between"
@@ -1129,7 +1129,7 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
                                         </div>
-                                        <input type="time" name="schedules[new_\${index}][start_time]" required
+                                        <input type="time" name="schedules[new_${index}][start_time]" required
                                                value="07:00"
                                                class="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:border-navy-800 dark:focus:border-gold-500 transition-all">
                                     </div>
@@ -1142,7 +1142,7 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
                                         </div>
-                                        <input type="time" name="schedules[new_\${index}][end_time]" required
+                                        <input type="time" name="schedules[new_${index}][end_time]" required
                                                value="15:00"
                                                class="w-full pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:border-navy-800 dark:focus:border-gold-500 transition-all">
                                     </div>
@@ -1173,7 +1173,7 @@
                                             <i data-lucide="book-open" class="w-4 h-4 text-slate-400 transition-colors" :class="open ? 'text-navy-800 dark:text-gold-500' : ''"></i>
                                         </div>
 
-                                        <input type="hidden" name="schedules[new_\${index}][subject_id]" x-model="value">
+                                        <input type="hidden" name="schedules[new_${index}][subject_id]" x-model="value">
 
                                         <button type="button" @click="open = !open"
                                                 class="w-full pl-9 pr-8 py-2.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 rounded-lg text-sm font-medium focus:outline-none transition-all text-left flex items-center justify-between"

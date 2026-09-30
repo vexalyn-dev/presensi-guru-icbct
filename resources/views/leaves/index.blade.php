@@ -297,66 +297,6 @@
         syncCheckboxes();
     }
 
-    /* ── Custom Checkbox (login page style) ── */
-    .cb-nichek {
-        position: absolute !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        width: 1px !important;
-        height: 1px !important;
-    }
-    .cb-box {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 22px !important;
-        height: 22px !important;
-        min-width: 22px !important;
-        border: 2px solid #cbd5e1 !important;
-        border-radius: 7px !important;
-        background: #fff !important;
-        cursor: pointer !important;
-        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s !important;
-        position: relative !important;
-        box-shadow: 0 1px 3px rgba(15,23,42,0.06) !important;
-        flex-shrink: 0 !important;
-        margin-top: 2px;
-    }
-    .dark .cb-box {
-        border-color: #475569 !important;
-        background: #1e293b !important;
-    }
-    .cb-box:hover {
-        border-color: #0f172a !important;
-        box-shadow: 0 0 0 4px rgba(15,23,42,0.08) !important;
-    }
-    .dark .cb-box:hover { border-color: #94a3b8 !important; }
-    .cb-box .cb-check {
-        opacity: 0 !important;
-        transform: scale(0) rotate(-10deg) !important;
-        transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    }
-    .cb-box.checked {
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
-        border-color: #0f172a !important;
-        box-shadow: 0 4px 14px rgba(15,23,42,0.28) !important;
-        animation: cbBounce 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    }
-    .dark .cb-box.checked {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 4px 14px rgba(59,130,246,0.3) !important;
-    }
-    .cb-box.checked .cb-check {
-        opacity: 1 !important;
-        transform: scale(1) rotate(0deg) !important;
-    }
-    @keyframes cbBounce {
-        0%   { transform: scale(0.8); }
-        55%  { transform: scale(1.18); }
-        100% { transform: scale(1); }
-    }
-
     // ── Context Menu Klik Kanan ──
     let _ctxLeaveTarget = null;
 
@@ -551,6 +491,66 @@
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Custom Checkbox — same style as login page */
+    .cb-nichek {
+        position: absolute !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 1px !important;
+        height: 1px !important;
+    }
+    .cb-box {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 7px !important;
+        background: #fff !important;
+        cursor: pointer !important;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s !important;
+        position: relative !important;
+        box-shadow: 0 1px 3px rgba(15,23,42,0.06) !important;
+        flex-shrink: 0 !important;
+        margin-top: 2px;
+    }
+    .dark .cb-box {
+        border-color: #475569 !important;
+        background: #1e293b !important;
+    }
+    .cb-box:hover {
+        border-color: #0f172a !important;
+        box-shadow: 0 0 0 4px rgba(15,23,42,0.08) !important;
+    }
+    .dark .cb-box:hover { border-color: #94a3b8 !important; }
+    .cb-box .cb-check {
+        opacity: 0 !important;
+        transform: scale(0) rotate(-10deg) !important;
+        transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+    .cb-box.checked {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
+        border-color: #0f172a !important;
+        box-shadow: 0 4px 14px rgba(15,23,42,0.28) !important;
+        animation: cbBounce 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+    .dark .cb-box.checked {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 4px 14px rgba(59,130,246,0.3) !important;
+    }
+    .cb-box.checked .cb-check {
+        opacity: 1 !important;
+        transform: scale(1) rotate(0deg) !important;
+    }
+    @keyframes cbBounce {
+        0%   { transform: scale(0.8); }
+        55%  { transform: scale(1.18); }
+        100% { transform: scale(1); }
     }
 </style>
 
