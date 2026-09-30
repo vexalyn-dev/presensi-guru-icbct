@@ -138,11 +138,11 @@
             ctx.font = 'bold 28px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(className.toUpperCase(), CW / 2, 275);
+            ctx.fillText(className.toUpperCase(), CW / 2, 330);
 
             // QR position: center inside the bracket frame
             // Brackets roughly at x=80..627, y=400..947 in scaled coords
-            // QR fills that area
+            const QR_X = 100, QR_Y = 480, QR_SIZE = 420;
             const QR_X = 80, QR_Y = 400, QR_SIZE = 547;
 
             // Convert SVG to Image
