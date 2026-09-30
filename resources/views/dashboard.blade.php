@@ -769,13 +769,6 @@
             });
         }
 
-        // Check Entry Status
-        checkAttendanceStatus(now);
-    }
-
-    function checkAttendanceStatus(now) {
-        // Function maintained for potential future use, 
-        // but UI elements removed per user request.
     }
 
     // ==========================================
@@ -1052,55 +1045,6 @@
         }
     };
 
-    // ==========================================
-    // HOLIDAY BADGE PLUGIN (DISABLED)
-    // ==========================================
-    /*
-    const holidayBadgePlugin = {
-        id: 'holidayBadge',
-        afterDraw: (chart) => {
-            const ctx = chart.ctx;
-            
-            if (!window.holidayIndices || !window.holidayIndices.length) return;
-            
-            window.holidayIndices.forEach(index => {
-                const meta = chart.getDatasetMeta(0);
-                if (!meta.data[index]) return;
-                
-                const bar = meta.data[index];
-                const barWidth = bar.width || 28;
-                
-                // Draw badge "LIBUR"
-                const badgeText = 'LIBUR';
-                ctx.font = 'bold 10px system-ui, sans-serif';
-                const textWidth = ctx.measureText(badgeText).width;
-                const badgeWidth = textWidth + 12;
-                const badgeHeight = 18;
-                const badgeX = bar.x - badgeWidth / 2;
-                const badgeY = bar.y - 30;
-                
-                // Badge background
-                ctx.fillStyle = '#facc15';
-                ctx.beginPath();
-                ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 4);
-                ctx.fill();
-                
-                // Badge shadow
-                ctx.shadowColor = 'rgba(250, 204, 21, 0.5)';
-                ctx.shadowBlur = 4;
-                ctx.shadowOffsetY = 2;
-                
-                // Badge text
-                ctx.fillStyle = '#0f172a';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(badgeText, bar.x, badgeY + badgeHeight / 2);
-                
-                ctx.shadowColor = 'transparent';
-            });
-        }
-    };
-    */
 
     // ==========================================
     // BOUNCE ANIMATION FOR HOLIDAY BARS
@@ -1404,7 +1348,6 @@
                 },
                 plugins: [
                     holidayBackgroundPlugin,
-                    // holidayBadgePlugin,
                     bouncePlugin,
                     confettiPlugin,
                 ],

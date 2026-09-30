@@ -464,9 +464,6 @@
         }
         openCropModal(file, input, ['photo-preview']);
     }
-
-    // Alias lama agar tidak error jika masih ada referensi
-    function previewImage(input) { handleAdminPhotoChange(input); }
     
     // Open Delete Modal Function
     function openDeleteModal() {

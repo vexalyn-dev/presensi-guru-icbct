@@ -492,15 +492,10 @@
                         this.selected = Array.isArray(initialSelected)
                             ? initialSelected.map(String)
                             : (initialSelected ? [String(initialSelected).trim()] : []);
-                        
-                        console.log('=== Subject Dropdown Initialized ===');
-                        console.log('Selected:', this.selected);
-                        console.log('Options:', this.options);
 
                         // Watch dropdown open/close
                         this.$watch('open', value => {
                             if (value) {
-                                console.log('Dropdown opened, selected:', this.selected);
                                 // Force icon re-render
                                 this.$nextTick(() => {
                                     if (window.lucide) {
@@ -513,7 +508,6 @@
 
                     select(name) {
                         const strName = String(name).trim();
-                        console.log('Selecting:', strName, 'was:', this.selected);
                         
                         // Single select: replace the value
                         this.selected = strName;
@@ -528,7 +522,6 @@
                     },
 
                     clear() {
-                        console.log('Clearing selection');
                         this.selected = '';
                         this.$nextTick(() => {
                             if (window.lucide) {

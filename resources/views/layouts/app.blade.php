@@ -225,7 +225,6 @@
     @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
     @if($appSettings && $appSettings->app_favicon)
         <link rel="icon" type="image/png" href="{{ asset('storage/' . $appSettings->app_favicon) }}?v={{ time() }}">
-        <link rel="shortcut icon" type="image/png" href="{{ asset('storage/' . $appSettings->app_favicon) }}?v={{ time() }}">
     @endif
 </head>
 
@@ -554,14 +553,13 @@
                 <!-- Dark Mode Toggle -->
                 <button @click="darkMode = !darkMode; spinAnim = true; setTimeout(() => spinAnim = false, 500)" 
                         class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 cursor-pointer focus:outline-none">
-                    <i data-lucide="sun" x-show="!darkMode" class="w-5 h-5 text-slate-600 transition-transform" :class="spinAnim ? 'rotate-center' : ''"></i>
-                    <i data-lucide="moon" x-show="darkMode" x-cloak class="w-5 h-5 text-gold-400 transition-transform" :class="spinAnim ? 'rotate-center' : ''"></i>
+                    <i data-lucide="sun" x-show="!darkMode" class="w-5 h-5 text-slate-600 transition-transform""></i>
+                    <i data-lucide="moon" x-show="darkMode" x-cloak class="w-5 h-5 text-gold-400 transition-transform""></i>
                 </button>
 
                 <!-- Notifications Dropdown -->
                 <div class="relative" x-data="notificationDropdownAdmin()"
-                     @click.outside="open = false"
-                     x-init="init()">
+                     @click.outside="open = false">
                     <button @click.stop="open = !open" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-110 relative icon-click">
                         <i data-lucide="bell" class="w-5 h-5 text-slate-600 dark:text-slate-300"></i>
                         @if(Auth::user()->unreadNotifications->count() > 0)
