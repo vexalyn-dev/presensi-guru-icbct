@@ -426,11 +426,11 @@ Route::get('/fix-session', function () {
     $canWrite = @file_put_contents($testFile, 'test', FILE_APPEND) !== false;
     @unlink($testFile);
 
-    \Artisan::call('config:clear');
-    \Artisan::call('route:clear');
-    \Artisan::call('view:clear');
-    \Artisan::call('cache:clear');
-    \Artisan::call('event:clear');
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('event:clear');
 
     return response()->json([
         'success'  => true,
