@@ -236,9 +236,15 @@
         }
     </style>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}" sizes="32x32">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}" sizes="180x180">
+    <!-- Favicon Pack -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon/favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon/apple-touch-icon-180x180.png') }}">
+    <link rel="manifest" href="{{ asset('favicon/manifest.webmanifest') }}">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="msapplication-TileColor" content="#0f172a">
+    <meta name="msapplication-config" content="{{ asset('favicon/browserconfig.xml') }}">
     <!-- Favicon Dynamic dari AppSetting (fallback) -->
     @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
     @if($appSettings && $appSettings->app_favicon)
