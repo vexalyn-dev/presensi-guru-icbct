@@ -14,8 +14,10 @@
 @endphp
 <script>
 /* @ts-nocheck */
-    var APP_LOGO_URL = `${@json($logoUrl)}`;
-    var UPLOAD_CARD_ROUTE_TEMPLATE = `${@json(route('support.upload-card', ['ticket' => 'PLACEHOLDER']))}`;
+    // @ts-ignore Blade injects here
+    var APP_LOGO_URL = @json($logoUrl);
+    // @ts-ignore Blade injects here
+    var UPLOAD_CARD_ROUTE_TEMPLATE = @json(route('support.upload-card', ['ticket' => 'PLACEHOLDER']));
 </script>
 <div class="space-y-6 fade-in">
 
@@ -630,104 +632,105 @@ function generateAndUploadCard(data, callback) {
     wrapper.style.backgroundColor = '#ffffff';
 
     // Salin persis HTML helpdesk-card.blade.php
+    // @ts-ignore Large HTML template injected via JS
     wrapper.innerHTML = `
-        <div id="capture-ticket-card" class="w-[1100px] h-[750px] bg-white rounded-3xl border-4 border-slate-900/10 overflow-hidden relative shadow-2xl" style="font-family: 'Inter', sans-serif;">
-            
+        <div id="capture-ticket-card" style="width:1100px; height:750px; background:#ffffff; border-radius:24px; border:4px solid rgba(2,6,23,0.06); overflow:hidden; position:relative; box-shadow:0 25px 50px rgba(0,0,0,0.15); font-family:'Inter',sans-serif;">
+
             <!-- HEADER KARTU -->
-            <div class="flex justify-between items-center px-10 pt-10 pb-6 bg-white">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:40px 40px 24px 40px; background:#ffffff;">
                 <!-- Kiri: Logo & Judul -->
-                <div class="flex items-center gap-6">
-                    <div class="w-24 h-24 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-200 p-2 shadow-sm">
-                        ${APP_LOGO_URL ? '<img src="' + APP_LOGO_URL + '" class="w-full h-full object-contain">' : '<span class="text-xs text-gray-400 text-center font-medium">Logo<br>Sekolah</span>'}
+                <div style="display:flex; align-items:center; gap:24px;">
+                    <div style="width:96px; height:96px; background:#f9fafb; border-radius:12px; display:flex; align-items:center; justify-content:center; border:1px solid #e5e7eb; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                        ${APP_LOGO_URL ? '<img src="' + APP_LOGO_URL + '" style="width:100%; height:100%; object-fit:contain;">' : '<span style="font-size:11px; color:#9ca3af; text-align:center; font-weight:500;">Logo<br>Sekolah</span>'}
                     </div>
                     <!-- Teks Judul -->
                     <div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-1.5 h-10 bg-blue-900 rounded-full"></div>
-                            <h1 class="text-[32px] font-extrabold text-[#112a64] tracking-tight">PERTANYAAN PUSAT BANTUAN</h1>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:6px; height:40px; background:#1e3a8a; border-radius:9999px;"></div>
+                            <h1 style="font-size:32px; font-weight:800; color:#112a64; letter-spacing:-0.5px; margin:0;">PERTANYAAN PUSAT BANTUAN</h1>
                         </div>
-                        <p class="text-gray-500 text-lg ml-4 mt-1 font-medium">Pusat Bantuan • Sistem Informasi ICB Cinta Teknika</p>
+                        <p style="color:#6b7280; font-size:18px; margin:4px 0 0 16px; font-weight:500;">Pusat Bantuan • Sistem Informasi ICB Cinta Teknika</p>
                     </div>
                 </div>
 
                 <!-- Kanan: ID Tiket -->
-                <div class="flex items-stretch border-2 border-[#112a64] rounded-2xl overflow-hidden shadow-sm bg-white">
-                    <div class="bg-[#112a64] text-white px-5 flex items-center justify-center">
-                        <i class="fa-solid fa-ticket-alt text-3xl transform -rotate-45"></i>
+                <div style="display:flex; align-items:stretch; border:2px solid #112a64; border-radius:16px; overflow:hidden; box-shadow:0 1px 4px rgba(17,42,100,0.1); background:#ffffff;">
+                    <div style="background:#112a64; color:#ffffff; padding:0 20px; display:flex; align-items:center; justify-content:center;">
+                        <i class="fa-solid fa-ticket-alt" style="font-size:30px; transform:rotate(-45deg);"></i>
                     </div>
-                    <div class="bg-white px-6 py-2 flex flex-col justify-center">
-                        <span class="text-gray-500 text-sm font-bold uppercase tracking-wider">ID TIKET</span>
-                        <span class="text-[#112a64] font-extrabold text-2xl leading-none">${data.ticket_code}</span>
+                    <div style="background:#ffffff; padding:0 24px 0 24px; display:flex; flex-direction:column; justify-content:center;">
+                        <span style="color:#6b7280; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">ID TIKET</span>
+                        <span style="color:#112a64; font-weight:800; font-size:28px; line-height:1;">${data.ticket_code}</span>
                     </div>
                 </div>
             </div>
 
-            <hr class="border-gray-200 mx-10 mb-8">
+            <hr style="border:none; border-top:1px solid #e5e7eb; margin:0 40px 32px 40px;">
 
             <!-- BODY / ISI TIKET -->
-            <div class="grid grid-cols-12 gap-8 px-10 pb-24 bg-white">
-                
+            <div style="display:grid; grid-template-columns:4fr 8fr; gap:32px; padding:0 40px 96px 40px; background:#ffffff;">
+
                 <!-- Kolom Kiri (Sidebar Info) -->
-                <div class="col-span-4 flex flex-col space-y-6 bg-white">
-                    
+                <div style="display:flex; flex-direction:column; gap:24px; background:#ffffff;">
+
                     <!-- Pelapor -->
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
-                            <i class="fa-regular fa-user text-2xl"></i>
+                    <div style="display:flex; align-items:flex-start; gap:16px;">
+                        <div style="width:56px; height:56px; border-radius:16px; background:#f0f4f8; display:flex; align-items:center; justify-content:center; color:#112a64; flex-shrink:0;">
+                            <i class="fa-regular fa-user" style="font-size:24px;"></i>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-[#112a64] font-extrabold text-sm mb-1 uppercase">PELAPOR</p>
-                            <p class="text-gray-900 font-bold text-lg leading-none">${data.user_name}</p>
-                            <div class="border-b-2 border-dashed border-gray-300 my-2"></div>
-                            <p class="text-gray-500 font-medium">Role: <span class="text-gray-900 font-bold">${data.user_role}</span></p>
+                        <div style="flex:1;">
+                            <p style="color:#112a64; font-weight:800; font-size:13px; margin:0 0 4px 0; text-transform:uppercase;">PELAPOR</p>
+                            <p style="color:#111827; font-weight:700; font-size:20px; line-height:1.2; margin:0 0 8px 0;">${data.user_name}</p>
+                            <div style="border-bottom:2px dashed #d1d5db; margin:8px 0;"></div>
+                            <p style="color:#6b7280; font-weight:500; font-size:14px; margin:0;">Role: <span style="color:#111827; font-weight:700;">${data.user_role}</span></p>
                         </div>
                     </div>
 
                     <!-- Subjek -->
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
-                            <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                    <div style="display:flex; align-items:flex-start; gap:16px;">
+                        <div style="width:56px; height:56px; border-radius:16px; background:#f0f4f8; display:flex; align-items:center; justify-content:center; color:#112a64; flex-shrink:0;">
+                            <i class="fa-solid fa-graduation-cap" style="font-size:24px;"></i>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-[#112a64] font-extrabold text-sm mb-1 uppercase">SUBJEK</p>
-                            <p class="text-gray-900 font-bold text-base">${data.title}</p>
-                            <div class="border-b-2 border-dashed border-gray-300 mt-3"></div>
+                        <div style="flex:1;">
+                            <p style="color:#112a64; font-weight:800; font-size:13px; margin:0 0 4px 0; text-transform:uppercase;">SUBJEK</p>
+                            <p style="color:#111827; font-weight:700; font-size:16px; margin:0;">${data.title}</p>
+                            <div style="border-bottom:2px dashed #d1d5db; margin:12px 0 0 0;"></div>
                         </div>
                     </div>
 
                     <!-- Prioritas -->
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
-                            <i class="fa-regular fa-flag text-2xl"></i>
+                    <div style="display:flex; align-items:flex-start; gap:16px;">
+                        <div style="width:56px; height:56px; border-radius:16px; background:#f0f4f8; display:flex; align-items:center; justify-content:center; color:#112a64; flex-shrink:0;">
+                            <i class="fa-regular fa-flag" style="font-size:24px;"></i>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-[#112a64] font-extrabold text-sm mb-2 uppercase">PRIORITAS</p>
-                            <span class="${priorityColor} text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-sm uppercase">${data.priority}</span>
-                            <div class="border-b-2 border-dashed border-gray-300 mt-4"></div>
+                        <div style="flex:1;">
+                            <p style="color:#112a64; font-weight:800; font-size:13px; margin:0 0 8px 0; text-transform:uppercase;">PRIORITAS</p>
+                            <span style="${priorityColor}; color:#ffffff; padding:6px 20px; border-radius:9999px; font-size:14px; font-weight:700; box-shadow:0 1px 4px rgba(0,0,0,0.12); text-transform:uppercase; display:inline-block;">${data.priority}</span>
+                            <div style="border-bottom:2px dashed #d1d5db; margin:16px 0 0 0;"></div>
                         </div>
                     </div>
 
                     <!-- Waktu Dibuat -->
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
-                            <i class="fa-regular fa-calendar text-2xl"></i>
+                    <div style="display:flex; align-items:flex-start; gap:16px;">
+                        <div style="width:56px; height:56px; border-radius:16px; background:#f0f4f8; display:flex; align-items:center; justify-content:center; color:#112a64; flex-shrink:0;">
+                            <i class="fa-regular fa-calendar" style="font-size:24px;"></i>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-[#112a64] font-extrabold text-sm mb-1 uppercase">WAKTU DIBUAT</p>
-                            <p class="text-gray-900 font-bold text-base">${data.created_at}</p>
-                            <div class="border-b-2 border-dashed border-gray-300 mt-3"></div>
+                        <div style="flex:1;">
+                            <p style="color:#112a64; font-weight:800; font-size:13px; margin:0 0 4px 0; text-transform:uppercase;">WAKTU DIBUAT</p>
+                            <p style="color:#111827; font-weight:700; font-size:16px; line-height:1.2; margin:0 0 12px 0;">${data.created_at}</p>
+                            <div style="border-bottom:2px dashed #d1d5db; margin:12px 0 0 0;"></div>
                         </div>
                     </div>
 
                     <!-- Status -->
-                    <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-[#f0f4f8] flex items-center justify-center text-[#112a64] flex-shrink-0">
-                            <i class="fa-regular fa-clock text-2xl"></i>
+                    <div style="display:flex; align-items:flex-start; gap:16px;">
+                        <div style="width:56px; height:56px; border-radius:16px; background:#f0f4f8; display:flex; align-items:center; justify-content:center; color:#112a64; flex-shrink:0;">
+                            <i class="fa-regular fa-clock" style="font-size:24px;"></i>
                         </div>
-                        <div class="flex-1 pt-1">
-                            <p class="text-[#112a64] font-extrabold text-sm mb-2 uppercase">STATUS</p>
-                            <span class="bg-[#ffd166] text-gray-900 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm flex items-center inline-flex gap-2">
-                                <span class="w-2 h-2 rounded-full bg-yellow-600"></span>
+                        <div style="flex:1; padding-top:4px;">
+                            <p style="color:#112a64; font-weight:800; font-size:13px; margin:0 0 8px 0; text-transform:uppercase;">STATUS</p>
+                            <span style="background:#ffd166; color:#111827; padding:6px 16px; border-radius:9999px; font-size:14px; font-weight:700; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:inline-flex; align-items:center; gap:8px;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:#ca8a04; display:inline-block;"></span>
                                 ${data.status}
                             </span>
                         </div>
@@ -735,17 +738,17 @@ function generateAndUploadCard(data, callback) {
                 </div>
 
                 <!-- Kolom Kanan (Detail Pertanyaan) -->
-                <div class="col-span-8 flex flex-col h-[420px] bg-white">
-                    <div class="border-2 border-[#f0f4f8] rounded-3xl h-full flex flex-col bg-white overflow-hidden shadow-sm">
+                <div style="flex:8; display:flex; flex-direction:column; height:420px; background:#ffffff;">
+                    <div style="border:2px solid #f0f4f8; border-radius:24px; height:100%; display:flex; flex-direction:column; background:#ffffff; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
                         <!-- Judul Box -->
-                        <div class="flex items-center gap-3 px-6 py-5 bg-white border-b border-gray-100">
-                            <i class="fa-regular fa-comment-dots text-3xl text-[#112a64]"></i>
-                            <h2 class="text-xl font-bold text-[#112a64]">PERTANYAAN / DETAIL</h2>
+                        <div style="display:flex; align-items:center; gap:12px; padding:20px 24px; background:#ffffff; border-bottom:1px solid #f3f4f6;">
+                            <i class="fa-regular fa-comment-dots" style="font-size:30px; color:#112a64;"></i>
+                            <h2 style="font-size:20px; font-weight:700; color:#112a64; margin:0;">PERTANYAAN / DETAIL</h2>
                         </div>
                         <!-- Area Teks Bergaris -->
-                        <div class="flex-1 px-8 pt-2 pb-8 bg-white/50 rounded-b-3xl">
-                            <div class="notebook-lines h-full min-h-[300px] w-full relative pt-1" style="background-image: repeating-linear-gradient(transparent, transparent 39px, #e5e7eb 39px, #e5e7eb 40px); background-attachment: local; line-height: 40px;">
-                                <p class="text-gray-900 font-semibold text-[17px] leading-[40px] whitespace-pre-wrap">${data.description}</p>
+                        <div style="flex:1; padding:8px 32px 32px 32px; background:rgba(255,255,255,0.5); border-radius:0 0 24px 24px;">
+                            <div style="position:relative; height:100%; min-height:300px; width:100%; padding-top:4px;" id="notebook-lines-el">
+                                <p style="color:#111827; font-weight:600; font-size:17px; line-height:40px; white-space:pre-wrap; margin:0; position:relative; z-index:1;">${data.description}</p>
                             </div>
                         </div>
                     </div>
@@ -754,31 +757,31 @@ function generateAndUploadCard(data, callback) {
             </div>
 
             <!-- FOOTER BAWAH -->
-            <div class="absolute bottom-0 w-full h-[60px] flex items-center z-10 bg-white border-t border-gray-200">
+            <div style="position:absolute; bottom:0; width:100%; height:60px; display:flex; align-items:center; z-index:10; background:#ffffff; border-top:1px solid #e5e7eb;">
                 <!-- Bagian Kiri Biru Gelap -->
-                <div class="bg-[#112a64] h-full w-[45%] flex items-center pl-8 text-white z-20 shadow-lg relative" style="clip-path: polygon(0 0, 95% 0, 90% 100%, 0% 100%);">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                <div style="background:#112a64; height:100%; width:45%; display:flex; align-items:center; padding-left:32px; color:#ffffff; z-index:20; box-shadow:0 4px 12px rgba(17,42,100,0.3);" id="footer-left-shape">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <i class="fa-solid fa-graduation-cap" style="font-size:30px;"></i>
                         <div>
-                            <p class="font-bold text-lg leading-tight">Pusat Bantuan</p>
-                            <p class="text-xs text-gray-300">Sistem Informasi ICB Cinta Teknika</p>
+                            <p style="font-weight:700; font-size:20px; line-height:1.2; margin:0;">Pusat Bantuan</p>
+                            <p style="font-size:13px; color:#d1d5db; margin:0;">Sistem Informasi ICB Cinta Teknika</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Ornamen Garis Miring Biru -->
-                <div class="bg-[#244388] h-full w-[8%] -ml-12 z-10" style="clip-path: polygon(0 0, 95% 0, 90% 100%, 0% 100%);"></div>
-                <div class="bg-[#3a5ba8] h-full w-[4%] -ml-4 z-0" style="clip-path: polygon(0 0, 95% 0, 90% 100%, 0% 100%);"></div>
+                <div style="background:#244388; height:100%; width:8%; margin-left:-48px; z-index:10;" id="footer-stripe-1"></div>
+                <div style="background:#3a5ba8; height:100%; width:4%; margin-left:-16px; z-index:0;" id="footer-stripe-2"></div>
 
                 <!-- Bagian Kanan Putih -->
-                <div class="flex-1 flex justify-end items-center pr-8 gap-6 h-full text-sm font-bold text-[#112a64]">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-regular fa-clock text-lg"></i>
+                <div style="flex:1; display:flex; justify-content:flex-end; align-items:center; padding-right:32px; gap:24px; height:100%; font-size:14px; font-weight:700; color:#112a64;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i class="fa-regular fa-clock" style="font-size:20px;"></i>
                         <span>${data.created_at}</span>
                     </div>
-                    <div class="h-6 w-px bg-gray-300"></div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-[#ffd166]"></span>
+                    <div style="height:24px; width:1px; background:#d1d5db;"></div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="width:12px; height:12px; border-radius:50%; background:#ffd166; display:inline-block;"></span>
                         <span>${data.status}</span>
                     </div>
                 </div>
