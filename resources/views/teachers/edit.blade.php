@@ -229,70 +229,93 @@
                                     </div>
                                 </div>
 
-                                <!-- Mata Pelajaran -->
-                                <div>
+                                <!-- Mata Pelajaran Multi-Select -->
+                                <div x-data="{
+                                    open: false,
+                                    search: '',
+                                    selected: @json($teacherSubjectIds),
+                                    get names() {
+                                        return this.selected.map(id => this.options.find(t => t.id == id)?.name).filter(Boolean);
+                                    }
+                                }">
                                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Mata Pelajaran</label>
-                                    <div x-data="subjectDropdown({{ Js::from($subjects) }}, {{ Js::from($teacherSubject) }})" class="relative">
-                                        {{-- Hidden input for single subject --}}
-                                        <input type="hidden" name="subject" :value="selected">
+                                    <div class="relative" @click.outside="open = false" style="overflow: visible;">
 
-                                        {{-- The Standard-looking Trigger --}}
-                                        <div class="relative">
-                                            <i data-lucide="book-open" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10 pointer-events-none"></i>
-                                            <div @click="open = !open" 
-                                                 class="w-full pl-11 pr-10 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm cursor-pointer flex flex-wrap items-center gap-2 hover:border-blue-400 transition-all shadow-sm">
-                                                
-                                                <template x-if="!selected || selected === ''">
-                                                    <span class="text-slate-400">Pilih mata pelajaran...</span>
+                                        <!-- Trigger -->
+                                        <div @click="open = !open" class="relative group cursor-pointer">
+                                            <i data-lucide="book-open" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                                            <div class="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 min-h-[52px] flex items-center gap-2"
+                                                 :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-blue-400 dark:border-blue-500': open, 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700': selected.length > 0}">
+                                                <template x-if="selected.length > 0">
+                                                    <span class="text-blue-700 dark:text-blue-300 font-semibold truncate"
+                                                          x-text="names.join(', ')"></span>
                                                 </template>
+                                                <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih mata pelajaran...</span>
+                                            </div>
+                                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-transform duration-300"
+                                               :class="{'rotate-180': open}"></i>
+                                        </div>
 
-                                                <template x-if="selected && selected !== ''">
-                                                    <div class="flex items-center gap-2 group/item animate-scale-in">
-                                                        <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold border border-blue-200 dark:border-blue-800"
-                                                              x-text="selected"></span>
-                                                        <button type="button" @click.stop="clear()" class="text-slate-400 hover:text-red-500 transition-colors">
-                                                            <i data-lucide="x-circle" class="w-4 h-4"></i>
-                                                        </button>
-                                                    </div>
+                                        <!-- Dropdown -->
+                                        <div x-show="open"
+                                             x-transition:enter="transition ease-out duration-150"
+                                             x-transition:enter-start="opacity-0 -translate-y-1 scale-98"
+                                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                             x-transition:leave="transition ease-in duration-100"
+                                             x-transition:leave-start="opacity-100"
+                                             x-transition:leave-end="opacity-0 -translate-y-1"
+                                             class="absolute left-0 right-0 top-full z-[9999] mt-2 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                             x-cloak @click.stop>
+
+                                            <!-- Search -->
+                                            <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                                                <div class="relative">
+                                                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                                    <input type="text" x-model="search" placeholder="Cari mapel..."
+                                                           class="w-full pl-10 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                                                </div>
+                                            </div>
+
+                                            <!-- Options -->
+                                            <div class="max-h-60 overflow-y-auto p-2">
+                                                <template x-for="subj in filteredOptions" :key="subj.id">
+                                                    <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-navy-50 dark:hover:bg-navy-900/20"
+                                                           :class="selected.includes(subj.id) ? 'bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800' : ''">
+                                                        <input type="checkbox" :value="subj.id" x-model="selected" class="cb-nichek">
+                                                        <div class="cb-box flex-shrink-0" :class="selected.includes(subj.id) ? 'checked' : ''">
+                                                            <svg class="cb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                                                <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0">
+                                                            <span x-text="subj.name.charAt(0).toUpperCase()"></span>
+                                                        </div>
+                                                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-300" x-text="subj.name"></span>
+                                                    </label>
                                                 </template>
+                                                <div x-show="filteredOptions.length === 0" class="p-4 text-center text-slate-500 dark:text-slate-400 text-sm">
+                                                    <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                                    <p>Tidak ada mapel ditemukan</p>
+                                                </div>
+                                            </div>
 
-                                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-                                                         class="text-slate-400 transition-all duration-300 transform" :class="open ? 'rotate-180' : ''">
-                                                        <path d="m6 9 6 6 6-6"/>
-                                                    </svg>
+                                            <!-- Footer -->
+                                            <div x-show="selected.length > 0" class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                                                <div class="flex items-center justify-between">
+                                                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                                                        <span class="font-bold" x-text="selected.length"></span> mapel dipilih
+                                                    </p>
+                                                    <button type="button" @click="selected = []" class="text-xs text-red-600 dark:text-red-400 hover:underline">Hapus semua</button>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {{-- Floating Overlay Panel (muncul ke ATAS) --}}
-                                        <div x-show="open" 
-                                             @click.outside="open = false"
-                                             class="absolute left-0 z-[100] w-full min-w-[300px] max-w-sm p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none origin-bottom"
-                                             style="bottom: 100%; top: auto; margin-bottom: 0.5rem;"
-                                             x-cloak>
-                                            <div class="max-h-60 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
-                                                <template x-for="subject in options" :key="subject.id">
-                                                    <div @click="select(subject.name)"
-                                                         class="flex items-center justify-between px-4 py-2.5 rounded-xl cursor-pointer transition-all border border-transparent"
-                                                         :class="isSelected(subject.name) ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'">
-                                                        <div class="flex items-center gap-3">
-                                                            <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-all bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700"
-                                                                 :class="isSelected(subject.name) ? 'text-blue-600 border-blue-300' : 'text-slate-400'">
-                                                                <i data-lucide="book" class="w-3.5 h-3.5"></i>
-                                                            </div>
-                                                            <span class="text-sm tracking-tight" x-text="subject.name"></span>
-                                                        </div>
-                                                        <template x-if="isSelected(subject.name)">
-                                                            <svg class="w-4 h-4 text-blue-600 animate-scale-in" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                            </svg>
-                                                        </template>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
+                                        <!-- Hidden Inputs -->
+                                        <template x-for="sid in selected" :key="sid">
+                                            <input type="hidden" name="subjects[]" :value="sid">
+                                        </template>
                                     </div>
+                                    @error('subjects')<p class="mt-2 text-xs text-red-500 flex items-center gap-1 animate-shake"><i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
                                 </div>
 
                             </div>
@@ -466,6 +489,9 @@
                         });
                         
                         this.options = Array.from(uniqueMap.values());
+                        this.selected = Array.isArray(initialSelected)
+                            ? initialSelected.map(String)
+                            : (initialSelected ? [String(initialSelected).trim()] : []);
                         
                         console.log('=== Subject Dropdown Initialized ===');
                         console.log('Selected:', this.selected);
@@ -665,6 +691,65 @@
 
         .dark .scrollbar-thin::-webkit-scrollbar-thumb {
             background: #334155;
+        }
+
+        /* ── Custom Checkbox (login page style) ── */
+        .cb-nichek {
+            position: absolute !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            width: 1px !important;
+            height: 1px !important;
+        }
+        .cb-box {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 22px !important;
+            height: 22px !important;
+            min-width: 22px !important;
+            border: 2px solid #cbd5e1 !important;
+            border-radius: 7px !important;
+            background: #fff !important;
+            cursor: pointer !important;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s !important;
+            position: relative !important;
+            box-shadow: 0 1px 3px rgba(15,23,42,0.06) !important;
+            flex-shrink: 0 !important;
+        }
+        .dark .cb-box {
+            border-color: #475569 !important;
+            background: #1e293b !important;
+        }
+        .cb-box:hover {
+            border-color: #0f172a !important;
+            box-shadow: 0 0 0 4px rgba(15,23,42,0.08) !important;
+        }
+        .dark .cb-box:hover { border-color: #94a3b8 !important; }
+        .cb-box .cb-check {
+            opacity: 0 !important;
+            transform: scale(0) rotate(-10deg) !important;
+            transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        .cb-box.checked {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
+            border-color: #0f172a !important;
+            box-shadow: 0 4px 14px rgba(15,23,42,0.28) !important;
+            animation: cbBounce 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        .dark .cb-box.checked {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 4px 14px rgba(59,130,246,0.3) !important;
+        }
+        .cb-box.checked .cb-check {
+            opacity: 1 !important;
+            transform: scale(1) rotate(0deg) !important;
+        }
+        @keyframes cbBounce {
+            0%   { transform: scale(0.8); }
+            55%  { transform: scale(1.18); }
+            100% { transform: scale(1); }
         }
     </style>
 @endsection

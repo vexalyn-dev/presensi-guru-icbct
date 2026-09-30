@@ -187,13 +187,11 @@ class TeacherController extends Controller
         // Fetch active subjects dynamically
         $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
 
-        // Get current subject(s) from pivot table, fallback to major_specialty / user.subject
+        // Get current subject(s) from pivot table
         $teacherSubjects = $teacher->teacher?->subjects;
-        $teacherSubject = $teacherSubjects
-            ? $teacherSubjects->pluck('name')->filter()->first()
-            : ($teacher->teacher?->major_specialty ?? $teacher->subject);
-        
-        return view('teachers.edit', compact('teacher', 'subjects', 'teacherSubject'));
+        $teacherSubjectIds = $teacherSubjects ? $teacherSubjects->pluck('id')->toArray() : [];
+
+        return view('teachers.edit', compact('teacher', 'subjects', 'teacherSubjectIds'));
     }
 
     public function update(Request $request, User $teacher)
@@ -210,6 +208,8 @@ class TeacherController extends Controller
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'subject' => 'nullable|string|max:255',
+            'subjects' => 'nullable|array',
+            'subjects.*' => 'exists:subjects,id',
             'is_active' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
@@ -248,33 +248,25 @@ class TeacherController extends Controller
         // ActivityLog
         try { ActivityLogService::teacherUpdated(auth()->user(), $teacher, array_keys($updateData)); } catch (\Exception $e) {}
 
-        // Update teacher record (sync major_specialty with subject)
+        // Update teacher record (sync major_specialty with first subject)
         if ($teacher->teacher) {
             $teacher->teacher->update([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
                 'address' => $validated['address'] ?? null,
-                'major_specialty' => $validated['subject'] ?? null,
                 'is_active' => $request->has('is_active') ? (bool)$request->is_active : $teacher->is_active,
             ]);
 
-            // Sync pivot table with the selected subject name
-            $subjectName = trim($validated['subject'] ?? '');
-            if ($subjectName) {
-                // Find subject by exact name first, then case-insensitive
-                $subject = \App\Models\Subject::where('name', $subjectName)->first();
-                if (!$subject) {
-                    $subject = \App\Models\Subject::whereRaw('LOWER(name) = ?', [strtolower($subjectName)])->first();
-                }
-                if ($subject) {
-                    // Detach all old subjects, attach new one
-                    $teacher->teacher->subjects()->detach();
-                    $teacher->teacher->subjects()->attach($subject->id);
-                }
+            // Sync subjects via pivot table
+            if (!empty($validated['subjects'])) {
+                $teacher->teacher->subjects()->sync($validated['subjects']);
+                // Update major_specialty to first subject name
+                $firstSubject = \App\Models\Subject::find((int)$validated['subjects'][0]);
+                $teacher->teacher->update(['major_specialty' => $firstSubject ? $firstSubject->name : null]);
             } else {
-                // Clear all subjects from pivot if empty
                 $teacher->teacher->subjects()->detach();
+                $teacher->teacher->update(['major_specialty' => null]);
             }
         }
 

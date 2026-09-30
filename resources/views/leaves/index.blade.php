@@ -219,34 +219,143 @@
         </div>
         @endforelse
     </div>
+
+    {{-- Select All button (only for pending) --}}
+    <div x-show="pendingIds.length > 0" x-data="{ allSelected: false }" x-init="pendingIds = @json($leaveRequests->where('status','pending')->pluck('id')->toArray()); checkAll()">
+        <button type="button" @click="allSelected ? clearAll() : selectAll()"
+                class="px-4 py-2 bg-navy-100 dark:bg-navy-900/30 hover:bg-navy-200 dark:hover:bg-navy-900/50 text-navy-700 dark:text-navy-300 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+            <i data-lucide="square" class="w-4 h-4"></i>
+            <span x-text="allSelected ? 'Batalkan Semua' : 'Pilih Semua (' + pendingIds.length + ')'"</span>
+        </button>
+    </div>
 </div>
 
 <script>
+    // Shared state for checkboxes across AJAX refreshes
+    window._leaveSelected = [];
+
     document.addEventListener('alpine:init', () => {
         Alpine.data('leaveApp', () => ({
             selectedIds: [],
+            pendingIds: @json($leaveRequests->where('status','pending')->pluck('id')->toArray()),
             get routeBulkDelete() {
-                return document.querySelector('[data-bulk-delete-url]')?.dataset.bulkDeleteUrl ?? '';
+                return '{{ route('leaves.bulk-delete') }}';
             },
             clearSelection() {
                 this.selectedIds = [];
+                window._leaveSelected = [];
+                syncCheckboxes();
             },
-            toggleAll(pendingIds) {
-                const allSelected = pendingIds.every(id => this.selectedIds.includes(id));
-                if (allSelected) {
-                    this.selectedIds = this.selectedIds.filter(id => !pendingIds.includes(id));
-                } else {
-                    pendingIds.forEach(id => {
-                        if (!this.selectedIds.includes(id)) this.selectedIds.push(id);
-                    });
-                }
+            selectAll() {
+                this.pendingIds.forEach(id => {
+                    if (!this.selectedIds.includes(id)) this.selectedIds.push(id);
+                    if (!window._leaveSelected.includes(id)) window._leaveSelected.push(id);
+                });
+                this.allSelected = true;
+                syncCheckboxes();
+            },
+            clearAll() {
+                this.selectedIds = this.selectedIds.filter(id => !this.pendingIds.includes(id));
+                window._leaveSelected = window._leaveSelected.filter(id => !this.pendingIds.includes(id));
+                this.allSelected = false;
+                syncCheckboxes();
+            },
+            checkAll() {
+                this.allSelected = this.pendingIds.every(id => this.selectedIds.includes(id));
             }
         }));
     });
 
+    // Sync custom checkbox visual state
+    function syncCheckboxes() {
+        document.querySelectorAll('.leave-checkbox').forEach(cb => {
+            const id = cb.value;
+            const box = document.querySelector(`.cb-box[data-leave-id="${id}"]`);
+            if (box) box.classList.toggle('checked', window._leaveSelected.includes(id));
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
+        syncCheckboxes();
     });
+
+    function toggleLeaveCheckbox(id) {
+        const idx = window._leaveSelected.indexOf(id);
+        if (idx >= 0) {
+            window._leaveSelected.splice(idx, 1);
+        } else {
+            window._leaveSelected.push(id);
+        }
+        // Sync Alpine state
+        const app = Alpine.$data(document.querySelector('[x-data="leaveApp"]'));
+        if (app) {
+            const aIdx = app.selectedIds.indexOf(id);
+            if (aIdx >= 0) app.selectedIds.splice(aIdx, 1);
+            else app.selectedIds.push(id);
+        }
+        syncCheckboxes();
+    }
+
+    /* ── Custom Checkbox (login page style) ── */
+    .cb-nichek {
+        position: absolute !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 1px !important;
+        height: 1px !important;
+    }
+    .cb-box {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 7px !important;
+        background: #fff !important;
+        cursor: pointer !important;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s !important;
+        position: relative !important;
+        box-shadow: 0 1px 3px rgba(15,23,42,0.06) !important;
+        flex-shrink: 0 !important;
+        margin-top: 2px;
+    }
+    .dark .cb-box {
+        border-color: #475569 !important;
+        background: #1e293b !important;
+    }
+    .cb-box:hover {
+        border-color: #0f172a !important;
+        box-shadow: 0 0 0 4px rgba(15,23,42,0.08) !important;
+    }
+    .dark .cb-box:hover { border-color: #94a3b8 !important; }
+    .cb-box .cb-check {
+        opacity: 0 !important;
+        transform: scale(0) rotate(-10deg) !important;
+        transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+    .cb-box.checked {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
+        border-color: #0f172a !important;
+        box-shadow: 0 4px 14px rgba(15,23,42,0.28) !important;
+        animation: cbBounce 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+    .dark .cb-box.checked {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 4px 14px rgba(59,130,246,0.3) !important;
+    }
+    .cb-box.checked .cb-check {
+        opacity: 1 !important;
+        transform: scale(1) rotate(0deg) !important;
+    }
+    @keyframes cbBounce {
+        0%   { transform: scale(0.8); }
+        55%  { transform: scale(1.18); }
+        100% { transform: scale(1); }
+    }
 
     // ── Context Menu Klik Kanan ──
     let _ctxLeaveTarget = null;
@@ -331,11 +440,17 @@
         ` : '';
 
         const renderLeave = leave => `
-            <div class="card p-5 hover:shadow-lg transition-all" data-leave-id="${leave.id}">
+            <div class="card p-5 hover:shadow-lg transition-all" data-leave-id="${leave.id}" data-leave-status="${leave.status}">
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex items-start gap-4 flex-1">
                         <input type="checkbox" value="${leave.id}"
-                               class="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer accent-navy-600">
+                               class="cb-nichek leave-checkbox" data-leave-id="${leave.id}">
+                        <div class="cb-box flex-shrink-0 cursor-pointer" data-leave-id="${leave.id}"
+                             onclick="toggleLeaveCheckbox(${leave.id})">
+                            <svg class="cb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
                         <img src="${esc(leave.teacher_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.teacher_name)}`)}"
                              class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                         <div class="flex-1 min-w-0">
@@ -393,9 +508,28 @@
                 });
 
                 list.innerHTML = data.leaves?.length ? data.leaves.map(renderLeave).join('') : renderEmpty();
+
+                // Sync custom checkboxes
+                syncCheckboxes();
                 if (window.lucide) lucide.createIcons();
+                updatePendingIds();
             } catch (error) {
                 console.error('Error refreshing leave requests:', error);
+            }
+        }
+
+        function syncCheckboxes() {
+            document.querySelectorAll('.leave-checkbox').forEach(cb => {
+                const id = cb.value;
+                const box = document.querySelector(`.cb-box[data-leave-id="${id}"]`);
+                if (box) box.classList.toggle('checked', window._leaveSelected.includes(id));
+            });
+        }
+
+        function updatePendingIds() {
+            const box = document.getElementById('pending-ids');
+            if (box) {
+                box.textContent = JSON.stringify([...window._leaveSelected]);
             }
         }
 
