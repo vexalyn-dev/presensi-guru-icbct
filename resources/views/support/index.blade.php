@@ -13,9 +13,9 @@
     $logoUrl = ($appSettings && $appSettings->app_logo) ? asset('storage/' . $appSettings->app_logo) : '';
 @endphp
 <script>
-    // @ts-nocheck
-    var APP_LOGO_URL = @json($logoUrl);
-    var UPLOAD_CARD_ROUTE_TEMPLATE = @json(route('support.upload-card', ['ticket' => 'PLACEHOLDER']));
+/* @ts-nocheck */
+    var APP_LOGO_URL = `${@json($logoUrl)}`;
+    var UPLOAD_CARD_ROUTE_TEMPLATE = `${@json(route('support.upload-card', ['ticket' => 'PLACEHOLDER']))}`;
 </script>
 <div class="space-y-6 fade-in">
 
