@@ -118,12 +118,13 @@
                                         Guru Pengampu
                                         <span class="text-slate-400 font-normal">(Dapat pilih lebih dari 1)</span>
                                     </label>
-                                     <div class="relative" x-data="{
-                                         open: false,
-                                         search: '',
-                                         selected: @json($selectedTeacherIds ?? [])
-                                     }"
-                                      @click.outside="open = false">
+                                      <div class="relative" x-data="{
+                                          open: false,
+                                          search: '',
+                                          selected: @json($selectedTeacherIds ?? [])
+                                      }"
+                                       @click.outside="open = false"
+                                       style="overflow: visible;">
 
                                          <!-- Dropdown Trigger -->
                                          <div @click="open = !open"
@@ -157,7 +158,7 @@
                                               x-transition:leave="transition ease-in duration-100"
                                               x-transition:leave-start="opacity-100"
                                               x-transition:leave-end="opacity-0 -translate-y-1"
-                                              class="absolute left-0 right-0 top-full z-50 mt-2 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                               class="absolute left-0 right-0 top-full z-[9999] mt-2 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
                                               x-cloak
                                               @click.stop>
 
