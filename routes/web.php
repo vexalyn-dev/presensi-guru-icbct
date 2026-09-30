@@ -447,22 +447,26 @@ Route::get('/fix-session', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
-        Route::get('/',                          [DeveloperController::class, 'dashboard'])       ->name('index');
-        Route::post('/apk',                      [DeveloperController::class, 'updateApk'])       ->name('apk');
-        Route::delete('/apk',                    [DeveloperController::class, 'deleteApk'])       ->name('apk.delete');
-        Route::post('/maintenance',              [DeveloperController::class, 'toggleMaintenance'])->name('maintenance');
-        Route::get('/clear-cache',               [DeveloperController::class, 'clearCache'])      ->name('clear-cache');
-        Route::get('/migrate',                   [DeveloperController::class, 'migrate'])         ->name('migrate');
-        Route::get('/optimize',                  [DeveloperController::class, 'optimize'])        ->name('optimize');
-        Route::post('/deploy',                   [DeveloperController::class, 'deploy'])          ->name('deploy');
-        Route::post('/updates',                  [DeveloperController::class, 'storeUpdate'])     ->name('updates.store');
-        Route::delete('/updates/{id}',           [DeveloperController::class, 'deleteUpdate'])    ->name('updates.delete');
-        Route::get('/card-preview/{ticketId?}',  [DeveloperController::class, 'cardPreview'])     ->name('card-preview');
-        Route::post('/toggle-debug',             [DeveloperController::class, 'toggleDebug'])       ->name('toggle-debug');
-        Route::get('/run-seeder',                [DeveloperController::class, 'runSeederPanel'])    ->name('run-seeder');
-        Route::get('/clear-routes',              [DeveloperController::class, 'clearRoutes'])       ->name('clear-routes');
-    });
+    // Dev panel dialihkan ke route terpisah agar tidak kena maintenance mode
+});
+
+// Developer panel — tidak pakai middleware auth global, auth dicek manual di controller via verifySecret()
+// Agar developer tetap bisa akses saat maintenance mode aktif
+Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
+    Route::get('/',                          [DeveloperController::class, 'dashboard'])       ->name('index');
+    Route::post('/apk',                      [DeveloperController::class, 'updateApk'])       ->name('apk');
+    Route::delete('/apk',                    [DeveloperController::class, 'deleteApk'])       ->name('apk.delete');
+    Route::post('/maintenance',              [DeveloperController::class, 'toggleMaintenance'])->name('maintenance');
+    Route::get('/clear-cache',               [DeveloperController::class, 'clearCache'])      ->name('clear-cache');
+    Route::get('/migrate',                   [DeveloperController::class, 'migrate'])         ->name('migrate');
+    Route::get('/optimize',                  [DeveloperController::class, 'optimize'])        ->name('optimize');
+    Route::post('/deploy',                   [DeveloperController::class, 'deploy'])          ->name('deploy');
+    Route::post('/updates',                  [DeveloperController::class, 'storeUpdate'])     ->name('updates.store');
+    Route::delete('/updates/{id}',           [DeveloperController::class, 'deleteUpdate'])    ->name('updates.delete');
+    Route::get('/card-preview/{ticketId?}',  [DeveloperController::class, 'cardPreview'])     ->name('card-preview');
+    Route::post('/toggle-debug',             [DeveloperController::class, 'toggleDebug'])       ->name('toggle-debug');
+    Route::get('/run-seeder',                [DeveloperController::class, 'runSeederPanel'])    ->name('run-seeder');
+    Route::get('/clear-routes',              [DeveloperController::class, 'clearRoutes'])       ->name('clear-routes');
 });
 
 // Public developer tool endpoints (no auth, key-based verification)

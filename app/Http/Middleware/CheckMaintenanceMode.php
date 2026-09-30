@@ -16,14 +16,9 @@ class CheckMaintenanceMode
             return $next($request);
         }
 
-        // Admin & Operator & Developer selalu bisa akses — bypass maintenance
+        // Admin & Operator selalu bisa akses — bypass maintenance
         $user = $request->user();
-        if ($user && ($user->canAccessAdmin() || $user->isDeveloper())) {
-            return $next($request);
-        }
-
-        // Developer panel access via secret key — bypass maintenance sepenuhnya
-        if ($request->routeIs('developer.*') && $user) {
+        if ($user && $user->canAccessAdmin()) {
             return $next($request);
         }
 
