@@ -232,21 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var chart;
     var monthMaxDay = {{ \Carbon\Carbon::createFromDate($year, $month, 1)->daysInMonth }};
 
-    function buildGradient(ctx, h) {
-        var g = ctx.createLinearGradient(0, 0, 0, h || 260);
-        g.addColorStop(0, 'rgba(99,102,241,0.35)');
-        g.addColorStop(0.5, 'rgba(99,102,241,0.10)');
-        g.addColorStop(1, 'rgba(99,102,241,0.00)');
-        return g;
-    }
-    function getPeriodLabel(days) {
-        var now  = new Date({{ $year }}, {{ $month }} - 1, monthMaxDay);
-        var start = new Date(now);
-        start.setDate(start.getDate() - days + 1);
-        var opts = { day: '2-digit', month: 'short' };
-        return 'Periode: ' + start.toLocaleDateString('id-ID', opts) + ' — ' + now.toLocaleDateString('id-ID', opts);
-    }
-    function updateChart(days) {
+    window.updateChart = function(days) {
         var now  = new Date({{ $year }}, {{ $month }} - 1, monthMaxDay);
         var cutoff = new Date(now);
         cutoff.setDate(cutoff.getDate() - days + 1);
@@ -273,7 +259,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     label: 'Sesi Mengajar',
                     data: data,
                     borderColor: '#6366f1',
-                    backgroundColor: buildGradient(ctx),
+                    backgroundColor: function(ctx) {
+                        var g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height || 260);
+                        g.addColorStop(0, 'rgba(99,102,241,0.35)');
+                        g.addColorStop(0.5, 'rgba(99,102,241,0.10)');
+                        g.addColorStop(1, 'rgba(99,102,241,0.00)');
+                        return g;
+                    },
                     fill: true,
                     tension: 0.4,
                     borderWidth: 2.5,
@@ -328,8 +320,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        document.getElementById('chartSubtitle').textContent = getPeriodLabel(days);
-    }
+        var periodLabel = document.getElementById('chartSubtitle');
+        if (periodLabel) {
+            var opts = { day: '2-digit', month: 'short' };
+            periodLabel.textContent = 'Periode: ' + cutoff.toLocaleDateString('id-ID', opts) + ' — ' + now.toLocaleDateString('id-ID', opts);
+        }
+    };
 
     updateChart(30);
     @endif
