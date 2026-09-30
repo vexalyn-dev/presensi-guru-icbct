@@ -118,18 +118,16 @@
                                         Guru Pengampu
                                         <span class="text-slate-400 font-normal">(Dapat pilih lebih dari 1)</span>
                                     </label>
-                                     <div class="relative" x-data="{ 
-                                         open: false, 
-                                         search: '', 
-                                         selected: @json($selectedTeacherIds ?? []),
-                                         dropdownEl: null
+                                     <div class="relative" x-data="{
+                                         open: false,
+                                         search: '',
+                                         selected: @json($selectedTeacherIds ?? [])
                                      }"
-                                      @click.outside="open = false"
-                                      @dropdown-move="$dropdownEl = $el.nextElementSibling">
+                                      @click.outside="open = false">
 
-                                        <!-- Dropdown Trigger -->
-                                         <div @click="open = !open; $nextTick(() => positionDropdown($el))"
-                                             class="relative group cursor-pointer">
+                                         <!-- Dropdown Trigger -->
+                                         <div @click="open = !open"
+                                              class="relative group cursor-pointer">
                                             <div class="absolute left-4 top-1/2 -translate-y-1/2">
                                                 <i data-lucide="users" class="w-5 h-5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
                                             </div>
@@ -152,18 +150,16 @@
                                         </div>
 
                                          <!-- Dropdown Menu -->
-                                        <div x-ref="dropdown"
-                                             x-show="open"
-                                             x-transition:enter="transition ease-out duration-150"
-                                             x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
-                                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                             x-transition:leave="transition ease-in duration-100"
-                                             x-transition:leave-start="opacity-100 scale-100"
-                                             x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                             class="fixed z-[9999] w-[calc(100%-2rem)] sm:w-full max-w-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
-                                             x-cloak
-                                             @click.stop
-                                             @keydown.escape="open = false">
+                                         <div x-show="open"
+                                              x-transition:enter="transition ease-out duration-150"
+                                              x-transition:enter-start="opacity-0 -translate-y-1 scale-98"
+                                              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                              x-transition:leave="transition ease-in duration-100"
+                                              x-transition:leave-start="opacity-100"
+                                              x-transition:leave-end="opacity-0 -translate-y-1"
+                                              class="absolute left-0 right-0 top-full z-50 mt-2 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                              x-cloak
+                                              @click.stop>
 
                                             <!-- Search Input -->
                                             <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
