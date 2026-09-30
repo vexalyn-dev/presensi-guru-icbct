@@ -936,7 +936,12 @@
 
     {{-- Release Modal --}}
     @if($latestUpdate && $latestUpdate->show_modal)
-    <div id="release-modal" style="display:none;position:fixed;inset:0;z-index:9998;align-items:center;justify-content:center;padding:16px;">
+    @php
+        $releaseModalSessionKey = auth()->check()
+            ? 'rel_modal_shown_' . md5((string) auth()->id())
+            : 'rel_modal_shown_guest';
+    @endphp
+    <div id="release-modal" data-session-key="{{ $releaseModalSessionKey }}" style="display:none;position:fixed;inset:0;z-index:9998;align-items:center;justify-content:center;padding:16px;">
         <div onclick="closeReleaseModal()" style="position:absolute;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);"></div>
         <div id="release-modal-box" style="position:relative;width:100%;max-width:440px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 32px 64px rgba(15,23,42,.4);animation:relSlideIn .35s cubic-bezier(.34,1.56,.64,1);">
             <div style="padding:20px 24px 18px;background:linear-gradient(135deg,#0F172A 0%,#1E3A8A 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;">
@@ -977,7 +982,7 @@
         if (m) { m.style.transition = 'opacity .2s'; m.style.opacity = '0'; setTimeout(function(){ m.style.display = 'none'; }, 200); }
     }
     (function(){
-        var KEY = 'rel_modal_shown_{{ auth()->check() ? md5(auth()->id()) : 'guest' }}';
+        var KEY = {{ json_encode($releaseModalSessionKey) }};
         if (sessionStorage.getItem(KEY)) return;
         var m = document.getElementById('release-modal');
         if (!m) return;
