@@ -74,62 +74,62 @@
                 };
                 $statusLabel = $todayAttendance->status === 'Tepat Waktu' ? 'Hadir' : $todayAttendance->status;
             @endphp
-            <span class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold {{ $statusBadgeClass }}">
+             <span class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold {{ $statusBadgeClass }}" data-key="status_badge">
                 {{ $statusLabel }}
             </span>
         @endif
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                        <div class="p-3 sm:p-4 rounded-2xl border-2 {{ $todayAttendance && $todayAttendance->check_in ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
-                            <div class="flex items-center gap-2 sm:gap-3 mb-2">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl {{ $todayAttendance && $todayAttendance->check_in ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center transition-colors flex-shrink-0">
-                                    <i data-lucide="clock" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Jam Masuk</p>
-                                    @if($scheduleStart)
-                                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Jadwal: {{ \Carbon\Carbon::parse($scheduleStart)->format('H:i') }}</p>
-                                    @else
-                                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Belum diatur</p>
-                                    @endif
-                                </div>
-                            </div>
-                            <h3 class="text-xl sm:text-2xl font-bold {{ $todayAttendance && $todayAttendance->check_in ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}">
-                                @if($todayAttendance && $todayAttendance->check_in)
-                                    {{ \Carbon\Carbon::parse($todayAttendance->check_in)->format('H:i') }}
-                                @elseif($scheduleStart)
-                                    {{ \Carbon\Carbon::parse($scheduleStart)->format('H:i') }}
-                                @else
-                                    --:--
-                                @endif
-                            </h3>
-                        </div>
+                         <div class="p-3 sm:p-4 rounded-2xl border-2 {{ $todayAttendance && $todayAttendance->check_in ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}" data-key="checkin_card">
+                             <div class="flex items-center gap-2 sm:gap-3 mb-2">
+                                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl {{ $todayAttendance && $todayAttendance->check_in ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center transition-colors flex-shrink-0" data-key="checkin_icon">
+                                     <i data-lucide="clock" class="w-4 h-4 sm:w-5 sm:w-5 text-white"></i>
+                                 </div>
+                                 <div>
+                                     <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Jam Masuk</p>
+                                     @if($scheduleStart)
+                                         <p class="text-[10px] text-slate-400 dark:text-slate-500">Jadwal: {{ \Carbon\Carbon::parse($scheduleStart)->format('H:i') }}</p>
+                                     @else
+                                         <p class="text-[10px] text-slate-400 dark:text-slate-500">Belum diatur</p>
+                                     @endif
+                                 </div>
+                             </div>
+                             <h3 class="text-xl sm:text-2xl font-bold {{ $todayAttendance && $todayAttendance->check_in ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}" data-key="check_in_time">
+                                 @if($todayAttendance && $todayAttendance->check_in)
+                                     {{ \Carbon\Carbon::parse($todayAttendance->check_in)->format('H:i') }}
+                                 @elseif($scheduleStart)
+                                     {{ \Carbon\Carbon::parse($scheduleStart)->format('H:i') }}
+                                 @else
+                                     --:--
+                                 @endif
+                             </h3>
+                         </div>
 
-                        <div class="p-3 sm:p-4 rounded-2xl border-2 {{ $todayAttendance && $todayAttendance->check_out ? 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}">
-                            <div class="flex items-center gap-2 sm:gap-3 mb-2">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl {{ $todayAttendance && $todayAttendance->check_out ? 'bg-red-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center transition-colors flex-shrink-0">
-                                    <i data-lucide="log-out" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Jam Pulang</p>
-                                    @if($scheduleEnd)
-                                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Jadwal: {{ \Carbon\Carbon::parse($scheduleEnd)->format('H:i') }}</p>
-                                    @else
-                                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Belum diatur</p>
-                                    @endif
-                                </div>
-                            </div>
-                            <h3 class="text-xl sm:text-2xl font-bold {{ $todayAttendance && $todayAttendance->check_out ? 'text-red-700 dark:text-red-400' : 'text-slate-400' }}">
-                                @if($todayAttendance && $todayAttendance->check_out)
-                                    {{ \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') }}
-                                @elseif($scheduleEnd)
-                                    {{ \Carbon\Carbon::parse($scheduleEnd)->format('H:i') }}
-                                @else
-                                    --:--
-                                @endif
-                            </h3>
-                        </div>
+                         <div class="p-3 sm:p-4 rounded-2xl border-2 {{ $todayAttendance && $todayAttendance->check_out ? 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}" data-key="checkout_card">
+                             <div class="flex items-center gap-2 sm:gap-3 mb-2">
+                                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl {{ $todayAttendance && $todayAttendance->check_out ? 'bg-red-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center transition-colors flex-shrink-0" data-key="checkout_icon">
+                                     <i data-lucide="log-out" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
+                                 </div>
+                                 <div>
+                                     <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Jam Pulang</p>
+                                     @if($scheduleEnd)
+                                         <p class="text-[10px] text-slate-400 dark:text-slate-500">Jadwal: {{ \Carbon\Carbon::parse($scheduleEnd)->format('H:i') }}</p>
+                                     @else
+                                         <p class="text-[10px] text-slate-400 dark:text-slate-500">Belum diatur</p>
+                                     @endif
+                                 </div>
+                             </div>
+                             <h3 class="text-xl sm:text-2xl font-bold {{ $todayAttendance && $todayAttendance->check_out ? 'text-red-700 dark:text-red-400' : 'text-slate-400' }}" data-key="check_out_time">
+                                 @if($todayAttendance && $todayAttendance->check_out)
+                                     {{ \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') }}
+                                 @elseif($scheduleEnd)
+                                     {{ \Carbon\Carbon::parse($scheduleEnd)->format('H:i') }}
+                                 @else
+                                     --:--
+                                 @endif
+                             </h3>
+                         </div>
                     </div>
                 </div>
 
@@ -463,7 +463,7 @@
                 closeTimer = setTimeout(function () {
                     closeModal();
                 }, 3000);
-            }, 600);
+            }, 200);
         }
 
         var pollTimer = null;
@@ -493,6 +493,35 @@
             if (badgeEl && data.status) {
                 var label = data.status === 'Tepat Waktu' ? 'Hadir' : data.status;
                 badgeEl.textContent = label;
+                // Reapply badge colors based on status
+                badgeEl.className = 'px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold';
+                if (data.status === 'Hadir' || data.status === 'Tepat Waktu') {
+                    badgeEl.classList.add('bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
+                } else if (data.status === 'Terlambat') {
+                    badgeEl.classList.add('bg-yellow-100', 'text-yellow-700', 'dark:bg-yellow-900/30', 'dark:text-yellow-400');
+                } else if (data.status === 'Alpha') {
+                    badgeEl.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400');
+                } else if (data.status === 'Izin' || data.status === 'Sakit') {
+                    badgeEl.classList.add('bg-blue-100', 'text-blue-700', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+                }
+            }
+            // Update card backgrounds
+            var ciCard = document.querySelector('[data-key="checkin_card"]');
+            if (ciCard && data.check_in) {
+                ciCard.className = 'p-3 sm:p-4 rounded-2xl border-2 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800';
+            }
+            var coCard = document.querySelector('[data-key="checkout_card"]');
+            if (coCard && data.check_out) {
+                coCard.className = 'p-3 sm:p-4 rounded-2xl border-2 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800';
+            }
+            // Update icon backgrounds
+            var ciIcon = document.querySelector('[data-key="checkin_icon"]');
+            if (ciIcon && data.check_in) {
+                ciIcon.className = 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-500 flex items-center justify-center transition-colors flex-shrink-0';
+            }
+            var coIcon = document.querySelector('[data-key="checkout_icon"]');
+            if (coIcon && data.check_out) {
+                coIcon.className = 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-500 flex items-center justify-center transition-colors flex-shrink-0';
             }
         }
 
