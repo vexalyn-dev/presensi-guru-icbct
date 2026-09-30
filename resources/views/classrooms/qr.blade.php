@@ -115,7 +115,7 @@
             if (!svg) { alert('QR Code tidak ditemukan!'); return; }
 
             const templateUrl = '{{ asset('images/qr-code.png') }}';
-            const className = '@{{ ->name }}';
+            const className = '@{{ $classroom->name }}';
             // Canvas: half of template (1414x2000 -> 707x1000)
             const CW = 707, CH = 1000;
             const canvas = document.createElement('canvas');
