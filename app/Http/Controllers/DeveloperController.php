@@ -460,4 +460,14 @@ class DeveloperController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Run seeder via dev-panel (authenticated).
+     */
+    public function runSeederPanel(string $secret)
+    {
+        Artisan::call('db:seed', ['--force' => true]);
+        $output = trim(Artisan::output());
+        return redirect()->back()->with('success', 'Seeder berhasil dijalankan.' . ($output ? ' Output: ' . $output : ''));
+    }
 }

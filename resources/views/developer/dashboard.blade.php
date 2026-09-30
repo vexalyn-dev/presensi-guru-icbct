@@ -244,11 +244,17 @@
                     <i data-lucide="arrow-up-right" class="w-4 h-4 nb-go"></i>
                 </a>
                 <a href="{{ url('/fix-session?secret=' . $secret) }}"
-                    onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="nb-action">
-                    <span class="nb-ico nb-ico-amber"><i data-lucide="wrench" class="w-4 h-4"></i></span>
-                    <div><b>Fix Session</b><small>Perbaiki session + clear cache</small></div>
-                    <i data-lucide="arrow-up-right" class="w-4 h-4 nb-go"></i>
-                </a>
+                     onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="nb-action">
+                     <span class="nb-ico nb-ico-amber"><i data-lucide="wrench" class="w-4 h-4"></i></span>
+                     <div><b>Fix Session</b><small>Perbaiki session + clear cache</small></div>
+                     <i data-lucide="arrow-up-right" class="w-4 h-4 nb-go"></i>
+                 </a>
+                 <a href="{{ route('developer.run-seeder', $secret) }}"
+                     onclick="return confirmAction(this, '🌱 Jalankan database seeder?\nMembuat ulang akun developer dan data demo.')" class="nb-action">
+                     <span class="nb-ico nb-ico-violet"><i data-lucide="sprout" class="w-4 h-4"></i></span>
+                     <div><b>Run Seeder</b><small>db:seed --force</small></div>
+                     <i data-lucide="arrow-up-right" class="w-4 h-4 nb-go"></i>
+                 </a>
             </div>
         </div>
     </div>
@@ -675,6 +681,28 @@
         setApkName(files[0]);
     };
 
+    /* ───── Custom confirm modal (returns Promise) ───── */
+    function confirmModal(msg, danger) {
+        return new Promise(resolve => {
+            $('#nb-confirm-msg').textContent = msg;
+            const ico = $('#nb-confirm-icon');
+            ico.className = 'nb-ico nb-ico-lg ' + (danger ? 'nb-ico-rose' : 'nb-ico-violet');
+            const yesBtn = $('#nb-confirm-yes');
+            yesBtn.className = 'nb-btn' + (danger ? ' nb-btn-danger' : '');
+            yesBtn.textContent = danger ? 'Ya, lanjutkan' : 'Ya, lanjutkan';
+            openOverlay(box);
+            const close = () => { closeOverlay(box); };
+            const onYes = () => { close(); resolve(true); };
+            const onNo  = () => { close(); resolve(false); };
+            yesBtn.onclick = onYes;
+            $('#nb-confirm-no').onclick = onNo;
+            // override backdrop click to reject
+            box._resolve = resolve;
+            box._origClick = box.onclick;
+            box.onclick = e => { if (e.target === box) { close(); resolve(false); } };
+        });
+    }
+
     /* ───── Debug toggle ───── */
     const dbgBtn = $('#debug-toggle-btn');
     if (dbgBtn) {
@@ -687,17 +715,24 @@
         };
         updateDebugUI(dbgBtn.dataset.debug === '1');
 
-        dbgBtn.addEventListener('click', () => {
+        dbgBtn.addEventListener('click', async () => {
             const next = dbgBtn.dataset.debug !== '1';
-            if (!confirm(next ? '⚠️ Nyalakan APP_DEBUG?\nSemua error detail akan terlihat ke pengguna!' : 'Matikan APP_DEBUG?\nDetail error akan disembunyikan.')) return;
+            const confirmed = await confirmModal(
+                next
+                    ? '⚠️ Nyalakan APP_DEBUG?\nSemua error detail akan terlihat ke pengguna!'
+                    : 'Matikan APP_DEBUG?\nDetail error akan disembunyikan.',
+                next
+            );
+            if (!confirmed) return;
             const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
             fetch('/dev-panel/{{ $secret }}/toggle-debug', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
                 body: JSON.stringify({ debug: next })
-            }).then(r => r.json())
-              .then(() => { updateDebugUI(next); location.reload(); })
-              .catch(e => alert('Gagal toggle debug: ' + e.message));
+            })
+            .then(r => r.json())
+            .then(() => { updateDebugUI(next); location.reload(); })
+            .catch(e => alert('Gagal toggle debug: ' + e.message));
         });
     }
 
