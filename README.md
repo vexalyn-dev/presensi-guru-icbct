@@ -60,6 +60,7 @@
 - [x] On-demand class selection
 - [x] Validasi durasi minimal mengajar
 - [x] Jadwal mengajar otomatis
+- [x] **Download QR Code bergambar template** — generate gambar kelas ke file `.png` menggunakan HTML5 Canvas (overlay QR ke desain template `public/images/qr-code.png`, ukuran 707×1000 px, nama kelas otomatis di bagian bawah)
 
 ### 📡 Live Monitoring
 - [x] Dashboard real-time siapa yang sedang mengajar
