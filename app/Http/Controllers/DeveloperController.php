@@ -448,9 +448,12 @@ class DeveloperController extends Controller
         try {
             Artisan::call('db:seed', ['--force' => true]);
             $output = trim(Artisan::output());
+            // Clear route & view cache so new routes take effect immediately
+            Artisan::call('route:clear');
+            Artisan::call('view:clear');
             return response()->json([
                 'success' => true,
-                'message' => 'Seeder selesai.',
+                'message' => 'Seeder selesai + cache dibersihkan.',
                 'output'  => $output ?: 'Database berhasil di-seed.',
             ]);
         } catch (\Throwable $e) {
