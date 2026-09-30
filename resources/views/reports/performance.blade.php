@@ -256,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var tickColor = isDark ? '#94a3b8' : '#64748b';
         var accentColor = isDark ? '#facc15' : '#0f172a';
         var areaColor = isDark ? 'rgba(250,204,21,0.24)' : 'rgba(15,23,42,0.16)';
+        var pointSize = data.length <= 2 ? 4 : 0;
 
         // Build gradient using actual canvas dimensions
         var gradHeight = canvasEl.height || 280;
@@ -279,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     pointBackgroundColor: accentColor,
                     pointBorderColor: isDark ? '#0f172a' : '#ffffff',
                     pointBorderWidth: 2,
-                    pointRadius: 0,
+                    pointRadius: pointSize,
                     pointHoverRadius: 6,
                     pointHoverBackgroundColor: accentColor,
                     pointHoverBorderColor: isDark ? '#0f172a' : '#ffffff',
