@@ -477,9 +477,16 @@ php artisan db:seed --class=DemoAccountSeeder
 | Operator | `operator@smkicb.sch.id` | `Operatoricb123` |
 | Guru Piket | `piket@smkicb.sch.id` | `Piketicb123` |
 | Guru | `guru@smkicb.sch.id` | `Guruicb123` |
-| Developer | `dev@vexalyndev.my.id` | `VexalynDev2026!` |
+| Developer | *see `.env`* | *see `.env`* |
 
 > **Developer** — login via halaman biasa, otomatis redirect ke Dev Panel.
+> Akun developer dikonfigurasi via `.env`:
+> ```env
+> DEV_EMAIL=dev@vexalyndev.my.id
+> DEV_PASSWORD=VexalynDev2026!
+> DEV_NAME=Vexalyn Dev
+> DEV_TEACHER_CODE=DEV-001
+> ```
 
 ### 📡 Live Monitoring
 
