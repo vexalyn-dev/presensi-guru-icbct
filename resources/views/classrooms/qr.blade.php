@@ -52,7 +52,7 @@
 
                             <!-- QR Code -->
                             <div id="qr-code-container" class="flex items-center justify-center">
-                                {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(300)->color(10, 37, 64)->generate($classroom->qr_data) !!}
+                                {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(420)->color(10, 37, 64)->generate($classroom->qr_data) !!}
                             </div>
                         </div>
 
@@ -112,34 +112,54 @@
     <script>
         async function downloadQRCode() {
             const svg = document.querySelector('#qr-code-container svg');
-            if (!svg) { alert('QR Code not found!'); return; }
+            if (!svg) { alert('QR Code tidak ditemukan!'); return; }
+
             const templateUrl = '{{ asset('images/qr-code.png') }}';
             const className = '{{ \->name }}';
+            // Canvas: half of template (1414x2000 -> 707x1000)
             const CW = 707, CH = 1000;
             const canvas = document.createElement('canvas');
             canvas.width = CW;
             canvas.height = CH;
             const ctx = canvas.getContext('2d');
+
+            // Load template
             const tplImg = await new Promise((resolve, reject) => {
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
                 img.onload = () => resolve(img);
-                img.onerror = () => reject(new Error('Template failed'));
+                img.onerror = () => reject(new Error('Template tidak bisa dimuat'));
                 img.src = templateUrl;
             });
             ctx.drawImage(tplImg, 0, 0, CW, CH);
-            const QR_X = 49.5, QR_Y = 143.5, QR_SIZE = 254.5;
+
+            // Draw class name below SCAN HERE
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 28px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(className.toUpperCase(), CW / 2, 275);
+
+            // QR position: center inside the bracket frame
+            // Brackets roughly at x=80..627, y=400..947 in scaled coords
+            // QR fills that area
+            const QR_X = 80, QR_Y = 400, QR_SIZE = 547;
+
+            // Convert SVG to Image
             const svgData = new XMLSerializer().serializeToString(svg);
             const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
             const svgUrl = URL.createObjectURL(svgBlob);
             const qrImg = await new Promise((resolve, reject) => {
                 const img = new Image();
                 img.onload = () => resolve(img);
-                img.onerror = () => reject(new Error('QR failed'));
+                img.onerror = () => reject(new Error('QR SVG gagal dimuat'));
                 img.src = svgUrl;
             });
+
             ctx.drawImage(qrImg, QR_X, QR_Y, QR_SIZE, QR_SIZE);
             URL.revokeObjectURL(svgUrl);
+
+            // Download
             canvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
