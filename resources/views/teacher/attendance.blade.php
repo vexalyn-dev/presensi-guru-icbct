@@ -435,34 +435,34 @@
             // Langsung tampilkan state tanpa delay — server sudah confirm berhasil
             showState(state);
 
-                if (state === 'checkin') {
-                    var el = document.getElementById('at-checkin-time');
-                    if (el) el.textContent = timeStr ? 'Jam masuk: ' + timeStr + ' WIB' : '';
-                    restartSvgAnim('at-state-checkin');
-                } else if (state === 'checkout') {
-                    var el = document.getElementById('at-checkout-time');
-                    if (el) el.textContent = timeStr ? 'Jam pulang: ' + timeStr + ' WIB' : '';
-                    restartSvgAnim('at-state-checkout');
-                } else if (state === 'already') {
-                    var infoEl = document.getElementById('at-already-info');
-                    if (infoEl && extra) {
-                        var msg = extra.check_in ? 'Sudah scan masuk: ' + extra.check_in + ' WIB' : '';
-                        msg += extra.check_out ? ' & pulang: ' + extra.check_out + ' WIB' : '';
-                        infoEl.textContent = msg || 'Presensi hari ini sudah lengkap';
-                    }
-                    restartSvgAnim('at-state-already');
-                } else if (state === 'failed') {
-                    var titleEl = document.getElementById('at-fail-title');
-                    var subEl   = document.getElementById('at-fail-sub');
-                    if (titleEl && extra && extra.message) titleEl.textContent = extra.message;
-                    if (subEl) subEl.textContent = extra && extra.retry ? 'Silakan coba lagi' : 'Hubungi operator jika masalah berlanjut';
-                    restartSvgAnim('at-state-failed');
+            if (state === 'checkin') {
+                var el = document.getElementById('at-checkin-time');
+                if (el) el.textContent = timeStr ? 'Jam masuk: ' + timeStr + ' WIB' : '';
+                restartSvgAnim('at-state-checkin');
+            } else if (state === 'checkout') {
+                var el = document.getElementById('at-checkout-time');
+                if (el) el.textContent = timeStr ? 'Jam pulang: ' + timeStr + ' WIB' : '';
+                restartSvgAnim('at-state-checkout');
+            } else if (state === 'already') {
+                var infoEl = document.getElementById('at-already-info');
+                if (infoEl && extra) {
+                    var msg = extra.check_in ? 'Sudah scan masuk: ' + extra.check_in + ' WIB' : '';
+                    msg += extra.check_out ? ' & pulang: ' + extra.check_out + ' WIB' : '';
+                    infoEl.textContent = msg || 'Presensi hari ini sudah lengkap';
                 }
+                restartSvgAnim('at-state-already');
+            } else if (state === 'failed') {
+                var titleEl = document.getElementById('at-fail-title');
+                var subEl   = document.getElementById('at-fail-sub');
+                if (titleEl && extra && extra.message) titleEl.textContent = extra.message;
+                if (subEl) subEl.textContent = extra && extra.retry ? 'Silakan coba lagi' : 'Hubungi operator jika masalah berlanjut';
+                restartSvgAnim('at-state-failed');
+            }
 
-                // Tutup otomatis, tanpa reload halaman
-                closeTimer = setTimeout(function () {
-                    closeModal();
-                }, 3000);
+            // Tutup otomatis, tanpa reload halaman
+            closeTimer = setTimeout(function () {
+                closeModal();
+            }, 3000);
         }
 
         var pollTimer = null;
