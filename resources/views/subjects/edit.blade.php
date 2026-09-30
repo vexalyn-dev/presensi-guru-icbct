@@ -137,7 +137,6 @@
                                                  <!-- Selected: comma-separated names -->
                                                  <template x-if="selected.length > 0">
                                                      <div class="flex items-center gap-2 w-full">
-                                                         <i data-lucide="user" class="w-4 h-4 text-blue-500 flex-shrink-0"></i>
                                                          <span class="text-blue-700 dark:text-blue-300 font-semibold truncate"
                                                                x-text="selected.map(id => teachers.find(t => t.id == id)?.name).filter(Boolean).join(', ')"></span>
                                                      </div>
