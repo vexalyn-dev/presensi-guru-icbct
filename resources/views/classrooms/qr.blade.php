@@ -114,8 +114,9 @@
             const svg = document.querySelector('#qr-code-container svg');
             if (!svg) { alert('QR Code tidak ditemukan!'); return; }
 
+            const className = document.getElementById('classroomNameData').value;
             const templateUrl = '{{ asset('images/qr-code.png') }}';
-            const className = @json($classroom->name);
+
             // Canvas: half of template (1414x2000 -> 707x1000)
             const CW = 707, CH = 1000;
             const canvas = document.createElement('canvas');
@@ -133,16 +134,15 @@
             });
             ctx.drawImage(tplImg, 0, 0, CW, CH);
 
-            // Draw class name below SCAN HERE
+            // Draw class name below SCAN HERE (y=325 pushes it below)
             ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 28px Inter, sans-serif';
+            ctx.font = 'bold 26px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(className.toUpperCase(), CW / 2, 330);
+            ctx.fillText(className.toUpperCase(), CW / 2, 325);
 
-            // QR position: center inside the bracket frame
-            // Brackets roughly at x=80..627, y=400..947 in scaled coords
-            const QR_X = 100, QR_Y = 480, QR_SIZE = 420;
+            // QR position and size (smaller and lower)
+            const QR_X = 105, QR_Y = 530, QR_SIZE = 390;
 
             // Convert SVG to Image
             const svgData = new XMLSerializer().serializeToString(svg);
