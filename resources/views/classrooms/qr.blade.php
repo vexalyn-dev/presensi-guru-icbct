@@ -111,40 +111,46 @@
 
     <script>
         async function downloadQRCode() {
-            const qrContainer = document.getElementById('qr-code-container');
-            const svg = qrContainer.querySelector('svg');
-
-            if (!svg) {
-                alert('QR Code tidak ditemukan!');
-                return;
-            }
-
-            // Convert SVG to Canvas
+            const svg = document.querySelector('#qr-code-container svg');
+            if (!svg) { alert('QR Code not found!'); return; }
+            const templateUrl = '{{ asset('images/qr-code.png') }}';
+            const className = '{{ \->name }}';
+            const CW = 707, CH = 1000;
             const canvas = document.createElement('canvas');
+            canvas.width = CW;
+            canvas.height = CH;
             const ctx = canvas.getContext('2d');
+            const tplImg = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Template failed'));
+                img.src = templateUrl;
+            });
+            ctx.drawImage(tplImg, 0, 0, CW, CH);
+            const QR_X = 49.5, QR_Y = 143.5, QR_SIZE = 254.5;
             const svgData = new XMLSerializer().serializeToString(svg);
             const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(svgBlob);
-
-            const img = new Image();
-            img.onload = function() {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
+            const svgUrl = URL.createObjectURL(svgBlob);
+            const qrImg = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('QR failed'));
+                img.src = svgUrl;
+            });
+            ctx.drawImage(qrImg, QR_X, QR_Y, QR_SIZE, QR_SIZE);
+            URL.revokeObjectURL(svgUrl);
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = className.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_') + '.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-
-                // Download as PNG
-                const pngUrl = canvas.toDataURL('image/png');
-                const downloadLink = document.createElement('a');
-                downloadLink.href = pngUrl;
-                downloadLink.download = 'QR-Code-{{ $classroom->code }}.png';
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            };
-            img.src = url;
+            }, 'image/png');
         }
-
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
         });
