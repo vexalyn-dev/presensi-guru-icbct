@@ -118,15 +118,17 @@
                                         Guru Pengampu
                                         <span class="text-slate-400 font-normal">(Dapat pilih lebih dari 1)</span>
                                     </label>
-                                    <div class="relative" x-data="{ 
-                                        open: false, 
-                                        search: '', 
-                                        selected: @json($selectedTeacherIds ?? [])
-                                    }"
-                                         @click.outside="open = false">
+                                     <div class="relative" x-data="{ 
+                                         open: false, 
+                                         search: '', 
+                                         selected: @json($selectedTeacherIds ?? []),
+                                         dropdownEl: null
+                                     }"
+                                      @click.outside="open = false"
+                                      @dropdown-move="$dropdownEl = $el.nextElementSibling">
 
                                         <!-- Dropdown Trigger -->
-                                        <div @click="open = !open" 
+                                         <div @click="open = !open; $nextTick(() => positionDropdown($el))"
                                              class="relative group cursor-pointer">
                                             <div class="absolute left-4 top-1/2 -translate-y-1/2">
                                                 <i data-lucide="users" class="w-5 h-5 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
@@ -149,16 +151,19 @@
                                              </div>
                                         </div>
 
-                                        <!-- Dropdown Menu -->
-                                        <div x-show="open" 
-                                             x-transition:enter="transition ease-out duration-200"
+                                         <!-- Dropdown Menu -->
+                                        <div x-ref="dropdown"
+                                             x-show="open"
+                                             x-transition:enter="transition ease-out duration-150"
                                              x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
                                              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                             x-transition:leave="transition ease-in duration-150"
+                                             x-transition:leave="transition ease-in duration-100"
                                              x-transition:leave-start="opacity-100 scale-100"
                                              x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
-                                              class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden subject-dropdown"
-                                             x-cloak>
+                                             class="fixed z-[9999] w-[calc(100%-2rem)] sm:w-full max-w-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                             x-cloak
+                                             @click.stop
+                                             @keydown.escape="open = false">
 
                                             <!-- Search Input -->
                                             <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
@@ -335,10 +340,19 @@
 
                 get filteredTeachers() {
                     if (!this.search) return this.teachers;
-                    return this.teachers.filter(t => 
+                    return this.teachers.filter(t =>
                         t.name.toLowerCase().includes(this.search.toLowerCase()) ||
                         t.email.toLowerCase().includes(this.search.toLowerCase())
                     );
+                },
+
+                positionDropdown(triggerEl) {
+                    const dd = this.$refs.dropdown;
+                    if (!dd) return;
+                    const rect = triggerEl.getBoundingClientRect();
+                    dd.style.left = rect.left + 'px';
+                    dd.style.top = (rect.bottom + 6) + 'px';
+                    dd.style.width = Math.min(rect.width, window.innerWidth - 32) + 'px';
                 }
             }));
         });
