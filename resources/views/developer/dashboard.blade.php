@@ -414,6 +414,12 @@
                         <small id="debug-toggle-desc">Klik untuk mematikan debug</small>
                     </div>
                 </button>
+                <a href="{{ route('developer.run-seeder', $secret) }}"
+                   onclick="return confirmAction(this, '🌱 Jalankan database seeder?\nMembuat ulang akun developer dan data demo.')"
+                   class="nb-tool">
+                    <span class="nb-ico nb-ico-lg nb-ico-violet"><i data-lucide="sprout" class="w-5 h-5"></i></span>
+                    <div><b>Run Seeder</b><small>db:seed --force</small></div>
+                </a>
             </div>
         </div>
     </div>
