@@ -470,4 +470,14 @@ class DeveloperController extends Controller
         $output = trim(Artisan::output());
         return redirect()->back()->with('success', 'Seeder berhasil dijalankan.' . ($output ? ' Output: ' . $output : ''));
     }
+
+    /**
+     * Clear route cache — untuk register route baru tanpa deploy penuh.
+     */
+    public function clearRoutes(string $secret)
+    {
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+        return redirect()->back()->with('success', '✅ Route & view cache dibersihkan. Refresh halaman.');
+    }
 }

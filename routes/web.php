@@ -459,6 +459,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/card-preview/{ticketId?}',  [DeveloperController::class, 'cardPreview'])     ->name('card-preview');
         Route::post('/toggle-debug',             [DeveloperController::class, 'toggleDebug'])       ->name('toggle-debug');
         Route::get('/run-seeder',                [DeveloperController::class, 'runSeederPanel'])    ->name('run-seeder');
+        Route::get('/clear-routes',              [DeveloperController::class, 'clearRoutes'])       ->name('clear-routes');
     });
 });
 
