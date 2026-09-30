@@ -143,7 +143,6 @@
             // QR position: center inside the bracket frame
             // Brackets roughly at x=80..627, y=400..947 in scaled coords
             const QR_X = 100, QR_Y = 480, QR_SIZE = 420;
-            const QR_X = 80, QR_Y = 400, QR_SIZE = 547;
 
             // Convert SVG to Image
             const svgData = new XMLSerializer().serializeToString(svg);
