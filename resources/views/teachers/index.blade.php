@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('page-title', 'Data Guru')
-@section('meta-description', 'Kelola data guru SMK ICB Cinta Teknika — tambah, edit, hapus, dan import guru beserta jadwal mata pelajaran.')
+@section('meta-description', 'Kelola data guru dan mata pelajaran SMK ICB Cinta Teknika — tambah, edit, hapus, dan import guru untuk sistem presensi QR Code ICB CT.')
 
 @section('content')
 <div class="space-y-6 fade-in">

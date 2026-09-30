@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('page-title', 'Jadwal Kerja Guru')
-@section('meta-description', 'Kelola jadwal kerja guru per hari — atur hari aktif mengajar dan sinkronisasi dengan sistem presensi kelas otomatis.')
+@section('meta-description', 'Kelola jadwal kerja guru per hari di SMK ICB CT — atur hari aktif mengajar dan sinkronisasi otomatis dengan sistem presensi kelas.')
 
 @section('content')
     <div class="fade-in space-y-6">

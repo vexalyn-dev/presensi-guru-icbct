@@ -4,23 +4,61 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('page-title', config('app.name')) . ' - ' . config('app.name')</title>
+    <title>@yield('page-title', 'Dashboard') — Presensi Guru ICB CT | SMK Cinta Teknika</title>
 
     <!-- SEO Meta -->
-    <meta name="description" content="@yield('meta-description', 'Sistem Presensi Digital Guru — SMK ICB Cinta Teknika. Presensi harian, presensi kelas, monitoring real-time, jadwal mengajar, dan laporan lengkap.')">
-    <meta name="keywords" content="absensi, presensi, guru, SMK, ICB, Cinta Teknika, QR Code, kehadiran">
-    <meta property="og:title" content="@yield('page-title', config('app.name')) . ' - ' . config('app.name')">
-    <meta property="og:description" content="@yield('meta-description', 'Sistem Presensi Digital Guru — SMK ICB Cinta Teknika. Presensi harian, presensi kelas, monitoring real-time, jadwal mengajar, dan laporan lengkap.')">
-    <meta property="og:image" content="{{ asset('images/logo.png') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta name="description" content="@yield('meta-description', 'Sistem Presensi Digital Guru ICB CT — SMK Cinta Teknika. Absensi harian & kelas via QR Code, validasi GPS, monitoring real-time, jadwal mengajar, dan laporan lengkap.')">
+    <meta name="keywords" content="presensi guru icb, absensi guru smk icb, presensi guru icb ct, sistem presensi guru, absensi digital guru, presensi qr code, smk cinta teknika, aplikasi presensi guru">
+    <meta name="author" content="SMK ICB Cinta Teknika">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="ICB CT Presensi Guru">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('page-title', 'Dashboard') — Presensi Guru ICB CT | SMK Cinta Teknika">
+    <meta property="og:description" content="@yield('meta-description', 'Sistem Presensi Digital Guru ICB CT — SMK Cinta Teknika. Absensi harian & kelas via QR Code, validasi GPS, monitoring real-time.')">
+    <meta property="og:image" content="{{ asset('images/logo.png') }}">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:site_name" content="Presensi Guru ICB CT">
+    <meta property="og:locale" content="id_ID">
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('page-title', config('app.name')) . ' - ' . config('app.name')">
-    <meta name="twitter:description" content="@yield('meta-description', 'Sistem Presensi Digital Guru — SMK ICB Cinta Teknika. Presensi harian, presensi kelas, monitoring real-time, jadwal mengajar, dan laporan lengkap.')">
+    <meta name="twitter:url" content="{{ url()->current() }}">
+    <meta name="twitter:title" content="@yield('page-title', 'Dashboard') — Presensi Guru ICB CT | SMK Cinta Teknika">
+    <meta name="twitter:description" content="@yield('meta-description', 'Sistem Presensi Digital Guru ICB CT — SMK Cinta Teknika. Absensi harian & kelas via QR Code, validasi GPS, monitoring real-time.')">
     <meta name="twitter:image" content="{{ asset('images/logo.png') }}">
-    <meta name="robots" content="index, follow">
-    
+
+    <!-- JSON-LD Structured Data — Sekolah -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "name": "SMK ICB Cinta Teknika",
+        "url": "{{ url()->current() }}",
+        "logo": "{{ asset('images/logo.png') }}",
+        "description": "Sistem Presensi Digital Guru — Absensi harian dan kelas berbasis QR Code dengan validasi GPS untuk SMK ICB Cinta Teknika.",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "ID"
+        },
+        "sameAs": [
+            "https://smkicb-teknika.sch.id"
+        ],
+        "knowsAbout": ["Presensi Guru", "Absensi QR Code", "Manajemen Pembelajaran"],
+        "makesOffer": {
+            "@type": "Offer",
+            "itemOffered": {
+                "@type": "Service",
+                "name": "Sistem Presensi Guru Digital ICB CT",
+                "description": "Aplikasi presensi guru online dengan scan QR Code, monitoring real-time, dan laporan kehadiran."
+            }
+        }
+    }
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     {{-- Define Alpine component functions BEFORE Alpine loads (deferred) --}}
