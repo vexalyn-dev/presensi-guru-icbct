@@ -276,46 +276,6 @@ class DeveloperController extends Controller
     }
 
     /**
-     * Deploy: git pull → composer → migrate → optimize → clear cache.
-     */
-    public function deploy(string $secret)
-    {
-        if (!$this->verifySecret($secret)) abort(404);
-
-        $steps = [];
-
-        // Git pull
-        chdir(base_path());
-        exec('git stash 2>&1', $stashOut, $stashCode);
-        exec('git pull origin main 2>&1', $pullOut, $pullCode);
-        if ($pullCode !== 0) {
-            return back()->with('error', '❌ Git pull gagal: ' . implode(' ', array_slice($pullOut, -2)));
-        }
-        $steps[] = '✅ Git pull';
-
-        // Composer
-        exec('php composer.phar install --no-dev --optimize-autoloader 2>&1', $composerOut, $composerCode);
-        $steps[] = $composerCode === 0 ? '✅ Composer install' : '⚠️ Composer warning';
-
-        // Migrate
-        try {
-            Artisan::call('migrate', ['--force' => true]);
-            $steps[] = '✅ Migrate';
-        } catch (\Throwable $e) {
-            $steps[] = '⚠️ Migrate skip';
-        }
-
-        // Cache
-        Artisan::call('config:clear');
-        Artisan::call('route:clear');
-        Artisan::call('view:clear');
-        Artisan::call('optimize');
-        $steps[] = '✅ Cache rebuilt';
-
-        return back()->with('success', implode(' → ', $steps));
-    }
-
-    /**
      * Toggle APP_DEBUG via env file edit + config cache rebuild.
      */
     public function toggleDebug(string $secret, Request $request)

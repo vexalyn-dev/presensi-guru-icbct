@@ -25,7 +25,7 @@
             </div>
             <ul class="tips">
                 <li><span class="ico t-violet"><i data-lucide="rocket" style="width:17px;height:17px"></i></span>
-                    <div><strong>Deploy dan maintenance</strong><small>Jalankan migration, optimize, atau perbaiki session dengan satu klik.</small></div></li>
+                    <div><strong>Maintenance & cache</strong><small>Jalankan migration, optimize, atau perbaiki session dengan satu klik.</small></div></li>
                 <li><span class="ico t-ok"><i data-lucide="package-check" style="width:17px;height:17px"></i></span>
                     <div><strong>Kelola APK</strong><small>Unggah build Android terbaru dan bagikan ke pengguna.</small></div></li>
                 <li><span class="ico t-warn"><i data-lucide="history" style="width:17px;height:17px"></i></span>
@@ -360,10 +360,6 @@
                 <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this, '⚡ Rebuild semua cache?')" class="tool">
                     <span class="ico ico-lg t-warn"><i data-lucide="zap" style="width:20px;height:20px"></i></span>
                     <div><b>Optimize</b><small>Bangun ulang cache config, route, & view</small></div>
-                </a>
-                <a href="{{ route('developer.deploy', $secret) }}" onclick="return confirmAction(this, '🚀 Deploy & Pull?\nGit pull dari repository, composer install, migrate, rebuild cache.')" class="tool">
-                    <span class="ico ico-lg t-violet"><i data-lucide="rocket" style="width:20px;height:20px"></i></span>
-                    <div><b>Deploy & Pull</b><small>Git pull + composer + migrate + cache</small></div>
                 </a>
                 <a href="{{ url('/fix-session?secret=' . $secret) }}" onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="tool">
                     <span class="ico ico-lg t-warn"><i data-lucide="wrench" style="width:20px;height:20px"></i></span>
