@@ -20,18 +20,6 @@ class CheckMaintenanceMode
             return $next($request);
         }
 
-        $envMode = env('MAINTENANCE_MODE');
-
-        if ($envMode === 'true') {
-            $message = env('MAINTENANCE_MESSAGE')
-                ?? 'Sistem sedang dalam pemeliharaan. Mohon tunggu sebentar.';
-            return response()->view('errors.maintenance', ['message' => $message], 503);
-        }
-
-        if ($envMode === 'false') {
-            return $next($request);
-        }
-
         try {
             $setting = AppSetting::getInstance();
 
