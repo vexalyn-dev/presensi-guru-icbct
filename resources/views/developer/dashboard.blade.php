@@ -169,7 +169,7 @@
     </div>
 
     <div class="grid-main">
-        <div class="card">
+        <div class="card left-col">
             <div class="card-head">
                 <h3><i data-lucide="activity" style="width:18px;height:18px;color:#34d399"></i> Informasi Sistem</h3>
                 <span class="live"><i></i> Live</span>
@@ -183,63 +183,98 @@
             </div>
         </div>
 
-        {{-- SERVER INFO CARD --}}
-        <div class="card" style="grid-column:1/-1">
+        <div class="card right-col">
             <div class="card-head">
                 <h3><i data-lucide="monitor" style="width:18px;height:18px;color:#06b6d4"></i> Server Info</h3>
                 <span class="live"><i></i> Live</span>
             </div>
-            <div class="grid-server-info">
-                <div class="si-block">
-                    <div class="si-label">PHP</div>
-                    <div class="si-val mono">{{ $stats['php_version'] ?? '8.x' }}</div>
-                    <div class="si-label">Laravel</div>
-                    <div class="si-val mono">v{{ ltrim($stats['laravel_version'] ?? '11.x', 'vV') }}</div>
-                    <div class="si-label">Memory Limit</div>
-                    <div class="si-val mono">{{ $stats['memory_limit'] ?? '-' }}</div>
+            <div class="server-info-body">
+                <div class="si-row">
+                    <div class="si-item"><span class="si-label">PHP</span><span class="si-val mono">{{ $stats['php_version'] ?? '8.x' }}</span></div>
+                    <div class="si-item"><span class="si-label">Laravel</span><span class="si-val mono">v{{ ltrim($stats['laravel_version'] ?? '11.x', 'vV') }}</span></div>
                 </div>
-                <div class="si-block">
-                    <div class="si-label">Upload Max</div>
-                    <div class="si-val mono">{{ $stats['upload_max'] ?? '-' }}</div>
-                    <div class="si-label">Post Max</div>
-                    <div class="si-val mono">{{ $stats['post_max'] ?? '-' }}</div>
-                    <div class="si-label">Max Execution</div>
-                    <div class="si-val mono">{{ $stats['max_exec_time'] ?? '-' }}s</div>
+                <div class="si-row">
+                    <div class="si-item"><span class="si-label">Memory Limit</span><span class="si-val mono">{{ $stats['memory_limit'] ?? '-' }}</span></div>
+                    <div class="si-item"><span class="si-label">Upload Max</span><span class="si-val mono">{{ $stats['upload_max'] ?? '-' }}</span></div>
                 </div>
-                <div class="si-block">
-                    <div class="si-label">Server Software</div>
-                    <div class="si-val mono" style="font-size:12px">{{ $stats['server_software'] ?? '-' }}</div>
-                    <div class="si-label">Server Port</div>
-                    <div class="si-val mono">{{ $stats['server_port'] ?? '-' }}</div>
-                    <div class="si-label">Server IP</div>
-                    <div class="si-val mono">{{ $stats['server_addr'] ?? '-' }}</div>
+                <div class="si-row">
+                    <div class="si-item"><span class="si-label">Post Max</span><span class="si-val mono">{{ $stats['post_max'] ?? '-' }}</span></div>
+                    <div class="si-item"><span class="si-label">Max Exec</span><span class="si-val mono">{{ $stats['max_exec_time'] ?? '-' }}s</span></div>
                 </div>
-                <div class="si-block">
-                    <div class="si-label">Database</div>
-                    <div class="si-val mono">{{ $stats['db_driver'] ?? '-' }} / {{ $stats['db_host'] ?? '-' }}</div>
-                    <div class="si-label">Database Name</div>
-                    <div class="si-val mono" style="font-size:11px">{{ $stats['db_name'] ?? '-' }}</div>
-                    <div class="si-label">Database User</div>
-                    <div class="si-val mono">{{ $stats['db_user'] ?? '-' }}</div>
+                <div class="si-row">
+                    <div class="si-item full"><span class="si-label">Server</span><span class="si-val mono" style="font-size:11px">{{ $stats['server_software'] ?? '-' }}</span></div>
                 </div>
-                <div class="si-block">
-                    <div class="si-label">Cache Status</div>
-                    <div class="si-val mono" style="font-size:11px">
-                        @if($stats['cache_config'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Cfg
-                        @if($stats['cache_route'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Rt
-                        @if($stats['cache_view'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Vw
+                <div class="si-row">
+                    <div class="si-item"><span class="si-label">Server IP</span><span class="si-val mono">{{ $stats['server_addr'] ?? '-' }}</span></div>
+                    <div class="si-item"><span class="si-label">Port</span><span class="si-val mono">{{ $stats['server_port'] ?? '-' }}</span></div>
+                </div>
+                <div class="si-row">
+                    <div class="si-item full"><span class="si-label">Database</span><span class="si-val mono" style="font-size:11px">{{ $stats['db_driver'] ?? '-' }} | {{ $stats['db_name'] ?? '-' }}@{{ $stats['db_host'] ?? '-' }}</span></div>
+                </div>
+                <div class="si-row">
+                    <div class="si-item full"><span class="si-label">Cache</span>
+                        <span class="si-val mono" style="font-size:11px">
+                            @if($stats['cache_config'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endifCfg
+                            @if($stats['cache_route'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endifRt
+                            @if($stats['cache_view'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endifVw
+                        </span>
                     </div>
-                    <div class="si-label">Disk Usage</div>
-                    <div class="si-val mono" style="font-size:11px">
-                        {{ round(($stats['disk_total'] - $stats['disk_free']) / 1073741824, 1) }}GB / {{ round($stats['disk_total'] / 1073741824, 1) }}GB ({{ $stats['disk_percent'] }}%)
+                </div>
+
+                {{-- Disk Usage Crypto Chart --}}
+                <div class="disk-chart-wrap">
+                    <div class="si-label" style="margin-bottom:10px">Disk Usage</div>
+                    <div class="disk-chart">
+                        @php
+                            $used = ($stats['disk_total'] - $stats['disk_free']) / 1073741824;
+                            $total = $stats['disk_total'] / 1073741824;
+                            $percent = $stats['disk_percent'];
+                            $cw = 300; $ch = 70;
+                            $pts = [];
+                            for ($i = 0; $i <= 20; $i++) {
+                                $baseY = $ch - ($percent / 100) * $ch;
+                                $v = sin($i * 0.8) * 4 + cos($i * 1.3) * 2;
+                                $y = max(4, min($ch - 4, $baseY + $v));
+                                $x = ($i / 20) * $cw;
+                                $pts[] = "$x,$y";
+                            }
+                            $areaPts = [$cw.','.$ch, '0,'.$ch] + $pts;
+                            $areaStr = implode(' ', array_map(function($p){$a=explode(',',$p);return $a[0].','.$a[1];}, $areaPts));
+                            $lineStr = implode(' ', $pts);
+                            $lastPt = end($pts); $lastY = (float)explode(',', $lastPt)[1];
+                        @endphp
+                        <svg viewBox="0 0 {{ $cw }} {{ $ch + 18 }}" preserveAspectRatio="none" style="width:100%;height:90px">
+                            <defs>
+                                <linearGradient id="dgG" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.4"/>
+                                    <stop offset="100%" stop-color="#10b981" stop-opacity="0.02"/>
+                                </linearGradient>
+                                <linearGradient id="dgL" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#059669"/>
+                                    <stop offset="60%" stop-color="#10b981"/>
+                                    <stop offset="100%" stop-color="#34d399"/>
+                                </linearGradient>
+                            </defs>
+                            <polygon points="{{ $areaStr }}" fill="url(#dgG)"/>
+                            <polyline points="{{ $lineStr }}" fill="none" stroke="url(#dgL)" stroke-width="2" stroke-linejoin="round"/>
+                            <circle cx="{{ $cw }}" cy="{{ $lastY }}" r="4" fill="#34d399" stroke="var(--bg-surface)" stroke-width="2"/>
+                        </svg>
+                        <div class="disk-stats">
+                            <span class="mono" style="color:#10b981;font-weight:700">{{ round($used,1) }}GB</span>
+                            <span class="mono" style="color:var(--txt-dim)">/{{ round($total,1) }}GB</span>
+                            <span class="mono disk-pct" style="color:{{ $percent > 90 ? '#f43f5e' : ($percent > 70 ? '#f59e0b' : '#10b981') }};margin-left:auto">{{ $percent }}%</span>
+                        </div>
                     </div>
-                    <div class="si-label">Session</div>
-                    <div class="si-val mono" style="font-size:11px">{{ $stats['session_driver'] ?? '-' }} · {{ $stats['session_lifetime'] ?? '-' }}min</div>
+                </div>
+
+                <div class="si-row" style="margin-top:8px">
+                    <div class="si-item"><span class="si-label">Session</span><span class="si-val mono">{{ $stats['session_driver'] ?? '-' }} · {{ $stats['session_lifetime'] ?? '-' }}min</span></div>
+                    <div class="si-item"><span class="si-label">Remote IP</span><span class="si-val mono" style="font-size:11px">{{ $stats['remote_addr'] ?? '-' }}</span></div>
                 </div>
             </div>
         </div>
 
-        <div class="card">
+        <div class="card left-col">
             <div class="card-head">
                 <h3><i data-lucide="zap" style="width:18px;height:18px;color:#818cf8"></i> Aksi Cepat</h3>
             </div>
@@ -249,19 +284,19 @@
                     <div><b>Sapu Jagat</b><small>Hapus cache config, route, & view</small></div>
                     <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                 </a>
-                <a href="{{ route('developer.migrate', $secret) }}" onclick="return confirmAction(this, '🗄️ Jalankan database migration?\nPastikan backup sudah ada!')" class="action">
-                    <span class="ico t-ok"><i data-lucide="database" style="width:17px;height:17px"></i></span>
-                    <div><b>Run Migration</b><small>artisan migrate --force</small></div>
-                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                </a>
-                <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this, '⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
-                    <span class="ico t-warn"><i data-lucide="zap" style="width:17px;height:17px"></i></span>
-                    <div><b>Optimize</b><small>Bangun ulang struktur cache</small></div>
-                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                </a>
                 <a href="{{ url('/fix-session?secret=' . $secret) }}" onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="action">
                     <span class="ico t-warn"><i data-lucide="wrench" style="width:17px;height:17px"></i></span>
                     <div><b>Fix Session</b><small>Perbaiki permissions & clear cache</small></div>
+                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
+                </a>
+                <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this, '⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
+                    <span class="ico t-sun"><i data-lucide="zap" style="width:17px;height:17px"></i></span>
+                    <div><b>Optimize</b><small>Bangun ulang struktur cache</small></div>
+                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
+                </a>
+                <a href="{{ route('developer.migrate', $secret) }}" onclick="return confirmAction(this, '🗄️ Jalankan database migration?\nPastikan backup sudah ada!')" class="action">
+                    <span class="ico t-ok"><i data-lucide="database" style="width:17px;height:17px"></i></span>
+                    <div><b>Run Migration</b><small>artisan migrate --force</small></div>
                     <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                 </a>
                 <a href="{{ route('developer.run-seeder', $secret) }}" onclick="return confirmAction(this, '🌱 Jalankan database seeder?\nMembuat ulang akun developer dan data demo.')" class="action">
