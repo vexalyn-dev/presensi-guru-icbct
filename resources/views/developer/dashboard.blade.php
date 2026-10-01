@@ -115,51 +115,51 @@
 {{-- ═════════ TAB: DASHBOARD ═════════ --}}
 <div id="tab-dashboard" class="tab-content">
 
-    <section class="hero">
-        <div class="hero-text">
-            <span class="pill">{{ $envName }}</span>
-            <h1>{{ $greeting }}, Developer.</h1>
-            <p>Sistem berjalan di <b>{{ $host }}</b> pukul {{ now()->format('H:i') }} WIB.
-               @if(($stats['pending_leaves'] ?? 0) > 0)
-                    Ada {{ $stats['pending_leaves'] }} pengajuan izin menunggu persetujuan.
-               @else
-                    Tidak ada pengajuan izin yang menunggu.
-               @endif
-            </p>
-            <div class="hero-actions">
-                <a href="{{ url('/dashboard') }}" target="_blank" class="btn btn-white"><i data-lucide="external-link" style="width:15px;height:15px"></i> Buka aplikasi</a>
-                <button type="button" class="btn btn-glass" id="nb-open-welcome"><i data-lucide="sparkles" style="width:15px;height:15px"></i> Panduan singkat</button>
+    <div class="dash-header">
+        <div class="dash-top">
+            <div>
+                <h2 class="greeting">{{ $greeting }}, Developer.</h2>
+                <p class="subtext">
+                    Sistem berjalan di <b>{{ $host }}</b> pukul {{ now()->format('H:i') }} WIB.
+                    @if(($stats['pending_leaves'] ?? 0) > 0)
+                        Ada {{ $stats['pending_leaves'] }} pengajuan izin menunggu persetujuan.
+                    @else
+                        Tidak ada pengajuan izin yang menunggu.
+                    @endif
+                </p>
+                <div class="dash-meta">
+                    <span class="dash-pill"><i></i> {{ $envName }}</span>
+                </div>
+            </div>
+            <div class="dash-actions">
+                <a href="{{ url('/dashboard') }}" target="_blank" class="btn btn-ghost"><i data-lucide="external-link" style="width:15px;height:15px"></i> Buka aplikasi</a>
+                <button type="button" class="btn btn-ghost" id="nb-open-welcome"><i data-lucide="book-open" style="width:15px;height:15px"></i> Panduan</button>
             </div>
         </div>
-        <div class="hero-art" aria-hidden="true">
-            <span><i data-lucide="code-2" style="width:24px;height:24px"></i></span>
-            <span><i data-lucide="database" style="width:24px;height:24px"></i></span>
-            <span><i data-lucide="rocket" style="width:24px;height:24px"></i></span>
-        </div>
-    </section>
+    </div>
 
     @if($debugOn)
         <div class="alert alert-warn" role="alert">
-            <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0"></i>
+            <i data-lucide="triangle-alert" style="width:16px;height:16px;flex-shrink:0;margin-top:1px"></i>
             <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di production supaya detail error tidak terlihat pengguna.</span>
         </div>
     @endif
 
     <div class="stats">
         <div class="card stat">
-            <div class="stat-head"><span class="ico t-violet"><i data-lucide="users" style="width:16px;height:16px"></i></span>Total pengguna</div>
+            <div class="stat-head"><span class="ico t-violet"><i data-lucide="users" style="width:14px;height:14px"></i></span>Total pengguna</div>
             <div class="num" data-count="{{ $stats['total_users'] ?? 0 }}">0</div>
         </div>
         <div class="card stat">
-            <div class="stat-head"><span class="ico t-sky"><i data-lucide="graduation-cap" style="width:16px;height:16px"></i></span>Guru aktif</div>
+            <div class="stat-head"><span class="ico t-sky"><i data-lucide="graduation-cap" style="width:14px;height:14px"></i></span>Guru aktif</div>
             <div class="num" data-count="{{ $stats['total_teachers'] ?? 0 }}">0</div>
         </div>
         <div class="card stat">
-            <div class="stat-head"><span class="ico t-warn"><i data-lucide="server" style="width:16px;height:16px"></i></span>Versi PHP</div>
+            <div class="stat-head"><span class="ico t-warn"><i data-lucide="cpu" style="width:14px;height:14px"></i></span>Versi PHP</div>
             <div class="num num-sm">{{ $stats['php_version'] ?? '8.x' }}</div>
         </div>
         <div class="card stat">
-            <div class="stat-head"><span class="ico t-bad"><i data-lucide="code-2" style="width:16px;height:16px"></i></span>Laravel</div>
+            <div class="stat-head"><span class="ico t-bad"><i data-lucide="code-2" style="width:14px;height:14px"></i></span>Laravel</div>
             <div class="num num-sm">v{{ $stats['laravel_version'] ?? '11.x' }}</div>
         </div>
     </div>
