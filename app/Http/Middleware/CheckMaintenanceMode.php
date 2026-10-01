@@ -15,8 +15,9 @@ class CheckMaintenanceMode
             return $next($request);
         }
 
+        // Hanya developer yang bisa akses saat maintenance — admin/operator/guru/piket tetap kena
         $user = $request->user();
-        if ($user && ($user->canAccessAdmin() || $user->isDeveloper())) {
+        if ($user && $user->isDeveloper()) {
             return $next($request);
         }
 
