@@ -494,6 +494,255 @@
     </div>
 </div>
 
+{{-- ═════════ TAB: SETTINGS & TEMA ═════════ --}}
+<div id="tab-settings" class="tab-content">
+    <header class="page-head">
+        <h2><i data-lucide="settings" style="width:22px;height:22px;color:var(--accent);vertical-align:middle;margin-right:8px"></i> Settings & Tema Konsol</h2>
+        <p>Sesuaikan tampilan antarmuka (theme) dan preferensi kerja Developer Console sesuai kenyamanan kamu.</p>
+    </header>
+
+    <div class="card" style="margin-bottom:24px">
+        <div class="card-head">
+            <h3><i data-lucide="palette" style="width:18px;height:18px;color:var(--accent)"></i> Pilihan Tema Konsol (Themes)</h3>
+            <span class="chip mono" id="active-theme-label">Obsidian Console</span>
+        </div>
+        <div class="pad">
+            <p class="mute" style="margin-bottom:22px">
+                Setiap tema dirancang dengan kontras warna presisi tinggi, nuansa developer modern, dan aksen glowing yang elegan. Klik kartu di bawah untuk langsung mengganti tema secara realtime:
+            </p>
+
+            <div class="theme-grid">
+                {{-- Theme 1: Obsidian Console --}}
+                <div class="theme-card" data-theme="obsidian" onclick="window.setConsoleTheme('obsidian')">
+                    <div class="theme-preview-box" style="background:#090d16;">
+                        <div class="theme-mini-side" style="background:rgba(15,23,42,0.9); border-color:rgba(255,255,255,0.08);">
+                            <div class="mini-logo" style="background:#6366f1;"></div>
+                            <div class="mini-nav-line active" style="background:#6366f1;"></div>
+                            <div class="mini-nav-line" style="background:#94a3b8;"></div>
+                            <div class="mini-nav-line" style="background:#94a3b8;"></div>
+                        </div>
+                        <div class="theme-mini-main">
+                            <div class="theme-mini-top" style="background:rgba(15,23,42,0.8); border-color:rgba(255,255,255,0.08);">
+                                <div class="mini-title-line" style="background:#f8fafc;"></div>
+                                <div class="mini-pill" style="background:rgba(16,185,129,0.2); border:1px solid #10b981;"></div>
+                            </div>
+                            <div class="theme-mini-content">
+                                <div class="theme-mini-stats">
+                                    <div class="theme-mini-stat-card" style="background:#0f172a;">
+                                        <div class="theme-mini-stat-line" style="background:#94a3b8;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#6366f1;"></div>
+                                    </div>
+                                    <div class="theme-mini-stat-card" style="background:#0f172a;">
+                                        <div class="theme-mini-stat-line" style="background:#94a3b8;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#06b6d4;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theme-card-foot">
+                        <div class="theme-card-info">
+                            <h4>Obsidian Console <span class="badge t-violet">Default</span></h4>
+                            <p>Deep dark obsidian dengan aksen electric indigo & cyan glow.</p>
+                            <div class="theme-card-swatches">
+                                <span class="theme-swatch" style="background:#090d16;" title="Base #090d16"></span>
+                                <span class="theme-swatch" style="background:#0f172a;" title="Surface #0f172a"></span>
+                                <span class="theme-swatch" style="background:#6366f1;" title="Accent #6366f1"></span>
+                                <span class="theme-swatch" style="background:#10b981;" title="Success #10b981"></span>
+                            </div>
+                        </div>
+                        <span class="theme-check-badge"><i data-lucide="check" style="width:13px;height:13px"></i></span>
+                    </div>
+                </div>
+
+                {{-- Theme 2: Tokyo Night --}}
+                <div class="theme-card" data-theme="tokyo-night" onclick="window.setConsoleTheme('tokyo-night')">
+                    <div class="theme-preview-box" style="background:#1a1b26;">
+                        <div class="theme-mini-side" style="background:#16161e; border-color:rgba(122,162,247,0.2);">
+                            <div class="mini-logo" style="background:#7aa2f7;"></div>
+                            <div class="mini-nav-line active" style="background:#7aa2f7;"></div>
+                            <div class="mini-nav-line" style="background:#a9b1d6;"></div>
+                            <div class="mini-nav-line" style="background:#a9b1d6;"></div>
+                        </div>
+                        <div class="theme-mini-main">
+                            <div class="theme-mini-top" style="background:#16161e; border-color:rgba(122,162,247,0.2);">
+                                <div class="mini-title-line" style="background:#c0caf5;"></div>
+                                <div class="mini-pill" style="background:rgba(115,218,202,0.2); border:1px solid #73daca;"></div>
+                            </div>
+                            <div class="theme-mini-content">
+                                <div class="theme-mini-stats">
+                                    <div class="theme-mini-stat-card" style="background:#1f2335;">
+                                        <div class="theme-mini-stat-line" style="background:#787c99;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#7aa2f7;"></div>
+                                    </div>
+                                    <div class="theme-mini-stat-card" style="background:#1f2335;">
+                                        <div class="theme-mini-stat-line" style="background:#787c99;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#bb9af7;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theme-card-foot">
+                        <div class="theme-card-info">
+                            <h4>Tokyo Night <span class="badge t-sky">Populer</span></h4>
+                            <p>Palet legendaris Tokyo Night indigo gelap dengan aksen neon blue & purple.</p>
+                            <div class="theme-card-swatches">
+                                <span class="theme-swatch" style="background:#1a1b26;" title="Base #1a1b26"></span>
+                                <span class="theme-swatch" style="background:#16161e;" title="Surface #16161e"></span>
+                                <span class="theme-swatch" style="background:#7aa2f7;" title="Accent #7aa2f7"></span>
+                                <span class="theme-swatch" style="background:#73daca;" title="Success #73daca"></span>
+                            </div>
+                        </div>
+                        <span class="theme-check-badge"><i data-lucide="check" style="width:13px;height:13px"></i></span>
+                    </div>
+                </div>
+
+                {{-- Theme 3: Catppuccin Mocha --}}
+                <div class="theme-card" data-theme="catppuccin" onclick="window.setConsoleTheme('catppuccin')">
+                    <div class="theme-preview-box" style="background:#11111b;">
+                        <div class="theme-mini-side" style="background:#181825; border-color:rgba(203,166,247,0.2);">
+                            <div class="mini-logo" style="background:#cba6f7;"></div>
+                            <div class="mini-nav-line active" style="background:#cba6f7;"></div>
+                            <div class="mini-nav-line" style="background:#a6adc8;"></div>
+                            <div class="mini-nav-line" style="background:#a6adc8;"></div>
+                        </div>
+                        <div class="theme-mini-main">
+                            <div class="theme-mini-top" style="background:#181825; border-color:rgba(203,166,247,0.2);">
+                                <div class="mini-title-line" style="background:#cdd6f4;"></div>
+                                <div class="mini-pill" style="background:rgba(166,227,161,0.2); border:1px solid #a6e3a1;"></div>
+                            </div>
+                            <div class="theme-mini-content">
+                                <div class="theme-mini-stats">
+                                    <div class="theme-mini-stat-card" style="background:#1e1e2e;">
+                                        <div class="theme-mini-stat-line" style="background:#6c7086;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#cba6f7;"></div>
+                                    </div>
+                                    <div class="theme-mini-stat-card" style="background:#1e1e2e;">
+                                        <div class="theme-mini-stat-line" style="background:#6c7086;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#89dceb;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theme-card-foot">
+                        <div class="theme-card-info">
+                            <h4>Catppuccin Mocha <span class="badge t-violet">Pastel</span></h4>
+                            <p>Nuansa velvety mocha gelap yang lembut di mata dengan aksen pastel mauve.</p>
+                            <div class="theme-card-swatches">
+                                <span class="theme-swatch" style="background:#11111b;" title="Base #11111b"></span>
+                                <span class="theme-swatch" style="background:#181825;" title="Surface #181825"></span>
+                                <span class="theme-swatch" style="background:#cba6f7;" title="Accent #cba6f7"></span>
+                                <span class="theme-swatch" style="background:#a6e3a1;" title="Success #a6e3a1"></span>
+                            </div>
+                        </div>
+                        <span class="theme-check-badge"><i data-lucide="check" style="width:13px;height:13px"></i></span>
+                    </div>
+                </div>
+
+                {{-- Theme 4: Nordic Aurora --}}
+                <div class="theme-card" data-theme="nordic" onclick="window.setConsoleTheme('nordic')">
+                    <div class="theme-preview-box" style="background:#0e141d;">
+                        <div class="theme-mini-side" style="background:#17202d; border-color:rgba(136,192,208,0.2);">
+                            <div class="mini-logo" style="background:#88c0d0;"></div>
+                            <div class="mini-nav-line active" style="background:#88c0d0;"></div>
+                            <div class="mini-nav-line" style="background:#9aa8bd;"></div>
+                            <div class="mini-nav-line" style="background:#9aa8bd;"></div>
+                        </div>
+                        <div class="theme-mini-main">
+                            <div class="theme-mini-top" style="background:#17202d; border-color:rgba(136,192,208,0.2);">
+                                <div class="mini-title-line" style="background:#eceff4;"></div>
+                                <div class="mini-pill" style="background:rgba(163,190,140,0.2); border:1px solid #a3be8c;"></div>
+                            </div>
+                            <div class="theme-mini-content">
+                                <div class="theme-mini-stats">
+                                    <div class="theme-mini-stat-card" style="background:#1f2b3c;">
+                                        <div class="theme-mini-stat-line" style="background:#63758e;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#88c0d0;"></div>
+                                    </div>
+                                    <div class="theme-mini-stat-card" style="background:#1f2b3c;">
+                                        <div class="theme-mini-stat-line" style="background:#63758e;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#8fbcbb;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theme-card-foot">
+                        <div class="theme-card-info">
+                            <h4>Nordic Aurora <span class="badge t-sky">Clean</span></h4>
+                            <p>Arsitektur kutub utara yang dingin, tenang, dan bersih dengan aksen frost ice blue.</p>
+                            <div class="theme-card-swatches">
+                                <span class="theme-swatch" style="background:#0e141d;" title="Base #0e141d"></span>
+                                <span class="theme-swatch" style="background:#17202d;" title="Surface #17202d"></span>
+                                <span class="theme-swatch" style="background:#88c0d0;" title="Accent #88c0d0"></span>
+                                <span class="theme-swatch" style="background:#a3be8c;" title="Success #a3be8c"></span>
+                            </div>
+                        </div>
+                        <span class="theme-check-badge"><i data-lucide="check" style="width:13px;height:13px"></i></span>
+                    </div>
+                </div>
+
+                {{-- Theme 5: Cyberpunk Matrix --}}
+                <div class="theme-card" data-theme="cyberpunk" onclick="window.setConsoleTheme('cyberpunk')">
+                    <div class="theme-preview-box" style="background:#05080e;">
+                        <div class="theme-mini-side" style="background:#0a111a; border-color:rgba(16,185,129,0.25);">
+                            <div class="mini-logo" style="background:#10b981;"></div>
+                            <div class="mini-nav-line active" style="background:#10b981;"></div>
+                            <div class="mini-nav-line" style="background:#6ee7b7;"></div>
+                            <div class="mini-nav-line" style="background:#6ee7b7;"></div>
+                        </div>
+                        <div class="theme-mini-main">
+                            <div class="theme-mini-top" style="background:#0a111a; border-color:rgba(16,185,129,0.25);">
+                                <div class="mini-title-line" style="background:#f0fdf4;"></div>
+                                <div class="mini-pill" style="background:rgba(16,185,129,0.3); border:1px solid #10b981;"></div>
+                            </div>
+                            <div class="theme-mini-content">
+                                <div class="theme-mini-stats">
+                                    <div class="theme-mini-stat-card" style="background:#101c2b;">
+                                        <div class="theme-mini-stat-line" style="background:#3b5771;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#10b981;"></div>
+                                    </div>
+                                    <div class="theme-mini-stat-card" style="background:#101c2b;">
+                                        <div class="theme-mini-stat-line" style="background:#3b5771;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#06b6d4;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theme-card-foot">
+                        <div class="theme-card-info">
+                            <h4>Cyberpunk Matrix <span class="badge t-ok">High Tech</span></h4>
+                            <p>Gaya stealth terminal hacker berenergi tinggi dengan pendaran neon emerald & cyan.</p>
+                            <div class="theme-card-swatches">
+                                <span class="theme-swatch" style="background:#05080e;" title="Base #05080e"></span>
+                                <span class="theme-swatch" style="background:#0a111a;" title="Surface #0a111a"></span>
+                                <span class="theme-swatch" style="background:#10b981;" title="Accent #10b981"></span>
+                                <span class="theme-swatch" style="background:#06b6d4;" title="Cyan #06b6d4"></span>
+                            </div>
+                        </div>
+                        <span class="theme-check-badge"><i data-lucide="check" style="width:13px;height:13px"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <h3><i data-lucide="sliders" style="width:18px;height:18px;color:var(--sky)"></i> Informasi Konsol & Sesi</h3>
+        </div>
+        <div class="info">
+            <div><p class="l">Developer Account</p><p class="v">Vio Atmajaya <span class="badge t-violet">SUPERUSER</span></p></div>
+            <div><p class="l">Penyimpanan Preferensi</p><p class="v mono"><span class="dot ok"></span> LocalStorage Browser (Persisten)</p></div>
+            <div><p class="l">Target Host</p><p class="v mono trunc">{{ $host }}</p></div>
+            <div><p class="l">Konsol Versi</p><p class="v mono">v2.0 (Modern SaaS Edition)</p></div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
