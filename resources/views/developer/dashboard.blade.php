@@ -402,7 +402,7 @@
                 <a href="{{ route('developer.deploy', $secret) }}"
                    onclick="return confirmAction(this, '🚀 Deploy & Pull?\nGit pull dari repository, composer install, migrate, rebuild cache.')"
                    class="nb-tool">
-                    <span class="nb-ico nb-ico-lg nb-ico-emerald"><i data-lucide="rocket" class="w-5 h-5"></i></span>
+                    <span class="nb-ico nb-ico-lg nb-ico-mint"><i data-lucide="rocket" class="w-5 h-5"></i></span>
                     <div><b>Deploy & Pull</b><small>Git pull + composer + migrate + cache</small></div>
                 </a>
                 <a href="{{ url('/fix-session?secret=' . $secret) }}"
