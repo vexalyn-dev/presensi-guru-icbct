@@ -1817,6 +1817,7 @@ textarea.input { resize: vertical; min-height: 85px; }
         <div class="nav-label">Kelola Sistem</div>
         <button type="button" onclick="switchTab('apk')" id="nav-apk" class="nav-item"><i data-lucide="smartphone"></i> APK Manager</button>
         <button type="button" onclick="switchTab('system')" id="nav-system" class="nav-item"><i data-lucide="cpu"></i> System State</button>
+        <button type="button" onclick="switchTab('server-info')" id="nav-server-info" class="nav-item"><i data-lucide="monitor"></i> Server Info</button>
         <button type="button" onclick="switchTab('releases')" id="nav-releases" class="nav-item"><i data-lucide="git-pull-request"></i> Releases</button>
 
         <div class="nav-label">Tautan & Preferensi</div>
@@ -1876,20 +1877,22 @@ textarea.input { resize: vertical; min-height: 85px; }
 </main>
 
 <script>
-    const tabs = ['dashboard', 'apk', 'system', 'releases', 'settings'];
-    const titles = { 
-        dashboard: 'Dashboard', 
-        apk: 'APK Manager', 
-        system: 'System State', 
-        releases: 'Riwayat Rilis', 
-        settings: 'Settings & Tema' 
+    const tabs = ['dashboard', 'apk', 'system', 'server-info', 'releases', 'settings'];
+    const titles = {
+        dashboard: 'Dashboard',
+        apk: 'APK Manager',
+        system: 'System State',
+        server-info: 'Server Info',
+        releases: 'Riwayat Rilis',
+        settings: 'Settings & Tema'
     };
-    const tabIcons = { 
-        dashboard: 'layout-dashboard', 
-        apk: 'smartphone', 
-        system: 'cpu', 
-        releases: 'git-pull-request', 
-        settings: 'settings' 
+    const tabIcons = {
+        dashboard: 'layout-dashboard',
+        apk: 'smartphone',
+        system: 'cpu',
+        server-info: 'monitor',
+        releases: 'git-pull-request',
+        settings: 'settings'
     };
 
     const sideEl = document.getElementById('side');

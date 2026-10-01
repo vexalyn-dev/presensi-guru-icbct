@@ -179,7 +179,6 @@
                 <div><p class="l">Debug mode</p><p class="v"><span class="dot {{ $debugOn ? 'warn' : 'ok' }}"></span>{{ $debugOn ? 'Aktif' : 'Nonaktif' }}</p></div>
                 <div><p class="l">Host URL</p><p class="v mono trunc">{{ $host }}</p></div>
                 <div><p class="l">Waktu server</p><p class="v mono">{{ now()->format('H:i') }} WIB</p></div>
-                <div><p class="l">Izin pending</p><p class="v">{{ $stats['pending_leaves'] ?? 0 }} pengajuan</p></div>
                 <div><p class="l">Operator & admin</p><p class="v">{{ $stats['total_operators'] ?? 0 }} akun</p></div>
             </div>
         </div>

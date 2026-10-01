@@ -60,6 +60,70 @@ class DeveloperController extends Controller
         return view('developer.dashboard', compact('appSetting', 'stats', 'secret', 'latestUpdate', 'updates'));
     }
 
+    public function serverInfo(string $secret)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $phpIni = php_ini_loaded_file() ?? 'Tidak ditemukan';
+        $uploadMax = get_cfg_var('upload_max_filesize') ?? 'N/A';
+        $postMax = get_cfg_var('post_max_size') ?? 'N/A';
+        $memoryLimit = get_cfg_var('memory_limit') ?? 'N/A';
+        $maxExecTime = get_cfg_var('max_execution_time') ?? 'N/A';
+
+        $diskTotal = disk_total_space(storage_path());
+        $diskFree  = disk_free_space(storage_path());
+        $diskUsed  = $diskTotal - $diskFree;
+        $diskPercent = $diskTotal > 0 ? round(($diskUsed / $diskTotal) * 100, 1) : 0;
+
+        $cacheStatus = [
+            'config'  => file_exists(base_path('bootstrap/cache/config.php')) ? 'CACHED' : 'NOT CACHED',
+            'route'   => file_exists(base_path('bootstrap/cache/routes-v7.php')) ? 'CACHED' : 'NOT CACHED',
+            'view'    => file_exists(base_path('bootstrap/cache/views.php')) ? 'CACHED' : 'NOT CACHED',
+            'events'  => file_exists(base_path('bootstrap/cache/events.php')) ? 'CACHED' : 'NOT CACHED',
+        ];
+
+        $serverSoftware = $_SERVER['SERVER_SOFTWARE'] ?? ($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown');
+        $serverPort = $_SERVER['SERVER_PORT'] ?? 'N/A';
+        $serverProtocol = $_SERVER['SERVER_PROTOCOL'] ?? 'N/A';
+        $serverAddr = $_SERVER['SERVER_ADDR'] ?? 'N/A';
+        $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? 'N/A';
+
+        $pdoDsn = config('database.connections.' . config('database.default') . '.dsn', 'N/A');
+        $dbHost = config('database.connections.' . config('database.default') . '.host', 'N/A');
+        $dbName = config('database.connections.' . config('database.default') . '.database', 'N/A');
+        $dbUser = config('database.connections.' . config('database.default') . '.username', 'N/A');
+
+        try {
+            $dbConnected = \DB::connection()->getPdo() !== null;
+        } catch (\Throwable $e) {
+            $dbConnected = false;
+        }
+
+        $phpExtensions = phpinfo(INFO_MODULES);
+        preg_match_all('/<tr[^>]*><td[^>]*>([A-Za-z_]+)<\/td><td[^>]*>([^<]+)<\/td>/i', $phpExtensions, $extMatches);
+        $extList = [];
+        foreach ($extMatches[1] as $i => $name) {
+            $extList[] = $name;
+        }
+        sort($extList);
+
+        $sessionDriver = config('session.driver', 'file');
+        $sessionLifetime = config('session.lifetime', 120);
+        $sessionPath = config('session.path', '/tmp');
+
+        $laravelVersion = app()->version();
+        $timezone = config('app.timezone', 'UTC');
+
+        return view('developer.server-info', compact(
+            'secret', 'phpVersion', 'phpIni', 'uploadMax', 'postMax', 'memoryLimit', 'maxExecTime',
+            'diskTotal', 'diskFree', 'diskUsed', 'diskPercent', 'cacheStatus',
+            'serverSoftware', 'serverPort', 'serverProtocol', 'serverAddr', 'remoteAddr',
+            'pdoDsn', 'dbHost', 'dbName', 'dbUser', 'dbConnected',
+            'extList', 'sessionDriver', 'sessionLifetime', 'sessionPath',
+            'laravelVersion', 'timezone'
+        ));
+    }
+
     // ─────────────────────────────────────────────
     // APK MANAGER
     // ─────────────────────────────────────────────
