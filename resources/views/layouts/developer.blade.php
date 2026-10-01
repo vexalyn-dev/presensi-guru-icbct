@@ -1166,20 +1166,33 @@ textarea.input { resize: vertical; min-height: 85px; }
 }
 .si-block:last-child { border-right: 0; }
 .si-label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--txt-dim);
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-family: 'Geist Mono', monospace;
 }
 .si-val {
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: var(--txt-head);
   font-family: 'Geist Mono', monospace;
   word-break: break-all;
+  line-height: 1.4;
+}
+@media(max-width: 900px) {
+  .grid-server-info { grid-template-columns: repeat(2, 1fr); }
+  .si-block:nth-child(2) { border-right: 0; }
+  .si-block:nth-child(3) { border-top: 1px solid var(--line-subtle); }
+  .si-block:nth-child(4) { border-top: 1px solid var(--line-subtle); border-right: 0; }
+  .si-block:nth-child(5) { border-top: 1px solid var(--line-subtle); }
+}
+@media(max-width: 500px) {
+  .grid-server-info { grid-template-columns: 1fr; }
+  .si-block { border-right: 0 !important; border-bottom: 1px solid var(--line-subtle); }
+  .si-block:last-child { border-bottom: 0; }
 }
 
 /* Quick Actions Console */

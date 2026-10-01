@@ -218,23 +218,23 @@
                     <div class="si-label">Database</div>
                     <div class="si-val mono">{{ $stats['db_driver'] ?? '-' }} / {{ $stats['db_host'] ?? '-' }}</div>
                     <div class="si-label">Database Name</div>
-                    <div class="si-val mono" style="font-size:12px">{{ $stats['db_name'] ?? '-' }}</div>
+                    <div class="si-val mono" style="font-size:11px">{{ $stats['db_name'] ?? '-' }}</div>
                     <div class="si-label">Database User</div>
                     <div class="si-val mono">{{ $stats['db_user'] ?? '-' }}</div>
                 </div>
                 <div class="si-block">
                     <div class="si-label">Cache Status</div>
-                    <div class="si-val" style="font-size:12px">
-                        Config {{ $stats['cache_config'] === 'CACHED' ? '<span style="color:#10b981">✓</span>' : '<span style="color:#f43f5e">✗</span>' }} /
-                        Route {{ $stats['cache_route'] === 'CACHED' ? '<span style="color:#10b981">✓</span>' : '<span style="color:#f43f5e">✗</span>' }} /
-                        View {{ $stats['cache_view'] === 'CACHED' ? '<span style="color:#10b981">✓</span>' : '<span style="color:#f43f5e">✗</span>' }}
+                    <div class="si-val mono" style="font-size:11px">
+                        @if($stats['cache_config'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Cfg
+                        @if($stats['cache_route'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Rt
+                        @if($stats['cache_view'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Vw
                     </div>
                     <div class="si-label">Disk Usage</div>
-                    <div class="si-val mono" style="font-size:12px">
+                    <div class="si-val mono" style="font-size:11px">
                         {{ round(($stats['disk_total'] - $stats['disk_free']) / 1073741824, 1) }}GB / {{ round($stats['disk_total'] / 1073741824, 1) }}GB ({{ $stats['disk_percent'] }}%)
                     </div>
                     <div class="si-label">Session</div>
-                    <div class="si-val mono">{{ $stats['session_driver'] ?? '-' }} / {{ $stats['session_lifetime'] ?? '-' }}min</div>
+                    <div class="si-val mono" style="font-size:11px">{{ $stats['session_driver'] ?? '-' }} · {{ $stats['session_lifetime'] ?? '-' }}min</div>
                 </div>
             </div>
         </div>
