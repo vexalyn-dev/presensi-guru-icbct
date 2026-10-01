@@ -399,6 +399,12 @@
                     <span class="nb-ico nb-ico-lg nb-ico-sun"><i data-lucide="zap" class="w-5 h-5"></i></span>
                     <div><b>Optimize</b><small>Bangun ulang cache config, route, dan view</small></div>
                 </a>
+                <a href="{{ route('developer.deploy', $secret) }}"
+                   onclick="return confirmAction(this, '🚀 Deploy & Pull?\nGit pull dari repository, composer install, migrate, rebuild cache.')"
+                   class="nb-tool">
+                    <span class="nb-ico nb-ico-lg nb-ico-emerald"><i data-lucide="rocket" class="w-5 h-5"></i></span>
+                    <div><b>Deploy & Pull</b><small>Git pull + composer + migrate + cache</small></div>
+                </a>
                 <a href="{{ url('/fix-session?secret=' . $secret) }}"
                    onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="nb-tool">
                     <span class="nb-ico nb-ico-lg nb-ico-amber"><i data-lucide="wrench" class="w-5 h-5"></i></span>

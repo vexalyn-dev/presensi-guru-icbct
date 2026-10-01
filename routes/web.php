@@ -408,8 +408,8 @@ Route::get('/debug-session', function () {
 });
 
 // ============================================================
-// One-time cache fix endpoint — hapus setelah selesai dipakai
-// Akses: /fix-session?secret=vexalyn-dev-2026
+// One-time session fix — clear cache & perbaiki session dir
+// Akses: /fix-session?secret={developer_secret_key}
 // ============================================================
 Route::get('/fix-session', function () {
     $secret = request('secret');
@@ -418,15 +418,8 @@ Route::get('/fix-session', function () {
     }
 
     $sessionDir = storage_path('framework/sessions');
-
-    // Paksa buat folder + set permission
     @mkdir($sessionDir, 0777, true);
     @chmod($sessionDir, 0777);
-
-    // Coba tulis file test
-    $testFile = $sessionDir . '/.write-test';
-    $canWrite = @file_put_contents($testFile, 'test', FILE_APPEND) !== false;
-    @unlink($testFile);
 
     Artisan::call('config:clear');
     Artisan::call('route:clear');
@@ -434,16 +427,7 @@ Route::get('/fix-session', function () {
     Artisan::call('cache:clear');
     Artisan::call('event:clear');
 
-    return response()->json([
-        'success'  => true,
-        'message'  => '✅ Cache berhasil dibersihkan! Session dir diperbaiki.',
-        'session_dir'  => $sessionDir,
-        'dir_exists'   => is_dir($sessionDir),
-        'dir_writable' => is_writable($sessionDir),
-        'write_test'   => $canWrite,
-        'permissions'  => substr(sprintf('%o', fileperms($sessionDir) ?? 0), -4),
-        'instructions' => 'Refresh halaman login (Ctrl+Shift+R). Cek cookie di DevTools → Application → Cookies. Harusnya muncul icb_ct_session.',
-    ]);
+    return redirect()->back()->with('success', '✅ Session & cache berhasil diperbaiki. Refresh halaman.');
 });
 
 Route::middleware(['auth'])->group(function () {
