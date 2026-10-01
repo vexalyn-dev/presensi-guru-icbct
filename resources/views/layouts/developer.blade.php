@@ -1153,6 +1153,35 @@ textarea.input { resize: vertical; min-height: 85px; }
 .dot.ok { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
 .dot.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
 
+/* Server Info Grid */
+.grid-server-info {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--line-subtle);
+}
+.si-block {
+  padding: 16px 20px;
+  border-right: 1px solid var(--line-subtle);
+}
+.si-block:last-child { border-right: 0; }
+.si-label {
+  font-size: 0.7rem;
+  color: var(--txt-dim);
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: 'Geist Mono', monospace;
+}
+.si-val {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--txt-head);
+  font-family: 'Geist Mono', monospace;
+  word-break: break-all;
+}
+
 /* Quick Actions Console */
 .actions {
   padding: 10px;
@@ -1817,7 +1846,6 @@ textarea.input { resize: vertical; min-height: 85px; }
         <div class="nav-label">Kelola Sistem</div>
         <button type="button" onclick="switchTab('apk')" id="nav-apk" class="nav-item"><i data-lucide="smartphone"></i> APK Manager</button>
         <button type="button" onclick="switchTab('system')" id="nav-system" class="nav-item"><i data-lucide="cpu"></i> System State</button>
-        <button type="button" onclick="switchTab('server-info')" id="nav-server-info" class="nav-item"><i data-lucide="monitor"></i> Server Info</button>
         <button type="button" onclick="switchTab('releases')" id="nav-releases" class="nav-item"><i data-lucide="git-pull-request"></i> Releases</button>
 
         <div class="nav-label">Tautan & Preferensi</div>
@@ -1877,12 +1905,11 @@ textarea.input { resize: vertical; min-height: 85px; }
 </main>
 
 <script>
-    const tabs = ['dashboard', 'apk', 'system', 'server-info', 'releases', 'settings'];
+    const tabs = ['dashboard', 'apk', 'system', 'releases', 'settings'];
     const titles = {
         dashboard: 'Dashboard',
         apk: 'APK Manager',
         system: 'System State',
-        'server-info': 'Server Info',
         releases: 'Riwayat Rilis',
         settings: 'Settings & Tema'
     };
@@ -1890,7 +1917,6 @@ textarea.input { resize: vertical; min-height: 85px; }
         dashboard: 'layout-dashboard',
         apk: 'smartphone',
         system: 'cpu',
-        'server-info': 'monitor',
         releases: 'git-pull-request',
         settings: 'settings'
     };

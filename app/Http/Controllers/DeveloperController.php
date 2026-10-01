@@ -49,6 +49,29 @@ class DeveloperController extends Controller
             'env'             => config('app.env'),
             'debug'           => config('app.debug'),
             'app_url'         => config('app.url'),
+            'upload_max'      => get_cfg_var('upload_max_filesize') ?: 'N/A',
+            'post_max'        => get_cfg_var('post_max_size') ?: 'N/A',
+            'memory_limit'    => get_cfg_var('memory_limit') ?: 'N/A',
+            'max_exec_time'   => get_cfg_var('max_execution_time') ?: 'N/A',
+            'disk_total'      => disk_total_space(storage_path()),
+            'disk_free'       => disk_free_space(storage_path()),
+            'disk_percent'    => disk_total_space(storage_path()) > 0
+                ? round((1 - disk_free_space(storage_path()) / disk_total_space(storage_path())) * 100, 1)
+                : 0,
+            'cache_config'    => file_exists(base_path('bootstrap/cache/config.php')) ? 'CACHED' : 'NOT',
+            'cache_route'     => file_exists(base_path('bootstrap/cache/routes-v7.php')) ? 'CACHED' : 'NOT',
+            'cache_view'      => file_exists(base_path('bootstrap/cache/views.php')) ? 'CACHED' : 'NOT',
+            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'server_port'     => $_SERVER['SERVER_PORT'] ?? 'N/A',
+            'server_addr'     => $_SERVER['SERVER_ADDR'] ?? 'N/A',
+            'remote_addr'     => $_SERVER['REMOTE_ADDR'] ?? 'N/A',
+            'db_driver'       => config('database.default'),
+            'db_host'         => config('database.connections.' . config('database.default') . '.host') ?: 'N/A',
+            'db_name'         => config('database.connections.' . config('database.default') . '.database') ?: 'N/A',
+            'db_user'         => config('database.connections.' . config('database.default') . '.username') ?: 'N/A',
+            'session_driver'  => config('session.driver', 'file'),
+            'session_lifetime'=> config('session.lifetime', 120),
+            'timezone'        => config('app.timezone', 'UTC'),
         ];
 
         $latestUpdate = null;

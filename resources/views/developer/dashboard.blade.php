@@ -183,6 +183,62 @@
             </div>
         </div>
 
+        {{-- SERVER INFO CARD --}}
+        <div class="card" style="grid-column:1/-1">
+            <div class="card-head">
+                <h3><i data-lucide="monitor" style="width:18px;height:18px;color:#06b6d4"></i> Server Info</h3>
+                <span class="live"><i></i> Live</span>
+            </div>
+            <div class="grid-server-info">
+                <div class="si-block">
+                    <div class="si-label">PHP</div>
+                    <div class="si-val mono">{{ $stats['php_version'] ?? '8.x' }}</div>
+                    <div class="si-label">Laravel</div>
+                    <div class="si-val mono">v{{ ltrim($stats['laravel_version'] ?? '11.x', 'vV') }}</div>
+                    <div class="si-label">Memory Limit</div>
+                    <div class="si-val mono">{{ $stats['memory_limit'] ?? '-' }}</div>
+                </div>
+                <div class="si-block">
+                    <div class="si-label">Upload Max</div>
+                    <div class="si-val mono">{{ $stats['upload_max'] ?? '-' }}</div>
+                    <div class="si-label">Post Max</div>
+                    <div class="si-val mono">{{ $stats['post_max'] ?? '-' }}</div>
+                    <div class="si-label">Max Execution</div>
+                    <div class="si-val mono">{{ $stats['max_exec_time'] ?? '-' }}s</div>
+                </div>
+                <div class="si-block">
+                    <div class="si-label">Server Software</div>
+                    <div class="si-val mono" style="font-size:12px">{{ $stats['server_software'] ?? '-' }}</div>
+                    <div class="si-label">Server Port</div>
+                    <div class="si-val mono">{{ $stats['server_port'] ?? '-' }}</div>
+                    <div class="si-label">Server IP</div>
+                    <div class="si-val mono">{{ $stats['server_addr'] ?? '-' }}</div>
+                </div>
+                <div class="si-block">
+                    <div class="si-label">Database</div>
+                    <div class="si-val mono">{{ $stats['db_driver'] ?? '-' }} / {{ $stats['db_host'] ?? '-' }}</div>
+                    <div class="si-label">Database Name</div>
+                    <div class="si-val mono" style="font-size:12px">{{ $stats['db_name'] ?? '-' }}</div>
+                    <div class="si-label">Database User</div>
+                    <div class="si-val mono">{{ $stats['db_user'] ?? '-' }}</div>
+                </div>
+                <div class="si-block">
+                    <div class="si-label">Cache Status</div>
+                    <div class="si-val" style="font-size:12px">
+                        Config {{ $stats['cache_config'] === 'CACHED' ? '<span style="color:#10b981">✓</span>' : '<span style="color:#f43f5e">✗</span>' }} /
+                        Route {{ $stats['cache_route'] === 'CACHED' ? '<span style="color:#10b981">✓</span>' : '<span style="color:#f43f5e">✗</span>' }} /
+                        View {{ $stats['cache_view'] === 'CACHED' ? '<span style="color:#10b981">✓</span>' : '<span style="color:#f43f5e">✗</span>' }}
+                    </div>
+                    <div class="si-label">Disk Usage</div>
+                    <div class="si-val mono" style="font-size:12px">
+                        {{ round(($stats['disk_total'] - $stats['disk_free']) / 1073741824, 1) }}GB / {{ round($stats['disk_total'] / 1073741824, 1) }}GB ({{ $stats['disk_percent'] }}%)
+                    </div>
+                    <div class="si-label">Session</div>
+                    <div class="si-val mono">{{ $stats['session_driver'] ?? '-' }} / {{ $stats['session_lifetime'] ?? '-' }}min</div>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-head">
                 <h3><i data-lucide="zap" style="width:18px;height:18px;color:#818cf8"></i> Aksi Cepat</h3>
