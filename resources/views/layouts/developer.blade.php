@@ -115,49 +115,51 @@ html[data-theme="tokyo-night"] body.dp {
   --sky-line: rgba(125, 207, 255, 0.35);
 }
 
-/* ─── 3. Catppuccin Mocha ─── */
+/* ─── 3. Cappuccino Mocha (Warm Roasted Coffee & Caramel) ─── */
+body.dp[data-theme="cappuccino"],
 body.dp[data-theme="catppuccin"],
+html[data-theme="cappuccino"] body.dp,
 html[data-theme="catppuccin"] body.dp {
-  --bg-base: #11111b;
-  --bg-surface: #181825;
-  --bg-surface-elevated: #1e1e2e;
-  --bg-surface-glass: rgba(24, 24, 37, 0.85);
-  --bg-hover: #313244;
+  --bg-base: #140d0a;
+  --bg-surface: #1e140f;
+  --bg-surface-elevated: #2a1c15;
+  --bg-surface-glass: rgba(30, 20, 15, 0.88);
+  --bg-hover: #36241b;
   
-  --line-subtle: rgba(255, 255, 255, 0.08);
-  --line-mid: rgba(203, 166, 247, 0.22);
-  --line-bright: rgba(203, 166, 247, 0.35);
+  --line-subtle: rgba(226, 198, 170, 0.12);
+  --line-mid: rgba(212, 163, 115, 0.28);
+  --line-bright: rgba(212, 163, 115, 0.45);
 
-  --txt-head: #cdd6f4;
-  --txt-body: #bac2de;
-  --txt-sub: #a6adc8;
-  --txt-dim: #6c7086;
+  --txt-head: #faf3eb;
+  --txt-body: #e6ccb2;
+  --txt-sub: #b08968;
+  --txt-dim: #7f5539;
 
-  --accent: #cba6f7;
-  --accent-hover: #b48ead;
-  --accent-glow: rgba(203, 166, 247, 0.38);
-  --accent-soft: rgba(203, 166, 247, 0.15);
-  --accent-line: rgba(203, 166, 247, 0.4);
+  --accent: #d4a373;
+  --accent-hover: #c58f5d;
+  --accent-glow: rgba(212, 163, 115, 0.4);
+  --accent-soft: rgba(212, 163, 115, 0.16);
+  --accent-line: rgba(212, 163, 115, 0.42);
 
-  --ok: #a6e3a1;
-  --ok-soft: rgba(166, 227, 161, 0.15);
-  --ok-glow: rgba(166, 227, 161, 0.35);
-  --ok-line: rgba(166, 227, 161, 0.35);
+  --ok: #52b788;
+  --ok-soft: rgba(82, 183, 136, 0.15);
+  --ok-glow: rgba(82, 183, 136, 0.35);
+  --ok-line: rgba(82, 183, 136, 0.35);
 
-  --warn: #f9e2af;
-  --warn-soft: rgba(249, 226, 175, 0.15);
-  --warn-glow: rgba(249, 226, 175, 0.35);
-  --warn-line: rgba(249, 226, 175, 0.35);
+  --warn: #e9c46a;
+  --warn-soft: rgba(233, 196, 106, 0.15);
+  --warn-glow: rgba(233, 196, 106, 0.35);
+  --warn-line: rgba(233, 196, 106, 0.35);
 
-  --bad: #f38ba8;
-  --bad-soft: rgba(243, 139, 168, 0.15);
-  --bad-glow: rgba(243, 139, 168, 0.35);
-  --bad-line: rgba(243, 139, 168, 0.35);
+  --bad: #e76f51;
+  --bad-soft: rgba(231, 111, 81, 0.15);
+  --bad-glow: rgba(231, 111, 81, 0.35);
+  --bad-line: rgba(231, 111, 81, 0.35);
 
-  --sky: #89dceb;
-  --sky-soft: rgba(137, 220, 235, 0.15);
-  --sky-glow: rgba(137, 220, 235, 0.35);
-  --sky-line: rgba(137, 220, 235, 0.35);
+  --sky: #dd9754;
+  --sky-soft: rgba(221, 151, 84, 0.15);
+  --sky-glow: rgba(221, 151, 84, 0.35);
+  --sky-line: rgba(221, 151, 84, 0.35);
 }
 
 /* ─── 4. Nordic Aurora ─── */
@@ -248,6 +250,81 @@ html[data-theme="cyberpunk"] body.dp {
   --sky-soft: rgba(6, 182, 212, 0.15);
   --sky-glow: rgba(6, 182, 212, 0.4);
   --sky-line: rgba(6, 182, 212, 0.4);
+}
+
+/* ─── 6. Alabaster Light (Clean, Crisp & Modern Light Mode) ─── */
+body.dp[data-theme="light"],
+html[data-theme="light"] body.dp {
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f1f5f9;
+  --bg-surface-glass: rgba(255, 255, 255, 0.88);
+  --bg-hover: #e2e8f0;
+  
+  --line-subtle: rgba(15, 23, 42, 0.08);
+  --line-mid: rgba(15, 23, 42, 0.16);
+  --line-bright: rgba(99, 102, 241, 0.35);
+
+  --txt-head: #0f172a;
+  --txt-body: #334155;
+  --txt-sub: #64748b;
+  --txt-dim: #94a3b8;
+
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-glow: rgba(79, 70, 229, 0.22);
+  --accent-soft: rgba(79, 70, 229, 0.08);
+  --accent-line: rgba(79, 70, 229, 0.25);
+
+  --ok: #059669;
+  --ok-soft: rgba(5, 150, 105, 0.08);
+  --ok-glow: rgba(5, 150, 105, 0.2);
+  --ok-line: rgba(5, 150, 105, 0.2);
+
+  --warn: #d97706;
+  --warn-soft: rgba(217, 119, 6, 0.08);
+  --warn-glow: rgba(217, 119, 6, 0.2);
+  --warn-line: rgba(217, 119, 6, 0.2);
+
+  --bad: #e11d48;
+  --bad-soft: rgba(225, 29, 72, 0.08);
+  --bad-glow: rgba(225, 29, 72, 0.2);
+  --bad-line: rgba(225, 29, 72, 0.2);
+
+  --sky: #0284c7;
+  --sky-soft: rgba(2, 132, 199, 0.08);
+  --sky-glow: rgba(2, 132, 199, 0.2);
+  --sky-line: rgba(2, 132, 199, 0.2);
+
+  --sh-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 14px -2px rgba(15, 23, 42, 0.06);
+  --sh-hover: 0 10px 25px -4px rgba(15, 23, 42, 0.09), 0 0 18px rgba(79, 70, 229, 0.12);
+  --sh-modal: 0 20px 45px -10px rgba(15, 23, 42, 0.18), 0 0 25px rgba(79, 70, 229, 0.1);
+}
+
+/* ─── Ultra-Smooth Luxury Theme Transitions ─── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 999999;
+}
+
+/* Fallback smooth transition */
+html.theme-morphing,
+html.theme-morphing body.dp,
+html.theme-morphing body.dp *,
+html.theme-morphing body.dp *::before,
+html.theme-morphing body.dp *::after {
+  transition: 
+    background-color 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.48s cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
 
 /* ═════════════════════════════════════════════════════════════
@@ -360,7 +437,7 @@ body.dp {
   font-size: 0.95rem;
   font-weight: 750;
   letter-spacing: -0.015em;
-  color: #fff;
+  color: var(--txt-head);
 }
 .brand small {
   display: block;
@@ -413,7 +490,7 @@ body.dp {
 }
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  color: var(--txt-head);
   transform: translateX(2px);
 }
 .nav-item:hover svg {
@@ -469,7 +546,7 @@ body.dp {
 .me .n {
   font-weight: 650;
   font-size: 0.84rem;
-  color: #fff;
+  color: var(--txt-head);
 }
 .me .r {
   font-size: 0.72rem;
@@ -508,7 +585,7 @@ body.dp {
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.015em;
-  color: #fff;
+  color: var(--txt-head);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -635,7 +712,7 @@ body.dp {
   font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #fff;
+  color: var(--txt-head);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -795,7 +872,7 @@ body.dp {
 .input {
   width: 100%;
   font: inherit;
-  color: #f8fafc;
+  color: var(--txt-head);
   background: var(--bg-surface-elevated);
   border: 1px solid var(--line-subtle);
   border-radius: 8px;
@@ -926,7 +1003,7 @@ textarea.input { resize: vertical; min-height: 85px; }
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.2;
-  color: #fff;
+  color: var(--txt-head);
 }
 .dash-header .subtext {
   color: var(--txt-sub);
@@ -935,7 +1012,7 @@ textarea.input { resize: vertical; min-height: 85px; }
   line-height: 1.6;
 }
 .dash-header .subtext b {
-  color: #fff;
+  color: var(--txt-head);
   font-weight: 600;
   font-family: 'Geist Mono', monospace;
 }
@@ -1030,13 +1107,13 @@ textarea.input { resize: vertical; min-height: 85px; }
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.035em;
-  color: #fff;
+  color: var(--txt-head);
 }
 .num-sm {
   font-size: 1.4rem;
   font-family: 'Geist Mono', monospace;
   font-weight: 650;
-  color: #fff;
+  color: var(--txt-head);
 }
 .grid-main {
   display: grid;
@@ -1066,7 +1143,7 @@ textarea.input { resize: vertical; min-height: 85px; }
 .info .v {
   font-weight: 600;
   font-size: 0.92rem;
-  color: #fff;
+  color: var(--txt-head);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1090,7 +1167,7 @@ textarea.input { resize: vertical; min-height: 85px; }
   width: 100%;
   padding: 12px 16px;
   font: inherit;
-  color: #fff;
+  color: var(--txt-head);
   text-align: left;
   text-decoration: none;
   cursor: pointer;
@@ -1103,7 +1180,7 @@ textarea.input { resize: vertical; min-height: 85px; }
   display: block;
   font-size: 0.88rem;
   font-weight: 650;
-  color: #fff;
+  color: var(--txt-head);
 }
 .action small, .tool small {
   display: block;
@@ -1140,7 +1217,7 @@ textarea.input { resize: vertical; min-height: 85px; }
 .apk h4 {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--txt-head);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1251,7 +1328,7 @@ textarea.input { resize: vertical; min-height: 85px; }
   display: block;
   font-size: 1.4rem;
   font-weight: 750;
-  color: #fff;
+  color: var(--txt-head);
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -1364,7 +1441,7 @@ textarea.input { resize: vertical; min-height: 85px; }
   gap: 8px;
   min-width: 0;
 }
-.tl-title h4 { font-size: 0.98rem; font-weight: 700; color: #fff; }
+.tl-title h4 { font-size: 0.98rem; font-weight: 700; color: var(--txt-head); }
 .tl-side {
   display: flex;
   align-items: center;
@@ -1559,7 +1636,7 @@ textarea.input { resize: vertical; min-height: 85px; }
 .theme-card-info h4 {
   font-size: 0.95rem;
   font-weight: 750;
-  color: #fff;
+  color: var(--txt-head);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1637,7 +1714,7 @@ textarea.input { resize: vertical; min-height: 85px; }
   border-bottom: 1px solid var(--line-subtle);
   background: rgba(255, 255, 255, 0.02);
 }
-.modal-top b { font-weight: 700; font-size: 0.95rem; color: #fff; }
+.modal-top b { font-weight: 700; font-size: 0.95rem; color: var(--txt-head); }
 .modal-body {
   padding: 24px;
   display: flex;
@@ -1645,8 +1722,8 @@ textarea.input { resize: vertical; min-height: 85px; }
   gap: 16px;
 }
 .modal-sm .modal-body { align-items: flex-start; }
-.modal-body h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.025em; color: #fff; }
-.modal-body h3 { font-size: 1.15rem; font-weight: 700; color: #fff; }
+.modal-body h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.025em; color: var(--txt-head); }
+.modal-body h3 { font-size: 1.15rem; font-weight: 700; color: var(--txt-head); }
 .tips {
   list-style: none;
   margin: 0;
@@ -1666,7 +1743,7 @@ textarea.input { resize: vertical; min-height: 85px; }
   transition: border-color 0.2s;
 }
 .tips li:hover { border-color: var(--line-mid); }
-.tips strong { display: block; font-size: 0.88rem; color: #fff; }
+.tips strong { display: block; font-size: 0.88rem; color: var(--txt-head); }
 .tips small { display: block; font-size: 0.78rem; color: var(--txt-sub); margin-top: 2px; }
 
 /* ─── Scrollbar ─── */
@@ -1849,40 +1926,103 @@ textarea.input { resize: vertical; min-height: 85px; }
         el.textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/\./g, ':') + ' WIB';
     }
 
-    /* ─── Global Theme Manager ─── */
-    window.setConsoleTheme = function(themeName) {
-        const validThemes = ['obsidian', 'tokyo-night', 'catppuccin', 'nordic', 'cyberpunk'];
+    /* ─── Ultra-Smooth Luxury Theme Manager ─── */
+    window.setConsoleTheme = function(themeName, event, skipAnimation) {
+        const validThemes = ['obsidian', 'tokyo-night', 'cappuccino', 'catppuccin', 'nordic', 'cyberpunk', 'light'];
         if (!validThemes.includes(themeName)) themeName = 'obsidian';
+
+        const applyThemeDOM = () => {
+            document.body.setAttribute('data-theme', themeName);
+            document.documentElement.setAttribute('data-theme', themeName);
+            try { localStorage.setItem('dev_panel_theme', themeName); } catch (e) {}
+
+            // Update Theme Cards selection state
+            document.querySelectorAll('.theme-card').forEach(card => {
+                const isMatch = card.dataset.theme === themeName || 
+                    ((themeName === 'cappuccino' || themeName === 'catppuccin') && 
+                     (card.dataset.theme === 'cappuccino' || card.dataset.theme === 'catppuccin'));
+                card.classList.toggle('selected', isMatch);
+            });
+
+            // Update theme label if present
+            const lbl = document.getElementById('active-theme-label');
+            if (lbl) {
+                const names = {
+                    'obsidian': 'Obsidian Console (Default)',
+                    'tokyo-night': 'Tokyo Night',
+                    'cappuccino': 'Cappuccino Mocha (Warm Coffee)',
+                    'catppuccin': 'Cappuccino Mocha (Warm Coffee)',
+                    'nordic': 'Nordic Aurora',
+                    'cyberpunk': 'Cyberpunk Matrix',
+                    'light': 'Alabaster Light (Clean Mode)'
+                };
+                lbl.textContent = names[themeName] || themeName;
+            }
+
+            if (window.lucide) lucide.createIcons();
+        };
+
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         
-        document.body.setAttribute('data-theme', themeName);
-        document.documentElement.setAttribute('data-theme', themeName);
-        try { localStorage.setItem('dev_panel_theme', themeName); } catch (e) {}
-
-        // Update Theme Cards selection state
-        document.querySelectorAll('.theme-card').forEach(card => {
-            card.classList.toggle('selected', card.dataset.theme === themeName);
-        });
-
-        // Update theme label if present
-        const lbl = document.getElementById('active-theme-label');
-        if (lbl) {
-            const names = {
-                'obsidian': 'Obsidian Console (Default)',
-                'tokyo-night': 'Tokyo Night',
-                'catppuccin': 'Catppuccin Mocha',
-                'nordic': 'Nordic Aurora',
-                'cyberpunk': 'Cyberpunk Matrix'
-            };
-            lbl.textContent = names[themeName] || themeName;
+        // Immediate apply if on initial load or user prefers reduced motion
+        if (skipAnimation || prefersReduced) {
+            applyThemeDOM();
+            return;
         }
 
-        if (window.lucide) lucide.createIcons();
+        // View Transition API circular reveal (luxurious radial sweep)
+        if (document.startViewTransition) {
+            let x = window.innerWidth / 2;
+            let y = window.innerHeight / 2;
+            if (event && (event.clientX || event.clientY)) {
+                x = event.clientX;
+                y = event.clientY;
+            } else if (event && event.currentTarget) {
+                const rect = event.currentTarget.getBoundingClientRect();
+                x = rect.left + rect.width / 2;
+                y = rect.top + rect.height / 2;
+            }
+
+            const endRadius = Math.hypot(
+                Math.max(x, window.innerWidth - x),
+                Math.max(y, window.innerHeight - y)
+            );
+
+            const transition = document.startViewTransition(() => {
+                applyThemeDOM();
+            });
+
+            transition.ready.then(() => {
+                document.documentElement.animate(
+                    {
+                        clipPath: [
+                            `circle(0px at ${x}px ${y}px)`,
+                            `circle(${endRadius}px at ${x}px ${y}px)`
+                        ]
+                    },
+                    {
+                        duration: 520,
+                        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                        pseudoElement: '::view-transition-new(root)'
+                    }
+                );
+            }).catch(() => {
+                applyThemeDOM();
+            });
+        } else {
+            // Buttery-smooth CSS morphing fallback
+            document.documentElement.classList.add('theme-morphing');
+            applyThemeDOM();
+            setTimeout(() => {
+                document.documentElement.classList.remove('theme-morphing');
+            }, 550);
+        }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Load active theme
+        // Load active theme smoothly without initial flash
         const savedTheme = localStorage.getItem('dev_panel_theme') || 'obsidian';
-        window.setConsoleTheme(savedTheme);
+        window.setConsoleTheme(savedTheme, null, true);
 
         if (window.lucide) lucide.createIcons();
         let saved = null;

@@ -164,7 +164,7 @@
         </div>
         <div class="card stat">
             <div class="stat-head"><span class="ico t-bad"><i data-lucide="code-2" style="width:16px;height:16px"></i></span>Laravel Framework</div>
-            <div class="num num-sm">v{{ $stats['laravel_version'] ?? '11.x' }}</div>
+            <div class="num num-sm">v{{ ltrim($stats['laravel_version'] ?? '11.x', 'vV') }}</div>
         </div>
     </div>
 
@@ -233,7 +233,7 @@
                     <span class="ico ico-lg t-ok"><i data-lucide="package-check" style="width:22px;height:22px"></i></span>
                     <div>
                         <h4>{{ $appSetting->apk_name ?? 'ICB CT Presensi' }}
-                            <span class="chip mono">v{{ $appSetting->apk_version_label ?? $appSetting->apk_version ?? '1.0' }}</span>
+                            <span class="chip mono">v{{ ltrim($appSetting->apk_version_label ?? $appSetting->apk_version ?? '1.0', 'vV') }}</span>
                         </h4>
                         <p class="mono mute">{{ $appSetting->apk_size_human ?? '-' }} • diunggah {{ $appSetting->apk_uploaded_at?->diffForHumans() ?? '-' }}</p>
                     </div>
@@ -408,7 +408,7 @@
 
     <div class="rel-stats">
         <div class="card mini"><span class="ico t-ok"><i data-lucide="layers" style="width:17px;height:17px"></i></span><div><p>Total Rilis</p><b>{{ $items->count() }}</b></div></div>
-        <div class="card mini"><span class="ico t-violet"><i data-lucide="tag" style="width:17px;height:17px"></i></span><div><p>Versi Terbaru</p><b class="mono">{{ $latest ? 'v'.$latest->version : '-' }}</b></div></div>
+        <div class="card mini"><span class="ico t-violet"><i data-lucide="tag" style="width:17px;height:17px"></i></span><div><p>Versi Terbaru</p><b class="mono">{{ $latest ? ('v' . ltrim($latest->version, 'vV')) : '-' }}</b></div></div>
         <div class="card mini"><span class="ico t-violet"><i data-lucide="star" style="width:17px;height:17px"></i></span><div><p>Fitur Baru</p><b>{{ $counts->get('feature', 0) }}</b></div></div>
         <div class="card mini"><span class="ico t-warn"><i data-lucide="wrench" style="width:17px;height:17px"></i></span><div><p>Perbaikan</p><b>{{ $counts->get('fix', 0) + $counts->get('hotfix', 0) }}</b></div></div>
     </div>
@@ -435,7 +435,7 @@
                                     <div class="tl-top">
                                         <div class="tl-title">
                                             <h4>{{ $u->title }}</h4>
-                                            <span class="chip mono">v{{ $u->version }}</span>
+                                            <span class="chip mono">v{{ ltrim($u->version, 'vV') }}</span>
                                             <span class="badge t-{{ $tone }}">{{ $tLabel }}</span>
                                             @if($isLatest)<span class="badge" style="background:var(--accent);color:#fff;box-shadow:0 0 10px var(--accent-glow)">Terbaru</span>@endif
                                         </div>
@@ -513,7 +513,7 @@
 
             <div class="theme-grid">
                 {{-- Theme 1: Obsidian Console --}}
-                <div class="theme-card" data-theme="obsidian" onclick="window.setConsoleTheme('obsidian')">
+                <div class="theme-card" data-theme="obsidian" onclick="window.setConsoleTheme('obsidian', event)">
                     <div class="theme-preview-box" style="background:#090d16;">
                         <div class="theme-mini-side" style="background:rgba(15,23,42,0.9); border-color:rgba(255,255,255,0.08);">
                             <div class="mini-logo" style="background:#6366f1;"></div>
@@ -556,7 +556,7 @@
                 </div>
 
                 {{-- Theme 2: Tokyo Night --}}
-                <div class="theme-card" data-theme="tokyo-night" onclick="window.setConsoleTheme('tokyo-night')">
+                <div class="theme-card" data-theme="tokyo-night" onclick="window.setConsoleTheme('tokyo-night', event)">
                     <div class="theme-preview-box" style="background:#1a1b26;">
                         <div class="theme-mini-side" style="background:#16161e; border-color:rgba(122,162,247,0.2);">
                             <div class="mini-logo" style="background:#7aa2f7;"></div>
@@ -598,29 +598,29 @@
                     </div>
                 </div>
 
-                {{-- Theme 3: Catppuccin Mocha --}}
-                <div class="theme-card" data-theme="catppuccin" onclick="window.setConsoleTheme('catppuccin')">
-                    <div class="theme-preview-box" style="background:#11111b;">
-                        <div class="theme-mini-side" style="background:#181825; border-color:rgba(203,166,247,0.2);">
-                            <div class="mini-logo" style="background:#cba6f7;"></div>
-                            <div class="mini-nav-line active" style="background:#cba6f7;"></div>
-                            <div class="mini-nav-line" style="background:#a6adc8;"></div>
-                            <div class="mini-nav-line" style="background:#a6adc8;"></div>
+                {{-- Theme 3: Cappuccino Mocha --}}
+                <div class="theme-card" data-theme="cappuccino" onclick="window.setConsoleTheme('cappuccino', event)">
+                    <div class="theme-preview-box" style="background:#140d0a;">
+                        <div class="theme-mini-side" style="background:#1e140f; border-color:rgba(212,163,115,0.25);">
+                            <div class="mini-logo" style="background:#d4a373;"></div>
+                            <div class="mini-nav-line active" style="background:#d4a373;"></div>
+                            <div class="mini-nav-line" style="background:#b08968;"></div>
+                            <div class="mini-nav-line" style="background:#b08968;"></div>
                         </div>
                         <div class="theme-mini-main">
-                            <div class="theme-mini-top" style="background:#181825; border-color:rgba(203,166,247,0.2);">
-                                <div class="mini-title-line" style="background:#cdd6f4;"></div>
-                                <div class="mini-pill" style="background:rgba(166,227,161,0.2); border:1px solid #a6e3a1;"></div>
+                            <div class="theme-mini-top" style="background:#1e140f; border-color:rgba(212,163,115,0.25);">
+                                <div class="mini-title-line" style="background:#faf3eb;"></div>
+                                <div class="mini-pill" style="background:rgba(82,183,136,0.25); border:1px solid #52b788;"></div>
                             </div>
                             <div class="theme-mini-content">
                                 <div class="theme-mini-stats">
-                                    <div class="theme-mini-stat-card" style="background:#1e1e2e;">
-                                        <div class="theme-mini-stat-line" style="background:#6c7086;"></div>
-                                        <div class="theme-mini-stat-val" style="background:#cba6f7;"></div>
+                                    <div class="theme-mini-stat-card" style="background:#2a1c15;">
+                                        <div class="theme-mini-stat-line" style="background:#7f5539;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#d4a373;"></div>
                                     </div>
-                                    <div class="theme-mini-stat-card" style="background:#1e1e2e;">
-                                        <div class="theme-mini-stat-line" style="background:#6c7086;"></div>
-                                        <div class="theme-mini-stat-val" style="background:#89dceb;"></div>
+                                    <div class="theme-mini-stat-card" style="background:#2a1c15;">
+                                        <div class="theme-mini-stat-line" style="background:#7f5539;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#e9c46a;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -628,13 +628,13 @@
                     </div>
                     <div class="theme-card-foot">
                         <div class="theme-card-info">
-                            <h4>Catppuccin Mocha <span class="badge t-violet">Pastel</span></h4>
-                            <p>Nuansa velvety mocha gelap yang lembut di mata dengan aksen pastel mauve.</p>
+                            <h4>Cappuccino Mocha <span class="badge t-warn">Warm Coffee</span></h4>
+                            <p>Nuansa roasted espresso, creamy caramel hangat, dan kayu walnut yang nyaman di mata.</p>
                             <div class="theme-card-swatches">
-                                <span class="theme-swatch" style="background:#11111b;" title="Base #11111b"></span>
-                                <span class="theme-swatch" style="background:#181825;" title="Surface #181825"></span>
-                                <span class="theme-swatch" style="background:#cba6f7;" title="Accent #cba6f7"></span>
-                                <span class="theme-swatch" style="background:#a6e3a1;" title="Success #a6e3a1"></span>
+                                <span class="theme-swatch" style="background:#140d0a;" title="Espresso #140d0a"></span>
+                                <span class="theme-swatch" style="background:#1e140f;" title="Mocha #1e140f"></span>
+                                <span class="theme-swatch" style="background:#d4a373;" title="Caramel #d4a373"></span>
+                                <span class="theme-swatch" style="background:#e9c46a;" title="Honey Latte #e9c46a"></span>
                             </div>
                         </div>
                         <span class="theme-check-badge"><i data-lucide="check" style="width:13px;height:13px"></i></span>
@@ -642,7 +642,7 @@
                 </div>
 
                 {{-- Theme 4: Nordic Aurora --}}
-                <div class="theme-card" data-theme="nordic" onclick="window.setConsoleTheme('nordic')">
+                <div class="theme-card" data-theme="nordic" onclick="window.setConsoleTheme('nordic', event)">
                     <div class="theme-preview-box" style="background:#0e141d;">
                         <div class="theme-mini-side" style="background:#17202d; border-color:rgba(136,192,208,0.2);">
                             <div class="mini-logo" style="background:#88c0d0;"></div>
@@ -685,7 +685,7 @@
                 </div>
 
                 {{-- Theme 5: Cyberpunk Matrix --}}
-                <div class="theme-card" data-theme="cyberpunk" onclick="window.setConsoleTheme('cyberpunk')">
+                <div class="theme-card" data-theme="cyberpunk" onclick="window.setConsoleTheme('cyberpunk', event)">
                     <div class="theme-preview-box" style="background:#05080e;">
                         <div class="theme-mini-side" style="background:#0a111a; border-color:rgba(16,185,129,0.25);">
                             <div class="mini-logo" style="background:#10b981;"></div>
@@ -721,6 +721,49 @@
                                 <span class="theme-swatch" style="background:#0a111a;" title="Surface #0a111a"></span>
                                 <span class="theme-swatch" style="background:#10b981;" title="Accent #10b981"></span>
                                 <span class="theme-swatch" style="background:#06b6d4;" title="Cyan #06b6d4"></span>
+                            </div>
+                        </div>
+                        <span class="theme-check-badge"><i data-lucide="check" style="width:13px;height:13px"></i></span>
+                    </div>
+                </div>
+
+                {{-- Theme 6: Alabaster Light --}}
+                <div class="theme-card" data-theme="light" onclick="window.setConsoleTheme('light', event)">
+                    <div class="theme-preview-box" style="background:#f8fafc; border:1px solid rgba(15,23,42,0.08);">
+                        <div class="theme-mini-side" style="background:#ffffff; border-color:rgba(15,23,42,0.08);">
+                            <div class="mini-logo" style="background:#4f46e5;"></div>
+                            <div class="mini-nav-line active" style="background:#4f46e5;"></div>
+                            <div class="mini-nav-line" style="background:#cbd5e1;"></div>
+                            <div class="mini-nav-line" style="background:#cbd5e1;"></div>
+                        </div>
+                        <div class="theme-mini-main">
+                            <div class="theme-mini-top" style="background:#ffffff; border-color:rgba(15,23,42,0.08);">
+                                <div class="mini-title-line" style="background:#0f172a;"></div>
+                                <div class="mini-pill" style="background:rgba(5,150,105,0.12); border:1px solid #059669;"></div>
+                            </div>
+                            <div class="theme-mini-content">
+                                <div class="theme-mini-stats">
+                                    <div class="theme-mini-stat-card" style="background:#ffffff; border-color:rgba(15,23,42,0.08);">
+                                        <div class="theme-mini-stat-line" style="background:#94a3b8;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#4f46e5;"></div>
+                                    </div>
+                                    <div class="theme-mini-stat-card" style="background:#ffffff; border-color:rgba(15,23,42,0.08);">
+                                        <div class="theme-mini-stat-line" style="background:#94a3b8;"></div>
+                                        <div class="theme-mini-stat-val" style="background:#0284c7;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="theme-card-foot">
+                        <div class="theme-card-info">
+                            <h4>Alabaster Light <span class="badge t-sky">Clean Mode</span></h4>
+                            <p>Desain terang modern, clean, dan super jernih dengan kontras tajam & nuansa visual elegan.</p>
+                            <div class="theme-card-swatches">
+                                <span class="theme-swatch" style="background:#f8fafc;" title="Base #f8fafc"></span>
+                                <span class="theme-swatch" style="background:#ffffff; border-color:#cbd5e1;" title="Surface #ffffff"></span>
+                                <span class="theme-swatch" style="background:#4f46e5;" title="Accent #4f46e5"></span>
+                                <span class="theme-swatch" style="background:#059669;" title="Success #059669"></span>
                             </div>
                         </div>
                         <span class="theme-check-badge"><i data-lucide="check" style="width:13px;height:13px"></i></span>
