@@ -365,7 +365,7 @@
                         <h3 class="nb-h3">Mode maintenance
                             <span class="nb-state {{ $mOn ? 'on' : '' }}"><i></i>{{ $mOn ? 'Aktif' : 'Nonaktif' }}</span>
                         </h3>
-                        <p class="nb-muted nb-maxw">Saat aktif, pengguna biasa melihat halaman maintenance. Admin dan operator tetap bisa masuk.</p>
+                        <p class="nb-muted nb-maxw">Saat aktif, hanya developer yang bisa login. Admin/operator/guru/piket akan melihat halaman maintenance.</p>
                     </div>
                     <label class="nb-switch">
                         <input type="hidden" name="maintenance_mode" value="0">
