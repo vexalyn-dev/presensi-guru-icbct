@@ -214,9 +214,9 @@
                 <div class="si-row">
                     <div class="si-item full"><span class="si-label">Cache</span>
                         <span class="si-val mono" style="font-size:11px">
-                            @if($stats['cache_config'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endifCfg
-                            @if($stats['cache_route'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endifRt
-                            @if($stats['cache_view'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endifVw
+                            @if($stats['cache_config'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Cfg
+                            @if($stats['cache_route'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Rt
+                            @if($stats['cache_view'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Vw
                         </span>
                     </div>
                 </div>
