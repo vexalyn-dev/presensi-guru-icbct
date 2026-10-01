@@ -118,90 +118,99 @@
     <div class="dash-header">
         <div class="dash-top">
             <div>
-                <h2 class="greeting">{{ $greeting }}, Developer.</h2>
+                <h2 class="greeting">{{ $greeting }}, <span style="background: linear-gradient(135deg, #cbd5e1 30%, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Developer</span></h2>
                 <p class="subtext">
-                    Sistem berjalan di <b>{{ $host }}</b> pukul {{ now()->format('H:i') }} WIB.
+                    Sistem aktif di <b>{{ $host }}</b> pukul {{ now()->format('H:i') }} WIB.
                     @if(($stats['pending_leaves'] ?? 0) > 0)
-                        Ada {{ $stats['pending_leaves'] }} pengajuan izin menunggu persetujuan.
+                        <span style="color: #fbbf24;">• Ada {{ $stats['pending_leaves'] }} pengajuan izin menunggu persetujuan.</span>
                     @else
-                        Tidak ada pengajuan izin yang menunggu.
+                        <span style="color: #34d399;">• Semua status operasional normal.</span>
                     @endif
                 </p>
                 <div class="dash-meta">
                     <span class="dash-pill"><i></i> {{ $envName }}</span>
+                    <span class="pill mono"><i data-lucide="server" style="width:13px;height:13px;color:var(--txt-dim)"></i> {{ $host }}</span>
+                    @if(($stats['pending_leaves'] ?? 0) > 0)
+                        <span class="pill" style="border-color: rgba(245,158,11,0.3); color: #fbbf24;"><i data-lucide="clock" style="width:13px;height:13px"></i> {{ $stats['pending_leaves'] }} Pending</span>
+                    @endif
                 </div>
             </div>
             <div class="dash-actions">
-                <a href="{{ url('/dashboard') }}" target="_blank" class="btn btn-ghost"><i data-lucide="external-link" style="width:15px;height:15px"></i> Buka aplikasi</a>
-                <button type="button" class="btn btn-ghost" id="nb-open-welcome"><i data-lucide="book-open" style="width:15px;height:15px"></i> Panduan</button>
+                <a href="{{ url('/dashboard') }}" target="_blank" class="btn btn-ghost"><i data-lucide="external-link" style="width:15px;height:15px"></i> Buka Aplikasi</a>
+                <button type="button" class="btn btn-ghost" id="nb-open-welcome"><i data-lucide="book-open" style="width:15px;height:15px"></i> Panduan Dev</button>
             </div>
         </div>
     </div>
 
     @if($debugOn)
         <div class="alert alert-warn" role="alert">
-            <i data-lucide="triangle-alert" style="width:16px;height:16px;flex-shrink:0;margin-top:1px"></i>
-            <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di production supaya detail error tidak terlihat pengguna.</span>
+            <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
+            <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di environment production agar detail konfigurasi dan error trace terlindungi.</span>
         </div>
     @endif
 
     <div class="stats">
         <div class="card stat">
-            <div class="stat-head"><span class="ico t-violet"><i data-lucide="users" style="width:14px;height:14px"></i></span>Total pengguna</div>
+            <div class="stat-head"><span class="ico t-violet"><i data-lucide="users" style="width:16px;height:16px"></i></span>Total Pengguna</div>
             <div class="num" data-count="{{ $stats['total_users'] ?? 0 }}">0</div>
         </div>
         <div class="card stat">
-            <div class="stat-head"><span class="ico t-sky"><i data-lucide="graduation-cap" style="width:14px;height:14px"></i></span>Guru aktif</div>
+            <div class="stat-head"><span class="ico t-sky"><i data-lucide="graduation-cap" style="width:16px;height:16px"></i></span>Guru Aktif</div>
             <div class="num" data-count="{{ $stats['total_teachers'] ?? 0 }}">0</div>
         </div>
         <div class="card stat">
-            <div class="stat-head"><span class="ico t-warn"><i data-lucide="cpu" style="width:14px;height:14px"></i></span>Versi PHP</div>
+            <div class="stat-head"><span class="ico t-warn"><i data-lucide="cpu" style="width:16px;height:16px"></i></span>Versi PHP</div>
             <div class="num num-sm">{{ $stats['php_version'] ?? '8.x' }}</div>
         </div>
         <div class="card stat">
-            <div class="stat-head"><span class="ico t-bad"><i data-lucide="code-2" style="width:14px;height:14px"></i></span>Laravel</div>
+            <div class="stat-head"><span class="ico t-bad"><i data-lucide="code-2" style="width:16px;height:16px"></i></span>Laravel Framework</div>
             <div class="num num-sm">v{{ $stats['laravel_version'] ?? '11.x' }}</div>
         </div>
     </div>
 
     <div class="grid-main">
         <div class="card">
-            <div class="card-head"><h3>Informasi sistem</h3><span class="live"><i></i> Live</span></div>
+            <div class="card-head">
+                <h3><i data-lucide="activity" style="width:18px;height:18px;color:#34d399"></i> Informasi Sistem</h3>
+                <span class="live"><i></i> Live</span>
+            </div>
             <div class="info">
-                <div><p class="l">Environment</p><p class="v">{{ $envName }}</p></div>
+                <div><p class="l">Environment</p><p class="v mono"><span class="badge t-ok">{{ $envName }}</span></p></div>
                 <div><p class="l">Debug mode</p><p class="v"><span class="dot {{ $debugOn ? 'warn' : 'ok' }}"></span>{{ $debugOn ? 'Aktif' : 'Nonaktif' }}</p></div>
-                <div><p class="l">Host URL</p><p class="v trunc">{{ $host }}</p></div>
-                <div><p class="l">Waktu server</p><p class="v">{{ now()->format('H:i') }} WIB</p></div>
+                <div><p class="l">Host URL</p><p class="v mono trunc">{{ $host }}</p></div>
+                <div><p class="l">Waktu server</p><p class="v mono">{{ now()->format('H:i') }} WIB</p></div>
                 <div><p class="l">Izin pending</p><p class="v">{{ $stats['pending_leaves'] ?? 0 }} pengajuan</p></div>
-                <div><p class="l">Operator dan admin</p><p class="v">{{ $stats['total_operators'] ?? 0 }} akun</p></div>
+                <div><p class="l">Operator & admin</p><p class="v">{{ $stats['total_operators'] ?? 0 }} akun</p></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-head"><h3>Aksi cepat</h3></div>
+            <div class="card-head">
+                <h3><i data-lucide="zap" style="width:18px;height:18px;color:#818cf8"></i> Aksi Cepat</h3>
+            </div>
             <div class="actions">
                 <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirmAction(this, '🧹 Bersihkan semua cache?\n(config, route, view, app cache)')" class="action">
-                    <span class="ico t-sky"><i data-lucide="trash-2" style="width:16px;height:16px"></i></span>
-                    <div><b>Sapu Jagat</b><small>Hapus semua cache</small></div>
+                    <span class="ico t-sky"><i data-lucide="trash-2" style="width:17px;height:17px"></i></span>
+                    <div><b>Sapu Jagat</b><small>Hapus cache config, route, & view</small></div>
                     <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                 </a>
                 <a href="{{ route('developer.migrate', $secret) }}" onclick="return confirmAction(this, '🗄️ Jalankan database migration?\nPastikan backup sudah ada!')" class="action">
-                    <span class="ico t-ok"><i data-lucide="database" style="width:16px;height:16px"></i></span>
-                    <div><b>Run migration</b><small>migrate --force</small></div>
+                    <span class="ico t-ok"><i data-lucide="database" style="width:17px;height:17px"></i></span>
+                    <div><b>Run Migration</b><small>artisan migrate --force</small></div>
                     <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                 </a>
                 <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this, '⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
-                    <span class="ico t-warn"><i data-lucide="zap" style="width:16px;height:16px"></i></span>
-                    <div><b>Optimize</b><small>Bangun ulang cache</small></div>
+                    <span class="ico t-warn"><i data-lucide="zap" style="width:17px;height:17px"></i></span>
+                    <div><b>Optimize</b><small>Bangun ulang struktur cache</small></div>
                     <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                 </a>
                 <a href="{{ url('/fix-session?secret=' . $secret) }}" onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="action">
-                    <span class="ico t-warn"><i data-lucide="wrench" style="width:16px;height:16px"></i></span>
-                    <div><b>Fix Session</b><small>Perbaiki session + clear cache</small></div>
+                    <span class="ico t-warn"><i data-lucide="wrench" style="width:17px;height:17px"></i></span>
+                    <div><b>Fix Session</b><small>Perbaiki permissions & clear cache</small></div>
                     <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                 </a>
                 <a href="{{ route('developer.run-seeder', $secret) }}" onclick="return confirmAction(this, '🌱 Jalankan database seeder?\nMembuat ulang akun developer dan data demo.')" class="action">
-                    <span class="ico t-violet"><i data-lucide="sprout" style="width:16px;height:16px"></i></span>
+                    <span class="ico t-violet"><i data-lucide="sprout" style="width:17px;height:17px"></i></span>
                     <div><b>Run Seeder</b><small>db:seed --force</small></div>
                     <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                 </a>
@@ -213,12 +222,12 @@
 {{-- ═════════ TAB: APK MANAGER ═════════ --}}
 <div id="tab-apk" class="tab-content">
     <header class="page-head">
-        <h2>APK Manager</h2>
-        <p>Unggah dan bagikan build Android terbaru ke pengguna.</p>
+        <h2><i data-lucide="smartphone" style="width:22px;height:22px;color:var(--accent);vertical-align:middle;margin-right:6px"></i> APK Manager</h2>
+        <p>Unggah dan bagikan build Android terbaru ke pengguna aplikasi.</p>
     </header>
 
     @if($appSetting?->apk_file)
-        <div class="card" style="margin-bottom:22px">
+        <div class="card" style="margin-bottom:24px">
             <div class="apk">
                 <div class="apk-info">
                     <span class="ico ico-lg t-ok"><i data-lucide="package-check" style="width:22px;height:22px"></i></span>
@@ -226,25 +235,25 @@
                         <h4>{{ $appSetting->apk_name ?? 'ICB CT Presensi' }}
                             <span class="chip mono">v{{ $appSetting->apk_version_label ?? $appSetting->apk_version ?? '1.0' }}</span>
                         </h4>
-                        <p class="mono mute">{{ $appSetting->apk_size_human ?? '-' }} – diunggah {{ $appSetting->apk_uploaded_at?->diffForHumans() ?? '-' }}</p>
+                        <p class="mono mute">{{ $appSetting->apk_size_human ?? '-' }} • diunggah {{ $appSetting->apk_uploaded_at?->diffForHumans() ?? '-' }}</p>
                     </div>
                 </div>
                 <div class="row">
-                    <a href="{{ $appSetting->apk_url }}" target="_blank" class="btn btn-ghost"><i data-lucide="download" style="width:15px;height:15px"></i> Unduh</a>
+                    <a href="{{ $appSetting->apk_url }}" target="_blank" class="btn btn-ghost"><i data-lucide="download" style="width:15px;height:15px"></i> Unduh APK</a>
                     <form action="{{ route('developer.apk.delete', $secret) }}" method="POST"
                           onsubmit="return confirmAction(this, '🗑️ Hapus APK ini?\nPengguna tidak bisa mengunduhnya lagi.', 'danger')">
                         @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-danger" aria-label="Hapus APK"><i data-lucide="trash-2" style="width:15px;height:15px"></i></button>
+                        <button type="submit" class="btn btn-danger" aria-label="Hapus APK" title="Hapus APK"><i data-lucide="trash-2" style="width:15px;height:15px"></i></button>
                     </form>
                 </div>
             </div>
             @if(!empty($appSetting->apk_min_android) || !empty($appSetting->apk_changelog))
                 <div class="apk-meta">
                     @if(!empty($appSetting->apk_min_android))
-                        <span class="pill"><i data-lucide="smartphone" style="width:14px;height:14px"></i> {{ $appSetting->apk_min_android }}</span>
+                        <span class="pill"><i data-lucide="smartphone" style="width:14px;height:14px;color:var(--txt-dim)"></i> {{ $appSetting->apk_min_android }}</span>
                     @endif
                     @if(!empty($appSetting->apk_changelog))
-                        <span class="pill"><i data-lucide="file-text" style="width:14px;height:14px"></i> {{ $appSetting->apk_changelog }}</span>
+                        <span class="pill"><i data-lucide="file-text" style="width:14px;height:14px;color:var(--txt-dim)"></i> {{ $appSetting->apk_changelog }}</span>
                     @endif
                 </div>
             @endif
@@ -252,21 +261,23 @@
     @endif
 
     <div class="card">
-        <div class="card-head"><h3>Unggah build baru</h3></div>
+        <div class="card-head">
+            <h3><i data-lucide="upload-cloud" style="width:18px;height:18px;color:#818cf8"></i> Unggah Build Baru</h3>
+        </div>
         <div class="pad">
             <form action="{{ route('developer.apk', $secret) }}" method="POST" enctype="multipart/form-data" class="apk-form">
                 @csrf
                 <div class="apk-drop">
                     <label class="label">File APK</label>
                     <div class="drop" id="apk-drop" tabindex="0" role="button"
-                         onclick="document.getElementById('apk-input').click()"
-                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('apk-input').click()}"
-                         ondragover="event.preventDefault(); this.classList.add('over')"
-                         ondragleave="this.classList.remove('over')"
-                         ondrop="handleApkDrop(event, this)">
+                          onclick="document.getElementById('apk-input').click()"
+                          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('apk-input').click()}"
+                          ondragover="event.preventDefault(); this.classList.add('over')"
+                          ondragleave="this.classList.remove('over')"
+                          ondrop="handleApkDrop(event, this)">
                         <span class="ico ico-lg t-violet"><i data-lucide="upload-cloud" style="width:22px;height:22px"></i></span>
-                        <p><b>Klik untuk memilih</b> atau seret file ke sini</p>
-                        <p id="apk-filename" class="mono mute">.apk, maksimal 100MB</p>
+                        <p><b>Klik untuk memilih</b> atau seret file ke area ini</p>
+                        <p id="apk-filename" class="mono mute">Format .apk, ukuran maksimal 100MB</p>
                     </div>
                     <input type="file" id="apk-input" name="apk_file" accept=".apk" hidden onchange="setApkName(this.files[0])">
                     @error('apk_file')<p class="err">{{ $message }}</p>@enderror
@@ -274,16 +285,26 @@
 
                 <div class="apk-fields">
                     <div class="form-grid">
-                        <div><label class="label">Nama aplikasi</label>
-                            <input type="text" name="apk_name" class="input" value="{{ old('apk_name', $appSetting?->apk_name ?? '') }}" placeholder="ICB CT Mobile"></div>
-                        <div><label class="label">Label versi</label>
-                            <input type="text" name="apk_version" class="input mono" value="{{ old('apk_version', $appSetting?->apk_version ?? '') }}" placeholder="1.0.0"></div>
-                        <div><label class="label">Minimal Android</label>
-                            <input type="text" name="apk_min_android" class="input" value="{{ old('apk_min_android', $appSetting?->apk_min_android ?? '') }}" placeholder="Android 8.0+"></div>
-                        <div><label class="label">Changelog</label>
-                            <input type="text" name="apk_changelog" class="input" value="{{ old('apk_changelog', $appSetting?->apk_changelog ?? '') }}" placeholder="Perbaikan bug dan peningkatan"></div>
+                        <div>
+                            <label class="label">Nama Aplikasi</label>
+                            <input type="text" name="apk_name" class="input" value="{{ old('apk_name', $appSetting?->apk_name ?? '') }}" placeholder="ICB CT Mobile">
+                        </div>
+                        <div>
+                            <label class="label">Label Versi</label>
+                            <input type="text" name="apk_version" class="input mono" value="{{ old('apk_version', $appSetting?->apk_version ?? '') }}" placeholder="1.0.0">
+                        </div>
+                        <div>
+                            <label class="label">Minimal Versi Android</label>
+                            <input type="text" name="apk_min_android" class="input" value="{{ old('apk_min_android', $appSetting?->apk_min_android ?? '') }}" placeholder="Android 8.0+">
+                        </div>
+                        <div>
+                            <label class="label">Catatan Perubahan (Changelog)</label>
+                            <input type="text" name="apk_changelog" class="input" value="{{ old('apk_changelog', $appSetting?->apk_changelog ?? '') }}" placeholder="Perbaikan performa dan antarmuka">
+                        </div>
                     </div>
-                    <div class="end"><button type="submit" class="btn"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan APK</button></div>
+                    <div class="end">
+                        <button type="submit" class="btn"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan APK</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -293,8 +314,8 @@
 {{-- ═════════ TAB: SYSTEM STATE ═════════ --}}
 <div id="tab-system" class="tab-content">
     <header class="page-head">
-        <h2>System State</h2>
-        <p>Atur ketersediaan aplikasi dan jalankan tools sistem.</p>
+        <h2><i data-lucide="cpu" style="width:22px;height:22px;color:var(--accent);vertical-align:middle;margin-right:6px"></i> System State</h2>
+        <p>Atur ketersediaan aplikasi dan jalankan tools eksekusi sistem.</p>
     </header>
 
     <div class="stack">
@@ -303,8 +324,8 @@
                 @csrf
                 <div class="pad bb" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
                     <div>
-                        <h3>Mode maintenance <span class="state {{ $mOn ? 'on' : '' }}"><i></i>{{ $mOn ? 'Aktif' : 'Nonaktif' }}</span></h3>
-                        <p class="mute" style="max-width:32rem;margin-top:4px">Saat aktif, hanya developer yang bisa login. Admin, operator, guru, dan piket akan melihat halaman maintenance.</p>
+                        <h3><i data-lucide="shield-alert" style="width:18px;height:18px;color:#fbbf24;vertical-align:middle;margin-right:6px"></i> Mode Maintenance <span class="state {{ $mOn ? 'on' : '' }}"><i></i>{{ $mOn ? 'Aktif' : 'Nonaktif' }}</span></h3>
+                        <p class="mute" style="max-width:34rem;margin-top:5px">Saat aktif, hanya developer yang bisa login. Admin, operator, guru, dan piket akan melihat halaman maintenance sistem.</p>
                     </div>
                     <label class="switch">
                         <input type="hidden" name="maintenance_mode" value="0">
@@ -314,44 +335,46 @@
                     </label>
                 </div>
                 <div class="pad bb">
-                    <label class="label">Pesan maintenance</label>
-                    <textarea name="maintenance_message" rows="3" class="input" placeholder="Sistem sedang dalam pemeliharaan...">{{ $setting->maintenance_message }}</textarea>
+                    <label class="label">Pesan Maintenance</label>
+                    <textarea name="maintenance_message" rows="3" class="input" placeholder="Sistem sedang dalam proses pemeliharaan berkala...">{{ $setting->maintenance_message }}</textarea>
                 </div>
                 <div class="pad foot end">
-                    <button type="submit" class="btn"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan perubahan</button>
+                    <button type="submit" class="btn"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan Pengaturan</button>
                 </div>
             </form>
         </div>
 
         <div class="card">
-            <div class="card-head"><h3>System tools</h3></div>
+            <div class="card-head">
+                <h3><i data-lucide="terminal" style="width:18px;height:18px;color:#38bdf8"></i> Developer Tools & Artisan Commands</h3>
+            </div>
             <div class="tools">
                 <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirmAction(this, '🧹 Bersihkan semua cache?')" class="tool">
-                    <span class="ico ico-lg t-sky"><i data-lucide="trash-2" style="width:19px;height:19px"></i></span>
-                    <div><b>Sapu Jagat</b><small>Hapus cache config, route, view, dan app</small></div>
+                    <span class="ico ico-lg t-sky"><i data-lucide="trash-2" style="width:20px;height:20px"></i></span>
+                    <div><b>Sapu Jagat</b><small>Hapus cache config, route, view, & app</small></div>
                 </a>
                 <a href="{{ route('developer.migrate', $secret) }}" onclick="return confirmAction(this, '🗄️ Jalankan migration?\nPastikan backup ada!')" class="tool">
-                    <span class="ico ico-lg t-ok"><i data-lucide="database" style="width:19px;height:19px"></i></span>
-                    <div><b>Run migration</b><small>artisan migrate --force</small></div>
+                    <span class="ico ico-lg t-ok"><i data-lucide="database" style="width:20px;height:20px"></i></span>
+                    <div><b>Run Migration</b><small>artisan migrate --force</small></div>
                 </a>
                 <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this, '⚡ Rebuild semua cache?')" class="tool">
-                    <span class="ico ico-lg t-warn"><i data-lucide="zap" style="width:19px;height:19px"></i></span>
-                    <div><b>Optimize</b><small>Bangun ulang cache config, route, dan view</small></div>
+                    <span class="ico ico-lg t-warn"><i data-lucide="zap" style="width:20px;height:20px"></i></span>
+                    <div><b>Optimize</b><small>Bangun ulang cache config, route, & view</small></div>
                 </a>
                 <a href="{{ route('developer.deploy', $secret) }}" onclick="return confirmAction(this, '🚀 Deploy & Pull?\nGit pull dari repository, composer install, migrate, rebuild cache.')" class="tool">
-                    <span class="ico ico-lg t-violet"><i data-lucide="rocket" style="width:19px;height:19px"></i></span>
+                    <span class="ico ico-lg t-violet"><i data-lucide="rocket" style="width:20px;height:20px"></i></span>
                     <div><b>Deploy & Pull</b><small>Git pull + composer + migrate + cache</small></div>
                 </a>
                 <a href="{{ url('/fix-session?secret=' . $secret) }}" onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="tool">
-                    <span class="ico ico-lg t-warn"><i data-lucide="wrench" style="width:19px;height:19px"></i></span>
-                    <div><b>Fix Session</b><small>Perbaiki session dir + clear semua cache</small></div>
+                    <span class="ico ico-lg t-warn"><i data-lucide="wrench" style="width:20px;height:20px"></i></span>
+                    <div><b>Fix Session</b><small>Perbaiki session dir + clear cache</small></div>
                 </a>
                 <button type="button" class="tool" id="debug-toggle-btn" data-debug="{{ $stats['debug'] ? '1' : '0' }}">
-                    <span class="ico ico-lg t-bad" id="debug-toggle-ico"><i data-lucide="bug" style="width:19px;height:19px"></i></span>
+                    <span class="ico ico-lg t-bad" id="debug-toggle-ico"><i data-lucide="bug" style="width:20px;height:20px"></i></span>
                     <div><b id="debug-toggle-label">Debug ON</b><small id="debug-toggle-desc">Klik untuk mematikan debug</small></div>
                 </button>
                 <a href="{{ route('developer.run-seeder', $secret) }}" onclick="return confirmAction(this, '🌱 Jalankan database seeder?\nMembuat ulang akun developer dan data demo.')" class="tool">
-                    <span class="ico ico-lg t-violet"><i data-lucide="sprout" style="width:19px;height:19px"></i></span>
+                    <span class="ico ico-lg t-violet"><i data-lucide="sprout" style="width:20px;height:20px"></i></span>
                     <div><b>Run Seeder</b><small>db:seed --force</small></div>
                 </a>
             </div>
@@ -377,17 +400,17 @@
 
     <div class="rel-head">
         <header class="page-head" style="margin-bottom:0">
-            <h2>Riwayat rilis</h2>
-            <p>Catatan perubahan yang dikirim ke pengguna, urut dari yang terbaru.</p>
+            <h2><i data-lucide="git-pull-request" style="width:22px;height:22px;color:var(--accent);vertical-align:middle;margin-right:6px"></i> Riwayat Rilis</h2>
+            <p>Catatan rilis dan pembaruan sistem yang didistribusikan ke pengguna.</p>
         </header>
-        <button type="button" class="btn" data-open-release><i data-lucide="plus" style="width:15px;height:15px"></i> Rilis baru</button>
+        <button type="button" class="btn" data-open-release><i data-lucide="plus" style="width:15px;height:15px"></i> Rilis Baru</button>
     </div>
 
     <div class="rel-stats">
-        <div class="card mini"><span class="ico t-ok"><i data-lucide="layers" style="width:16px;height:16px"></i></span><div><p>Total rilis</p><b>{{ $items->count() }}</b></div></div>
-        <div class="card mini"><span class="ico t-violet"><i data-lucide="tag" style="width:16px;height:16px"></i></span><div><p>Versi terbaru</p><b class="mono">{{ $latest ? 'v'.$latest->version : '-' }}</b></div></div>
-        <div class="card mini"><span class="ico t-violet"><i data-lucide="star" style="width:16px;height:16px"></i></span><div><p>Fitur baru</p><b>{{ $counts->get('feature', 0) }}</b></div></div>
-        <div class="card mini"><span class="ico t-warn"><i data-lucide="wrench" style="width:16px;height:16px"></i></span><div><p>Perbaikan</p><b>{{ $counts->get('fix', 0) + $counts->get('hotfix', 0) }}</b></div></div>
+        <div class="card mini"><span class="ico t-ok"><i data-lucide="layers" style="width:17px;height:17px"></i></span><div><p>Total Rilis</p><b>{{ $items->count() }}</b></div></div>
+        <div class="card mini"><span class="ico t-violet"><i data-lucide="tag" style="width:17px;height:17px"></i></span><div><p>Versi Terbaru</p><b class="mono">{{ $latest ? 'v'.$latest->version : '-' }}</b></div></div>
+        <div class="card mini"><span class="ico t-violet"><i data-lucide="star" style="width:17px;height:17px"></i></span><div><p>Fitur Baru</p><b>{{ $counts->get('feature', 0) }}</b></div></div>
+        <div class="card mini"><span class="ico t-warn"><i data-lucide="wrench" style="width:17px;height:17px"></i></span><div><p>Perbaikan</p><b>{{ $counts->get('fix', 0) + $counts->get('hotfix', 0) }}</b></div></div>
     </div>
 
     <div class="rel-grid">
@@ -414,7 +437,7 @@
                                             <h4>{{ $u->title }}</h4>
                                             <span class="chip mono">v{{ $u->version }}</span>
                                             <span class="badge t-{{ $tone }}">{{ $tLabel }}</span>
-                                            @if($isLatest)<span class="badge" style="background:var(--v);color:#fff">Terbaru</span>@endif
+                                            @if($isLatest)<span class="badge" style="background:var(--accent);color:#fff;box-shadow:0 0 10px var(--accent-glow)">Terbaru</span>@endif
                                         </div>
                                         <div class="tl-side">
                                             <time class="mono" datetime="{{ $u->created_at->toDateString() }}">{{ $u->created_at->locale('id')->translatedFormat('d M Y') }}</time>
