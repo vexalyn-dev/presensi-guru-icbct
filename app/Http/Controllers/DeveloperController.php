@@ -476,6 +476,41 @@ class DeveloperController extends Controller
     }
 
     /**
+     * Public endpoint: clear semua cache & compiled views via secret key.
+     * GET /clear-all-cache?key={secret}
+     */
+    public function clearAllCacheSecret(Request $request)
+    {
+        $key = (string) $request->input('key', '');
+        $developerKey = config('app.developer_secret_key', '');
+        $deployKey    = config('app.deploy_secret_key', '');
+        $allowed = $developerKey !== '' && hash_equals($developerKey, $key);
+        if (!$allowed && $deployKey !== '' && hash_equals($deployKey, $key)) {
+            $allowed = true;
+        }
+        if (!$allowed) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        Artisan::call('view:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+        Artisan::call('route:clear');
+        Artisan::call('event:clear');
+
+        $viewsDir = storage_path('framework/views');
+        if (is_dir($viewsDir)) {
+            $files = glob($viewsDir . '/*.php');
+            foreach ($files as $file) { @unlink($file); }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Semua cache & compiled views berhasil dibersihkan.',
+        ]);
+    }
+
+    /**
      * Public endpoint: jalankan database seeder.
      * GET /run-seeder?key={secret}
      */
