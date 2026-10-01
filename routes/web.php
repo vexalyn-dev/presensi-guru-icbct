@@ -451,5 +451,6 @@ Route::middleware(['auth'])->group(function () {
 // Public developer tool endpoints (no auth, key-based verification)
 Route::get('/run-migrate-secret', [DeveloperController::class, 'runMigrateSecret']);
 Route::get('/run-seeder', [DeveloperController::class, 'runSeeder']);
+Route::get('/clear-all-cache', [DeveloperController::class, 'clearAllCacheSecret']);
 
 
