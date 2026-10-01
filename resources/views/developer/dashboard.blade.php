@@ -118,7 +118,7 @@
     <div class="dash-header">
         <div class="dash-top">
             <div>
-                <h2 class="greeting">{{ $greeting }}, <span style="background: linear-gradient(135deg, #cbd5e1 30%, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Developer</span></h2>
+                <h2 class="greeting">{{ $greeting }}, <span style="background: linear-gradient(135deg, #cbd5e1 30%, #818cf8); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Developer</span></h2>
                 <p class="subtext">
                     Sistem aktif di <b>{{ $host }}</b> pukul {{ now()->format('H:i') }} WIB.
                     @if(($stats['pending_leaves'] ?? 0) > 0)
@@ -262,7 +262,7 @@
                         <div class="disk-stats">
                             <span class="mono" style="color:#10b981;font-weight:700">{{ round($used,1) }}GB</span>
                             <span class="mono" style="color:var(--txt-dim)">/{{ round($total,1) }}GB</span>
-                            <span class="mono disk-pct" style="color:{{ $percent > 90 ? '#f43f5e' : ($percent > 70 ? '#f59e0b' : '#10b981') }};margin-left:auto">{{ $percent }}%</span>
+                            <span class="mono disk-pct {{ $percent > 90 ? 'text-rose-500' : ($percent > 70 ? 'text-amber-500' : 'text-emerald-500') }}" style="margin-left:auto">{{ $percent }}%</span>
                         </div>
                     </div>
                 </div>
