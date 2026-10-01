@@ -34,7 +34,7 @@
     <!-- JSON-LD Structured Data — Sekolah -->
     <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
+        "@@context": "https://schema.org",
         "@type": "EducationalOrganization",
         "name": "SMK ICB Cinta Teknika",
         "url": "{{ url()->current() }}",
