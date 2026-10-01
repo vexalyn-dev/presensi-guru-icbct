@@ -1882,7 +1882,7 @@ textarea.input { resize: vertical; min-height: 85px; }
         dashboard: 'Dashboard',
         apk: 'APK Manager',
         system: 'System State',
-        server-info: 'Server Info',
+        'server-info': 'Server Info',
         releases: 'Riwayat Rilis',
         settings: 'Settings & Tema'
     };
@@ -1890,7 +1890,7 @@ textarea.input { resize: vertical; min-height: 85px; }
         dashboard: 'layout-dashboard',
         apk: 'smartphone',
         system: 'cpu',
-        server-info: 'monitor',
+        'server-info': 'monitor',
         releases: 'git-pull-request',
         settings: 'settings'
     };

@@ -139,6 +139,8 @@
         try {
             $teacherSubject = \App\Models\Teacher::where('user_id', auth()->id())->first()?->major_specialty ?? null;
         } catch (\Exception $e) {
+            $teacherSubject = null;
+        }
     @endphp
     <div class="flex min-h-screen m-0 p-0 overflow-x-hidden" x-data="{ sidebarOpen: false }">
         
