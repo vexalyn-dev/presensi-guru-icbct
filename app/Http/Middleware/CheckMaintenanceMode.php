@@ -11,7 +11,7 @@ class CheckMaintenanceMode
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->routeIs('login', 'logout', 'password.*')) {
+        if ($request->routeIs('login', 'login.post', 'logout', 'password.*')) {
             return $next($request);
         }
 
