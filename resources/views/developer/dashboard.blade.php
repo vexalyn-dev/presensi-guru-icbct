@@ -401,6 +401,102 @@
     </div>
 </div>
 
+{{-- ═════════ TAB: iOS MANAGER ═════════ --}}
+<div id="tab-ios" class="tab-content">
+    <header class="page-head">
+        <h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 814 1000" style="width:22px;height:22px;vertical-align:middle;margin-right:6px;fill:var(--accent)"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-110.7c-46-70.4-73.9-161.4-73.9-247.9 0-157.1 100.1-247.4 198.5-247.4 51.6 0 95.1 33.9 127.5 33.9 31.3 0 80.4-36.1 139.2-36.1 22.4 0 108.2 2 167 74.2zM726.4 82.4c24.2-28.8 41.7-68.7 41.7-108.6 0-5.5-.5-11.1-1.5-15.5-39.1 1.5-85.5 26.1-113.8 56.3-22.4 24.7-43.2 64.6-43.2 105.1 0 6 1 12 1.5 14.1 2.5.5 6.5 1 10.5 1 35.4 0 79.4-23.2 104.8-52.4z"/></svg>
+            iOS Manager
+        </h2>
+        <p>Unggah dan bagikan build iOS (IPA) terbaru ke pengguna aplikasi.</p>
+    </header>
+
+    @if($appSetting?->ios_file)
+        <div class="card" style="margin-bottom:24px">
+            <div class="apk">
+                <div class="apk-info">
+                    <span class="ico ico-lg t-sky"><i data-lucide="package-check" style="width:22px;height:22px"></i></span>
+                    <div>
+                        <h4>{{ $appSetting->ios_name ?? 'ICB CT Presensi' }}
+                            <span class="chip mono">v{{ ltrim($appSetting->ios_version_label ?? $appSetting->ios_version ?? '1.0', 'vV') }}</span>
+                        </h4>
+                        <p class="mono mute">{{ $appSetting->ios_size_human ?? '-' }} • diunggah {{ $appSetting->ios_uploaded_at?->diffForHumans() ?? '-' }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <a href="{{ $appSetting->ios_url }}" target="_blank" class="btn btn-ghost"><i data-lucide="download" style="width:15px;height:15px"></i> Unduh IPA</a>
+                    <form action="{{ route('developer.ios.delete', $secret) }}" method="POST"
+                          onsubmit="return confirmAction(this, '🗑️ Hapus file iOS ini?\nPengguna tidak bisa mengunduhnya lagi.', 'danger')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-danger" aria-label="Hapus iOS" title="Hapus iOS"><i data-lucide="trash-2" style="width:15px;height:15px"></i></button>
+                    </form>
+                </div>
+            </div>
+            @if(!empty($appSetting->ios_min_version) || !empty($appSetting->ios_changelog))
+                <div class="apk-meta">
+                    @if(!empty($appSetting->ios_min_version))
+                        <span class="pill"><i data-lucide="smartphone" style="width:14px;height:14px;color:var(--txt-dim)"></i> {{ $appSetting->ios_min_version }}</span>
+                    @endif
+                    @if(!empty($appSetting->ios_changelog))
+                        <span class="pill"><i data-lucide="file-text" style="width:14px;height:14px;color:var(--txt-dim)"></i> {{ $appSetting->ios_changelog }}</span>
+                    @endif
+                </div>
+            @endif
+        </div>
+    @endif
+
+    <div class="card">
+        <div class="card-head">
+            <h3><i data-lucide="upload-cloud" style="width:18px;height:18px;color:#38bdf8"></i> Unggah Build iOS Baru</h3>
+        </div>
+        <div class="pad">
+            <form action="{{ route('developer.ios', $secret) }}" method="POST" enctype="multipart/form-data" class="apk-form">
+                @csrf
+                <div class="apk-drop">
+                    <label class="label">File IPA</label>
+                    <div class="drop" id="ios-drop" tabindex="0" role="button"
+                         onclick="document.getElementById('ios-input').click()"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('ios-input').click()}"
+                         ondragover="event.preventDefault(); this.classList.add('over')"
+                         ondragleave="this.classList.remove('over')"
+                         ondrop="handleIosDrop(event, this)">
+                        <span class="ico ico-lg t-sky"><i data-lucide="upload-cloud" style="width:22px;height:22px"></i></span>
+                        <p><b>Klik untuk memilih</b> atau seret file ke area ini</p>
+                        <p id="ios-filename" class="mono mute">Format .ipa / .zip, ukuran maksimal 200MB</p>
+                    </div>
+                    <input type="file" id="ios-input" name="ios_file" accept=".ipa,.zip" hidden
+                           onchange="document.getElementById('ios-filename').textContent = this.files[0]?.name || 'Format .ipa / .zip, ukuran maksimal 200MB'">
+                    @error('ios_file')<p class="err">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="apk-fields">
+                    <div class="form-grid">
+                        <div>
+                            <label class="label">Nama Aplikasi</label>
+                            <input type="text" name="ios_name" class="input" value="{{ old('ios_name', $appSetting?->ios_name ?? '') }}" placeholder="ICB CT Mobile">
+                        </div>
+                        <div>
+                            <label class="label">Label Versi</label>
+                            <input type="text" name="ios_version" class="input mono" value="{{ old('ios_version', $appSetting?->ios_version ?? '') }}" placeholder="1.0.0">
+                        </div>
+                        <div>
+                            <label class="label">Minimal Versi iOS</label>
+                            <input type="text" name="ios_min_version" class="input" value="{{ old('ios_min_version', $appSetting?->ios_min_version ?? '') }}" placeholder="iOS 14.0+">
+                        </div>
+                        <div>
+                            <label class="label">Catatan Perubahan (Changelog)</label>
+                            <input type="text" name="ios_changelog" class="input" value="{{ old('ios_changelog', $appSetting?->ios_changelog ?? '') }}" placeholder="Perbaikan performa dan antarmuka">
+                        </div>
+                    </div>
+                    <div class="end">
+                        <button type="submit" class="btn"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan iOS</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- ═════════ TAB: SYSTEM STATE ═════════ --}}
 <div id="tab-system" class="tab-content">
     <header class="page-head">
@@ -985,6 +1081,21 @@
         dt.items.add(files[0]);
         $('#apk-input').files = dt.files;
         setApkName(files[0]);
+    };
+
+    window.handleIosDrop = function (event, zone) {
+        event.preventDefault();
+        zone.classList.remove('over');
+        const files = event.dataTransfer.files;
+        if (!files.length) return;
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        const input = document.getElementById('ios-input');
+        if (input) input.files = dt.files;
+        const label = document.getElementById('ios-filename');
+        if (label) label.textContent = files[0].name;
+        const drop = document.getElementById('ios-drop');
+        if (drop) drop.classList.add('has-file');
     };
 
     /* Konfirmasi berbasis Promise (untuk debug toggle) */

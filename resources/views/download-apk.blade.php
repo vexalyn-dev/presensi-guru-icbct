@@ -310,14 +310,9 @@
                 {{-- Android --}}
                 <button onclick="selectPlatform('android')"
                         class="group flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all active:scale-95">
-                    {{-- Android robot SVG (real icon) --}}
-                    <svg viewBox="0 0 24 24" class="w-10 h-10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6.18 12.82a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1Zm11.64 0a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1Z" fill="#3DDC84"/>
-                        <path d="M3.5 9.5C3.5 7.015 7.358 5 12 5s8.5 2.015 8.5 4.5V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V9.5Z" stroke="#3DDC84" stroke-width="1.5" fill="none"/>
-                        <path d="M7 5 5 2M17 5l2-2" stroke="#3DDC84" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M3.5 13h17" stroke="#3DDC84" stroke-width="1.5"/>
-                        <rect x="7" y="19" width="2" height="3" rx="1" fill="#3DDC84"/>
-                        <rect x="15" y="19" width="2" height="3" rx="1" fill="#3DDC84"/>
+                    {{-- Android official logo SVG --}}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-10 h-10">
+                        <path d="M17.523 15.341a.58.58 0 0 1-.58-.58.58.58 0 0 1 .58-.58.58.58 0 0 1 .58.58.58.58 0 0 1-.58.58m-11.046 0a.58.58 0 0 1-.58-.58.58.58 0 0 1 .58-.58.58.58 0 0 1 .58.58.58.58 0 0 1-.58.58M17.78 9.3l1.738-3.01a.361.361 0 0 0-.132-.494.362.362 0 0 0-.494.133l-1.759 3.047a10.879 10.879 0 0 0-5.133-1.27c-1.846 0-3.585.47-5.133 1.27L5.108 5.93a.362.362 0 0 0-.494-.133.361.361 0 0 0-.132.494L6.22 9.3C3.625 10.78 1.9 13.438 1.9 16.5h20.2c0-3.062-1.725-5.72-4.32-7.2" fill="#3DDC84"/>
                     </svg>
                     <div>
                         <p class="text-sm font-bold text-navy-800 dark:text-white">Android</p>
@@ -328,10 +323,9 @@
                 {{-- iOS --}}
                 <button onclick="selectPlatform('ios')"
                         class="group flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-95">
-                    {{-- Apple logo SVG (real icon) --}}
-                    <svg viewBox="0 0 24 24" class="w-10 h-10" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path class="text-slate-700 dark:text-slate-300" fill="currentColor"
-                              d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    {{-- Apple official logo SVG --}}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 814 1000" class="w-10 h-10" fill="currentColor" style="color:#1d1d1f">
+                        <path class="dark:text-slate-200" fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-110.7c-46-70.4-73.9-161.4-73.9-247.9 0-157.1 100.1-247.4 198.5-247.4 51.6 0 95.1 33.9 127.5 33.9 31.3 0 80.4-36.1 139.2-36.1 22.4 0 108.2 2 167 74.2zM726.4 82.4c24.2-28.8 41.7-68.7 41.7-108.6 0-5.5-.5-11.1-1.5-15.5-39.1 1.5-85.5 26.1-113.8 56.3-22.4 24.7-43.2 64.6-43.2 105.1 0 6 1 12 1.5 14.1 2.5.5 6.5 1 10.5 1 35.4 0 79.4-23.2 104.8-52.4z"/>
                     </svg>
                     <div>
                         <p class="text-sm font-bold text-navy-800 dark:text-white">iOS</p>
@@ -410,18 +404,42 @@
             <button onclick="closeApkModal()" class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg">Oke, siap install!</button>
         </div>
 
-        {{-- Panel: iOS (belum tersedia) --}}
+        {{-- Panel: iOS --}}
         <div id="apk-panel-ios" class="p-8 text-center" style="display:none">
-            <div class="w-16 h-16 mx-auto mb-5 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" class="w-14 h-14" fill="currentColor" style="color:#1d1d1f;">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            @php
+                $hasIos = !empty($apkSetting->ios_file) || \Illuminate\Support\Facades\Schema::hasColumn('app_settings', 'ios_file') && !empty($apkSetting->ios_file);
+                $iosUrl  = $hasIos ? asset('storage/' . $apkSetting->ios_file) : '';
+            @endphp
+
+            {{-- Apple logo --}}
+            <div class="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-2xl {{ $hasIos ? 'bg-slate-100 dark:bg-slate-800' : 'bg-slate-100 dark:bg-slate-800' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 814 1000" class="w-10 h-10" fill="currentColor" style="color:#1d1d1f">
+                    <path class="dark:text-slate-200" fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-110.7c-46-70.4-73.9-161.4-73.9-247.9 0-157.1 100.1-247.4 198.5-247.4 51.6 0 95.1 33.9 127.5 33.9 31.3 0 80.4-36.1 139.2-36.1 22.4 0 108.2 2 167 74.2zM726.4 82.4c24.2-28.8 41.7-68.7 41.7-108.6 0-5.5-.5-11.1-1.5-15.5-39.1 1.5-85.5 26.1-113.8 56.3-22.4 24.7-43.2 64.6-43.2 105.1 0 6 1 12 1.5 14.1 2.5.5 6.5 1 10.5 1 35.4 0 79.4-23.2 104.8-52.4z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">iOS Belum Tersedia</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2">Aplikasi ini saat ini hanya tersedia untuk <span class="font-semibold text-navy-800 dark:text-white">Android</span>.</p>
-            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">Versi iOS sedang dalam pengembangan. Gunakan perangkat Android untuk menginstal aplikasi.</p>
-            <button onclick="closeApkModal()" class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg mb-2">Mengerti</button>
-            <button onclick="closeApkModal(); openPlatformModal()" class="w-full py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-navy-800 dark:hover:text-white transition-colors">← Kembali ke pilihan platform</button>
+
+            @if($hasIos)
+                {{-- iOS tersedia: tampilkan info dan tombol download --}}
+                <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-1">{{ $apkSetting->ios_name ?? 'ICB CT Presensi' }}</h3>
+                <p class="text-xs text-slate-400 mb-1">
+                    {{ $apkSetting->ios_version ? 'v'.$apkSetting->ios_version : '' }}
+                    @if($apkSetting->ios_size) · {{ $apkSetting->ios_size_human }} @endif
+                    @if($apkSetting->ios_min_version) · {{ $apkSetting->ios_min_version }} @endif
+                </p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">Unduh file IPA lalu instal melalui TestFlight atau AltStore.</p>
+                <a href="{{ $iosUrl }}" download
+                   onclick="setTimeout(function(){ document.getElementById('apk-panel-ios').style.display='none'; document.getElementById('apk-panel-done').style.display='block'; }, 1200)"
+                   class="block w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg mb-2 text-center">
+                    Unduh untuk iOS
+                </a>
+            @else
+                {{-- iOS belum tersedia --}}
+                <h3 class="text-lg font-extrabold text-navy-800 dark:text-white mb-2">iOS Belum Tersedia</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2">Aplikasi ini saat ini hanya tersedia untuk <span class="font-semibold text-navy-800 dark:text-white">Android</span>.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">Versi iOS sedang dalam pengembangan. Gunakan perangkat Android untuk menginstal aplikasi.</p>
+                <button onclick="closeApkModal()" class="w-full py-3.5 bg-gradient-to-r from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 rounded-xl text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg mb-2">Mengerti</button>
+            @endif
+            <button onclick="closeApkModal(); setTimeout(openPlatformModal, 100)" class="w-full py-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-navy-800 dark:hover:text-white transition-colors">← Kembali ke pilihan platform</button>
         </div>
     </div>
 </div>
@@ -576,56 +594,82 @@ document.getElementById('platform-modal').addEventListener('click', function(e){
 function openPlatformModal() {
     var modal = document.getElementById('platform-modal');
     var box   = document.getElementById('platform-modal-box');
-    modal.style.display = 'flex';
+    // Reset state
+    box.style.transition  = 'none';
+    box.style.transform   = 'translateY(30px) scale(0.96)';
+    box.style.opacity     = '0';
+    modal.style.display   = 'flex';
+    // Double RAF — pastikan browser sudah paint sebelum mulai animasi
     requestAnimationFrame(function() {
-        box.style.transform = 'translateY(0) scale(1)';
-        box.style.opacity   = '1';
+        requestAnimationFrame(function() {
+            box.style.transition = 'transform .32s cubic-bezier(0.22,1,0.36,1), opacity .25s ease';
+            box.style.transform  = 'translateY(0) scale(1)';
+            box.style.opacity    = '1';
+        });
     });
 }
 
-function closePlatformModal() {
-    var box = document.getElementById('platform-modal-box');
-    box.style.transform = 'translateY(20px) scale(0.96)';
-    box.style.opacity   = '0';
-    setTimeout(function(){
-        document.getElementById('platform-modal').style.display = 'none';
-        box.style.transition = '';
-    }, 280);
+function closePlatformModal(callback) {
+    var modal = document.getElementById('platform-modal');
+    var box   = document.getElementById('platform-modal-box');
+    box.style.transition = 'transform .22s cubic-bezier(0.4,0,1,1), opacity .18s ease';
+    box.style.transform  = 'translateY(16px) scale(0.95)';
+    box.style.opacity    = '0';
+    setTimeout(function() {
+        modal.style.display = 'none';
+        if (typeof callback === 'function') callback();
+    }, 220);
+}
+
+function openApkModalSmooth(showPanel) {
+    // Sembunyikan semua panel
+    ['apk-panel-soon','apk-panel-loading','apk-panel-done','apk-panel-ios'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    // Tampilkan panel yang diminta
+    var panel = document.getElementById('apk-panel-' + showPanel);
+    if (panel) panel.style.display = 'block';
+
+    var modal = document.getElementById('apk-modal');
+    var box   = document.getElementById('apk-modal-box');
+    box.style.transition = 'none';
+    box.style.transform  = 'translateY(30px) scale(0.96)';
+    box.style.opacity    = '0';
+    modal.style.display  = 'flex';
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            box.style.transition = 'transform .32s cubic-bezier(0.22,1,0.36,1), opacity .25s ease';
+            box.style.transform  = 'translateY(0) scale(1)';
+            box.style.opacity    = '1';
+        });
+    });
 }
 
 function selectPlatform(platform) {
-    closePlatformModal();
-    setTimeout(function() {
+    // Tutup platform modal dulu, lalu buka apk modal setelah animasi close selesai
+    closePlatformModal(function() {
         if (platform === 'ios') {
-            // Tampilkan panel iOS langsung
-            document.getElementById('apk-panel-soon').style.display    = 'none';
-            document.getElementById('apk-panel-loading').style.display = 'none';
-            document.getElementById('apk-panel-done').style.display    = 'none';
-            document.getElementById('apk-panel-ios').style.display     = 'block';
-            var modal = document.getElementById('apk-modal');
-            var box   = document.getElementById('apk-modal-box');
-            modal.style.display = 'flex';
-            requestAnimationFrame(function() {
-                box.style.transform = 'translateY(0) scale(1)';
-                box.style.opacity   = '1';
-            });
+            openApkModalSmooth('ios');
         } else {
-            // Android — flow existing
+            // Android
             if (!APK_URL || APK_URL === '') {
-                showApkModal('soon');
+                openApkModalSmooth('soon');
             } else {
-                showApkModal('loading');
-                setTimeout(function(){
+                openApkModalSmooth('loading');
+                setTimeout(function() {
                     var a = document.createElement('a');
                     a.href = APK_URL;
                     a.download = '{{ $apkSetting->apk_name ? str_replace(" ","-",$apkSetting->apk_name) : "ICB-CT-Presensi" }}.apk';
                     document.body.appendChild(a);
-                    a.click(); a.remove();
-                    showApkModal('done');
-                }, 1800);
+                    a.click();
+                    a.remove();
+                    // Tampilkan done setelah sedikit delay
+                    setTimeout(function() { showApkModal('done'); }, 1800);
+                }, 400);
             }
         }
-    }, 320); // tunggu platform modal tutup
+    });
 }
 
 document.getElementById('apk-btn').addEventListener('click', function(){

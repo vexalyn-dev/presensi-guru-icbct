@@ -40,6 +40,14 @@ class AppSetting extends Model
         'apk_size',
         'apk_uploaded_at',
         'apk_changelog',
+        // iOS
+        'ios_file',
+        'ios_name',
+        'ios_version',
+        'ios_min_version',
+        'ios_size',
+        'ios_uploaded_at',
+        'ios_changelog',
     ];
 
     protected $casts = [
@@ -53,6 +61,8 @@ class AppSetting extends Model
         'location_radius'              => 'integer',
         'apk_size'                     => 'integer',
         'apk_uploaded_at'              => 'datetime',
+        'ios_size'                     => 'integer',
+        'ios_uploaded_at'              => 'datetime',
     ];
 
     public function getLogoUrlAttribute()
@@ -83,6 +93,26 @@ class AppSetting extends Model
     public function getApkVersionLabelAttribute(): string
     {
         return $this->apk_version ? 'v' . ltrim($this->apk_version, 'v') : 'v1.0.0';
+    }
+
+    /** URL download iOS */
+    public function getIosUrlAttribute(): ?string
+    {
+        return $this->ios_file ? asset('storage/' . $this->ios_file) : null;
+    }
+
+    /** Ukuran iOS dalam format manusia */
+    public function getIosSizeHumanAttribute(): string
+    {
+        if (!$this->ios_size) return '-';
+        $mb = $this->ios_size / 1048576;
+        return $mb < 1 ? round($mb * 1024) . ' KB' : '~' . round($mb, 1) . ' MB';
+    }
+
+    /** Versi iOS dengan prefix v */
+    public function getIosVersionLabelAttribute(): string
+    {
+        return $this->ios_version ? 'v' . ltrim($this->ios_version, 'v') : 'v1.0.0';
     }
 
     public static function getInstance()

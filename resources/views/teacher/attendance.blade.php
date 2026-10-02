@@ -393,20 +393,27 @@
         var modalVisible = false;
         var closeTimer   = null;
 
-        // Polling: 100ms untuk update status bar real-time
-        var POLL_MS      = 100;
+        // Polling interval — lebih pendek untuk responsif
+        var POLL_MS    = 300; // 300ms cukup responsif tanpa overwhelm server
+        var POLL_FAST  = 100; // setelah scan, poll cepat selama beberapa detik
+        var fastPollCount = 0;
+        var MAX_FAST_POLLS = 30; // 30 x 100ms = 3 detik polling cepat setelah scan
+
         var prevCheckInTs  = null;
         var prevCheckOutTs = null;
         var initialized    = false;
 
         // Inisialisasi lastKnownState dari kondisi presensi saat halaman dimuat
-        // Supaya polling tidak trigger modal untuk scan yang sudah terjadi sebelum halaman dibuka
         var _hasCI = cfg && cfg.dataset.hasCheckin === 'true';
         var _hasCO = cfg && cfg.dataset.hasCheckout === 'true';
         var lastKnownState = _hasCI && _hasCO ? 'both'
                            : _hasCI            ? 'checkin'
                            : _hasCO            ? 'checkout'
                            :                     'none';
+
+        // Waktu server terakhir diketahui (dari poll response) untuk menghindari clock skew
+        var serverTimeOffset = 0; // selisih server - browser dalam detik
+        var serverTimeKnown  = false;
 
         function showState(name) {
             ['at-state-loading','at-state-checkin','at-state-checkout','at-state-already','at-state-failed']
@@ -433,74 +440,98 @@
             if (callback) setTimeout(callback, 350);
         }
 
+        // Tampilkan loading spinner segera, lalu transisi ke state final
+        function showOverlayLoading() {
+            if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+            showState('loading');
+            overlay.classList.add('show');
+            modalVisible = true;
+        }
+
         function showOverlay(state, timeStr, extra) {
             if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
 
+            // Tampilkan loading dulu, baru state final setelah brief delay
+            // agar transisi loading → ceklis terasa smooth
             showState('loading');
             overlay.classList.add('show');
             modalVisible = true;
 
-            // Langsung tampilkan state tanpa delay — server sudah confirm berhasil
-            showState(state);
+            // Transisi ke state sebenarnya dengan sedikit delay (200ms)
+            // sehingga loading spinner sempat terlihat
+            setTimeout(function() {
+                showState(state);
 
-            if (state === 'checkin') {
-                var el = document.getElementById('at-checkin-time');
-                if (el) el.textContent = timeStr ? 'Jam masuk: ' + timeStr + ' WIB' : '';
-                restartSvgAnim('at-state-checkin');
-            } else if (state === 'checkout') {
-                var el = document.getElementById('at-checkout-time');
-                if (el) el.textContent = timeStr ? 'Jam pulang: ' + timeStr + ' WIB' : '';
-                restartSvgAnim('at-state-checkout');
-            } else if (state === 'already') {
-                var infoEl = document.getElementById('at-already-info');
-                if (infoEl && extra) {
-                    var msg = extra.check_in ? 'Sudah scan masuk: ' + extra.check_in + ' WIB' : '';
-                    msg += extra.check_out ? ' & pulang: ' + extra.check_out + ' WIB' : '';
-                    infoEl.textContent = msg || 'Presensi hari ini sudah lengkap';
+                if (state === 'checkin') {
+                    var el = document.getElementById('at-checkin-time');
+                    if (el) el.textContent = timeStr ? 'Jam masuk: ' + timeStr + ' WIB' : '';
+                    restartSvgAnim('at-state-checkin');
+                } else if (state === 'checkout') {
+                    var el = document.getElementById('at-checkout-time');
+                    if (el) el.textContent = timeStr ? 'Jam pulang: ' + timeStr + ' WIB' : '';
+                    restartSvgAnim('at-state-checkout');
+                } else if (state === 'already') {
+                    var infoEl = document.getElementById('at-already-info');
+                    if (infoEl && extra) {
+                        var msg = '';
+                        if (extra.check_in && extra.check_out) {
+                            msg = 'Sudah scan masuk: ' + extra.check_in + ' WIB\ndan pulang: ' + extra.check_out + ' WIB';
+                        } else if (extra.check_in) {
+                            msg = 'Sudah scan masuk: ' + extra.check_in + ' WIB';
+                        } else if (extra.check_out) {
+                            msg = 'Sudah scan keluar: ' + extra.check_out + ' WIB';
+                        } else {
+                            msg = 'Presensi hari ini sudah lengkap';
+                        }
+                        infoEl.textContent = msg;
+                    }
+                    restartSvgAnim('at-state-already');
+                } else if (state === 'failed') {
+                    var titleEl = document.getElementById('at-fail-title');
+                    var subEl   = document.getElementById('at-fail-sub');
+                    if (titleEl && extra && extra.message) titleEl.textContent = extra.message;
+                    if (subEl) subEl.textContent = extra && extra.retry ? 'Silakan coba lagi' : 'Hubungi operator jika masalah berlanjut';
+                    restartSvgAnim('at-state-failed');
                 }
-                restartSvgAnim('at-state-already');
-            } else if (state === 'failed') {
-                var titleEl = document.getElementById('at-fail-title');
-                var subEl   = document.getElementById('at-fail-sub');
-                if (titleEl && extra && extra.message) titleEl.textContent = extra.message;
-                if (subEl) subEl.textContent = extra && extra.retry ? 'Silakan coba lagi' : 'Hubungi operator jika masalah berlanjut';
-                restartSvgAnim('at-state-failed');
-            }
+            }, 200);
 
-            // Tutup otomatis, tanpa reload halaman
+            // Tutup otomatis setelah 3.5 detik (loading 200ms + state 3300ms)
             closeTimer = setTimeout(function () {
                 closeModal();
-            }, 3000);
+            }, 3500);
         }
 
         var pollTimer = null;
 
-        function schedulePoll() {
+        function schedulePoll(fast) {
             if (pollTimer) clearTimeout(pollTimer);
-            pollTimer = setTimeout(function() { poll(); }, POLL_MS);
+            var delay = (fast || fastPollCount > 0) ? POLL_FAST : POLL_MS;
+            if (fastPollCount > 0) fastPollCount--;
+            pollTimer = setTimeout(function() { poll(); }, delay);
+        }
+
+        // Mulai mode fast polling (setelah modal muncul, polling cepat untuk update statusbar)
+        function startFastPoll() {
+            fastPollCount = MAX_FAST_POLLS;
         }
 
         function updateStatusBar(data) {
-            // Update jam masuk
             var ciEl = document.querySelector('[data-key="check_in_time"]');
             if (ciEl && data.check_in) {
                 ciEl.textContent = data.check_in;
                 ciEl.classList.remove('text-slate-400');
                 ciEl.classList.add('text-green-700', 'dark:text-green-400');
             }
-            // Update jam pulang
             var coEl = document.querySelector('[data-key="check_out_time"]');
             if (coEl && data.check_out) {
                 coEl.textContent = data.check_out;
                 coEl.classList.remove('text-slate-400');
                 coEl.classList.add('text-red-700', 'dark:text-red-400');
             }
-            // Update status badge
             var badgeEl = document.querySelector('[data-key="status_badge"]');
             if (badgeEl && data.status) {
                 var label = data.status === 'Tepat Waktu' ? 'Hadir' : data.status;
                 badgeEl.textContent = label;
-                // Reapply badge colors based on status
                 badgeEl.className = 'px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold';
                 if (data.status === 'Hadir' || data.status === 'Tepat Waktu') {
                     badgeEl.classList.add('bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
@@ -512,7 +543,6 @@
                     badgeEl.classList.add('bg-blue-100', 'text-blue-700', 'dark:bg-blue-900/30', 'dark:text-blue-400');
                 }
             }
-            // Update card backgrounds
             var ciCard = document.querySelector('[data-key="checkin_card"]');
             if (ciCard && data.check_in) {
                 ciCard.className = 'p-3 sm:p-4 rounded-2xl border-2 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800';
@@ -521,7 +551,6 @@
             if (coCard && data.check_out) {
                 coCard.className = 'p-3 sm:p-4 rounded-2xl border-2 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800';
             }
-            // Update icon backgrounds
             var ciIcon = document.querySelector('[data-key="checkin_icon"]');
             if (ciIcon && data.check_in) {
                 ciIcon.className = 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-500 flex items-center justify-center transition-colors flex-shrink-0';
@@ -533,6 +562,8 @@
         }
 
         function poll() {
+            var fetchStart = Math.floor(Date.now() / 1000);
+
             fetch(pollUrl, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
                 credentials: 'same-origin',
@@ -541,6 +572,8 @@
             .then(function (data) {
                 if (!data) { schedulePoll(); return; }
 
+                // Hitung server time offset dari timestamp check_in/out terbaru
+                // untuk menghindari clock skew antara browser dan server
                 var ciTs = data.check_in_ts  || null;
                 var coTs = data.check_out_ts || null;
 
@@ -555,25 +588,32 @@
 
                 if (modalVisible) { schedulePoll(); return; }
 
-                var now = Math.floor(Date.now() / 1000);
-                var GRACE_SEC = 120;
+                // GRACE_SEC diperbesar ke 600 detik (10 menit) untuk menghindari
+                // clock skew antara browser dan server timezone
+                var GRACE_SEC = 600;
+                var now = fetchStart; // gunakan waktu saat fetch dimulai, bukan sekarang
 
-                // Check-in baru
-                if (ciTs && ciTs !== prevCheckInTs && (now - ciTs) <= GRACE_SEC) {
-                    prevCheckInTs = ciTs;
+                var isNewCheckIn  = ciTs && ciTs !== prevCheckInTs && (now - ciTs) <= GRACE_SEC;
+                var isNewCheckOut = coTs && coTs !== prevCheckOutTs && (now - coTs) <= GRACE_SEC;
+
+                // Check-in BARU
+                if (isNewCheckIn) {
+                    prevCheckInTs  = ciTs;
                     lastKnownState = coTs ? 'both' : 'checkin';
                     updateStatusBar(data);
                     showOverlay('checkin', data.check_in);
+                    startFastPoll();
                     schedulePoll();
                     return;
                 }
 
-                // Check-out baru
-                if (coTs && coTs !== prevCheckOutTs && (now - coTs) <= GRACE_SEC) {
+                // Check-out BARU
+                if (isNewCheckOut) {
                     prevCheckOutTs = coTs;
                     lastKnownState = 'both';
                     updateStatusBar(data);
                     showOverlay('checkout', data.check_out);
+                    startFastPoll();
                     schedulePoll();
                     return;
                 }
@@ -581,16 +621,18 @@
                 prevCheckInTs  = ciTs;
                 prevCheckOutTs = coTs;
 
-                // Detect state untuk modal "sudah scan"
+                // State change detection untuk "QR Sudah Tercatat"
+                // Hanya trigger jika state benar-benar berubah DAN belum pernah dinotifikasi
                 var newState = 'none';
                 if (ciTs && coTs) newState = 'both';
                 else if (ciTs) newState = 'checkin';
                 else if (coTs) newState = 'checkout';
 
-                if (newState !== lastKnownState && newState !== 'none' && !modalVisible) {
-                    // State berubah (scan baru terjadi tapi timestamp sudah tercatat sebelumnya)
+                if (newState !== 'none' && newState !== lastKnownState && !modalVisible) {
                     lastKnownState = newState;
                     updateStatusBar(data);
+                    // "already" hanya tampil jika state sudah 'both' (keduanya sudah scan)
+                    // Untuk state 'checkin' atau 'checkout' saja, tampilkan notifikasi berhasil
                     if (newState === 'both') {
                         showOverlay('already', null, { check_in: data.check_in, check_out: data.check_out });
                     } else if (newState === 'checkin') {

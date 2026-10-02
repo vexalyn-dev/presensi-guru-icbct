@@ -1866,6 +1866,10 @@ textarea.input { resize: vertical; min-height: 85px; }
 
         <div class="nav-label">Kelola Sistem</div>
         <button type="button" onclick="switchTab('apk')" id="nav-apk" class="nav-item"><i data-lucide="smartphone"></i> APK Manager</button>
+        <button type="button" onclick="switchTab('ios')" id="nav-ios" class="nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 814 1000" style="width:18px;height:18px;fill:currentColor;flex-shrink:0"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-110.7c-46-70.4-73.9-161.4-73.9-247.9 0-157.1 100.1-247.4 198.5-247.4 51.6 0 95.1 33.9 127.5 33.9 31.3 0 80.4-36.1 139.2-36.1 22.4 0 108.2 2 167 74.2zM726.4 82.4c24.2-28.8 41.7-68.7 41.7-108.6 0-5.5-.5-11.1-1.5-15.5-39.1 1.5-85.5 26.1-113.8 56.3-22.4 24.7-43.2 64.6-43.2 105.1 0 6 1 12 1.5 14.1 2.5.5 6.5 1 10.5 1 35.4 0 79.4-23.2 104.8-52.4z"/></svg>
+            iOS Manager
+        </button>
         <button type="button" onclick="switchTab('system')" id="nav-system" class="nav-item"><i data-lucide="cpu"></i> System State</button>
         <button type="button" onclick="switchTab('releases')" id="nav-releases" class="nav-item"><i data-lucide="git-pull-request"></i> Releases</button>
 
@@ -1926,10 +1930,11 @@ textarea.input { resize: vertical; min-height: 85px; }
 </main>
 
 <script>
-    const tabs = ['dashboard', 'apk', 'system', 'releases', 'settings'];
+    const tabs = ['dashboard', 'apk', 'ios', 'system', 'releases', 'settings'];
     const titles = {
         dashboard: 'Dashboard',
         apk: 'APK Manager',
+        ios: 'iOS Manager',
         system: 'System State',
         releases: 'Riwayat Rilis',
         settings: 'Settings & Tema'
@@ -1937,6 +1942,7 @@ textarea.input { resize: vertical; min-height: 85px; }
     const tabIcons = {
         dashboard: 'layout-dashboard',
         apk: 'smartphone',
+        ios: 'smartphone',
         system: 'cpu',
         releases: 'git-pull-request',
         settings: 'settings'

@@ -436,6 +436,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/',                          [DeveloperController::class, 'dashboard'])       ->name('index');
         Route::post('/apk',                      [DeveloperController::class, 'updateApk'])       ->name('apk');
         Route::delete('/apk',                    [DeveloperController::class, 'deleteApk'])       ->name('apk.delete');
+        Route::post('/ios',                      [DeveloperController::class, 'updateIos'])       ->name('ios');
+        Route::delete('/ios',                    [DeveloperController::class, 'deleteIos'])       ->name('ios.delete');
         Route::post('/maintenance',              [DeveloperController::class, 'toggleMaintenance'])->name('maintenance');
         Route::get('/clear-cache',               [DeveloperController::class, 'clearCache'])      ->name('clear-cache');
         Route::get('/migrate',                   [DeveloperController::class, 'migrate'])         ->name('migrate');

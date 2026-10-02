@@ -248,6 +248,102 @@ class DeveloperController extends Controller
     }
 
     // ─────────────────────────────────────────────
+    // iOS MANAGER
+    // ─────────────────────────────────────────────
+
+    public function updateIos(string $secret, Request $request)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $request->validate([
+            'ios_file'        => 'nullable|file|max:204800', // max 200MB (IPA lebih besar dari APK)
+            'ios_name'        => 'nullable|string|max:100',
+            'ios_version'     => 'nullable|string|max:20',
+            'ios_min_version' => 'nullable|string|max:50',
+            'ios_changelog'   => 'nullable|string|max:1000',
+        ]);
+
+        if ($request->hasFile('ios_file')) {
+            $ext = strtolower($request->file('ios_file')->getClientOriginalExtension());
+            if (!in_array($ext, ['ipa', 'zip'])) {
+                return back()->withErrors(['ios_file' => 'File harus berekstensi .ipa atau .zip']);
+            }
+        }
+
+        $setting = AppSetting::getInstance();
+        $data    = [];
+
+        if ($request->hasFile('ios_file')) {
+            // Hapus file lama
+            if ($setting->ios_file && Storage::disk('public')->exists($setting->ios_file)) {
+                Storage::disk('public')->delete($setting->ios_file);
+            }
+
+            $file = $request->file('ios_file');
+            $path = $file->storeAs('ios', $file->getClientOriginalName(), 'public');
+
+            $data = [
+                'ios_file'        => $path,
+                'ios_size'        => $file->getSize(),
+                'ios_uploaded_at' => now(),
+                'ios_version'     => $request->input('ios_version') ?: '1.0.0',
+                'ios_min_version' => $request->input('ios_min_version') ?: 'iOS 14.0+',
+                'ios_name'        => $request->input('ios_name') ?: ($setting->apk_name ?? 'ICB CT Presensi'),
+            ];
+
+            Setting::set('ios_file_path',    $path);
+            Setting::set('ios_name',         $data['ios_name']);
+            Setting::set('ios_version',      $data['ios_version']);
+            Setting::set('ios_min_version',  $data['ios_min_version']);
+            Setting::set('ios_size',         $data['ios_size'], 'number');
+            Setting::set('ios_download_url', asset('storage/' . $path));
+        } else {
+            if ($request->filled('ios_name'))        { $data['ios_name']        = $request->ios_name;        Setting::set('ios_name',        $request->ios_name); }
+            if ($request->filled('ios_version'))     { $data['ios_version']     = $request->ios_version;     Setting::set('ios_version',     $request->ios_version); }
+            if ($request->filled('ios_min_version')) { $data['ios_min_version'] = $request->ios_min_version; Setting::set('ios_min_version', $request->ios_min_version); }
+        }
+
+        if ($request->filled('ios_changelog')) {
+            $data['ios_changelog'] = $request->ios_changelog;
+            Setting::set('ios_changelog', $request->ios_changelog);
+        }
+
+        if (!empty($data)) {
+            try {
+                $setting->update($data);
+            } catch (\Throwable $e) {
+                \Log::error('iOS update failed: ' . $e->getMessage());
+                return back()->with('error', '❌ Gagal menyimpan metadata iOS: ' . substr($e->getMessage(), 0, 100));
+            }
+        }
+
+        return back()->with('success', '✅ iOS berhasil disimpan!');
+    }
+
+    public function deleteIos(string $secret)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $setting = AppSetting::getInstance();
+        try {
+            if ($setting->ios_file && Storage::disk('public')->exists($setting->ios_file)) {
+                Storage::disk('public')->delete($setting->ios_file);
+            }
+            $setting->update([
+                'ios_file' => null, 'ios_name' => null, 'ios_version' => null,
+                'ios_min_version' => null, 'ios_size' => null,
+                'ios_uploaded_at' => null, 'ios_changelog' => null,
+            ]);
+        } catch (\Throwable $e) {}
+
+        foreach (['ios_file_path', 'ios_name', 'ios_version', 'ios_min_version', 'ios_size', 'ios_download_url', 'ios_changelog'] as $k) {
+            Setting::set($k, '');
+        }
+
+        return back()->with('success', '✅ iOS berhasil dihapus.');
+    }
+
+    // ─────────────────────────────────────────────
     // MAINTENANCE
     // ─────────────────────────────────────────────
 
