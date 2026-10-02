@@ -50,6 +50,20 @@ class NotificationController extends Controller
         return back()->with('success', 'Semua notifikasi telah dihapus');
     }
 
+    public function destroy(string $id)
+    {
+        Notification::where('id', $id)
+            ->where('notifiable_type', get_class(Auth::user()))
+            ->where('notifiable_id', Auth::id())
+            ->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Notifikasi berhasil dihapus');
+    }
+
     public function getUnread()
     {
         $notifications = Notification::where('notifiable_type', get_class(Auth::user()))

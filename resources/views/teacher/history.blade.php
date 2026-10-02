@@ -29,6 +29,31 @@
     </div>
 
     <!-- Statistics Cards -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <!-- Month Picker -->
+        <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Periode:</label>
+            <select id="month-picker"
+                    class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-semibold text-navy-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 cursor-pointer">
+                @php
+                    $months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                    $currentYear = now()->year;
+                    $currentMonth = now()->month;
+                @endphp
+                @for($y = $currentYear; $y >= $currentYear - 2; $y--)
+                    @for($m = 12; $m >= 1; $m--)
+                        @if($y == $currentYear && $m > $currentMonth) @continue @endif
+                        <option value="{{ $y }}-{{ $m }}"
+                            {{ ($y == $currentYear && $m == $currentMonth) ? 'selected' : '' }}>
+                            {{ $months[$m-1] }} {{ $y }}
+                        </option>
+                    @endfor
+                @endfor
+            </select>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div class="card p-4 group hover:shadow-lg transition-all">
             <div class="flex items-center gap-3">
@@ -150,6 +175,15 @@
     let currentPage = 1;
     const historyDataUrl = "{{ route('teacher.history.data') }}";
 
+    function getSelectedMonthYear() {
+        const val = document.getElementById('month-picker')?.value || '';
+        const parts = val.split('-');
+        return {
+            year:  parts[0] || new Date().getFullYear(),
+            month: parts[1] || (new Date().getMonth() + 1),
+        };
+    }
+
     function switchTab(type) {
         currentTab = type;
         currentPage = 1;
@@ -178,8 +212,10 @@
         spinner.classList.remove('hidden');
         spinner.classList.add('flex');
         document.getElementById('table-container').classList.add('hidden');
-        
-        fetch(`${historyDataUrl}?type=${currentTab}&page=${page}`, {
+
+        const { year, month } = getSelectedMonthYear();
+
+        fetch(`${historyDataUrl}?type=${currentTab}&page=${page}&month=${month}&year=${year}`, {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -512,6 +548,13 @@
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
+
+        // Reload saat bulan diganti
+        document.getElementById('month-picker')?.addEventListener('change', () => {
+            currentPage = 1;
+            loadData();
+        });
+
         loadData();
     });
 </script>

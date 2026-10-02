@@ -43,10 +43,11 @@ class DashboardController extends Controller
         }
 
         // JADWAL KERJA (Work Schedule)
+        $todayDow = now()->dayOfWeek; // 0=Minggu … 6=Sabtu
         $workSchedule = TeacherSchedule::where('user_id', $user->id)
             ->where('is_active', true)
             ->get()
-            ->sortBy('day_of_week');
+            ->sortBy(fn($w) => ($w->day_of_week - $todayDow + 7) % 7);
 
         // Presensi hari ini
         $todayAttendance = Attendance::where('user_id', $user->id)

@@ -398,7 +398,15 @@
         var prevCheckInTs  = null;
         var prevCheckOutTs = null;
         var initialized    = false;
-        var lastKnownState = null; // 'none'|'checkin'|'checkout'|'both'
+
+        // Inisialisasi lastKnownState dari kondisi presensi saat halaman dimuat
+        // Supaya polling tidak trigger modal untuk scan yang sudah terjadi sebelum halaman dibuka
+        var _hasCI = cfg && cfg.dataset.hasCheckin === 'true';
+        var _hasCO = cfg && cfg.dataset.hasCheckout === 'true';
+        var lastKnownState = _hasCI && _hasCO ? 'both'
+                           : _hasCI            ? 'checkin'
+                           : _hasCO            ? 'checkout'
+                           :                     'none';
 
         function showState(name) {
             ['at-state-loading','at-state-checkin','at-state-checkout','at-state-already','at-state-failed']
@@ -553,6 +561,7 @@
                 // Check-in baru
                 if (ciTs && ciTs !== prevCheckInTs && (now - ciTs) <= GRACE_SEC) {
                     prevCheckInTs = ciTs;
+                    lastKnownState = coTs ? 'both' : 'checkin';
                     updateStatusBar(data);
                     showOverlay('checkin', data.check_in);
                     schedulePoll();
@@ -562,6 +571,7 @@
                 // Check-out baru
                 if (coTs && coTs !== prevCheckOutTs && (now - coTs) <= GRACE_SEC) {
                     prevCheckOutTs = coTs;
+                    lastKnownState = 'both';
                     updateStatusBar(data);
                     showOverlay('checkout', data.check_out);
                     schedulePoll();

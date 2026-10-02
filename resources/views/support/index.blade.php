@@ -141,12 +141,12 @@
                     <div x-data="{
                         menuOpen: false,
                         selected: {{ old('priority') ? "'" . e(old('priority')) . "'" : 'null' }},
-                        opts: @json([
+                        opts: {{ Js::from([
                             ['value'=>'low',      'label'=>'Rendah',  'dot'=>'bg-green-500',  'bg'=>'bg-green-100 dark:bg-green-900/30',  'text'=>'text-green-700 dark:text-green-400',  'icon'=>'circle-check'],
                             ['value'=>'medium',   'label'=>'Sedang',  'dot'=>'bg-amber-500',  'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'text'=>'text-amber-700 dark:text-amber-400',  'icon'=>'alert-circle'],
                             ['value'=>'high',     'label'=>'Tinggi',  'dot'=>'bg-orange-500', 'bg'=>'bg-orange-100 dark:bg-orange-900/30','text'=>'text-orange-700 dark:text-orange-400','icon'=>'alert-triangle'],
                             ['value'=>'critical', 'label'=>'Kritis',  'dot'=>'bg-red-500',    'bg'=>'bg-red-100 dark:bg-red-900/30',      'text'=>'text-red-700 dark:text-red-400',      'icon'=>'flame'],
-                        ]),
+                        ]) }},
                         select(opt) {
                             this.selected = opt.value;
                             document.getElementById('priority-input').value = opt.value;

@@ -566,6 +566,84 @@
         </div>
     </div>
 
+    {{-- Sudah Scan Keluar --}}
+    <div class="card overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-emerald-50/50 dark:bg-emerald-900/10">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="log-out" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                </div>
+                <h2 class="text-sm font-bold text-navy-800 dark:text-white">
+                    Sudah Scan Keluar
+                </h2>
+            </div>
+            <span
+                class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold"
+                x-text="data.sudah_scan_keluar.length + ' guru'"
+            ></span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-slate-100 dark:border-slate-800 text-left">
+                        <th class="px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Guru</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Presensi</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Jam Masuk</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Jam Keluar</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">Durasi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 dark:divide-slate-800/50">
+                    <template x-for="(item, i) in data.sudah_scan_keluar" :key="i">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                            <td class="px-5 py-3">
+                                <div class="flex items-center gap-3">
+                                    <template x-if="item.user.photo">
+                                        <img :src="item.user.photo" :alt="item.user.name"
+                                             class="w-8 h-8 rounded-full object-cover flex-shrink-0"/>
+                                    </template>
+                                    <template x-if="!item.user.photo">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                                             x-text="item.user.initial"></div>
+                                    </template>
+                                    <div>
+                                        <p class="font-semibold text-navy-800 dark:text-white text-sm" x-text="item.user.name"></p>
+                                        <p class="text-[10px] text-slate-400 font-mono" x-text="item.user.teacher_code"></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3">
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                                    :class="item.status_presensi === 'Tepat Waktu' || item.status_presensi === 'Hadir'
+                                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                                        : item.status_presensi === 'Terlambat'
+                                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'"
+                                >
+                                    <span class="w-1.5 h-1.5 rounded-full"
+                                          :class="item.status_presensi === 'Tepat Waktu' || item.status_presensi === 'Hadir'
+                                              ? 'bg-emerald-500'
+                                              : item.status_presensi === 'Terlambat' ? 'bg-amber-500' : 'bg-slate-400'"></span>
+                                    <span x-text="item.status_presensi"></span>
+                                </span>
+                            </td>
+                            <td class="px-5 py-3 font-mono text-slate-600 dark:text-slate-300 text-sm" x-text="item.check_in_time"></td>
+                            <td class="px-5 py-3 font-mono text-emerald-600 dark:text-emerald-400 font-semibold text-sm" x-text="item.check_out_time"></td>
+                            <td class="px-5 py-3 text-right">
+                                <span class="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm" x-text="item.durasi_label"></span>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+            <div x-show="data.sudah_scan_keluar.length === 0" class="px-5 py-10 text-center">
+                <i data-lucide="clock" class="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                <p class="text-sm text-slate-400">Belum ada guru yang scan keluar hari ini.</p>
+            </div>
+        </div>
+    </div>
+
     {{-- Sudah Selesai --}}
     <div class="card overflow-hidden">
         <div

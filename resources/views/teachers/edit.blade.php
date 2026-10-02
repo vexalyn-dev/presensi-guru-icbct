@@ -230,11 +230,14 @@
                                 </div>
 
                                 <!-- Mata Pelajaran Multi-Select -->
+                                @php
+                                    $subjectOptions = $subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray();
+                                @endphp
                                 <div x-data="{
                                     open: false,
                                     search: '',
-                                    options: @json($subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])),
-                                    selected: @json($teacherSubjectIds),
+                                    options: {{ Js::from($subjectOptions) }},
+                                    selected: {{ Js::from($teacherSubjectIds) }},
                                     get filteredOptions() {
                                         if (!this.search) return this.options;
                                         const q = this.search.toLowerCase();

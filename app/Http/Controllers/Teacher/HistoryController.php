@@ -89,8 +89,16 @@ class HistoryController extends Controller
         $type = $request->input('type', 'daily');
         $page = $request->input('page', 1);
 
-        $startDate = Carbon::now()->startOfMonth()->toDateString();
-        $endDate = Carbon::now()->toDateString();
+        // Baca bulan & tahun dari request, default bulan ini
+        $month = (int) $request->input('month', Carbon::now()->month);
+        $year  = (int) $request->input('year',  Carbon::now()->year);
+
+        // Batasi supaya tidak ada injeksi nilai aneh
+        $month = max(1, min(12, $month));
+        $year  = max(2020, min(2099, $year));
+
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+        $endDate   = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
 
         if ($type === 'daily') {
             $attendances = Attendance::where('user_id', $user->id)
@@ -139,6 +147,8 @@ class HistoryController extends Controller
                 'stats' => $stats,
                 'links' => $attendances->links()->toHtml(),
                 'last_page' => $attendances->lastPage(),
+                'month' => $month,
+                'year'  => $year,
             ]);
         }
 

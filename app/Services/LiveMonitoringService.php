@@ -30,6 +30,7 @@ class LiveMonitoringService
                 'sedang_mengajar'   => $this->getSedangMengajar($today, $currentTime),
                 'belum_scan_masuk'  => $this->getBelumScanMasuk($today, $dayOfWeek, $currentTime),
                 'belum_scan_keluar' => $this->getBelumScanKeluar($today),
+                'sudah_scan_keluar' => $this->getSudahScanKeluar($today),
                 'sudah_selesai'     => $this->getSudahSelesai($today),
                 'stats'             => $this->getStats($today),
                 'waktu_server'      => $now->format('H:i:s'),
@@ -167,7 +168,43 @@ class LiveMonitoringService
     }
 
     /**
-     * 4. Guru yang sudah selesai mengajar (ClassAttendance lengkap IN + OUT hari ini)
+     * 4. Guru yang sudah scan KELUAR hari ini (check_in dan check_out keduanya ada)
+     */
+    private function getSudahScanKeluar(string $today): array
+    {
+        return Attendance::with('user:id,name,teacher_code,photo')
+            ->whereDate('date', $today)
+            ->whereNotNull('check_in')
+            ->whereNotNull('check_out')
+            ->whereHas('user', fn($q) => $q->where('role', 'guru'))
+            ->get()
+            ->map(function ($att) {
+                $checkInDate  = $att->date instanceof \Carbon\Carbon ? $att->date : \Carbon\Carbon::parse($att->date);
+                $checkIn      = (clone $checkInDate)->setTimeFromTimeString($att->check_in);
+                $checkOut     = (clone $checkInDate)->setTimeFromTimeString($att->check_out);
+                $durasiMenit  = $checkIn->diffInMinutes($checkOut);
+
+                return [
+                    'user'            => [
+                        'id'           => $att->user?->id ?? null,
+                        'name'         => $att->user?->name ?? '-',
+                        'teacher_code' => $att->user?->teacher_code ?? '',
+                        'photo'        => $att->user?->photo ? asset('storage/' . $att->user->photo) : null,
+                        'initial'      => strtoupper(substr($att->user?->name ?? 'U', 0, 1)),
+                    ],
+                    'check_in_time'   => $checkIn->format('H:i'),
+                    'check_out_time'  => $checkOut->format('H:i'),
+                    'durasi_menit'    => $durasiMenit,
+                    'durasi_label'    => ($durasiMenit >= 60 ? floor($durasiMenit / 60) . 'j ' : '') . ($durasiMenit % 60) . 'm',
+                    'status_presensi' => $att->status ?? '-',
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * 5. Guru yang sudah selesai mengajar (ClassAttendance lengkap IN + OUT hari ini)
      */
     private function getSudahSelesai(string $today): array
     {
