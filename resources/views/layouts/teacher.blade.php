@@ -130,15 +130,37 @@
             .profile-avatar { width: 48px; height: 48px; }
         }
 
+        /* Marquee animation for dashboard reminders */
+        .marquee-container {
+            mask-image: linear-gradient(to right, transparent, black 4px, black calc(100% - 4px), transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 4px, black calc(100% - 4px), transparent);
+        }
+        .marquee-track {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: marquee-scroll 18s linear infinite;
+        }
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+        @keyframes marquee-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
     </style>
     @stack('styles')
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 m-0 p-0 overflow-x-hidden">
     @php
         // Get teacher data for current user with error handling
+        $teacherData = null;
+        $teacherSubject = null;
+
         try {
-            $teacherSubject = \App\Models\Teacher::where('user_id', auth()->id())->first()?->major_specialty ?? null;
+            $teacherData = \App\Models\Teacher::where('user_id', auth()->id())->first();
+            $teacherSubject = $teacherData ? $teacherData->major_specialty : null;
         } catch (\Exception $e) {
+            // Model belum ada atau error lain
             $teacherSubject = null;
         }
     @endphp
@@ -298,7 +320,8 @@
 
                         <!-- Notifikasi Dropdown -->
                         <div class="relative" x-data="notificationDropdown()" 
-                        @click.outside="open = false">
+                        @click.outside="open = false"
+                        x-init="init()">
                             
                             <button @click.stop="open = !open" class="relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-slate-600">
                                 <i data-lucide="bell" class="w-4 h-4 sm:w-5 sm:h-5"></i>
