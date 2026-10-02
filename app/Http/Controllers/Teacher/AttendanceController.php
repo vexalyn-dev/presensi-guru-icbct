@@ -41,7 +41,7 @@ class AttendanceController extends Controller
             ->take(7)
             ->get();
 
-        if (!$user->qr_code_url) {
+        if (!$user->qr_code_url || !\Illuminate\Support\Facades\Storage::disk('public')->exists($user->qr_code_path ?: $user->qr_code)) {
             $user->generateQrCode();
             $user->refresh();
         }

@@ -233,7 +233,13 @@
                                 <div x-data="{
                                     open: false,
                                     search: '',
+                                    options: @json($subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])),
                                     selected: @json($teacherSubjectIds),
+                                    get filteredOptions() {
+                                        if (!this.search) return this.options;
+                                        const q = this.search.toLowerCase();
+                                        return this.options.filter(s => s.name.toLowerCase().includes(q));
+                                    },
                                     get names() {
                                         return this.selected.map(id => this.options.find(t => t.id == id)?.name).filter(Boolean);
                                     }

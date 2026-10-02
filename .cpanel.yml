@@ -7,3 +7,4 @@ deployment:
     - cd $DEPLOYPATH && /usr/local/bin/php artisan migrate --force --no-interaction
     - cd $DEPLOYPATH && /usr/local/bin/php artisan config:clear
     - cd $DEPLOYPATH && /usr/local/bin/php artisan view:clear
+    - cd $DEPLOYPATH && /usr/local/bin/php artisan storage:link --force
