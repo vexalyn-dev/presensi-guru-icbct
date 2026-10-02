@@ -352,7 +352,7 @@
                         <!-- Profile Dropdown -->
                         <div class="relative" x-data="{ open: false }">
                             <button @click.stop="open = !open"
-                                    class="flex items-center gap-1.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-1 sm:p-1.5 pr-1.5 sm:pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
+                                    class="flex items-center gap-1.5 sm:gap-3 rounded-full p-1 sm:p-1.5 pr-1.5 sm:pr-3 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:scale-105">
                                 <img src="{{ auth()->user()->photo_url }}" 
                                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
                                      data-default-src="{{ asset('images/default-operator.png') }}"

@@ -29,16 +29,27 @@
         </button>
     </div>
 
-    <!-- Alert Messages -->
+    <!-- Toast Notification -->
     @if(session('success'))
-        <div class="mb-6 card p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 animate-slide-up">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="check-circle" class="w-4 h-4 text-green-600 dark:text-green-400"></i>
-                </div>
-                <p class="text-sm font-medium text-green-800 dark:text-green-300">{{ session('success') }}</p>
-            </div>
+    <div id="settings-toast"
+         class="fixed bottom-6 right-6 z-[999] flex items-center gap-3 px-5 py-4 bg-white dark:bg-slate-800 border border-green-200 dark:border-green-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] max-w-sm animate-slide-up"
+         x-data="{ show: true }"
+         x-show="show"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+         x-init="setTimeout(() => show = false, 4000)">
+        <div class="w-9 h-9 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
         </div>
+        <p class="text-sm font-semibold text-slate-800 dark:text-white flex-1">{{ session('success') }}</p>
+        <button @click="show = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors flex-shrink-0">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
     @endif
 
     <!-- HORIZONTAL TAB NAVIGATION -->
@@ -291,6 +302,28 @@
                 <form action="{{ route('settings.attendance') }}" method="POST" class="space-y-5">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Jam Masuk -->
+                        <div>
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Jam Masuk</label>
+                            <div class="relative group">
+                                <i data-lucide="clock-3" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                <input type="time" name="attendance_start_time"
+                                       value="{{ old('attendance_start_time', $settings['attendance']['attendance_start_time'] ?? '06:30') }}"
+                                       class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                            </div>
+                        </div>
+
+                        <!-- Jam Keluar -->
+                        <div>
+                            <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Jam Keluar</label>
+                            <div class="relative group">
+                                <i data-lucide="clock-9" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                                <input type="time" name="attendance_end_time"
+                                       value="{{ old('attendance_end_time', $settings['attendance']['attendance_end_time'] ?? '16:00') }}"
+                                       class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                            </div>
+                        </div>
+
                         <!-- Toleransi Terlambat -->
                         <div>
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Toleransi Terlambat (Menit)</label>
@@ -1363,72 +1396,6 @@
     button:active { transform: translateY(0); }
 </style>
 
-    {{-- ═══════════════════════════════════════════════════════════
-         MAINTENANCE MODE CARD — Floating card di bawah semua tab
-    ═══════════════════════════════════════════════════════════ --}}
-    <div class="card overflow-hidden border-2 border-amber-200 dark:border-amber-800/50 mt-6">
-        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-200 dark:border-amber-800/50 flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-md">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-            <div class="flex-1">
-                <h3 class="text-base font-bold text-amber-800 dark:text-amber-300">Mode Maintenance</h3>
-                <p class="text-xs text-amber-600 dark:text-amber-400">Aktifkan untuk menampilkan halaman maintenance ke guru. Admin/Operator tetap bisa akses.</p>
-            </div>
-            {{-- Status badge --}}
-            @php $mSetting = \App\Models\AppSetting::getInstance(); @endphp
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold
-                {{ $mSetting->maintenance_mode ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' }}">
-                <span class="w-2 h-2 rounded-full {{ $mSetting->maintenance_mode ? 'bg-red-500 animate-pulse' : 'bg-emerald-500' }}"></span>
-                {{ $mSetting->maintenance_mode ? 'AKTIF' : 'NONAKTIF' }}
-            </span>
-        </div>
 
-        <form action="{{ route('admin.maintenance.toggle') }}" method="POST" class="p-6 space-y-5">
-            @csrf
-
-            {{-- Toggle ON/OFF --}}
-            <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div>
-                    <p class="text-sm font-semibold text-navy-800 dark:text-white">Aktifkan Mode Maintenance</p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Halaman maintenance akan muncul untuk semua pengguna (kecuali Admin/Operator)</p>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer ml-4">
-                    <input type="hidden" name="maintenance_mode" value="0">
-                    <input type="checkbox" name="maintenance_mode" value="1" class="sr-only peer"
-                           {{ $mSetting->maintenance_mode ? 'checked' : '' }}
-                           onchange="this.form.querySelector('[name=maintenance_mode][type=hidden]').value = this.checked ? '1' : '0'">
-                    <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500 transition-colors"></div>
-                </label>
-            </div>
-
-            {{-- Pesan custom --}}
-            <div>
-                <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
-                    Pesan Maintenance <span class="text-slate-400 font-normal">(opsional)</span>
-                </label>
-                <textarea name="maintenance_message" rows="3" maxlength="500"
-                          placeholder="Kami sedang melakukan pemeliharaan untuk meningkatkan kualitas layanan. Mohon tunggu..."
-                          class="w-full px-4 py-3 bg-white dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all resize-none">{{ $mSetting->maintenance_message }}</textarea>
-                <p class="text-xs text-slate-400 mt-1">Pesan ini akan ditampilkan di halaman maintenance kepada pengguna.</p>
-            </div>
-
-            {{-- Warning --}}
-            <div class="flex items-start gap-3 p-3.5 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800/40">
-                <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                <p class="text-xs text-amber-700 dark:text-amber-400">
-                    <strong>Perhatian:</strong> Saat mode maintenance aktif, semua guru tidak dapat mengakses sistem. Pastikan untuk menonaktifkan setelah selesai.
-                </p>
-            </div>
-
-            <div class="flex justify-end">
-                <button type="submit"
-                        class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    Simpan Pengaturan Maintenance
-                </button>
-            </div>
-        </form>
-    </div>
 
 @endsection

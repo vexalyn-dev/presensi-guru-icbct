@@ -120,37 +120,41 @@ class SettingController extends Controller
 
         $this->syncToAppSetting();
 
-        return back()->with('success', 'Pengaturan umum berhasil disimpan!');
+        return back()->with('success', 'Pengaturan umum berhasil disimpan!')->with('active_tab', 'general');
     }
 
     public function updateAttendance(Request $request)
     {
         $validated = $request->validate([
-            'attendance_start_time' => 'required|date_format:H:i',
-            'attendance_end_time' => 'required|date_format:H:i|after:attendance_start_time',
+            'attendance_start_time' => 'nullable|date_format:H:i',
+            'attendance_end_time' => 'nullable|date_format:H:i',
             'attendance_late_grace_period' => 'required|integer|min:0|max:60',
             'gps_validation_status' => 'required|in:on,off',
             'auto_logout' => 'required|in:off,5,10,15,30,60,120',
         ]);
 
-        Setting::set('attendance_start_time', $validated['attendance_start_time']);
-        Setting::set('attendance_end_time', $validated['attendance_end_time']);
+        // Use submitted values or fall back to currently saved values
+        $startTime = $validated['attendance_start_time'] ?? Setting::get('attendance_start_time', '06:30');
+        $endTime   = $validated['attendance_end_time']   ?? Setting::get('attendance_end_time', '16:00');
+
+        Setting::set('attendance_start_time', $startTime);
+        Setting::set('attendance_end_time', $endTime);
         Setting::set('attendance_late_grace_period', $validated['attendance_late_grace_period'], 'number');
         Setting::set('gps_validation_status', $validated['gps_validation_status'], 'string');
         Setting::set('auto_logout', $validated['auto_logout'], 'string');
 
         $this->syncToAppSetting();
 
-        return back()->with('success', 'Aturan presensi berhasil disimpan!');
+        return back()->with('success', 'Aturan presensi berhasil disimpan!')->with('active_tab', 'attendance');
     }
 
     public function updateAppearance(Request $request)
     {
         $validated = $request->validate([
-            'primary_color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'accent_color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'app_logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'app_favicon' => 'nullable|image|mimes:jpeg,png,jpg,ico|max:1024',
+            'primary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'accent_color'  => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'app_logo'      => 'nullable|image|mimes:jpeg,png,jpg|max:7168',
+            'app_favicon'   => 'nullable|mimes:jpeg,png,jpg,ico|max:1024',
         ]);
 
         // Handle logo upload
@@ -159,7 +163,6 @@ class SettingController extends Controller
             if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
                 Storage::disk('public')->delete($oldLogo);
             }
-            
             $path = $request->file('app_logo')->store('settings', 'public');
             Setting::set('app_logo', $path);
         }
@@ -170,17 +173,21 @@ class SettingController extends Controller
             if ($oldFavicon && Storage::disk('public')->exists($oldFavicon)) {
                 Storage::disk('public')->delete($oldFavicon);
             }
-            
             $path = $request->file('app_favicon')->store('settings', 'public');
             Setting::set('app_favicon', $path);
         }
 
-        Setting::set('primary_color', $validated['primary_color']);
-        Setting::set('accent_color', $validated['accent_color']);
+        // Only update colors if provided
+        if (!empty($validated['primary_color'])) {
+            Setting::set('primary_color', $validated['primary_color']);
+        }
+        if (!empty($validated['accent_color'])) {
+            Setting::set('accent_color', $validated['accent_color']);
+        }
 
         $this->syncToAppSetting();
 
-        return back()->with('success', 'Tampilan berhasil diperbarui!');
+        return back()->with('success', 'Tampilan berhasil diperbarui!')->with('active_tab', 'appearance');
     }
 
     public function updateNotification(Request $request)
@@ -197,7 +204,7 @@ class SettingController extends Controller
 
         $this->syncToAppSetting();
 
-        return back()->with('success', 'Pengaturan notifikasi berhasil disimpan!');
+        return back()->with('success', 'Pengaturan notifikasi berhasil disimpan!')->with('active_tab', 'notification');
     }
 
     public function updateMaps(Request $request)
@@ -214,7 +221,7 @@ class SettingController extends Controller
 
         $this->syncToAppSetting();
 
-        return back()->with('success', 'Lokasi sekolah berhasil diperbarui!');
+        return back()->with('success', 'Lokasi sekolah berhasil diperbarui!')->with('active_tab', 'maps');
     }
 
     public function updateApk(Request $request)
