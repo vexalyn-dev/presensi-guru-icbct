@@ -2039,33 +2039,14 @@ textarea.input { resize: vertical; min-height: 85px; }
         <button type="button" onclick="switchTab('releases')" id="nav-releases" class="nav-item"><i data-lucide="git-pull-request"></i> Releases</button>
 
         <div class="nav-label">Tautan &amp; Preferensi</div>
-        <button type="button" onclick="switchTab('profile')" id="nav-profile" class="nav-item"><i data-lucide="user-circle-2"></i> Profil Developer</button>
         <a href="https://github.com/vexalyn-dev/presensi-guru-icbct" target="_blank" rel="noopener" class="nav-item"><i data-lucide="git-branch"></i> Repository</a>
         <a href="{{ url('/dashboard') }}" class="nav-item"><i data-lucide="external-link"></i> Main App</a>
         <button type="button" onclick="switchTab('settings')" id="nav-settings" class="nav-item"><i data-lucide="settings"></i> Settings &amp; Tema</button>
     </nav>
 
     <div class="side-foot">
-        @php
-            $sidebarUser  = auth()->user();
-            $sidebarPhoto = ($sidebarUser->photo_path ?: $sidebarUser->photo)
-                ? asset('storage/'.($sidebarUser->photo_path ?: $sidebarUser->photo))
-                : asset('images/profile-dev.png');
-        @endphp
-        <div class="me" style="cursor:pointer" onclick="switchTab('profile')" title="Buka Profil">
-            <img src="{{ $sidebarPhoto }}" alt="{{ $sidebarUser->name }}"
-                 style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(99,102,241,.5);flex-shrink:0">
-            <div style="min-width:0;flex:1">
-                <p class="n trunc">{{ $sidebarUser->name }}</p>
-                <p class="r trunc" style="display:flex;align-items:center;gap:5px;">
-                    <span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;flex-shrink:0"></span>
-                    developer console
-                </p>
-            </div>
-        </div>
         {{-- Logout di sidebar bawah --}}
         <form action="{{ route('logout') }}" method="POST"
-              style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)"
               onsubmit="if(!confirmAction(this,'Yakin ingin keluar dari Developer Panel?','danger'))return false;try{sessionStorage.removeItem('dev_splash_shown');}catch(e){}return true;">
             @csrf
             <button type="submit" class="nav-item"
@@ -2087,15 +2068,34 @@ textarea.input { resize: vertical; min-height: 85px; }
         <div class="top-r">
             <span class="clock mono" id="live-clock">--:--:--</span>
             <span class="env"><i></i><span>{{ strtoupper(app()->environment()) }}</span></span>
-            {{-- Avatar profil developer di pojok kanan atas --}}
-            @php $topUser = auth()->user(); $topPhoto = ($topUser->photo_path ?: $topUser->photo) ? asset('storage/'.($topUser->photo_path ?: $topUser->photo)) : asset('images/profile-dev.png'); @endphp
-            <button type="button" onclick="switchTab('profile')" title="Profil Developer"
-                    style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:8px;border-radius:10px;padding:5px 10px 5px 5px;transition:background .2s;border:1px solid transparent"
-                    onmouseover="this.style.background='rgba(99,102,241,.1)';this.style.borderColor='rgba(99,102,241,.25)'"
-                    onmouseout="this.style.background='none';this.style.borderColor='transparent'">
+            {{-- Profile card di pojok kanan atas --}}
+            @php
+                $topUser  = auth()->user();
+                $topPhoto = ($topUser->photo_path ?: $topUser->photo)
+                    ? asset('storage/'.($topUser->photo_path ?: $topUser->photo))
+                    : asset('images/profile-dev.png');
+            @endphp
+            <button type="button" onclick="switchTab('profile')" title="Buka Profil"
+                    style="display:flex;align-items:center;gap:10px;padding:5px 12px 5px 5px;
+                           background:rgba(255,255,255,.03);border:1px solid var(--line-subtle);
+                           border-radius:10px;cursor:pointer;transition:all .2s var(--ease);font:inherit"
+                    onmouseover="this.style.background='rgba(99,102,241,.08)';this.style.borderColor='rgba(99,102,241,.3)'"
+                    onmouseout="this.style.background='rgba(255,255,255,.03)';this.style.borderColor='var(--line-subtle)'">
                 <img src="{{ $topPhoto }}" alt="{{ $topUser->name }}"
-                     style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid rgba(99,102,241,.45);flex-shrink:0">
-                <span style="font-size:.8rem;font-weight:600;color:var(--txt-head);white-space:nowrap;display:none" class="dev-name-top">{{ $topUser->name }}</span>
+                     style="width:32px;height:32px;border-radius:50%;object-fit:cover;
+                            border:2px solid rgba(99,102,241,.5);flex-shrink:0">
+                <div style="text-align:left;min-width:0">
+                    <p style="margin:0;font-size:.82rem;font-weight:650;color:var(--txt-head);
+                               white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">
+                        {{ $topUser->name }}
+                    </p>
+                    <p style="margin:0;font-size:.68rem;color:var(--txt-dim);
+                               font-family:'Geist Mono',monospace;display:flex;align-items:center;gap:4px">
+                        <span style="width:5px;height:5px;border-radius:50%;background:#10b981;
+                                     box-shadow:0 0 5px #10b981;flex-shrink:0"></span>
+                        DEVELOPER CONSOLE
+                    </p>
+                </div>
             </button>
         </div>
     </header>

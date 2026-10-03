@@ -142,11 +142,10 @@
         </div>
     </div>
 
-    {{-- ── Banner Vexalyn Dev (full width, lebih tinggi) ── --}}
+    {{-- ── Banner Vexalyn Dev (full width, tidak terpotong) ── --}}
     <div style="margin-bottom:24px;border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(99,102,241,.2);box-shadow:0 8px 32px rgba(99,102,241,.12)">
         <img src="{{ asset('images/banner-vexalyn-dev.png') }}" alt="Vexalyn Dev Banner"
-             style="width:100%;display:block;height:220px;object-fit:cover;object-position:center top">
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(5,9,18,.55) 100%);pointer-events:none"></div>
+             style="width:100%;display:block;height:auto;max-height:260px;object-fit:contain;object-position:center;background:#050912">
     </div>
 
     @if($debugOn)
@@ -312,12 +311,12 @@
                 </div>
             </div>
 
-            {{-- Chart Aktivitas 7 Hari --}}
-            <div class="card" style="padding:18px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            {{-- Chart Aktivitas 7 Hari (crypto-style) --}}
+            <div class="card" style="padding:18px 20px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
                     <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:6px">
-                        <i data-lucide="bar-chart-2" style="width:15px;height:15px;color:var(--accent)"></i>
-                        Aktivitas 7 Hari
+                        <i data-lucide="trending-up" style="width:15px;height:15px;color:#6366f1"></i>
+                        Aktivitas Presensi 7 Hari
                     </span>
                     <span class="live" style="font-size:0.72rem"><i></i> Live</span>
                 </div>
@@ -328,13 +327,25 @@
                         $activityLabels[] = $date->locale('id')->isoFormat('D MMM');
                         $activityData[]   = \App\Models\Attendance::whereDate('date', $date->toDateString())->count();
                     }
+                    $latestVal  = end($activityData);
+                    $prevVal    = $activityData[count($activityData)-2] ?? 0;
+                    $changeSign = $latestVal >= $prevVal ? '+' : '';
+                    $changeDiff = $latestVal - $prevVal;
                 @endphp
-                <canvas id="dash-activity-chart" style="width:100%;height:110px"
+                <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px">
+                    <span style="font-size:1.8rem;font-weight:800;color:#f8fafc;letter-spacing:-.04em;line-height:1">{{ $latestVal }}</span>
+                    <span style="font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:20px;font-family:'Geist Mono',monospace;
+                        {{ $changeDiff >= 0 ? 'background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25)' : 'background:rgba(244,63,94,.12);color:#f87171;border:1px solid rgba(244,63,94,.25)' }}">
+                        {{ $changeSign }}{{ $changeDiff }} hari ini
+                    </span>
+                    <span style="font-size:.7rem;color:var(--txt-dim);margin-left:auto;font-family:'Geist Mono',monospace">scan presensi</span>
+                </div>
+                <canvas id="dash-activity-chart" style="width:100%;height:130px"
                         data-labels='@json($activityLabels)'
                         data-values='@json($activityData)'></canvas>
             </div>
 
-            {{-- Environment Quick Info --}}
+            {{-- Runtime Info --}}
             <div class="card" style="padding:16px 18px">
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
                     <i data-lucide="terminal" style="width:15px;height:15px;color:var(--accent)"></i>
@@ -352,6 +363,55 @@
                         <span style="font-size:.71rem;color:var(--txt-dim);font-family:'Geist Mono',monospace">{{ $ei['k'] }}</span>
                         <span style="font-size:.74rem;font-weight:600;color:{{ $ei['c'] }};font-family:'Geist Mono',monospace">{{ $ei['v'] }}</span>
                     </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Disk Usage — full-width crypto bar style --}}
+            @php $dp = $stats['disk_percent']??0; $dc = $dp>90?'#f43f5e':($dp>70?'#f59e0b':'#10b981'); $dcA = $dp>90?'rgba(244,63,94,.12)':($dp>70?'rgba(245,158,11,.12)':'rgba(16,185,129,.12)'); @endphp
+            <div class="card" style="padding:22px 24px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <div style="width:34px;height:34px;border-radius:9px;background:{{ $dcA }};border:1px solid {{ $dc }}44;display:flex;align-items:center;justify-content:center">
+                            <i data-lucide="hard-drive" style="width:15px;height:15px;color:{{ $dc }}"></i>
+                        </div>
+                        <div>
+                            <p style="font-size:.82rem;font-weight:700;color:var(--txt-head);margin:0">Disk Usage</p>
+                            <p style="font-size:.68rem;color:var(--txt-dim);margin:0;font-family:'Geist Mono',monospace">
+                                {{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }} GB / {{ round($stats['disk_total']/1073741824,1) }} GB
+                            </p>
+                        </div>
+                    </div>
+                    <span style="font-size:2rem;font-weight:800;letter-spacing:-.04em;color:{{ $dc }};font-family:'Geist Mono',monospace;text-shadow:0 0 20px {{ $dc }}66">{{ $dp }}%</span>
+                </div>
+                {{-- Crypto-style segmented bar --}}
+                <div style="position:relative;height:12px;border-radius:12px;background:rgba(255,255,255,.04);overflow:hidden;margin-bottom:8px;border:1px solid rgba(255,255,255,.06)">
+                    <div style="height:100%;width:{{ $dp }}%;border-radius:12px;
+                        background:linear-gradient(90deg,{{ $dc }}88 0%,{{ $dc }} 100%);
+                        box-shadow:0 0 16px {{ $dc }}55;
+                        transition:width 1.4s cubic-bezier(.4,0,.2,1);
+                        position:relative;overflow:hidden">
+                        <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);animation:shimmer 2.5s infinite"></div>
+                    </div>
+                    @foreach([25,50,75] as $tick)
+                    <div style="position:absolute;top:0;bottom:0;left:{{ $tick }}%;width:1px;background:rgba(255,255,255,.08)"></div>
+                    @endforeach
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+                    @foreach(['0%','25%','50%','75%','100%'] as $lbl)
+                    <span style="font-size:.6rem;color:rgba(100,116,139,.5);font-family:'Geist Mono',monospace">{{ $lbl }}</span>
+                    @endforeach
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    @foreach([['label'=>'Config','ok'=>$stats['cache_config']==='CACHED'],['label'=>'Routes','ok'=>$stats['cache_route']==='CACHED'],['label'=>'Views','ok'=>$stats['cache_view']==='CACHED']] as $c)
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;padding:5px 13px;border-radius:20px;font-family:'Geist Mono',monospace;
+                        background:{{ $c['ok']?'rgba(16,185,129,.08)':'rgba(244,63,94,.08)' }};
+                        color:{{ $c['ok']?'#34d399':'#f87171' }};
+                        border:1px solid {{ $c['ok']?'rgba(16,185,129,.2)':'rgba(244,63,94,.2)' }}">
+                        @if($c['ok'])<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>
+                        @else<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>@endif
+                        {{ $c['label'] }}
+                    </span>
                     @endforeach
                 </div>
             </div>
@@ -395,7 +455,13 @@
 
 <style>
 /* Chart.js canvas sizing */
-#dash-activity-chart { max-height: 110px; }
+#dash-activity-chart { max-height: 140px; }
+
+/* Shimmer animation for disk bar */
+@keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+}
 
 /* Stat counter animation */
 @keyframes countUp {
@@ -423,48 +489,83 @@ function initDashChart() {
 
     var labels = JSON.parse(ctx.dataset.labels || '[]');
     var data   = JSON.parse(ctx.dataset.values || '[]');
-    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6366f1';
+
+    /* Crypto-style gradient fill */
+    var canvas = ctx;
+    var gradFill = canvas.getContext('2d').createLinearGradient(0, 0, 0, 140);
+    gradFill.addColorStop(0,   'rgba(99,102,241,0.35)');
+    gradFill.addColorStop(0.6, 'rgba(99,102,241,0.08)');
+    gradFill.addColorStop(1,   'rgba(99,102,241,0.00)');
 
     new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: data.map(function(v, i) {
-                    return i === data.length - 1 ? accent : 'rgba(99,102,241,0.35)';
+                fill: true,
+                backgroundColor: gradFill,
+                borderColor: '#6366f1',
+                borderWidth: 2,
+                pointBackgroundColor: data.map(function(v, i) {
+                    return i === data.length - 1 ? '#818cf8' : 'transparent';
                 }),
-                borderColor: accent,
-                borderWidth: 1.5,
-                borderRadius: 5,
-                borderSkipped: false,
+                pointBorderColor: data.map(function(v, i) {
+                    return i === data.length - 1 ? '#6366f1' : 'transparent';
+                }),
+                pointRadius: data.map(function(v, i) {
+                    return i === data.length - 1 ? 5 : 0;
+                }),
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: '#818cf8',
+                tension: 0.45,
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: { duration: 800, easing: 'easeInOutQuart' },
+            interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(15,23,42,0.92)',
-                    borderColor: 'rgba(99,102,241,0.4)',
+                    backgroundColor: 'rgba(9,13,28,0.95)',
+                    borderColor: 'rgba(99,102,241,0.5)',
                     borderWidth: 1,
                     titleColor: '#f8fafc',
                     bodyColor: '#94a3b8',
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false,
                     callbacks: {
-                        label: ctx => ` ${ctx.raw} scan presensi`,
+                        title: function(items) { return items[0].label; },
+                        label: function(item) { return '  ' + item.raw + ' scan presensi'; }
                     }
                 }
             },
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { color: '#64748b', font: { size: 10, family: "'Geist Mono', monospace" } },
+                    ticks: {
+                        color: '#475569',
+                        font: { size: 10, family: "'Geist Mono', monospace" },
+                        maxRotation: 0,
+                    },
                     border: { display: false },
                 },
                 y: {
-                    grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
-                    ticks: { color: '#64748b', font: { size: 10, family: "'Geist Mono', monospace" }, stepSize: 1 },
+                    position: 'right',
+                    grid: {
+                        color: 'rgba(255,255,255,0.04)',
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        color: '#475569',
+                        font: { size: 10, family: "'Geist Mono', monospace" },
+                        stepSize: 1,
+                        padding: 8,
+                        maxTicksLimit: 5,
+                    },
                     border: { display: false },
                 }
             }
