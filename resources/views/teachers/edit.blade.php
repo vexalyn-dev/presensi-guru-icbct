@@ -5,24 +5,6 @@
 @section('content')
     <div class="fade-in" x-data="editPageState({{ $teacher->is_active ? 'true' : 'false' }})">
 
-        <!-- Toast Notification -->
-        @if (session('success'))
-            <div id="toast-success" class="fixed top-6 right-6 z-50 animate-slide-in-right">
-                <div class="flex items-center gap-3 px-5 py-4 bg-green-500 text-white rounded-xl shadow-2xl">
-                    <i data-lucide="check-circle" class="w-5 h-5"></i>
-                    <p class="text-sm font-medium">{{ session('success') }}</p>
-                </div>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div id="toast-error" class="fixed top-6 right-6 z-50 animate-slide-in-right">
-                <div class="flex items-center gap-3 px-5 py-4 bg-red-500 text-white rounded-xl shadow-2xl">
-                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
-                    <p class="text-sm font-medium">{{ session('error') }}</p>
-                </div>
-            </div>
-        @endif
         <!-- Page Header with Modern Back Button -->
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-4">

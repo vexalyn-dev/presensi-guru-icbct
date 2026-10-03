@@ -71,20 +71,6 @@
         </div>
     </div>
 
-    {{-- Flash messages --}}
-    @if(session('success'))
-    <div class="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-3">
-        <i data-lucide="check-circle" class="w-5 h-5 text-green-600 flex-shrink-0"></i>
-        <p class="text-sm font-medium text-green-800 dark:text-green-300">{{ session('success') }}</p>
-    </div>
-    @endif
-    @if(session('warning'))
-    <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 flex items-center gap-3">
-        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>
-        <p class="text-sm font-medium text-amber-800 dark:text-amber-300">{{ session('warning') }}</p>
-    </div>
-    @endif
-
     {{-- ── SELECT-ALL BAR (muncul saat mode pilih aktif) ─────── --}}
     <div x-show="selectMode"
          x-transition:enter="transition ease-out duration-150"

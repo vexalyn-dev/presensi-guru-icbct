@@ -1848,6 +1848,149 @@ textarea.input { resize: vertical; min-height: 85px; }
 </head>
 
 <body class="dp antialiased">
+
+{{-- ══ CYBER SPLASH SCREEN ══ --}}
+<div id="dev-splash" style="
+    position:fixed;inset:0;z-index:99999;
+    background:#050912;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    font-family:'Geist Mono',ui-monospace,monospace;
+    overflow:hidden;
+    transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1);
+">
+    {{-- Animated grid background --}}
+    <canvas id="splash-canvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:.35"></canvas>
+
+    {{-- Glow orbs --}}
+    <div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.18) 0%,transparent 70%);top:-100px;left:-100px;animation:splashOrb1 6s ease-in-out infinite alternate;pointer-events:none"></div>
+    <div style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.12) 0%,transparent 70%);bottom:-100px;right:-100px;animation:splashOrb2 7s ease-in-out infinite alternate;pointer-events:none"></div>
+
+    {{-- Logo --}}
+    <div style="position:relative;z-index:1;text-align:center;margin-bottom:40px">
+        <div style="width:72px;height:72px;margin:0 auto 16px;border-radius:18px;
+            background:linear-gradient(135deg,#6366f1,#4f46e5);
+            display:flex;align-items:center;justify-content:center;
+            box-shadow:0 0 40px rgba(99,102,241,.5),0 0 80px rgba(99,102,241,.2);
+            animation:splashLogoPulse 2s ease-in-out infinite">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+        </div>
+        <p style="font-size:.7rem;font-weight:700;letter-spacing:.25em;color:#6366f1;text-transform:uppercase;margin:0">DEV PANEL</p>
+        <p style="font-size:.62rem;letter-spacing:.15em;color:#334155;margin:4px 0 0;font-family:'Geist Mono',monospace">ICB CT · v2.0</p>
+    </div>
+
+    {{-- Terminal boot sequence --}}
+    <div id="splash-terminal" style="
+        position:relative;z-index:1;
+        width:min(460px,92vw);
+        background:rgba(9,13,22,.9);
+        border:1px solid rgba(99,102,241,.3);
+        border-radius:12px;
+        padding:18px 20px;
+        box-shadow:0 0 40px rgba(99,102,241,.15),inset 0 1px 0 rgba(255,255,255,.04);
+    ">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)">
+            <span style="width:10px;height:10px;border-radius:50%;background:#f43f5e"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:#10b981"></span>
+            <span style="margin-left:8px;font-size:.72rem;color:#475569;letter-spacing:.05em">dev-console ~ icb-ct</span>
+        </div>
+        <div id="splash-lines" style="font-size:.75rem;line-height:1.8;color:#94a3b8;min-height:120px"></div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+            <span style="color:#6366f1;font-size:.75rem">❯</span>
+            <span id="splash-cursor" style="width:8px;height:14px;background:#6366f1;display:inline-block;animation:splashBlink .9s step-end infinite;border-radius:1px"></span>
+        </div>
+    </div>
+
+    {{-- Progress bar --}}
+    <div style="position:relative;z-index:1;width:min(460px,92vw);margin-top:20px">
+        <div style="height:2px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden">
+            <div id="splash-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#06b6d4);border-radius:2px;transition:width .3s ease;box-shadow:0 0 8px #6366f1"></div>
+        </div>
+        <p id="splash-status" style="font-size:.65rem;color:#475569;margin:8px 0 0;text-align:right;letter-spacing:.05em">Memuat sistem...</p>
+    </div>
+</div>
+
+<style>
+@keyframes splashOrb1   { from{transform:translate(0,0) scale(1)} to{transform:translate(80px,60px) scale(1.2)} }
+@keyframes splashOrb2   { from{transform:translate(0,0) scale(1)} to{transform:translate(-60px,-80px) scale(1.15)} }
+@keyframes splashLogoPulse { 0%,100%{box-shadow:0 0 40px rgba(99,102,241,.5),0 0 80px rgba(99,102,241,.2)} 50%{box-shadow:0 0 60px rgba(99,102,241,.7),0 0 120px rgba(99,102,241,.3)} }
+@keyframes splashBlink  { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+
+<script>
+(function() {
+    /* ── Canvas grid animation ── */
+    var c = document.getElementById('splash-canvas');
+    if (c) {
+        var ctx = c.getContext('2d');
+        var W, H, cols, rows;
+        function resize() {
+            W = c.width  = window.innerWidth;
+            H = c.height = window.innerHeight;
+            cols = Math.ceil(W / 50); rows = Math.ceil(H / 50);
+        }
+        resize(); window.addEventListener('resize', resize);
+        var t = 0;
+        function drawGrid() {
+            ctx.clearRect(0,0,W,H);
+            ctx.strokeStyle = 'rgba(99,102,241,.15)';
+            ctx.lineWidth = .5;
+            for(var x=0;x<=W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+            for(var y=0;y<=H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+            /* Traveling pulse */
+            var px = (t % W); var py = (t * .6) % H;
+            ctx.fillStyle='rgba(99,102,241,.4)'; ctx.beginPath(); ctx.arc(px,py,2,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='rgba(6,182,212,.3)'; ctx.beginPath(); ctx.arc(W-px, py, 1.5,0,Math.PI*2); ctx.fill();
+            t+=1.2;
+            requestAnimationFrame(drawGrid);
+        }
+        drawGrid();
+    }
+
+    /* ── Boot sequence ── */
+    var lines = document.getElementById('splash-lines');
+    var bar   = document.getElementById('splash-bar');
+    var stat  = document.getElementById('splash-status');
+    var splash= document.getElementById('dev-splash');
+
+    var bootLines = [
+        { txt: '<span style="color:#6366f1">▶</span> Menginisialisasi Dev Panel...', pct: 10, delay: 0 },
+        { txt: '<span style="color:#10b981">✓</span> Memverifikasi kredensial developer', pct: 25, delay: 300 },
+        { txt: '<span style="color:#10b981">✓</span> Memuat konfigurasi sistem', pct: 42, delay: 550 },
+        { txt: '<span style="color:#10b981">✓</span> Koneksi database: <span style="color:#34d399">OK</span>', pct: 58, delay: 780 },
+        { txt: '<span style="color:#10b981">✓</span> Cache engine: <span style="color:#34d399">Aktif</span>', pct: 72, delay: 980 },
+        { txt: '<span style="color:#06b6d4">⟳</span> Kompilasi antarmuka konsol...', pct: 88, delay: 1150 },
+        { txt: '<span style="color:#10b981">✓</span> Sistem siap — <span style="color:#818cf8">selamat datang, Developer</span>', pct: 100, delay: 1380 },
+    ];
+
+    bootLines.forEach(function(item) {
+        setTimeout(function() {
+            var p = document.createElement('div');
+            p.innerHTML = item.txt;
+            p.style.cssText = 'opacity:0;transform:translateY(4px);transition:opacity .25s ease,transform .25s ease';
+            lines.appendChild(p);
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    p.style.opacity = '1'; p.style.transform = 'translateY(0)';
+                });
+            });
+            if (bar) bar.style.width = item.pct + '%';
+            if (stat) stat.textContent = item.pct < 100 ? 'Memuat... ' + item.pct + '%' : 'Siap masuk ✓';
+        }, item.delay);
+    });
+
+    /* ── Dismiss dan reveal UI ── */
+    setTimeout(function() {
+        if (!splash) return;
+        splash.style.opacity = '0';
+        splash.style.transform = 'scale(1.03)';
+        setTimeout(function() { splash.style.display = 'none'; }, 650);
+    }, 1900);
+})();
+</script>
 <div class="scrim" id="scrim"></div>
 
 {{-- SIDEBAR --}}
@@ -1865,7 +2008,10 @@ textarea.input { resize: vertical; min-height: 85px; }
         <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active"><i data-lucide="layout-dashboard"></i> Dashboard</button>
 
         <div class="nav-label">Kelola Sistem</div>
-        <button type="button" onclick="switchTab('apk')" id="nav-apk" class="nav-item"><i data-lucide="smartphone"></i> APK Manager</button>
+        <button type="button" onclick="switchTab('apk')" id="nav-apk" class="nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;fill:#3DDC84"><path d="M17.523 15.341a.58.58 0 0 1-.58-.58.58.58 0 0 1 .58-.58.58.58 0 0 1 .58.58.58.58 0 0 1-.58.58m-11.046 0a.58.58 0 0 1-.58-.58.58.58 0 0 1 .58-.58.58.58 0 0 1 .58.58.58.58 0 0 1-.58.58M17.78 9.3l1.738-3.01a.361.361 0 0 0-.132-.494.362.362 0 0 0-.494.133l-1.759 3.047a10.879 10.879 0 0 0-5.133-1.27c-1.846 0-3.585.47-5.133 1.27L5.108 5.93a.362.362 0 0 0-.494-.133.361.361 0 0 0-.132.494L6.22 9.3C3.625 10.78 1.9 13.438 1.9 16.5h20.2c0-3.062-1.725-5.72-4.32-7.2"/></svg>
+            Android Manager
+        </button>
         <button type="button" onclick="switchTab('ios')" id="nav-ios" class="nav-item">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 814 1000" style="width:18px;height:18px;fill:currentColor;flex-shrink:0"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.3-150.3-110.7c-46-70.4-73.9-161.4-73.9-247.9 0-157.1 100.1-247.4 198.5-247.4 51.6 0 95.1 33.9 127.5 33.9 31.3 0 80.4-36.1 139.2-36.1 22.4 0 108.2 2 167 74.2zM726.4 82.4c24.2-28.8 41.7-68.7 41.7-108.6 0-5.5-.5-11.1-1.5-15.5-39.1 1.5-85.5 26.1-113.8 56.3-22.4 24.7-43.2 64.6-43.2 105.1 0 6 1 12 1.5 14.1 2.5.5 6.5 1 10.5 1 35.4 0 79.4-23.2 104.8-52.4z"/></svg>
             iOS Manager
@@ -1874,6 +2020,7 @@ textarea.input { resize: vertical; min-height: 85px; }
         <button type="button" onclick="switchTab('releases')" id="nav-releases" class="nav-item"><i data-lucide="git-pull-request"></i> Releases</button>
 
         <div class="nav-label">Tautan & Preferensi</div>
+        <button type="button" onclick="switchTab('profile')" id="nav-profile" class="nav-item"><i data-lucide="user-circle-2"></i> Profil Developer</button>
         <a href="https://github.com/vexalyn-dev/presensi-guru-icbct" target="_blank" rel="noopener" class="nav-item"><i data-lucide="git-branch"></i> Repository</a>
         <a href="{{ url('/dashboard') }}" class="nav-item"><i data-lucide="external-link"></i> Main App</a>
         <button type="button" onclick="switchTab('settings')" id="nav-settings" class="nav-item"><i data-lucide="settings"></i> Settings & Tema</button>
@@ -1914,15 +2061,24 @@ textarea.input { resize: vertical; min-height: 85px; }
     </header>
 
     <div class="content">
-        @if(session('success') || session('error'))
-            <div class="flash">
-                @if(session('success'))
-                    <div class="alert alert-ok" role="status"><i data-lucide="check-circle-2" style="width:18px;height:18px;flex-shrink:0"></i><span>{{ session('success') }}</span></div>
-                @endif
-                @if(session('error'))
-                    <div class="alert alert-err" role="alert"><i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0"></i><span>{{ session('error') }}</span></div>
-                @endif
-            </div>
+        @if(session('success') || session('error') || session('warning'))
+        <div class="flash"
+             x-data="{ show: true }"
+             x-init="setTimeout(() => show = false, 2000)"
+             x-show="show"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            @if(session('success'))
+                <div class="alert alert-ok" role="status"><i data-lucide="check-circle-2" style="width:18px;height:18px;flex-shrink:0"></i><span>{{ session('success') }}</span></div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-err" role="alert"><i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0"></i><span>{{ session('error') }}</span></div>
+            @endif
+            @if(session('warning'))
+                <div class="alert alert-warn" role="alert"><i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0"></i><span>{{ session('warning') }}</span></div>
+            @endif
+        </div>
         @endif
 
         @yield('content')
@@ -1930,14 +2086,15 @@ textarea.input { resize: vertical; min-height: 85px; }
 </main>
 
 <script>
-    const tabs = ['dashboard', 'apk', 'ios', 'system', 'releases', 'settings'];
+    const tabs = ['dashboard', 'apk', 'ios', 'system', 'releases', 'settings', 'profile'];
     const titles = {
         dashboard: 'Dashboard',
-        apk: 'APK Manager',
+        apk: 'Android Manager',
         ios: 'iOS Manager',
         system: 'System State',
         releases: 'Riwayat Rilis',
-        settings: 'Settings & Tema'
+        settings: 'Settings & Tema',
+        profile: 'Profil Developer',
     };
     const tabIcons = {
         dashboard: 'layout-dashboard',
@@ -1945,7 +2102,8 @@ textarea.input { resize: vertical; min-height: 85px; }
         ios: 'smartphone',
         system: 'cpu',
         releases: 'git-pull-request',
-        settings: 'settings'
+        settings: 'settings',
+        profile: 'user-circle',
     };
 
     const sideEl = document.getElementById('side');
@@ -2083,7 +2241,9 @@ textarea.input { resize: vertical; min-height: 85px; }
         if (window.lucide) lucide.createIcons();
         let saved = null;
         try { saved = sessionStorage.getItem('dev_tab'); } catch (e) {}
-        switchTab((location.hash || '').replace('#', '') || saved || 'dashboard');
+        // Buka tab sesuai flash session jika ada (misal setelah save profile)
+        const flashTab = '{{ session("active_tab_dev") }}';
+        switchTab(flashTab || (location.hash || '').replace('#', '') || saved || 'dashboard');
         window.scrollTo(0, 0);
         tickClock();
         setInterval(tickClock, 1000);

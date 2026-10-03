@@ -1,5 +1,7 @@
 {
   "css.lint.unknownAtRules": "ignore",
+  "css.validate": false,
+  "html.validate.styles": false,
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },

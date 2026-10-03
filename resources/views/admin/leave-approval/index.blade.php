@@ -17,13 +17,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-    <div class="card p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 flex items-center gap-3">
-        <i data-lucide="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0"></i>
-        <p class="text-sm font-medium text-green-800 dark:text-green-300">{{ session('success') }}</p>
-    </div>
-    @endif
-
     {{-- Stats --}}
     <div class="grid grid-cols-3 gap-4">
         <div class="card p-4">

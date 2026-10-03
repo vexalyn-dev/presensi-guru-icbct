@@ -273,21 +273,13 @@
                         $circ = 2 * 3.14159 * $r;
                         $filled = $circ * ($dp / 100);
                         $empty  = $circ - $filled;
+                        $dcGlow = $dc . '80';
                     @endphp
                     <svg width="128" height="128" viewBox="0 0 128 128">
                         <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
-                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none"
-                                stroke="{{ $dc }}" stroke-width="10"
-                                stroke-dasharray="{{ $filled }} {{ $empty }}"
-                                stroke-dashoffset="{{ $circ * 0.25 }}"
-                                stroke-linecap="round"
-                                style="filter:drop-shadow(0 0 6px {{ $dc }}80);transition:stroke-dasharray 1s ease"/>
-                        <text x="{{ $cx }}" y="{{ $cy }}" text-anchor="middle" dominant-baseline="middle"
-                              fill="{{ $dc }}" font-size="22" font-weight="800" font-family="'Geist Mono',monospace">{{ $dp }}%</text>
-                        <text x="{{ $cx }}" y="{{ $cy + 18 }}" text-anchor="middle" dominant-baseline="middle"
-                              fill="var(--txt-dim)" font-size="9" font-family="'Plus Jakarta Sans',sans-serif">
-                            {{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }}GB / {{ round($stats['disk_total']/1073741824,1) }}GB
-                        </text>
+                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="{{ $dc }}" stroke-width="10" stroke-dasharray="{{ $filled }} {{ $empty }}" stroke-dashoffset="{{ $circ * 0.25 }}" stroke-linecap="round" style="filter:drop-shadow(0 0 6px {{ $dcGlow }});transition:stroke-dasharray 1s ease"/>
+                        <text x="{{ $cx }}" y="{{ $cy }}" text-anchor="middle" dominant-baseline="middle" fill="{{ $dc }}" font-size="22" font-weight="800" font-family="'Geist Mono',monospace">{{ $dp }}%</text>
+                        <text x="{{ $cx }}" y="{{ $cy + 18 }}" text-anchor="middle" dominant-baseline="middle" fill="var(--txt-dim)" font-size="9" font-family="'Plus Jakarta Sans',sans-serif">{{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }}GB / {{ round($stats['disk_total']/1073741824,1) }}GB</text>
                     </svg>
                 </div>
                 {{-- Cache health badges --}}
@@ -300,11 +292,9 @@
                         ];
                     @endphp
                     @foreach($caches as $c)
-                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:600;padding:4px 10px;border-radius:6px;font-family:'Geist Mono',monospace;
-                        background:{{ $c['ok']?'rgba(16,185,129,.12)':'rgba(244,63,94,.12)' }};
-                        color:{{ $c['ok']?'#34d399':'#f87171' }};
-                        border:1px solid {{ $c['ok']?'rgba(16,185,129,.3)':'rgba(244,63,94,.3)' }}">
-                        <span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:600;padding:4px 10px;border-radius:6px;font-family:'Geist Mono',monospace;background:{{ $c['ok']?'rgba(16,185,129,.12)':'rgba(244,63,94,.12)' }};color:{{ $c['ok']?'#34d399':'#f87171' }};border:1px solid {{ $c['ok']?'rgba(16,185,129,.3)':'rgba(244,63,94,.3)' }}">
+                        @if($c['ok'])<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>
+                        @else<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>@endif
                         {{ $c['label'] }}
                     </span>
                     @endforeach
@@ -320,7 +310,6 @@
                     </span>
                     <span class="live" style="font-size:0.72rem"><i></i> Live</span>
                 </div>
-                <canvas id="dash-activity-chart" style="width:100%;height:100px"></canvas>
                 @php
                     $activityData = [];
                     $activityLabels = [];
@@ -330,12 +319,9 @@
                         $activityData[] = \App\Models\Attendance::whereDate('date', $date->toDateString())->count();
                     }
                 @endphp
-                <script>
-                    window.__dashActivity = {
-                        labels: @json($activityLabels),
-                        data: @json($activityData),
-                    };
-                </script>
+                <canvas id="dash-activity-chart" style="width:100%;height:100px"
+                    data-labels="{{ htmlspecialchars(json_encode($activityLabels), ENT_QUOTES) }}"
+                    data-values="{{ htmlspecialchars(json_encode($activityData), ENT_QUOTES) }}"></canvas>
             </div>
         </div>
     </div>
@@ -360,21 +346,14 @@
                 ];
             @endphp
             @foreach($healthItems as $hi)
-            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 12px;border-radius:10px;
-                background:{{ $hi['ok']?'rgba(16,185,129,.06)':'rgba(244,63,94,.06)' }};
-                border:1px solid {{ $hi['ok']?'rgba(16,185,129,.2)':'rgba(244,63,94,.2)' }};
-                transition:all .2s ease"
-                onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-                <div style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-                    background:{{ $hi['ok']?'rgba(16,185,129,.12)':'rgba(244,63,94,.12)' }};
-                    color:{{ $hi['ok']?'#10b981':'#f43f5e' }}">
+            @php $hiOk = $hi['ok']; @endphp
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 12px;border-radius:10px;background:{{ $hiOk?'rgba(16,185,129,.06)':'rgba(244,63,94,.06)' }};border:1px solid {{ $hiOk?'rgba(16,185,129,.2)':'rgba(244,63,94,.2)' }};transition:all .2s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                <div style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:{{ $hiOk?'rgba(16,185,129,.12)':'rgba(244,63,94,.12)' }};color:{{ $hiOk?'#10b981':'#f43f5e' }}">
                     <i data-lucide="{{ $hi['icon'] }}" style="width:17px;height:17px"></i>
                 </div>
                 <span style="font-size:0.78rem;font-weight:700;color:var(--txt-head)">{{ $hi['label'] }}</span>
                 <span style="font-size:0.68rem;color:var(--txt-dim);font-family:'Geist Mono',monospace;text-align:center">{{ $hi['detail'] }}</span>
-                <div style="width:6px;height:6px;border-radius:50%;background:{{ $hi['ok']?'#10b981':'#f43f5e' }};
-                    box-shadow:0 0 8px {{ $hi['ok']?'#10b981':'#f43f5e' }};
-                    animation:pulseGlow 2s infinite"></div>
+                <div style="width:6px;height:6px;border-radius:50%;background:{{ $hiOk?'#10b981':'#f43f5e' }};box-shadow:0 0 8px {{ $hiOk?'#10b981':'#f43f5e' }};animation:pulseGlow 2s infinite"></div>
             </div>
             @endforeach
         </div>
@@ -408,22 +387,21 @@
 
 function initDashChart() {
     var ctx = document.getElementById('dash-activity-chart');
-    if (!ctx || typeof Chart === 'undefined' || !window.__dashActivity) return;
+    if (!ctx || typeof Chart === 'undefined') return;
 
-    var d = window.__dashActivity;
+    var labels = JSON.parse(ctx.dataset.labels || '[]');
+    var data   = JSON.parse(ctx.dataset.values || '[]');
     var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6366f1';
 
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: d.labels,
+            labels: labels,
             datasets: [{
-                data: d.data,
-                backgroundColor: d.data.map((v, i) =>
-                    i === d.data.length - 1
-                        ? accent
-                        : 'rgba(99,102,241,0.35)'
-                ),
+                data: data,
+                backgroundColor: data.map(function(v, i) {
+                    return i === data.length - 1 ? accent : 'rgba(99,102,241,0.35)';
+                }),
                 borderColor: accent,
                 borderWidth: 1.5,
                 borderRadius: 5,
@@ -495,10 +473,15 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
 });
 </script>
 
-{{-- ═════════ TAB: APK MANAGER ═════════ --}}
+{{-- ═════════ TAB: ANDROID MANAGER ═════════ --}}
 <div id="tab-apk" class="tab-content">
     <header class="page-head">
-        <h2><i data-lucide="smartphone" style="width:22px;height:22px;color:var(--accent);vertical-align:middle;margin-right:6px"></i> APK Manager</h2>
+        <h2 style="display:flex;align-items:center;gap:10px">
+            <span style="width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:26px;height:26px;fill:#3DDC84"><path d="M17.523 15.341a.58.58 0 0 1-.58-.58.58.58 0 0 1 .58-.58.58.58 0 0 1 .58.58.58.58 0 0 1-.58.58m-11.046 0a.58.58 0 0 1-.58-.58.58.58 0 0 1 .58-.58.58.58 0 0 1 .58.58.58.58 0 0 1-.58.58M17.78 9.3l1.738-3.01a.361.361 0 0 0-.132-.494.362.362 0 0 0-.494.133l-1.759 3.047a10.879 10.879 0 0 0-5.133-1.27c-1.846 0-3.585.47-5.133 1.27L5.108 5.93a.362.362 0 0 0-.494-.133.361.361 0 0 0-.132.494L6.22 9.3C3.625 10.78 1.9 13.438 1.9 16.5h20.2c0-3.062-1.725-5.72-4.32-7.2"/></svg>
+            </span>
+            Android Manager
+        </h2>
         <p>Unggah dan bagikan build Android terbaru ke pengguna aplikasi.</p>
     </header>
 
@@ -1154,6 +1137,247 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
     </div>
 </div>
 
+{{-- ═════════ TAB: PROFIL DEVELOPER ═════════ --}}
+<div id="tab-profile" class="tab-content">
+
+<style>
+.cp-hero { position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#050912 0%,#0f172a 40%,#0d1b2a 100%);border:1px solid rgba(99,102,241,.25);padding:36px 32px 28px;margin-bottom:24px; }
+.cp-hero::before { content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 120% at 80% 50%,rgba(99,102,241,.12) 0%,transparent 60%),radial-gradient(ellipse 40% 80% at 10% 80%,rgba(6,182,212,.08) 0%,transparent 60%);pointer-events:none; }
+.cp-hero canvas { position:absolute;inset:0;width:100%;height:100%;opacity:.18;pointer-events:none; }
+.cp-avatar-wrap { position:relative;width:88px;height:88px;flex-shrink:0; }
+.cp-avatar-ring { position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(from 0deg,#6366f1,#06b6d4,#10b981,#6366f1);animation:cpRingSpin 4s linear infinite; }
+.cp-avatar { position:relative;z-index:1;width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #050912; }
+@keyframes cpRingSpin { to{transform:rotate(360deg)} }
+.cp-badge { position:absolute;bottom:0;right:0;z-index:2;width:22px;height:22px;border-radius:50%;background:#10b981;border:3px solid #050912;box-shadow:0 0 8px #10b981; }
+.cp-field { background:rgba(9,13,22,.7);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:11px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--txt-head);width:100%;transition:border-color .2s,box-shadow .2s;outline:none; }
+.cp-field:focus { border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15),0 0 16px rgba(99,102,241,.1); }
+.cp-label { font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--txt-dim);margin-bottom:6px;display:block;font-family:'Geist Mono',monospace; }
+.cp-card { background:rgba(9,13,22,.6);border:1px solid rgba(99,102,241,.15);border-radius:14px;padding:24px;position:relative;overflow:hidden; }
+.cp-card::after { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(99,102,241,.4),transparent); }
+.cp-totp-display { font-family:'Geist Mono',monospace;font-size:2.4rem;font-weight:800;letter-spacing:.3em;color:#34d399;text-shadow:0 0 20px rgba(16,185,129,.5),0 0 40px rgba(16,185,129,.2);text-align:center;padding:24px;background:rgba(16,185,129,.05);border-radius:12px;border:1px solid rgba(16,185,129,.2); }
+.cp-totp-timer { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;font-size:.78rem;color:var(--txt-sub); }
+.cp-progress { height:3px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;margin-top:8px; }
+.cp-progress-bar { height:100%;background:linear-gradient(90deg,#10b981,#06b6d4);border-radius:3px;transition:width .5s linear;box-shadow:0 0 8px rgba(16,185,129,.5); }
+.cp-stat-mini { display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px; }
+.cp-stat-mini b { font-size:1.35rem;font-weight:800;color:var(--txt-head);letter-spacing:-.02em; }
+.cp-stat-mini span { font-size:.7rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace; }
+.cp-section-title { font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-dim);font-family:'Geist Mono',monospace;margin-bottom:16px;display:flex;align-items:center;gap:8px; }
+.cp-section-title::after { content:'';flex:1;height:1px;background:rgba(255,255,255,.06); }
+</style>
+
+@php
+    $devUser = auth()->user();
+    $devPhoto = ($devUser->photo_path ?: $devUser->photo)
+        ? asset('storage/' . ($devUser->photo_path ?: $devUser->photo))
+        : asset('images/profile-dev.png');
+    $totalUsers     = \App\Models\User::count();
+    $totalGuruAktif = \App\Models\User::where('role','guru')->where('is_active',true)->count();
+    $totalPresensi  = \App\Models\Attendance::whereDate('date', today())->count();
+@endphp
+
+{{-- Hero Banner --}}
+<div class="cp-hero">
+    <canvas id="cp-hero-canvas"></canvas>
+    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+        <div style="position:relative;cursor:pointer" onclick="document.getElementById('cp-photo-input').click()" title="Ganti foto">
+            <div class="cp-avatar-wrap">
+                <div class="cp-avatar-ring"></div>
+                <img id="cp-avatar-img" src="{{ $devPhoto }}" class="cp-avatar" alt="{{ $devUser->name }}">
+            </div>
+            <div class="cp-badge"></div>
+        </div>
+        <input type="file" id="cp-photo-input" accept="image/*" hidden onchange="cpPreviewPhoto(this)">
+        <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+                <h2 id="cp-name-display" style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;color:#f8fafc;margin:0">{{ $devUser->name }}</h2>
+                <span style="font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3);font-family:'Geist Mono',monospace;letter-spacing:.08em">DEVELOPER</span>
+            </div>
+            <p style="font-size:.85rem;color:#64748b;margin:0 0 10px;font-family:'Geist Mono',monospace">{{ $devUser->email }}</p>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span style="display:inline-flex;align-items:center;gap:5px;font-size:.72rem;color:#34d399;font-family:'Geist Mono',monospace">
+                    <span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:pulseGlow 2s infinite"></span>
+                    Online
+                </span>
+                <span style="color:rgba(255,255,255,.12)">·</span>
+                <span style="font-size:.72rem;color:#475569;font-family:'Geist Mono',monospace">Bergabung {{ $devUser->created_at->locale('id')->isoFormat('MMM YYYY') }}</span>
+                <span style="color:rgba(255,255,255,.12)">·</span>
+                <span style="font-size:.72rem;color:#475569;font-family:'Geist Mono',monospace">ID #{{ $devUser->id }}</span>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,80px);gap:8px;flex-shrink:0">
+            <div class="cp-stat-mini"><b>{{ $totalUsers }}</b><span>Users</span></div>
+            <div class="cp-stat-mini"><b>{{ $totalGuruAktif }}</b><span>Aktif</span></div>
+            <div class="cp-stat-mini"><b>{{ $totalPresensi }}</b><span>Scan</span></div>
+        </div>
+    </div>
+</div>
+
+{{-- Flash messages --}}
+@if(session('success'))
+<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#34d399;font-size:.85rem;font-weight:600;margin-bottom:20px">
+    <i data-lucide="check-circle" style="width:16px;height:16px;flex-shrink:0"></i>
+    {{ session('success') }}
+</div>
+@endif
+@if($errors->any())
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-radius:10px;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);color:#f87171;font-size:.85rem;font-weight:600;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:10px"><i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0"></i> Ada kesalahan yang perlu diperbaiki:</div>
+    <ul style="margin:4px 0 0 26px;padding:0;font-weight:400">
+        @foreach($errors->all() as $err)
+            <li>{{ $err }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
+{{-- 2-col grid --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+    {{-- Kiri: Edit Profil + Ganti Password --}}
+    <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="cp-card">
+            <p class="cp-section-title"><i data-lucide="user" style="width:14px;height:14px;color:var(--accent)"></i> Identitas Developer</p>
+            <form action="{{ route('developer.profile.update', $secret) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="file" name="photo" id="cp-photo-hidden" accept="image/*" hidden>
+                <div style="display:flex;flex-direction:column;gap:14px">
+                    <div><label class="cp-label">Nama Lengkap</label>
+                        <input type="text" name="name" class="cp-field" value="{{ old('name', $devUser->name) }}" required oninput="document.getElementById('cp-name-display').textContent=this.value">
+                    </div>
+                    <div><label class="cp-label">Email</label>
+                        <input type="email" name="email" class="cp-field" value="{{ old('email', $devUser->email) }}" required>
+                    </div>
+                    <div><label class="cp-label">Nomor Telepon</label>
+                        <input type="text" name="phone" class="cp-field" value="{{ old('phone', $devUser->phone ?? '') }}" placeholder="08xxxxxxxxxx">
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:18px">
+                    <button type="submit" class="btn"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="cp-card">
+            <p class="cp-section-title"><i data-lucide="lock" style="width:14px;height:14px;color:#f43f5e"></i> Keamanan Akun</p>
+            <form action="{{ route('developer.profile.password', $secret) }}" method="POST">
+                @csrf
+                <div style="display:flex;flex-direction:column;gap:14px">
+                    <div><label class="cp-label">Password Lama</label><input type="password" name="current_password" class="cp-field" required placeholder="••••••••"></div>
+                    <div><label class="cp-label">Password Baru</label><input type="password" name="password" id="cp-pw-new" class="cp-field" required minlength="8" placeholder="Min. 8 karakter"></div>
+                    <div><label class="cp-label">Konfirmasi Password</label><input type="password" name="password_confirmation" class="cp-field" required minlength="8" placeholder="Ulangi password baru"></div>
+                    <div>
+                        <div class="cp-progress"><div id="cp-pw-bar" class="cp-progress-bar" style="width:0%"></div></div>
+                        <p id="cp-pw-hint" style="font-size:.7rem;color:var(--txt-dim);margin-top:5px;font-family:'Geist Mono',monospace">Masukkan password baru</p>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:18px">
+                    <button type="submit" class="btn btn-danger"><i data-lucide="lock" style="width:15px;height:15px"></i> Ganti Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Kanan: 2FA + Session --}}
+    <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="cp-card">
+            <p class="cp-section-title"><i data-lucide="shield-check" style="width:14px;height:14px;color:#10b981"></i> Two-Factor Authentication</p>
+            <div style="text-align:center;margin-bottom:16px">
+                <p style="font-size:.8rem;color:var(--txt-sub);margin-bottom:12px">Kode OTP berubah tiap 30 detik. Gunakan Google Authenticator atau Authy.</p>
+                <div class="cp-totp-display" id="cp-totp-code">--- ---</div>
+                <div class="cp-totp-timer"><i data-lucide="timer" style="width:13px;height:13px"></i><span id="cp-totp-countdown">30</span>s tersisa</div>
+                <div class="cp-progress"><div id="cp-totp-bar" class="cp-progress-bar" style="width:100%"></div></div>
+            </div>
+            <div style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:10px;padding:14px">
+                <p style="font-size:.78rem;font-weight:600;color:#34d399;margin-bottom:8px">Setup Authenticator</p>
+                <p style="font-size:.75rem;color:var(--txt-sub);line-height:1.6;margin:0">1. Install Google Authenticator / Authy<br>2. Masukkan secret key TOTP dari admin<br>3. Masukkan 6-digit OTP saat login</p>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                    <input type="text" class="cp-field" placeholder="Secret key TOTP..." id="cp-totp-secret-input" style="flex:1;font-family:'Geist Mono',monospace;font-size:.85rem">
+                    <button type="button" onclick="cpInitTotp()" class="btn" style="padding:11px 14px"><i data-lucide="key" style="width:14px;height:14px"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="cp-card">
+            <p class="cp-section-title"><i data-lucide="activity" style="width:14px;height:14px;color:#06b6d4"></i> Sesi & Keamanan</p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                @php
+                    $sessionItems = [
+                        ['label'=>'IP Address',    'value'=>request()->ip(),                                      'icon'=>'map-pin'],
+                        ['label'=>'Browser',       'value'=>substr(request()->userAgent()??'-',0,42).'…',          'icon'=>'monitor'],
+                        ['label'=>'Login Terakhir','value'=>$devUser->updated_at->locale('id')->diffForHumans(),  'icon'=>'clock'],
+                        ['label'=>'Session Driver','value'=>config('session.driver','file'),                       'icon'=>'database'],
+                        ['label'=>'Role',          'value'=>strtoupper($devUser->role??'developer'),               'icon'=>'shield'],
+                    ];
+                @endphp
+                @foreach($sessionItems as $si)
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.04)">
+                    <div style="width:28px;height:28px;border-radius:7px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i data-lucide="{{ $si['icon'] }}" style="width:13px;height:13px;color:#06b6d4"></i>
+                    </div>
+                    <div style="min-width:0;flex:1">
+                        <p style="font-size:.68rem;color:var(--txt-dim);margin:0;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.06em">{{ $si['label'] }}</p>
+                        <p style="font-size:.82rem;font-weight:600;color:var(--txt-head);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $si['value'] }}</p>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05)">
+                <form action="{{ route('logout') }}" method="POST" onsubmit="return confirmAction(this,'⚠ Yakin ingin keluar?','danger')">
+                    @csrf
+                    <button type="submit" class="btn btn-ghost btn-block" style="border-color:rgba(244,63,94,.3);color:#f87171">
+                        <i data-lucide="log-out" style="width:15px;height:15px"></i> Keluar dari Sesi
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* Hero canvas particles */
+(function(){
+    var c=document.getElementById('cp-hero-canvas'); if(!c)return;
+    var ctx=c.getContext('2d'),W,H,pts=[];
+    function resize(){W=c.width=c.parentElement.offsetWidth;H=c.height=c.parentElement.offsetHeight;}
+    resize(); window.addEventListener('resize',resize);
+    for(var i=0;i<40;i++) pts.push({x:Math.random()*1200,y:Math.random()*300,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.2,r:Math.random()*1.5+.5});
+    function draw(){
+        ctx.clearRect(0,0,W,H);
+        pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+            ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(99,102,241,.7)';ctx.fill();});
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+function cpPreviewPhoto(input){
+    if(!input.files||!input.files[0])return;
+    var r=new FileReader();
+    r.onload=function(e){
+        document.getElementById('cp-avatar-img').src=e.target.result;
+        var dt=new DataTransfer(); dt.items.add(input.files[0]);
+        document.getElementById('cp-photo-hidden').files=dt.files;
+    };
+    r.readAsDataURL(input.files[0]);
+}
+
+document.getElementById('cp-pw-new')?.addEventListener('input',function(){
+    var v=this.value,score=0;
+    if(v.length>=8)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
+    var pct=score*25,colors=['#f43f5e','#f43f5e','#f59e0b','#10b981','#10b981'],labels=['Terlalu lemah','Lemah','Sedang','Kuat','Sangat kuat'];
+    var bar=document.getElementById('cp-pw-bar'),hint=document.getElementById('cp-pw-hint');
+    if(bar){bar.style.width=pct+'%';bar.style.background='linear-gradient(90deg,'+colors[score]+','+(score>2?'#06b6d4':colors[score])+')';}
+    if(hint){hint.textContent=v.length?labels[score]:'Masukkan password baru';hint.style.color=v.length?colors[score]:'';}
+});
+
+var cpTotpSecret='',cpTotpInterval=null;
+function cpInitTotp(){var i=document.getElementById('cp-totp-secret-input');if(!i||!i.value.trim())return;cpTotpSecret=i.value.trim().toUpperCase().replace(/\s/g,'');if(cpTotpInterval)clearInterval(cpTotpInterval);cpTickTotp();cpTotpInterval=setInterval(cpTickTotp,1000);}
+function cpTickTotp(){var now=Math.floor(Date.now()/1000),rem=30-(now%30);var cd=document.getElementById('cp-totp-countdown'),bar=document.getElementById('cp-totp-bar');if(cd)cd.textContent=rem;if(bar)bar.style.width=(rem/30*100)+'%';if(cpTotpSecret)cpGenerateTotp(cpTotpSecret,Math.floor(Date.now()/30000)).then(function(code){var el=document.getElementById('cp-totp-code');if(el)el.textContent=code.slice(0,3)+' '+code.slice(3);});}
+async function cpGenerateTotp(secret,counter){try{var kb=base32Decode(secret);if(!kb)return'------';var key=await crypto.subtle.importKey('raw',kb,{name:'HMAC',hash:'SHA-1'},false,['sign']);var buf=new ArrayBuffer(8),view=new DataView(buf);view.setUint32(4,counter,false);var sig=await crypto.subtle.sign('HMAC',key,buf),arr=new Uint8Array(sig),offset=arr[19]&0xf;var code=((arr[offset]&0x7f)<<24|(arr[offset+1]&0xff)<<16|(arr[offset+2]&0xff)<<8|(arr[offset+3]&0xff))%1000000;return String(code).padStart(6,'0');}catch(e){return'------';}}
+function base32Decode(s){var alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',bits=0,value=0,output=[];for(var i=0;i<s.length;i++){var idx=alpha.indexOf(s[i].toUpperCase());if(idx<0)continue;value=(value<<5)|idx;bits+=5;if(bits>=8){output.push((value>>>(bits-8))&0xff);bits-=8;}}return output.length?new Uint8Array(output):null;}
+</script>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -1188,7 +1412,7 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
     welcome.addEventListener('click', e => { if (e.target === welcome) closeWelcome(); });
     $('#nb-open-welcome')?.addEventListener('click', () => openOverlay(welcome));
     const relErr = !!$('#nb-release-modal[data-open="1"]');
-    if (!relErr && safe(() => localStorage.getItem(SKIP_KEY)) !== today) setTimeout(() => openOverlay(welcome), 450);
+    if (relErr) setTimeout(() => openOverlay($('#nb-release-modal')), 450);
 
     /* Konfirmasi (dipakai link, form, dan toggle debug) */
     const box = $('#nb-confirm');

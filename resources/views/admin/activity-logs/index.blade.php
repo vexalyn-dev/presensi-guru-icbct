@@ -28,13 +28,6 @@
         </div>
     </div>
 
-    {{-- Flash messages --}}
-    @if(session('success'))
-        <div class="card p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-            <p class="text-sm text-green-800 dark:text-green-300 font-medium">{{ session('success') }}</p>
-        </div>
-    @endif
-
     {{-- Stats Cards --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="card p-5">

@@ -18,33 +18,6 @@
             </div>
         </div>
 
-        <!-- Alerts -->
-        @if(session('success'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
-                 x-transition:leave="transition ease-in duration-300"
-                 x-transition:leave-start="opacity-100 translate-y-0"
-                 x-transition:leave-end="opacity-0 -translate-y-2"
-                 class="card p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 animate-fade-in">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="check" class="w-4 h-4 text-white"></i>
-                    </div>
-                    <p class="text-sm font-medium text-green-800 dark:text-green-300">{{ session('success') }}</p>
-                </div>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="card p-4 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200 dark:border-red-800 animate-fade-in">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="x" class="w-4 h-4 text-white"></i>
-                    </div>
-                    <p class="text-sm font-medium text-red-800 dark:text-red-300">{{ session('error') }}</p>
-                </div>
-            </div>
-        @endif
-
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left Column - Main Presensi Area -->
             <div class="lg:col-span-2 space-y-6">

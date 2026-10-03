@@ -60,7 +60,7 @@ class DeveloperController extends Controller
                 : 0,
             'cache_config'    => file_exists(base_path('bootstrap/cache/config.php')) ? 'CACHED' : 'NOT',
             'cache_route'     => file_exists(base_path('bootstrap/cache/routes-v7.php')) ? 'CACHED' : 'NOT',
-            'cache_view'      => file_exists(base_path('bootstrap/cache/views.php')) ? 'CACHED' : 'NOT',
+            'cache_view'      => count(glob(storage_path('framework/views/*.php')) ?: []) > 0 ? 'CACHED' : 'NOT',
             'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
             'server_port'     => $_SERVER['SERVER_PORT'] ?? 'N/A',
             'server_addr'     => $_SERVER['SERVER_ADDR'] ?? 'N/A',
@@ -101,7 +101,7 @@ class DeveloperController extends Controller
         $cacheStatus = [
             'config'  => file_exists(base_path('bootstrap/cache/config.php')) ? 'CACHED' : 'NOT CACHED',
             'route'   => file_exists(base_path('bootstrap/cache/routes-v7.php')) ? 'CACHED' : 'NOT CACHED',
-            'view'    => file_exists(base_path('bootstrap/cache/views.php')) ? 'CACHED' : 'NOT CACHED',
+            'view'    => count(glob(storage_path('framework/views/*.php')) ?: []) > 0 ? 'CACHED' : 'NOT CACHED',
             'events'  => file_exists(base_path('bootstrap/cache/events.php')) ? 'CACHED' : 'NOT CACHED',
         ];
 
@@ -245,6 +245,66 @@ class DeveloperController extends Controller
         }
 
         return back()->with('success', '✅ APK berhasil dihapus.');
+    }
+
+    // ─────────────────────────────────────────────
+    // DEVELOPER PROFILE
+    // ─────────────────────────────────────────────
+
+    public function updateProfile(string $secret, Request $request)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $data = [
+            'name'  => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? $user->phone,
+        ];
+
+        if ($request->hasFile('photo')) {
+            // Hapus foto lama
+            if ($user->photo && Storage::disk('public')->exists($user->photo)) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            $path = $request->file('photo')->store('profiles', 'public');
+            $data['photo'] = $path;
+        }
+
+        $user->update($data);
+
+        return back()->with('success', '✅ Profil berhasil diperbarui!')->with('active_tab_dev', 'profile');
+    }
+
+    public function updatePassword(string $secret, Request $request)
+    {
+        if (!$this->verifySecret($secret)) abort(404);
+
+        $request->validate([
+            'current_password'      => 'required',
+            'password'              => 'required|min:8|confirmed',
+            'password_confirmation' => 'required',
+        ]);
+
+        $user = auth()->user();
+
+        if (!\Hash::check($request->current_password, $user->password)) {
+            return back()
+                ->withErrors(['current_password' => 'Password lama tidak sesuai.'])
+                ->with('active_tab_dev', 'profile');
+        }
+
+        $user->update(['password' => \Hash::make($request->password)]);
+
+        return back()->with('success', '✅ Password berhasil diubah!')->with('active_tab_dev', 'profile');
     }
 
     // ─────────────────────────────────────────────

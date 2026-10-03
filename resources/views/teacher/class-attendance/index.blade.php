@@ -214,11 +214,10 @@
 
                     <!-- Idle overlay -->
                     <div id="qr-idle-overlay"
-                        class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 text-white gap-3 p-4 text-center">
+                        class="absolute inset-0 flex items-center justify-center bg-white dark:bg-slate-800">
                         <img src="{{ asset('images/scan-qrcode.png') }}"
                              alt="Scan QR Code"
-                             class="w-full h-full object-cover opacity-80"
-                             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit">
+                             class="w-3/5 sm:w-1/2 max-w-[180px] object-contain select-none pointer-events-none">
                     </div>
 
                     <!-- Scan box overlay -->

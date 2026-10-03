@@ -771,7 +771,7 @@
 
         <!-- Page Content -->
         <main class="flex-1 p-5 lg:p-6 overflow-x-hidden">
-            @if (session('success') || session('error'))
+            @if (session('success') || session('error') || session('warning'))
             <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 2000)" x-show="show"
                  x-transition:leave="transition ease-in duration-300"
                  x-transition:leave-start="opacity-100 translate-y-0"
@@ -786,7 +786,14 @@
                 @if (session('error'))
                 <div class="mb-5 flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl slide-up">
                     <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
-                    <p class="text-sm text-red-800 dark:text-red-200">{{ session('error') }}</p>
+                    <p class="text-sm text-red-800 dark:text-red-200">{{ is_array(session('error')) ? implode(' ', session('error')) : session('error') }}</p>
+                </div>
+                @endif
+
+                @if (session('warning'))
+                <div class="mb-5 flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl slide-up">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                    <p class="text-sm text-amber-800 dark:text-amber-200">{{ is_array(session('warning')) ? implode(' ', session('warning')) : session('warning') }}</p>
                 </div>
                 @endif
             </div>

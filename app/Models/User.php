@@ -459,6 +459,7 @@ class User extends Authenticatable
             'admin'        => asset('images/default-admin.png'),
             'operator'     => asset('images/default-operator.png'),
             'guru_piket'   => asset('images/default-piket.png'),
+            'developer'    => asset('images/profile-dev.png'),
             default        => asset('images/default-teacher.png'),
         };
     }

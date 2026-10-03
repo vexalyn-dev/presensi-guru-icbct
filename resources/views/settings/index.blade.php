@@ -41,7 +41,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
          x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-         x-init="setTimeout(() => show = false, 4000)">
+         x-init="setTimeout(() => show = false, 2000)">
         <div class="w-9 h-9 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
             <i data-lucide="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
         </div>
