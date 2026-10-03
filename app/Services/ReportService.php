@@ -38,13 +38,14 @@ class ReportService
                 // Scan tidak lengkap = ada check_in tapi tidak ada check_out
                 $incomplete = $items->filter(fn($a) => $a->check_in && !$a->check_out)->count();
 
-                $tepatWaktu = $hadir;
-                $pct = $total > 0 ? round(($tepatWaktu / $total) * 100, 1) : 0;
+                // Total hadir = Hadir/Tepat Waktu + Terlambat (sama-sama masuk sekolah)
+                $totalHadir = $hadir + $telat;
+                $pct = $total > 0 ? round(($hadir / $total) * 100, 1) : 0;
 
                 return [
                     'user'                => $user,
                     'total'               => $total,
-                    'hadir'               => $hadir,
+                    'hadir'               => $totalHadir,
                     'telat'               => $telat,
                     'izin_sakit'          => $izin,
                     'alpha'               => $alpha,

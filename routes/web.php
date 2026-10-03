@@ -227,6 +227,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/holidays/{holiday}', [HolidayController::class, 'update'])->name('holidays.update');
     Route::delete('/holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
     Route::post('/holidays/fetch-national', [HolidayController::class, 'fetchNationalHolidays'])->name('holidays.fetch-national');
+    Route::get('/holidays/check-is-holiday', [HolidayController::class, 'checkIsHoliday'])->name('holidays.check-is-holiday');
 
     // Activity Logs
     Route::prefix('activity-logs')->name('activity-logs.')->group(function () {

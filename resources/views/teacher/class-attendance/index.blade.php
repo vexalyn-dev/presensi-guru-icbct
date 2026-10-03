@@ -215,14 +215,10 @@
                     <!-- Idle overlay -->
                     <div id="qr-idle-overlay"
                         class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 text-white gap-3 p-4 text-center">
-                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 flex items-center justify-center">
-                            <svg class="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="1.75">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9m5.25 11.25v-4.5m0 4.5h-4.5m4.5 0L15 15" />
-                            </svg>
-                        </div>
-                        <p class="text-xs sm:text-sm font-medium text-slate-300">Tekan tombol untuk mulai scan</p>
+                        <img src="{{ asset('images/scan-qrcode.png') }}"
+                             alt="Scan QR Code"
+                             class="w-full h-full object-cover opacity-80"
+                             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit">
                     </div>
 
                     <!-- Scan box overlay -->

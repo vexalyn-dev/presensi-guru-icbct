@@ -184,7 +184,7 @@
                     <div x-data="{
                         menuOpen: false,
                         selected: {{ old('category') ? "'" . e(old('category')) . "'" : 'null' }},
-                        opts: @json([
+                        opts: {{ Js::from([
                             ['v'=>'UI',        'icon'=>'layout',       'bg'=>'bg-blue-100 dark:bg-blue-900/30',    'c'=>'text-blue-600 dark:text-blue-400'],
                             ['v'=>'Login',     'icon'=>'log-in',       'bg'=>'bg-purple-100 dark:bg-purple-900/30','c'=>'text-purple-600 dark:text-purple-400'],
                             ['v'=>'Presensi',  'icon'=>'scan-line',    'bg'=>'bg-green-100 dark:bg-green-900/30',  'c'=>'text-green-600 dark:text-green-400'],
@@ -193,7 +193,7 @@
                             ['v'=>'Performa',  'icon'=>'zap',          'bg'=>'bg-orange-100 dark:bg-orange-900/30','c'=>'text-orange-600 dark:text-orange-400'],
                             ['v'=>'Keamanan',  'icon'=>'shield-alert', 'bg'=>'bg-red-100 dark:bg-red-900/30',      'c'=>'text-red-600 dark:text-red-400'],
                             ['v'=>'Lainnya',   'icon'=>'more-horizontal','bg'=>'bg-slate-100 dark:bg-slate-700',   'c'=>'text-slate-600 dark:text-slate-400'],
-                        ]),
+                        ]) }},
                         select(opt) {
                             this.selected = opt.v;
                             document.getElementById('category-input').value = opt.v;
@@ -266,12 +266,12 @@
                         <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Tingkat Dampak</label>
                         <div x-data="{
                             menuOpen: false,
-                            opts: @json([
+                            opts: {{ Js::from([
                                 ['v'=>'Hanya saya',             'icon'=>'user',         'bg'=>'bg-slate-100 dark:bg-slate-700',     'c'=>'text-slate-600 dark:text-slate-400'],
                                 ['v'=>'Beberapa pengguna',      'icon'=>'users',        'bg'=>'bg-amber-100 dark:bg-amber-900/30',  'c'=>'text-amber-600 dark:text-amber-400'],
                                 ['v'=>'Semua pengguna',         'icon'=>'users-round',  'bg'=>'bg-orange-100 dark:bg-orange-900/30','c'=>'text-orange-600 dark:text-orange-400'],
                                 ['v'=>'Seluruh sistem terganggu','icon'=>'alert-octagon','bg'=>'bg-red-100 dark:bg-red-900/30',     'c'=>'text-red-600 dark:text-red-400'],
-                            ]),
+                            ]) }},
                             select(opt) {
                                 document.getElementById('impact-input').value = opt.v;
                                 var lbl = document.getElementById('impact-label');

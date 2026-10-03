@@ -118,21 +118,20 @@
     <div class="dash-header">
         <div class="dash-top">
             <div>
-                <h2 class="greeting">{{ $greeting }}, <span style="background: linear-gradient(135deg, #cbd5e1 30%, #818cf8); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Developer</span></h2>
+                <h2 class="greeting">{{ $greeting }}, <span style="background: linear-gradient(135deg, #a5b4fc 20%, #818cf8 50%, #6366f1); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Developer</span></h2>
                 <p class="subtext">
-                    Sistem aktif di <b>{{ $host }}</b> pukul {{ now()->format('H:i') }} WIB.
+                    Sistem aktif di <b>{{ $host }}</b> &nbsp;·&nbsp; {{ now()->locale('id')->isoFormat('dddd, D MMM YYYY') }} &nbsp;·&nbsp; pukul <span id="dash-clock-text">{{ now()->format('H:i') }}</span> WIB.
                     @if(($stats['pending_leaves'] ?? 0) > 0)
-                        <span style="color: #fbbf24;">• Ada {{ $stats['pending_leaves'] }} pengajuan izin menunggu persetujuan.</span>
+                        <span style="color:#fbbf24;font-weight:600"> &nbsp;⚠ {{ $stats['pending_leaves'] }} izin pending.</span>
                     @else
-                        <span style="color: #34d399;">• Semua status operasional normal.</span>
+                        <span style="color:#34d399"> &nbsp;✓ Semua operasional normal.</span>
                     @endif
                 </p>
                 <div class="dash-meta">
                     <span class="dash-pill"><i></i> {{ $envName }}</span>
                     <span class="pill mono"><i data-lucide="server" style="width:13px;height:13px;color:var(--txt-dim)"></i> {{ $host }}</span>
-                    @if(($stats['pending_leaves'] ?? 0) > 0)
-                        <span class="pill" style="border-color: rgba(245,158,11,0.3); color: #fbbf24;"><i data-lucide="clock" style="width:13px;height:13px"></i> {{ $stats['pending_leaves'] }} Pending</span>
-                    @endif
+                    @if($debugOn)<span class="pill" style="border-color:rgba(245,158,11,.35);color:#fbbf24"><i data-lucide="alert-triangle" style="width:13px;height:13px"></i> Debug ON</span>@endif
+                    @if(($stats['pending_leaves'] ?? 0) > 0)<span class="pill" style="border-color:rgba(245,158,11,.3);color:#fbbf24"><i data-lucide="clock" style="width:13px;height:13px"></i> {{ $stats['pending_leaves'] }} Pending</span>@endif
                 </div>
             </div>
             <div class="dash-actions">
@@ -143,171 +142,358 @@
     </div>
 
     @if($debugOn)
-        <div class="alert alert-warn" role="alert">
-            <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
-            <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di environment production agar detail konfigurasi dan error trace terlindungi.</span>
-        </div>
+    <div class="alert alert-warn" role="alert">
+        <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
+        <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di environment production agar detail konfigurasi dan error trace terlindungi.</span>
+    </div>
     @endif
 
-    <div class="stats">
-        <div class="card stat">
-            <div class="stat-head"><span class="ico t-violet"><i data-lucide="users" style="width:16px;height:16px"></i></span>Total Pengguna</div>
-            <div class="num" data-count="{{ $stats['total_users'] ?? 0 }}">0</div>
+    {{-- ── Stats Row ── --}}
+    <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px">
+        @php
+            $statCards = [
+                ['label'=>'Total Pengguna',  'value'=>$stats['total_users']??0,     'icon'=>'users',          'color'=>'violet', 'suffix'=>''],
+                ['label'=>'Guru Aktif',      'value'=>$stats['total_teachers']??0,  'icon'=>'graduation-cap', 'color'=>'sky',    'suffix'=>''],
+                ['label'=>'Operator/Admin',  'value'=>$stats['total_operators']??0, 'icon'=>'shield-check',   'color'=>'ok',     'suffix'=>''],
+                ['label'=>'Izin Pending',    'value'=>$stats['pending_leaves']??0,  'icon'=>'clock',          'color'=>($stats['pending_leaves']??0)>0?'warn':'ok', 'suffix'=>''],
+            ];
+        @endphp
+        @foreach($statCards as $sc)
+        <div class="card stat" style="cursor:default">
+            <div class="stat-head">
+                <span class="ico t-{{ $sc['color'] }}" style="width:30px;height:30px;border-radius:8px">
+                    <i data-lucide="{{ $sc['icon'] }}" style="width:15px;height:15px"></i>
+                </span>
+                {{ $sc['label'] }}
+            </div>
+            <div class="num" data-count="{{ $sc['value'] }}">{{ $sc['value'] }}</div>
         </div>
-        <div class="card stat">
-            <div class="stat-head"><span class="ico t-sky"><i data-lucide="graduation-cap" style="width:16px;height:16px"></i></span>Guru Aktif</div>
-            <div class="num" data-count="{{ $stats['total_teachers'] ?? 0 }}">0</div>
+        @endforeach
+    </div>
+
+    {{-- ── Main 3-col grid ── --}}
+    <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:20px;margin-bottom:20px">
+
+        {{-- Kiri: System Info + Quick Actions --}}
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+            {{-- System Info --}}
+            <div class="card">
+                <div class="card-head">
+                    <h3><i data-lucide="activity" style="width:18px;height:18px;color:#34d399"></i> Informasi Sistem</h3>
+                    <span class="live"><i></i> Live</span>
+                </div>
+                <div class="info">
+                    <div><p class="l">Environment</p><p class="v mono"><span class="badge t-ok" style="font-size:0.75rem;padding:3px 9px">{{ $envName }}</span></p></div>
+                    <div><p class="l">Debug Mode</p><p class="v"><span class="dot {{ $debugOn ? 'warn' : 'ok' }}"></span>{{ $debugOn ? 'Aktif' : 'Nonaktif' }}</p></div>
+                    <div><p class="l">Host URL</p><p class="v mono trunc" style="font-size:0.82rem">{{ $host }}</p></div>
+                    <div><p class="l">Waktu Server</p><p class="v mono" id="dash-srv-clock">{{ now()->format('H:i:s') }}</p></div>
+                    <div><p class="l">PHP Version</p><p class="v mono">{{ $stats['php_version']??'-' }}</p></div>
+                    <div><p class="l">Laravel</p><p class="v mono">v{{ ltrim($stats['laravel_version']??'12.x','vV') }}</p></div>
+                </div>
+            </div>
+
+            {{-- Quick Actions --}}
+            <div class="card">
+                <div class="card-head">
+                    <h3><i data-lucide="zap" style="width:18px;height:18px;color:#818cf8"></i> Aksi Cepat</h3>
+                </div>
+                <div class="actions">
+                    <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirmAction(this,'🧹 Bersihkan semua cache?\n(config, route, view, app cache)')" class="action">
+                        <span class="ico t-sky"><i data-lucide="trash-2" style="width:17px;height:17px"></i></span>
+                        <div><b>Sapu Jagat</b><small>Hapus cache config, route, & view</small></div>
+                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
+                    </a>
+                    <a href="{{ url('/fix-session?secret='.$secret) }}" onclick="return confirmAction(this,'🔧 Perbaiki session dir & hapus semua cache?')" class="action">
+                        <span class="ico t-warn"><i data-lucide="wrench" style="width:17px;height:17px"></i></span>
+                        <div><b>Fix Session</b><small>Perbaiki permissions & clear cache</small></div>
+                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
+                    </a>
+                    <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this,'⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
+                        <span class="ico" style="background:rgba(250,204,21,.12);color:#facc15;border:1px solid rgba(250,204,21,.3)"><i data-lucide="zap" style="width:17px;height:17px"></i></span>
+                        <div><b>Optimize</b><small>Bangun ulang struktur cache</small></div>
+                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
+                    </a>
+                    <a href="{{ route('developer.migrate', $secret) }}" onclick="return confirmAction(this,'🗄️ Jalankan database migration?\nPastikan backup sudah ada!')" class="action">
+                        <span class="ico t-ok"><i data-lucide="database" style="width:17px;height:17px"></i></span>
+                        <div><b>Run Migration</b><small>artisan migrate --force</small></div>
+                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
+                    </a>
+                    <a href="{{ route('developer.run-seeder', $secret) }}" onclick="return confirmAction(this,'🌱 Jalankan database seeder?\nMembuat ulang akun developer dan data demo.')" class="action">
+                        <span class="ico t-violet"><i data-lucide="sprout" style="width:17px;height:17px"></i></span>
+                        <div><b>Run Seeder</b><small>db:seed --force</small></div>
+                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="card stat">
-            <div class="stat-head"><span class="ico t-warn"><i data-lucide="cpu" style="width:16px;height:16px"></i></span>Versi PHP</div>
-            <div class="num num-sm">{{ $stats['php_version'] ?? '8.x' }}</div>
-        </div>
-        <div class="card stat">
-            <div class="stat-head"><span class="ico t-bad"><i data-lucide="code-2" style="width:16px;height:16px"></i></span>Laravel Framework</div>
-            <div class="num num-sm">v{{ ltrim($stats['laravel_version'] ?? '11.x', 'vV') }}</div>
+
+        {{-- Kanan: Server + Disk + Cache Health --}}
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+            {{-- Server Info --}}
+            <div class="card">
+                <div class="card-head">
+                    <h3><i data-lucide="monitor" style="width:18px;height:18px;color:#06b6d4"></i> Server Info</h3>
+                    <span class="live"><i></i> Live</span>
+                </div>
+                <div class="server-info-body">
+                    <div class="si-row">
+                        <div class="si-item"><span class="si-label">Memory</span><span class="si-val">{{ $stats['memory_limit']??'-' }}</span></div>
+                        <div class="si-item"><span class="si-label">Upload Max</span><span class="si-val">{{ $stats['upload_max']??'-' }}</span></div>
+                    </div>
+                    <div class="si-row">
+                        <div class="si-item"><span class="si-label">Post Max</span><span class="si-val">{{ $stats['post_max']??'-' }}</span></div>
+                        <div class="si-item"><span class="si-label">Max Exec</span><span class="si-val">{{ $stats['max_exec_time']??'-' }}s</span></div>
+                    </div>
+                    <div class="si-row">
+                        <div class="si-item full"><span class="si-label">Server</span><span class="si-val" style="font-size:0.78rem">{{ $stats['server_software']??'-' }}</span></div>
+                    </div>
+                    <div class="si-row">
+                        <div class="si-item"><span class="si-label">IP</span><span class="si-val" style="font-size:0.78rem">{{ $stats['server_addr']??'-' }}</span></div>
+                        <div class="si-item"><span class="si-label">Port</span><span class="si-val">{{ $stats['server_port']??'-' }}</span></div>
+                    </div>
+                    <div class="si-row">
+                        <div class="si-item full"><span class="si-label">Database</span><span class="si-val" style="font-size:0.78rem">{{ $stats['db_driver']??'-' }} / {{ $stats['db_name']??'-' }} @ {{ $stats['db_host']??'-' }}</span></div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Disk Usage Gauge --}}
+            <div class="card" style="padding:20px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                    <span style="font-size:0.78rem;font-weight:600;color:var(--txt-sub);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace">Disk Usage</span>
+                    @php $dp = $stats['disk_percent']??0; $dc = $dp>90?'#f43f5e':($dp>70?'#f59e0b':'#10b981'); @endphp
+                    <span style="font-size:0.85rem;font-weight:700;color:{{ $dc }};font-family:'Geist Mono',monospace">{{ $dp }}%</span>
+                </div>
+                {{-- Radial gauge --}}
+                <div style="display:flex;justify-content:center;margin-bottom:14px">
+                    @php
+                        $r = 52; $cx = 64; $cy = 64;
+                        $circ = 2 * 3.14159 * $r;
+                        $filled = $circ * ($dp / 100);
+                        $empty  = $circ - $filled;
+                    @endphp
+                    <svg width="128" height="128" viewBox="0 0 128 128">
+                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none"
+                                stroke="{{ $dc }}" stroke-width="10"
+                                stroke-dasharray="{{ $filled }} {{ $empty }}"
+                                stroke-dashoffset="{{ $circ * 0.25 }}"
+                                stroke-linecap="round"
+                                style="filter:drop-shadow(0 0 6px {{ $dc }}80);transition:stroke-dasharray 1s ease"/>
+                        <text x="{{ $cx }}" y="{{ $cy }}" text-anchor="middle" dominant-baseline="middle"
+                              fill="{{ $dc }}" font-size="22" font-weight="800" font-family="'Geist Mono',monospace">{{ $dp }}%</text>
+                        <text x="{{ $cx }}" y="{{ $cy + 18 }}" text-anchor="middle" dominant-baseline="middle"
+                              fill="var(--txt-dim)" font-size="9" font-family="'Plus Jakarta Sans',sans-serif">
+                            {{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }}GB / {{ round($stats['disk_total']/1073741824,1) }}GB
+                        </text>
+                    </svg>
+                </div>
+                {{-- Cache health badges --}}
+                <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+                    @php
+                        $caches = [
+                            ['label'=>'Config',  'ok'=>$stats['cache_config']==='CACHED'],
+                            ['label'=>'Routes',  'ok'=>$stats['cache_route']==='CACHED'],
+                            ['label'=>'Views',   'ok'=>$stats['cache_view']==='CACHED'],
+                        ];
+                    @endphp
+                    @foreach($caches as $c)
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:600;padding:4px 10px;border-radius:6px;font-family:'Geist Mono',monospace;
+                        background:{{ $c['ok']?'rgba(16,185,129,.12)':'rgba(244,63,94,.12)' }};
+                        color:{{ $c['ok']?'#34d399':'#f87171' }};
+                        border:1px solid {{ $c['ok']?'rgba(16,185,129,.3)':'rgba(244,63,94,.3)' }}">
+                        <span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>
+                        {{ $c['label'] }}
+                    </span>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Chart: User Growth (last 7 days attendance activity) --}}
+            <div class="card" style="padding:18px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head)">
+                        <i data-lucide="bar-chart-2" style="width:15px;height:15px;vertical-align:middle;margin-right:5px;color:var(--accent)"></i>
+                        Aktivitas 7 Hari
+                    </span>
+                    <span class="live" style="font-size:0.72rem"><i></i> Live</span>
+                </div>
+                <canvas id="dash-activity-chart" style="width:100%;height:100px"></canvas>
+                @php
+                    $activityData = [];
+                    $activityLabels = [];
+                    for ($d = 6; $d >= 0; $d--) {
+                        $date = now()->subDays($d);
+                        $activityLabels[] = $date->locale('id')->isoFormat('D MMM');
+                        $activityData[] = \App\Models\Attendance::whereDate('date', $date->toDateString())->count();
+                    }
+                @endphp
+                <script>
+                    window.__dashActivity = {
+                        labels: @json($activityLabels),
+                        data: @json($activityData),
+                    };
+                </script>
+            </div>
         </div>
     </div>
 
-    <div class="grid-main">
-        <div class="card left-col">
-            <div class="card-head">
-                <h3><i data-lucide="activity" style="width:18px;height:18px;color:#34d399"></i> Informasi Sistem</h3>
-                <span class="live"><i></i> Live</span>
-            </div>
-            <div class="info">
-                <div><p class="l">Environment</p><p class="v mono"><span class="badge t-ok">{{ $envName }}</span></p></div>
-                <div><p class="l">Debug mode</p><p class="v"><span class="dot {{ $debugOn ? 'warn' : 'ok' }}"></span>{{ $debugOn ? 'Aktif' : 'Nonaktif' }}</p></div>
-                <div><p class="l">Host URL</p><p class="v mono trunc">{{ $host }}</p></div>
-                <div><p class="l">Waktu server</p><p class="v mono">{{ now()->format('H:i') }} WIB</p></div>
-                <div><p class="l">Operator & admin</p><p class="v">{{ $stats['total_operators'] ?? 0 }} akun</p></div>
-            </div>
+    {{-- ── System Health Bar ── --}}
+    <div class="card" style="padding:20px 24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+            <h3 style="font-size:0.92rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:8px">
+                <i data-lucide="shield-check" style="width:17px;height:17px;color:#10b981"></i>
+                System Health
+            </h3>
+            <span class="live"><i></i> All Systems Operational</span>
         </div>
-
-        <div class="card right-col">
-            <div class="card-head">
-                <h3><i data-lucide="monitor" style="width:18px;height:18px;color:#06b6d4"></i> Server Info</h3>
-                <span class="live"><i></i> Live</span>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+            @php
+                $healthItems = [
+                    ['label'=>'Database',   'ok'=>true,           'icon'=>'database',    'detail'=>$stats['db_driver']??'mysql'],
+                    ['label'=>'Cache',      'ok'=>($stats['cache_config']==='CACHED'), 'icon'=>'cpu',      'detail'=>$stats['cache_config']==='CACHED'?'Cached':'Not Cached'],
+                    ['label'=>'Storage',    'ok'=>($dp<90),        'icon'=>'hard-drive',  'detail'=>$dp.'% used'],
+                    ['label'=>'Debug',      'ok'=>!$debugOn,       'icon'=>'bug',         'detail'=>$debugOn?'Active':'Off'],
+                    ['label'=>'Session',    'ok'=>true,            'icon'=>'lock',        'detail'=>$stats['session_driver']??'file'],
+                ];
+            @endphp
+            @foreach($healthItems as $hi)
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 12px;border-radius:10px;
+                background:{{ $hi['ok']?'rgba(16,185,129,.06)':'rgba(244,63,94,.06)' }};
+                border:1px solid {{ $hi['ok']?'rgba(16,185,129,.2)':'rgba(244,63,94,.2)' }};
+                transition:all .2s ease"
+                onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                <div style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+                    background:{{ $hi['ok']?'rgba(16,185,129,.12)':'rgba(244,63,94,.12)' }};
+                    color:{{ $hi['ok']?'#10b981':'#f43f5e' }}">
+                    <i data-lucide="{{ $hi['icon'] }}" style="width:17px;height:17px"></i>
+                </div>
+                <span style="font-size:0.78rem;font-weight:700;color:var(--txt-head)">{{ $hi['label'] }}</span>
+                <span style="font-size:0.68rem;color:var(--txt-dim);font-family:'Geist Mono',monospace;text-align:center">{{ $hi['detail'] }}</span>
+                <div style="width:6px;height:6px;border-radius:50%;background:{{ $hi['ok']?'#10b981':'#f43f5e' }};
+                    box-shadow:0 0 8px {{ $hi['ok']?'#10b981':'#f43f5e' }};
+                    animation:pulseGlow 2s infinite"></div>
             </div>
-            <div class="server-info-body">
-                <div class="si-row">
-                    <div class="si-item"><span class="si-label">PHP</span><span class="si-val mono">{{ $stats['php_version'] ?? '8.x' }}</span></div>
-                    <div class="si-item"><span class="si-label">Laravel</span><span class="si-val mono">v{{ ltrim($stats['laravel_version'] ?? '11.x', 'vV') }}</span></div>
-                </div>
-                <div class="si-row">
-                    <div class="si-item"><span class="si-label">Memory Limit</span><span class="si-val mono">{{ $stats['memory_limit'] ?? '-' }}</span></div>
-                    <div class="si-item"><span class="si-label">Upload Max</span><span class="si-val mono">{{ $stats['upload_max'] ?? '-' }}</span></div>
-                </div>
-                <div class="si-row">
-                    <div class="si-item"><span class="si-label">Post Max</span><span class="si-val mono">{{ $stats['post_max'] ?? '-' }}</span></div>
-                    <div class="si-item"><span class="si-label">Max Exec</span><span class="si-val mono">{{ $stats['max_exec_time'] ?? '-' }}s</span></div>
-                </div>
-                <div class="si-row">
-                    <div class="si-item full"><span class="si-label">Server</span><span class="si-val mono" style="font-size:11px">{{ $stats['server_software'] ?? '-' }}</span></div>
-                </div>
-                <div class="si-row">
-                    <div class="si-item"><span class="si-label">Server IP</span><span class="si-val mono">{{ $stats['server_addr'] ?? '-' }}</span></div>
-                    <div class="si-item"><span class="si-label">Port</span><span class="si-val mono">{{ $stats['server_port'] ?? '-' }}</span></div>
-                </div>
-                <div class="si-row">
-                    <div class="si-item full"><span class="si-label">Database</span><span class="si-val mono" style="font-size:11px">{{ $stats['db_driver'] ?? '-' }} | {{ $stats['db_name'] ?? '-' }}@{{ $stats['db_host'] ?? '-' }}</span></div>
-                </div>
-                <div class="si-row">
-                    <div class="si-item full"><span class="si-label">Cache</span>
-                        <span class="si-val mono" style="font-size:11px">
-                            @if($stats['cache_config'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Cfg
-                            @if($stats['cache_route'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Rt
-                            @if($stats['cache_view'] === 'CACHED')<span style="color:#10b981">✓</span>@else<span style="color:#f43f5e">✗</span>@endif Vw
-                        </span>
-                    </div>
-                </div>
-
-                {{-- Disk Usage Crypto Chart --}}
-                <div class="disk-chart-wrap">
-                    <div class="si-label" style="margin-bottom:10px">Disk Usage</div>
-                    <div class="disk-chart">
-                        @php
-                            $used = ($stats['disk_total'] - $stats['disk_free']) / 1073741824;
-                            $total = $stats['disk_total'] / 1073741824;
-                            $percent = $stats['disk_percent'];
-                            $cw = 300; $ch = 70;
-                            $pts = [];
-                            for ($i = 0; $i <= 20; $i++) {
-                                $baseY = $ch - ($percent / 100) * $ch;
-                                $v = sin($i * 0.8) * 4 + cos($i * 1.3) * 2;
-                                $y = max(4, min($ch - 4, $baseY + $v));
-                                $x = ($i / 20) * $cw;
-                                $pts[] = "$x,$y";
-                            }
-                            $areaPts = [$cw.','.$ch, '0,'.$ch] + $pts;
-                            $areaStr = implode(' ', array_map(function($p){$a=explode(',',$p);return $a[0].','.$a[1];}, $areaPts));
-                            $lineStr = implode(' ', $pts);
-                            $lastPt = end($pts); $lastY = (float)explode(',', $lastPt)[1];
-                        @endphp
-                        <svg viewBox="0 0 {{ $cw }} {{ $ch + 18 }}" preserveAspectRatio="none" style="width:100%;height:90px">
-                            <defs>
-                                <linearGradient id="dgG" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.4"/>
-                                    <stop offset="100%" stop-color="#10b981" stop-opacity="0.02"/>
-                                </linearGradient>
-                                <linearGradient id="dgL" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stop-color="#059669"/>
-                                    <stop offset="60%" stop-color="#10b981"/>
-                                    <stop offset="100%" stop-color="#34d399"/>
-                                </linearGradient>
-                            </defs>
-                            <polygon points="{{ $areaStr }}" fill="url(#dgG)"/>
-                            <polyline points="{{ $lineStr }}" fill="none" stroke="url(#dgL)" stroke-width="2" stroke-linejoin="round"/>
-                            <circle cx="{{ $cw }}" cy="{{ $lastY }}" r="4" fill="#34d399" stroke="var(--bg-surface)" stroke-width="2"/>
-                        </svg>
-                        <div class="disk-stats">
-                            <span class="mono" style="color:#10b981;font-weight:700">{{ round($used,1) }}GB</span>
-                            <span class="mono" style="color:var(--txt-dim)">/{{ round($total,1) }}GB</span>
-                            <span class="mono disk-pct {{ $percent > 90 ? 'text-rose-500' : ($percent > 70 ? 'text-amber-500' : 'text-emerald-500') }}" style="margin-left:auto">{{ $percent }}%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="si-row" style="margin-top:8px">
-                    <div class="si-item"><span class="si-label">Session</span><span class="si-val mono">{{ $stats['session_driver'] ?? '-' }} · {{ $stats['session_lifetime'] ?? '-' }}min</span></div>
-                    <div class="si-item"><span class="si-label">Remote IP</span><span class="si-val mono" style="font-size:11px">{{ $stats['remote_addr'] ?? '-' }}</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card left-col">
-            <div class="card-head">
-                <h3><i data-lucide="zap" style="width:18px;height:18px;color:#818cf8"></i> Aksi Cepat</h3>
-            </div>
-            <div class="actions">
-                <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirmAction(this, '🧹 Bersihkan semua cache?\n(config, route, view, app cache)')" class="action">
-                    <span class="ico t-sky"><i data-lucide="trash-2" style="width:17px;height:17px"></i></span>
-                    <div><b>Sapu Jagat</b><small>Hapus cache config, route, & view</small></div>
-                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                </a>
-                <a href="{{ url('/fix-session?secret=' . $secret) }}" onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="action">
-                    <span class="ico t-warn"><i data-lucide="wrench" style="width:17px;height:17px"></i></span>
-                    <div><b>Fix Session</b><small>Perbaiki permissions & clear cache</small></div>
-                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                </a>
-                <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this, '⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
-                    <span class="ico t-sun"><i data-lucide="zap" style="width:17px;height:17px"></i></span>
-                    <div><b>Optimize</b><small>Bangun ulang struktur cache</small></div>
-                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                </a>
-                <a href="{{ route('developer.migrate', $secret) }}" onclick="return confirmAction(this, '🗄️ Jalankan database migration?\nPastikan backup sudah ada!')" class="action">
-                    <span class="ico t-ok"><i data-lucide="database" style="width:17px;height:17px"></i></span>
-                    <div><b>Run Migration</b><small>artisan migrate --force</small></div>
-                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                </a>
-                <a href="{{ route('developer.run-seeder', $secret) }}" onclick="return confirmAction(this, '🌱 Jalankan database seeder?\nMembuat ulang akun developer dan data demo.')" class="action">
-                    <span class="ico t-violet"><i data-lucide="sprout" style="width:17px;height:17px"></i></span>
-                    <div><b>Run Seeder</b><small>db:seed --force</small></div>
-                    <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                </a>
-            </div>
+            @endforeach
         </div>
     </div>
+
 </div>
+
+<style>
+/* Chart.js canvas sizing */
+#dash-activity-chart { max-height: 110px; }
+
+/* Stat counter animation */
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.num[data-count] {
+    animation: countUp .5s var(--ease) both;
+}
+</style>
+
+<script>
+/* ── Load Chart.js dynamically ── */
+(function() {
+    if (typeof Chart !== 'undefined') { initDashChart(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';
+    s.onload = initDashChart;
+    document.head.appendChild(s);
+})();
+
+function initDashChart() {
+    var ctx = document.getElementById('dash-activity-chart');
+    if (!ctx || typeof Chart === 'undefined' || !window.__dashActivity) return;
+
+    var d = window.__dashActivity;
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6366f1';
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [{
+                data: d.data,
+                backgroundColor: d.data.map((v, i) =>
+                    i === d.data.length - 1
+                        ? accent
+                        : 'rgba(99,102,241,0.35)'
+                ),
+                borderColor: accent,
+                borderWidth: 1.5,
+                borderRadius: 5,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15,23,42,0.92)',
+                    borderColor: 'rgba(99,102,241,0.4)',
+                    borderWidth: 1,
+                    titleColor: '#f8fafc',
+                    bodyColor: '#94a3b8',
+                    callbacks: {
+                        label: ctx => ` ${ctx.raw} scan presensi`,
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748b', font: { size: 10, family: "'Geist Mono', monospace" } },
+                    border: { display: false },
+                },
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+                    ticks: { color: '#64748b', font: { size: 10, family: "'Geist Mono', monospace" }, stepSize: 1 },
+                    border: { display: false },
+                }
+            }
+        }
+    });
+}
+
+/* ── Live clock tick (dashboard) ── */
+(function tickDashClock() {
+    var el = document.getElementById('dash-srv-clock');
+    if (!el) return;
+    setInterval(function() {
+        var now = new Date();
+        var h = String(now.getHours()).padStart(2,'0');
+        var m = String(now.getMinutes()).padStart(2,'0');
+        var s = String(now.getSeconds()).padStart(2,'0');
+        el.textContent = h + ':' + m + ':' + s;
+        var dt = document.getElementById('dash-clock-text');
+        if (dt) dt.textContent = h + ':' + m;
+    }, 1000);
+})();
+
+/* ── Count-up animation for stat numbers ── */
+document.querySelectorAll('.num[data-count]').forEach(function(el) {
+    var target = parseInt(el.dataset.count, 10) || 0;
+    if (target === 0) { el.textContent = '0'; return; }
+    var start = 0;
+    var dur = 800;
+    var startTime = null;
+    function step(ts) {
+        if (!startTime) startTime = ts;
+        var prog = Math.min((ts - startTime) / dur, 1);
+        var ease = 1 - Math.pow(1 - prog, 3);
+        el.textContent = Math.round(start + (target - start) * ease);
+        if (prog < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+});
+</script>
 
 {{-- ═════════ TAB: APK MANAGER ═════════ --}}
 <div id="tab-apk" class="tab-content">
