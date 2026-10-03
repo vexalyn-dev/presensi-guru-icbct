@@ -2066,8 +2066,6 @@ textarea.input { resize: vertical; min-height: 85px; }
             <h1 id="header-title"><i data-lucide="layout-dashboard" style="width:18px;height:18px;color:var(--accent);vertical-align:middle;margin-right:6px"></i> <span>Dashboard</span></h1>
         </div>
         <div class="top-r">
-            <span class="clock mono" id="live-clock">--:--:--</span>
-            <span class="env"><i></i><span>{{ strtoupper(app()->environment()) }}</span></span>
             {{-- Profile card di pojok kanan atas --}}
             @php
                 $topUser  = auth()->user();

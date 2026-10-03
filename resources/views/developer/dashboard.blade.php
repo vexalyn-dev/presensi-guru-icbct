@@ -115,362 +115,325 @@
 {{-- ═════════ TAB: DASHBOARD ═════════ --}}
 <div id="tab-dashboard" class="tab-content">
 
-    {{-- ── Greeting Header ── --}}
-    <div class="dash-header">
-        <div class="dash-top">
-            <div>
-                <h2 class="greeting">{{ $greeting }}, <span style="background:linear-gradient(135deg,#a5b4fc 20%,#818cf8 50%,#6366f1);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Developer</span></h2>
-                <p class="subtext">
-                    Sistem aktif di <b>{{ $host }}</b> &nbsp;·&nbsp; {{ now()->locale('id')->isoFormat('dddd, D MMM YYYY') }} &nbsp;·&nbsp; pukul <span id="dash-clock-text">{{ now()->format('H:i') }}</span> WIB.
-                    @if(($stats['pending_leaves'] ?? 0) > 0)
-                        <span style="color:#fbbf24;font-weight:600"> &nbsp;⚠ {{ $stats['pending_leaves'] }} izin pending.</span>
-                    @else
-                        <span style="color:#34d399"> &nbsp;✓ Semua operasional normal.</span>
-                    @endif
-                </p>
-                <div class="dash-meta">
-                    <span class="dash-pill"><i></i> {{ $envName }}</span>
-                    <span class="pill mono"><i data-lucide="server" style="width:13px;height:13px;color:var(--txt-dim)"></i> {{ $host }}</span>
-                    @if($debugOn)<span class="pill" style="border-color:rgba(245,158,11,.35);color:#fbbf24"><i data-lucide="alert-triangle" style="width:13px;height:13px"></i> Debug ON</span>@endif
-                    @if(($stats['pending_leaves'] ?? 0) > 0)<span class="pill" style="border-color:rgba(245,158,11,.3);color:#fbbf24"><i data-lucide="clock" style="width:13px;height:13px"></i> {{ $stats['pending_leaves'] }} Pending</span>@endif
-                </div>
-            </div>
-            <div class="dash-actions">
-                <a href="{{ url('/dashboard') }}" target="_blank" class="btn btn-ghost"><i data-lucide="external-link" style="width:15px;height:15px"></i> Buka Aplikasi</a>
-                <button type="button" class="btn btn-ghost" id="nb-open-welcome"><i data-lucide="book-open" style="width:15px;height:15px"></i> Panduan Dev</button>
-            </div>
+@php
+    $dp   = $stats['disk_percent']??0;
+    $dc   = $dp>90?'#f43f5e':($dp>70?'#f59e0b':'#10b981');
+    $dcA  = $dp>90?'rgba(244,63,94,.1)':($dp>70?'rgba(245,158,11,.1)':'rgba(16,185,129,.1)');
+    $activityData=[]; $activityLabels=[];
+    for ($d=6;$d>=0;$d--){
+        $date=now()->subDays($d);
+        $activityLabels[]=$date->locale('id')->isoFormat('D MMM');
+        $activityData[]=\App\Models\Attendance::whereDate('date',$date->toDateString())->count();
+    }
+    $latestVal  = end($activityData);
+    $prevVal    = $activityData[count($activityData)-2]??0;
+    $changeDiff = $latestVal - $prevVal;
+@endphp
+
+{{-- ════════════════════════════════════════
+     BARIS 1: Greeting (kiri) + Banner (kanan)
+     ════════════════════════════════════════ --}}
+<div style="display:grid;grid-template-columns:1fr 1.6fr;gap:20px;margin-bottom:20px;align-items:stretch">
+
+    {{-- Greeting Card --}}
+    <div style="position:relative;overflow:hidden;border-radius:18px;background:linear-gradient(135deg,rgba(9,13,28,.95) 0%,rgba(15,20,40,.95) 100%);border:1px solid rgba(99,102,241,.2);padding:28px 28px 24px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 4px 24px rgba(99,102,241,.08)">
+        <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.18) 0%,transparent 70%);pointer-events:none"></div>
+        <div style="position:absolute;bottom:-30px;left:-20px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.1) 0%,transparent 70%);pointer-events:none"></div>
+        <div>
+            <p style="font-size:.72rem;font-weight:600;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.12em;font-family:'Geist Mono',monospace;margin:0 0 8px">{{ now()->locale('id')->isoFormat('dddd, D MMM YYYY') }}</p>
+            <h2 style="font-size:1.55rem;font-weight:800;letter-spacing:-.03em;color:#f8fafc;margin:0 0 6px;line-height:1.15">{{ $greeting }},<br><span style="background:linear-gradient(135deg,#a5b4fc,#6366f1);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent">Developer</span></h2>
+            <p style="font-size:.78rem;color:var(--txt-dim);margin:0 0 16px;line-height:1.6">
+                Sistem aktif di <span style="color:var(--txt-sub);font-family:'Geist Mono',monospace;font-size:.74rem">{{ $host }}</span>
+                @if(($stats['pending_leaves']??0)>0)
+                <br><span style="color:#fbbf24">⚠ {{ $stats['pending_leaves'] }} izin menunggu persetujuan</span>
+                @else
+                <br><span style="color:#34d399">✓ Semua sistem operasional normal</span>
+                @endif
+            </p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:.68rem;font-weight:700;padding:4px 10px;border-radius:20px;font-family:'Geist Mono',monospace;background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25)">
+                <i></i> {{ $envName }}
+            </span>
+            @if($debugOn)
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:.68rem;font-weight:700;padding:4px 10px;border-radius:20px;font-family:'Geist Mono',monospace;background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.25)">
+                <i data-lucide="alert-triangle" style="width:10px;height:10px"></i> Debug ON
+            </span>
+            @endif
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+            <a href="{{ url('/dashboard') }}" target="_blank" class="btn btn-ghost" style="font-size:.78rem;padding:7px 14px"><i data-lucide="external-link" style="width:13px;height:13px"></i> Buka App</a>
+            <button type="button" class="btn btn-ghost" id="nb-open-welcome" style="font-size:.78rem;padding:7px 14px"><i data-lucide="book-open" style="width:13px;height:13px"></i> Panduan</button>
         </div>
     </div>
 
-    {{-- ── Banner Vexalyn Dev (full width, tidak terpotong) ── --}}
-    <div style="margin-bottom:24px;border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(99,102,241,.2);box-shadow:0 8px 32px rgba(99,102,241,.12)">
+    {{-- Banner --}}
+    <div style="border-radius:18px;overflow:hidden;border:1px solid rgba(99,102,241,.2);box-shadow:0 8px 32px rgba(99,102,241,.1)">
         <img src="{{ asset('images/banner-vexalyn-dev.png') }}" alt="Vexalyn Dev Banner"
-             style="width:100%;display:block;height:auto;max-height:260px;object-fit:contain;object-position:center;background:#050912">
+             style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;min-height:180px">
     </div>
+</div>
 
-    @if($debugOn)
-    <div class="alert alert-warn" role="alert" style="margin-bottom:20px">
-        <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
-        <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di environment production agar detail konfigurasi dan error trace terlindungi.</span>
-    </div>
-    @endif
+@if($debugOn)
+<div class="alert alert-warn" role="alert" style="margin-bottom:20px">
+    <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0"></i>
+    <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di environment production.</span>
+</div>
+@endif
 
-    {{-- ── Stat Cards — desain premium ── --}}
-    @php
-        $statCards = [
-            ['label'=>'Total Pengguna',  'value'=>$stats['total_users']??0,     'icon'=>'users',          'color'=>'#818cf8', 'bg'=>'rgba(99,102,241,.08)',  'border'=>'rgba(99,102,241,.2)'],
-            ['label'=>'Guru Aktif',      'value'=>$stats['total_teachers']??0,  'icon'=>'graduation-cap', 'color'=>'#38bdf8', 'bg'=>'rgba(56,189,248,.08)',  'border'=>'rgba(56,189,248,.2)'],
-            ['label'=>'Operator/Admin',  'value'=>$stats['total_operators']??0, 'icon'=>'shield-check',   'color'=>'#34d399', 'bg'=>'rgba(52,211,153,.08)',  'border'=>'rgba(52,211,153,.2)'],
-            ['label'=>'Izin Pending',    'value'=>$stats['pending_leaves']??0,  'icon'=>'clock',          'color'=>($stats['pending_leaves']??0)>0?'#fbbf24':'#34d399', 'bg'=>($stats['pending_leaves']??0)>0?'rgba(251,191,36,.08)':'rgba(52,211,153,.08)', 'border'=>($stats['pending_leaves']??0)>0?'rgba(251,191,36,.2)':'rgba(52,211,153,.2)'],
-        ];
-    @endphp
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
-        @foreach($statCards as $sc)
-        <div style="position:relative;overflow:hidden;border-radius:14px;background:{{ $sc['bg'] }};border:1px solid {{ $sc['border'] }};padding:20px 22px;transition:transform .2s,box-shadow .2s"
-             onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.25)'"
-             onmouseout="this.style.transform='';this.style.boxShadow=''">
-            <div style="position:absolute;top:-20px;right:-10px;width:80px;height:80px;border-radius:50%;background:{{ $sc['bg'] }};opacity:.5;filter:blur(12px);pointer-events:none"></div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid {{ $sc['border'] }};display:flex;align-items:center;justify-content:center">
-                    <i data-lucide="{{ $sc['icon'] }}" style="width:17px;height:17px;color:{{ $sc['color'] }}"></i>
-                </div>
-                <span style="font-size:.65rem;font-weight:700;color:{{ $sc['color'] }};font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em;opacity:.8">Live</span>
+{{-- ════════════════════════════════════════
+     BARIS 2: 4 Stat Cards
+     ════════════════════════════════════════ --}}
+@php
+    $statCards = [
+        ['label'=>'Total Pengguna',  'value'=>$stats['total_users']??0,    'icon'=>'users',          'color'=>'#818cf8','bg'=>'rgba(99,102,241,.07)', 'border'=>'rgba(99,102,241,.18)'],
+        ['label'=>'Guru Aktif',      'value'=>$stats['total_teachers']??0, 'icon'=>'graduation-cap', 'color'=>'#38bdf8','bg'=>'rgba(56,189,248,.07)', 'border'=>'rgba(56,189,248,.18)'],
+        ['label'=>'Operator/Admin',  'value'=>$stats['total_operators']??0,'icon'=>'shield-check',   'color'=>'#34d399','bg'=>'rgba(52,211,153,.07)', 'border'=>'rgba(52,211,153,.18)'],
+        ['label'=>'Izin Pending',    'value'=>$stats['pending_leaves']??0, 'icon'=>'clock',
+            'color'=>($stats['pending_leaves']??0)>0?'#fbbf24':'#34d399',
+            'bg'   =>($stats['pending_leaves']??0)>0?'rgba(251,191,36,.07)':'rgba(52,211,153,.07)',
+            'border'=>($stats['pending_leaves']??0)>0?'rgba(251,191,36,.18)':'rgba(52,211,153,.18)'],
+    ];
+@endphp
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+    @foreach($statCards as $sc)
+    <div style="position:relative;overflow:hidden;border-radius:14px;background:{{ $sc['bg'] }};border:1px solid {{ $sc['border'] }};padding:18px 20px;transition:transform .2s,box-shadow .2s;cursor:default"
+         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 28px rgba(0,0,0,.25)'"
+         onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 90% 10%,{{ $sc['bg'] }},transparent);pointer-events:none"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid {{ $sc['border'] }};display:flex;align-items:center;justify-content:center">
+                <i data-lucide="{{ $sc['icon'] }}" style="width:16px;height:16px;color:{{ $sc['color'] }}"></i>
             </div>
-            <div class="num" data-count="{{ $sc['value'] }}" style="font-size:2.1rem;font-weight:800;color:#f8fafc;letter-spacing:-.04em;line-height:1;margin-bottom:6px">{{ $sc['value'] }}</div>
-            <p style="font-size:.72rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.08em;font-family:'Geist Mono',monospace;margin:0">{{ $sc['label'] }}</p>
+            <div style="width:6px;height:6px;border-radius:50%;background:{{ $sc['color'] }};box-shadow:0 0 8px {{ $sc['color'] }};animation:pulseGlow 2s infinite"></div>
         </div>
-        @endforeach
+        <div class="num" data-count="{{ $sc['value'] }}" style="font-size:2rem;font-weight:800;color:#f8fafc;letter-spacing:-.04em;line-height:1;margin-bottom:5px;position:relative">{{ $sc['value'] }}</div>
+        <p style="font-size:.68rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.09em;font-family:'Geist Mono',monospace;margin:0;position:relative">{{ $sc['label'] }}</p>
     </div>
+    @endforeach
+</div>
 
-    {{-- ── Main Grid: Kiri (2/3) + Kanan (1/3) ── --}}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+{{-- ════════════════════════════════════════
+     BARIS 3: Sistem Info (kiri) + Aksi Cepat (kanan)
+     ════════════════════════════════════════ --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
 
-        {{-- ═══ Kolom Kiri ═══ --}}
-        <div style="display:flex;flex-direction:column;gap:18px">
-
-            {{-- System Info --}}
-            <div class="card">
-                <div class="card-head">
-                    <h3><i data-lucide="activity" style="width:18px;height:18px;color:#34d399"></i> Informasi Sistem</h3>
-                    <span class="live"><i></i> Live</span>
-                </div>
-                <div class="info">
-                    <div><p class="l">Environment</p><p class="v mono"><span class="badge t-ok" style="font-size:0.75rem;padding:3px 9px">{{ $envName }}</span></p></div>
-                    <div><p class="l">Debug Mode</p><p class="v"><span class="dot {{ $debugOn ? 'warn' : 'ok' }}"></span>{{ $debugOn ? 'Aktif' : 'Nonaktif' }}</p></div>
-                    <div><p class="l">Host URL</p><p class="v mono trunc" style="font-size:0.82rem">{{ $host }}</p></div>
-                    <div><p class="l">Waktu Server</p><p class="v mono" id="dash-srv-clock">{{ now()->format('H:i:s') }}</p></div>
-                    <div><p class="l">PHP Version</p><p class="v mono">{{ $stats['php_version']??'-' }}</p></div>
-                    <div><p class="l">Laravel</p><p class="v mono">v{{ ltrim($stats['laravel_version']??'12.x','vV') }}</p></div>
-                </div>
-            </div>
-
-            {{-- Quick Actions --}}
-            <div class="card">
-                <div class="card-head">
-                    <h3><i data-lucide="zap" style="width:18px;height:18px;color:#818cf8"></i> Aksi Cepat</h3>
-                </div>
-                <div class="actions">
-                    <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirmAction(this,'🧹 Bersihkan semua cache?\n(config, route, view, app cache)')" class="action">
-                        <span class="ico t-sky"><i data-lucide="trash-2" style="width:17px;height:17px"></i></span>
-                        <div><b>Sapu Jagat</b><small>Hapus cache config, route, &amp; view</small></div>
-                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                    </a>
-                    <a href="{{ url('/fix-session?secret='.$secret) }}" onclick="return confirmAction(this,'🔧 Perbaiki session dir & hapus semua cache?')" class="action">
-                        <span class="ico t-warn"><i data-lucide="wrench" style="width:17px;height:17px"></i></span>
-                        <div><b>Fix Session</b><small>Perbaiki permissions &amp; clear cache</small></div>
-                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                    </a>
-                    <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this,'⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
-                        <span class="ico" style="background:rgba(250,204,21,.12);color:#facc15;border:1px solid rgba(250,204,21,.3)"><i data-lucide="zap" style="width:17px;height:17px"></i></span>
-                        <div><b>Optimize</b><small>Bangun ulang struktur cache</small></div>
-                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                    </a>
-                    <a href="{{ route('developer.migrate', $secret) }}" onclick="return confirmAction(this,'🗄️ Jalankan database migration?\nPastikan backup sudah ada!')" class="action">
-                        <span class="ico t-ok"><i data-lucide="database" style="width:17px;height:17px"></i></span>
-                        <div><b>Run Migration</b><small>artisan migrate --force</small></div>
-                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                    </a>
-                    <a href="{{ route('developer.run-seeder', $secret) }}" onclick="return confirmAction(this,'🌱 Jalankan database seeder?\nMembuat ulang akun developer dan data demo.')" class="action">
-                        <span class="ico t-violet"><i data-lucide="sprout" style="width:17px;height:17px"></i></span>
-                        <div><b>Run Seeder</b><small>db:seed --force</small></div>
-                        <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
-                    </a>
-                </div>
-            </div>
+    {{-- Informasi Sistem --}}
+    <div class="card">
+        <div class="card-head">
+            <h3><i data-lucide="activity" style="width:17px;height:17px;color:#34d399"></i> Informasi Sistem</h3>
+            <span class="live"><i></i> Live</span>
         </div>
-
-        {{-- ═══ Kolom Kanan ═══ --}}
-        <div style="display:flex;flex-direction:column;gap:18px">
-
-            {{-- Server Info --}}
-            <div class="card">
-                <div class="card-head">
-                    <h3><i data-lucide="monitor" style="width:18px;height:18px;color:#06b6d4"></i> Server Info</h3>
-                    <span class="live"><i></i> Live</span>
-                </div>
-                <div class="server-info-body">
-                    <div class="si-row">
-                        <div class="si-item"><span class="si-label">Memory</span><span class="si-val">{{ $stats['memory_limit']??'-' }}</span></div>
-                        <div class="si-item"><span class="si-label">Upload Max</span><span class="si-val">{{ $stats['upload_max']??'-' }}</span></div>
-                    </div>
-                    <div class="si-row">
-                        <div class="si-item"><span class="si-label">Post Max</span><span class="si-val">{{ $stats['post_max']??'-' }}</span></div>
-                        <div class="si-item"><span class="si-label">Max Exec</span><span class="si-val">{{ $stats['max_exec_time']??'-' }}s</span></div>
-                    </div>
-                    <div class="si-row">
-                        <div class="si-item full"><span class="si-label">Server</span><span class="si-val" style="font-size:0.78rem">{{ $stats['server_software']??'-' }}</span></div>
-                    </div>
-                    <div class="si-row">
-                        <div class="si-item"><span class="si-label">IP</span><span class="si-val" style="font-size:0.78rem">{{ $stats['server_addr']??'-' }}</span></div>
-                        <div class="si-item"><span class="si-label">Port</span><span class="si-val">{{ $stats['server_port']??'-' }}</span></div>
-                    </div>
-                    <div class="si-row">
-                        <div class="si-item full"><span class="si-label">Database</span><span class="si-val" style="font-size:0.78rem">{{ $stats['db_driver']??'-' }} / {{ $stats['db_name']??'-' }} @ {{ $stats['db_host']??'-' }}</span></div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Disk Usage Gauge --}}
-            <div class="card" style="padding:20px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-                    <span style="font-size:0.78rem;font-weight:600;color:var(--txt-sub);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace">Disk Usage</span>
-                    @php $dp = $stats['disk_percent']??0; $dc = $dp>90?'#f43f5e':($dp>70?'#f59e0b':'#10b981'); @endphp
-                    <span style="font-size:0.85rem;font-weight:700;font-family:'Geist Mono',monospace;color:{{ $dc }}">{{ $dp }}%</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:20px">
-                    @php
-                        $r = 48; $cx = 56; $cy = 56;
-                        $circ = 2 * 3.14159 * $r;
-                        $filled = $circ * ($dp / 100);
-                        $empty  = $circ - $filled;
-                        $dcGlow = $dc . '80';
-                    @endphp
-                    <svg width="112" height="112" viewBox="0 0 112 112" style="flex-shrink:0">
-                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/>
-                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="{{ $dc }}" stroke-width="9"
-                                stroke-dasharray="{{ $filled }} {{ $empty }}" stroke-dashoffset="{{ $circ * 0.25 }}"
-                                stroke-linecap="round" style="filter:drop-shadow(0 0 6px {{ $dcGlow }});transition:stroke-dasharray 1s ease"/>
-                        <text x="{{ $cx }}" y="{{ $cy - 3 }}" text-anchor="middle" dominant-baseline="middle"
-                              fill="{{ $dc }}" font-size="18" font-weight="800" font-family="'Geist Mono',monospace">{{ $dp }}%</text>
-                        <text x="{{ $cx }}" y="{{ $cy + 14 }}" text-anchor="middle" dominant-baseline="middle"
-                              fill="rgba(100,116,139,.8)" font-size="8" font-family="'Plus Jakarta Sans',sans-serif">used</text>
-                    </svg>
-                    <div style="flex:1">
-                        <p style="font-size:.75rem;color:var(--txt-dim);margin:0 0 8px">
-                            {{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }} GB dipakai dari {{ round($stats['disk_total']/1073741824,1) }} GB
-                        </p>
-                        <div style="display:flex;gap:6px;flex-wrap:wrap">
-                            @foreach([['label'=>'Config','ok'=>$stats['cache_config']==='CACHED'],['label'=>'Routes','ok'=>$stats['cache_route']==='CACHED'],['label'=>'Views','ok'=>$stats['cache_view']==='CACHED']] as $c)
-                            <span style="display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:20px;font-family:'Geist Mono',monospace;background:{{ $c['ok']?'rgba(16,185,129,.1)':'rgba(244,63,94,.1)' }};color:{{ $c['ok']?'#34d399':'#f87171' }};border:1px solid {{ $c['ok']?'rgba(16,185,129,.25)':'rgba(244,63,94,.25)' }}">
-                                @if($c['ok'])<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>@else<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>@endif
-                                {{ $c['label'] }}
-                            </span>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Chart Aktivitas 7 Hari (crypto-style) --}}
-            <div class="card" style="padding:18px 20px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:6px">
-                        <i data-lucide="trending-up" style="width:15px;height:15px;color:#6366f1"></i>
-                        Aktivitas Presensi 7 Hari
-                    </span>
-                    <span class="live" style="font-size:0.72rem"><i></i> Live</span>
-                </div>
-                @php
-                    $activityData = []; $activityLabels = [];
-                    for ($d = 6; $d >= 0; $d--) {
-                        $date = now()->subDays($d);
-                        $activityLabels[] = $date->locale('id')->isoFormat('D MMM');
-                        $activityData[]   = \App\Models\Attendance::whereDate('date', $date->toDateString())->count();
-                    }
-                    $latestVal  = end($activityData);
-                    $prevVal    = $activityData[count($activityData)-2] ?? 0;
-                    $changeSign = $latestVal >= $prevVal ? '+' : '';
-                    $changeDiff = $latestVal - $prevVal;
-                @endphp
-                <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px">
-                    <span style="font-size:1.8rem;font-weight:800;color:#f8fafc;letter-spacing:-.04em;line-height:1">{{ $latestVal }}</span>
-                    <span style="font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:20px;font-family:'Geist Mono',monospace;
-                        {{ $changeDiff >= 0 ? 'background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25)' : 'background:rgba(244,63,94,.12);color:#f87171;border:1px solid rgba(244,63,94,.25)' }}">
-                        {{ $changeSign }}{{ $changeDiff }} hari ini
-                    </span>
-                    <span style="font-size:.7rem;color:var(--txt-dim);margin-left:auto;font-family:'Geist Mono',monospace">scan presensi</span>
-                </div>
-                <canvas id="dash-activity-chart" style="width:100%;height:130px"
-                        data-labels='@json($activityLabels)'
-                        data-values='@json($activityData)'></canvas>
-            </div>
-
-            {{-- Runtime Info --}}
-            <div class="card" style="padding:16px 18px">
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
-                    <i data-lucide="terminal" style="width:15px;height:15px;color:var(--accent)"></i>
-                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head)">Runtime Info</span>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:5px">
-                    @foreach([
-                        ['k'=>'PHP',        'v'=>PHP_VERSION,                    'c'=>'#818cf8'],
-                        ['k'=>'Laravel',    'v'=>'v'.app()->version(),            'c'=>'#f87171'],
-                        ['k'=>'Timezone',   'v'=>config('app.timezone','UTC'),    'c'=>'#06b6d4'],
-                        ['k'=>'Queue',      'v'=>config('queue.default','sync'),  'c'=>'#34d399'],
-                        ['k'=>'Mail',       'v'=>config('mail.default','smtp'),   'c'=>'#fbbf24'],
-                    ] as $ei)
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03)">
-                        <span style="font-size:.71rem;color:var(--txt-dim);font-family:'Geist Mono',monospace">{{ $ei['k'] }}</span>
-                        <span style="font-size:.74rem;font-weight:600;color:{{ $ei['c'] }};font-family:'Geist Mono',monospace">{{ $ei['v'] }}</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- Disk Usage — full-width crypto bar style --}}
-            @php $dp = $stats['disk_percent']??0; $dc = $dp>90?'#f43f5e':($dp>70?'#f59e0b':'#10b981'); $dcA = $dp>90?'rgba(244,63,94,.12)':($dp>70?'rgba(245,158,11,.12)':'rgba(16,185,129,.12)'); @endphp
-            <div class="card" style="padding:22px 24px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-                    <div style="display:flex;align-items:center;gap:10px">
-                        <div style="width:34px;height:34px;border-radius:9px;background:{{ $dcA }};border:1px solid {{ $dc }}44;display:flex;align-items:center;justify-content:center">
-                            <i data-lucide="hard-drive" style="width:15px;height:15px;color:{{ $dc }}"></i>
-                        </div>
-                        <div>
-                            <p style="font-size:.82rem;font-weight:700;color:var(--txt-head);margin:0">Disk Usage</p>
-                            <p style="font-size:.68rem;color:var(--txt-dim);margin:0;font-family:'Geist Mono',monospace">
-                                {{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }} GB / {{ round($stats['disk_total']/1073741824,1) }} GB
-                            </p>
-                        </div>
-                    </div>
-                    <span style="font-size:2rem;font-weight:800;letter-spacing:-.04em;color:{{ $dc }};font-family:'Geist Mono',monospace;text-shadow:0 0 20px {{ $dc }}66">{{ $dp }}%</span>
-                </div>
-                {{-- Crypto-style segmented bar --}}
-                <div style="position:relative;height:12px;border-radius:12px;background:rgba(255,255,255,.04);overflow:hidden;margin-bottom:8px;border:1px solid rgba(255,255,255,.06)">
-                    <div style="height:100%;width:{{ $dp }}%;border-radius:12px;
-                        background:linear-gradient(90deg,{{ $dc }}88 0%,{{ $dc }} 100%);
-                        box-shadow:0 0 16px {{ $dc }}55;
-                        transition:width 1.4s cubic-bezier(.4,0,.2,1);
-                        position:relative;overflow:hidden">
-                        <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);animation:shimmer 2.5s infinite"></div>
-                    </div>
-                    @foreach([25,50,75] as $tick)
-                    <div style="position:absolute;top:0;bottom:0;left:{{ $tick }}%;width:1px;background:rgba(255,255,255,.08)"></div>
-                    @endforeach
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:16px">
-                    @foreach(['0%','25%','50%','75%','100%'] as $lbl)
-                    <span style="font-size:.6rem;color:rgba(100,116,139,.5);font-family:'Geist Mono',monospace">{{ $lbl }}</span>
-                    @endforeach
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap">
-                    @foreach([['label'=>'Config','ok'=>$stats['cache_config']==='CACHED'],['label'=>'Routes','ok'=>$stats['cache_route']==='CACHED'],['label'=>'Views','ok'=>$stats['cache_view']==='CACHED']] as $c)
-                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;padding:5px 13px;border-radius:20px;font-family:'Geist Mono',monospace;
-                        background:{{ $c['ok']?'rgba(16,185,129,.08)':'rgba(244,63,94,.08)' }};
-                        color:{{ $c['ok']?'#34d399':'#f87171' }};
-                        border:1px solid {{ $c['ok']?'rgba(16,185,129,.2)':'rgba(244,63,94,.2)' }}">
-                        @if($c['ok'])<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>
-                        @else<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>@endif
-                        {{ $c['label'] }}
-                    </span>
-                    @endforeach
-                </div>
-            </div>
+        <div class="info">
+            <div><p class="l">Environment</p><p class="v mono"><span class="badge t-ok" style="font-size:.73rem;padding:3px 9px">{{ $envName }}</span></p></div>
+            <div><p class="l">Debug Mode</p><p class="v"><span class="dot {{ $debugOn?'warn':'ok' }}"></span>{{ $debugOn?'Aktif':'Nonaktif' }}</p></div>
+            <div><p class="l">Host URL</p><p class="v mono trunc" style="font-size:.8rem">{{ $host }}</p></div>
+            <div><p class="l">Waktu Server</p><p class="v mono" id="dash-srv-clock">{{ now()->format('H:i:s') }}</p></div>
+            <div><p class="l">PHP</p><p class="v mono">{{ $stats['php_version']??'-' }}</p></div>
+            <div><p class="l">Laravel</p><p class="v mono">v{{ ltrim($stats['laravel_version']??'12.x','vV') }}</p></div>
         </div>
     </div>
 
-    {{-- ── System Health Bar ── --}}
-    <div class="card" style="padding:20px 24px">
+    {{-- Aksi Cepat --}}
+    <div class="card">
+        <div class="card-head">
+            <h3><i data-lucide="zap" style="width:17px;height:17px;color:#818cf8"></i> Aksi Cepat</h3>
+        </div>
+        <div class="actions">
+            <a href="{{ route('developer.clear-cache',$secret) }}" onclick="return confirmAction(this,'🧹 Bersihkan semua cache?')" class="action">
+                <span class="ico t-sky"><i data-lucide="trash-2" style="width:16px;height:16px"></i></span>
+                <div><b>Sapu Jagat</b><small>Hapus cache config, route &amp; view</small></div>
+                <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
+            </a>
+            <a href="{{ url('/fix-session?secret='.$secret) }}" onclick="return confirmAction(this,'🔧 Perbaiki session dir?')" class="action">
+                <span class="ico t-warn"><i data-lucide="wrench" style="width:16px;height:16px"></i></span>
+                <div><b>Fix Session</b><small>Perbaiki permissions &amp; clear cache</small></div>
+                <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
+            </a>
+            <a href="{{ route('developer.optimize',$secret) }}" onclick="return confirmAction(this,'⚡ Rebuild semua cache?')" class="action">
+                <span class="ico" style="background:rgba(250,204,21,.12);color:#facc15;border:1px solid rgba(250,204,21,.3)"><i data-lucide="zap" style="width:16px;height:16px"></i></span>
+                <div><b>Optimize</b><small>Bangun ulang cache config, route &amp; view</small></div>
+                <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
+            </a>
+            <a href="{{ route('developer.migrate',$secret) }}" onclick="return confirmAction(this,'🗄️ Jalankan migration?')" class="action">
+                <span class="ico t-ok"><i data-lucide="database" style="width:16px;height:16px"></i></span>
+                <div><b>Run Migration</b><small>artisan migrate --force</small></div>
+                <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
+            </a>
+            <a href="{{ route('developer.run-seeder',$secret) }}" onclick="return confirmAction(this,'🌱 Jalankan seeder?')" class="action">
+                <span class="ico t-violet"><i data-lucide="sprout" style="width:16px;height:16px"></i></span>
+                <div><b>Run Seeder</b><small>db:seed --force</small></div>
+                <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+{{-- ════════════════════════════════════════
+     BARIS 4: Chart (kiri lebar) + Server Info (kanan)
+     ════════════════════════════════════════ --}}
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px">
+
+    {{-- Chart Bar Aktivitas 7 Hari --}}
+    <div class="card" style="padding:20px 22px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:.85rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:7px">
+                <i data-lucide="bar-chart-2" style="width:15px;height:15px;color:var(--accent)"></i>
+                Aktivitas Presensi 7 Hari
+            </span>
+            <span class="live" style="font-size:.7rem"><i></i> Live</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px">
+            <span style="font-size:1.9rem;font-weight:800;color:#f8fafc;letter-spacing:-.04em;line-height:1">{{ $latestVal }}</span>
+            <span style="font-size:.7rem;font-weight:600;padding:2px 9px;border-radius:20px;font-family:'Geist Mono',monospace;
+                {{ $changeDiff>=0?'background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.22)':'background:rgba(244,63,94,.1);color:#f87171;border:1px solid rgba(244,63,94,.22)' }}">
+                {{ $changeDiff>=0?'+':'' }}{{ $changeDiff }} vs kemarin
+            </span>
+            <span style="font-size:.68rem;color:var(--txt-dim);margin-left:auto;font-family:'Geist Mono',monospace">scan / hari</span>
+        </div>
+        <canvas id="dash-activity-chart" style="width:100%;height:140px"
+                data-labels='@json($activityLabels)'
+                data-values='@json($activityData)'></canvas>
+    </div>
+
+    {{-- Server Info --}}
+    <div class="card">
+        <div class="card-head">
+            <h3><i data-lucide="monitor" style="width:17px;height:17px;color:#06b6d4"></i> Server Info</h3>
+            <span class="live"><i></i> Live</span>
+        </div>
+        <div class="server-info-body">
+            <div class="si-row">
+                <div class="si-item"><span class="si-label">Memory</span><span class="si-val">{{ $stats['memory_limit']??'-' }}</span></div>
+                <div class="si-item"><span class="si-label">Upload</span><span class="si-val">{{ $stats['upload_max']??'-' }}</span></div>
+            </div>
+            <div class="si-row">
+                <div class="si-item"><span class="si-label">Post Max</span><span class="si-val">{{ $stats['post_max']??'-' }}</span></div>
+                <div class="si-item"><span class="si-label">Exec</span><span class="si-val">{{ $stats['max_exec_time']??'-' }}s</span></div>
+            </div>
+            <div class="si-row">
+                <div class="si-item full"><span class="si-label">Server</span><span class="si-val" style="font-size:.76rem">{{ $stats['server_software']??'-' }}</span></div>
+            </div>
+            <div class="si-row">
+                <div class="si-item"><span class="si-label">IP</span><span class="si-val" style="font-size:.76rem">{{ $stats['server_addr']??'-' }}</span></div>
+                <div class="si-item"><span class="si-label">Port</span><span class="si-val">{{ $stats['server_port']??'-' }}</span></div>
+            </div>
+            <div class="si-row">
+                <div class="si-item full"><span class="si-label">DB</span><span class="si-val" style="font-size:.76rem">{{ $stats['db_driver']??'-' }} / {{ $stats['db_name']??'-' }}</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ════════════════════════════════════════
+     BARIS 5: Disk Usage bar (kiri) + Runtime Info (kanan)
+     ════════════════════════════════════════ --}}
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px">
+
+    {{-- Disk Usage — bar progress premium --}}
+    <div class="card" style="padding:22px 24px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-            <h3 style="font-size:0.92rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:8px">
-                <i data-lucide="shield-check" style="width:17px;height:17px;color:#10b981"></i>
-                System Health
-            </h3>
-            <span class="live"><i></i> All Systems Operational</span>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
-            @php
-                $healthItems = [
-                    ['label'=>'Database',   'ok'=>true,           'icon'=>'database',    'detail'=>$stats['db_driver']??'mysql'],
-                    ['label'=>'Cache',      'ok'=>($stats['cache_config']==='CACHED'), 'icon'=>'cpu',      'detail'=>$stats['cache_config']==='CACHED'?'Cached':'Not Cached'],
-                    ['label'=>'Storage',    'ok'=>($dp<90),        'icon'=>'hard-drive',  'detail'=>$dp.'% used'],
-                    ['label'=>'Debug',      'ok'=>!$debugOn,       'icon'=>'bug',         'detail'=>$debugOn?'Active':'Off'],
-                    ['label'=>'Session',    'ok'=>true,            'icon'=>'lock',        'detail'=>$stats['session_driver']??'file'],
-                ];
-            @endphp
-            @foreach($healthItems as $hi)
-            @php $hiOk = $hi['ok']; @endphp
-            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 12px;border-radius:10px;background:{{ $hiOk?'rgba(16,185,129,.06)':'rgba(244,63,94,.06)' }};border:1px solid {{ $hiOk?'rgba(16,185,129,.2)':'rgba(244,63,94,.2)' }};transition:all .2s ease" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-                <div style="width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:{{ $hiOk?'rgba(16,185,129,.12)':'rgba(244,63,94,.12)' }};color:{{ $hiOk?'#10b981':'#f43f5e' }}">
-                    <i data-lucide="{{ $hi['icon'] }}" style="width:17px;height:17px"></i>
+            <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:34px;height:34px;border-radius:9px;background:{{ $dcA }};border:1px solid {{ $dc }}44;display:flex;align-items:center;justify-content:center">
+                    <i data-lucide="hard-drive" style="width:15px;height:15px;color:{{ $dc }}"></i>
                 </div>
-                <span style="font-size:0.78rem;font-weight:700;color:var(--txt-head)">{{ $hi['label'] }}</span>
-                <span style="font-size:0.68rem;color:var(--txt-dim);font-family:'Geist Mono',monospace;text-align:center">{{ $hi['detail'] }}</span>
-                <div style="width:6px;height:6px;border-radius:50%;background:{{ $hiOk?'#10b981':'#f43f5e' }};box-shadow:0 0 8px {{ $hiOk?'#10b981':'#f43f5e' }};animation:pulseGlow 2s infinite"></div>
+                <div>
+                    <p style="font-size:.82rem;font-weight:700;color:var(--txt-head);margin:0">Disk Usage</p>
+                    <p style="font-size:.68rem;color:var(--txt-dim);margin:0;font-family:'Geist Mono',monospace">{{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }} GB / {{ round($stats['disk_total']/1073741824,1) }} GB</p>
+                </div>
             </div>
+            <span style="font-size:1.8rem;font-weight:800;letter-spacing:-.04em;color:{{ $dc }};font-family:'Geist Mono',monospace;text-shadow:0 0 20px {{ $dc }}55">{{ $dp }}%</span>
+        </div>
+        {{-- Progress bar --}}
+        <div style="position:relative;height:10px;border-radius:10px;background:rgba(255,255,255,.04);overflow:hidden;margin-bottom:8px;border:1px solid rgba(255,255,255,.05)">
+            <div style="height:100%;width:{{ $dp }}%;border-radius:10px;background:linear-gradient(90deg,{{ $dc }}99,{{ $dc }});box-shadow:0 0 14px {{ $dc }}55;transition:width 1.4s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden">
+                <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:shimmer 2.5s infinite"></div>
+            </div>
+            @foreach([25,50,75] as $tick)
+            <div style="position:absolute;top:0;bottom:0;left:{{ $tick }}%;width:1px;background:rgba(255,255,255,.07)"></div>
+            @endforeach
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:14px">
+            @foreach(['0%','25%','50%','75%','100%'] as $lbl)
+            <span style="font-size:.6rem;color:rgba(100,116,139,.45);font-family:'Geist Mono',monospace">{{ $lbl }}</span>
+            @endforeach
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+            @foreach([['label'=>'Config','ok'=>$stats['cache_config']==='CACHED'],['label'=>'Routes','ok'=>$stats['cache_route']==='CACHED'],['label'=>'Views','ok'=>$stats['cache_view']==='CACHED']] as $c)
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:.69rem;font-weight:600;padding:5px 12px;border-radius:20px;font-family:'Geist Mono',monospace;background:{{ $c['ok']?'rgba(16,185,129,.08)':'rgba(244,63,94,.08)' }};color:{{ $c['ok']?'#34d399':'#f87171' }};border:1px solid {{ $c['ok']?'rgba(16,185,129,.2)':'rgba(244,63,94,.2)' }}">
+                @if($c['ok'])<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>@else<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>@endif
+                {{ $c['label'] }}
+            </span>
             @endforeach
         </div>
     </div>
 
+    {{-- Runtime Info --}}
+    <div class="card" style="padding:18px 20px">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px">
+            <i data-lucide="terminal" style="width:15px;height:15px;color:var(--accent)"></i>
+            <span style="font-size:.85rem;font-weight:700;color:var(--txt-head)">Runtime Info</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            @foreach([
+                ['k'=>'PHP',      'v'=>PHP_VERSION,                    'c'=>'#818cf8'],
+                ['k'=>'Laravel',  'v'=>'v'.app()->version(),            'c'=>'#f87171'],
+                ['k'=>'Timezone', 'v'=>config('app.timezone','UTC'),    'c'=>'#06b6d4'],
+                ['k'=>'Queue',    'v'=>config('queue.default','sync'),  'c'=>'#34d399'],
+                ['k'=>'Mail',     'v'=>config('mail.default','smtp'),   'c'=>'#fbbf24'],
+            ] as $ei)
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04)">
+                <span style="font-size:.71rem;color:var(--txt-dim);font-family:'Geist Mono',monospace">{{ $ei['k'] }}</span>
+                <span style="font-size:.74rem;font-weight:700;color:{{ $ei['c'] }};font-family:'Geist Mono',monospace">{{ $ei['v'] }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+
+{{-- ════════════════════════════════════════
+     BARIS 6: System Health (full width)
+     ════════════════════════════════════════ --}}
+<div class="card" style="padding:20px 24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h3 style="font-size:.9rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:8px;margin:0">
+            <i data-lucide="shield-check" style="width:16px;height:16px;color:#10b981"></i>
+            System Health
+        </h3>
+        <span class="live"><i></i> All Systems Operational</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+        @php
+            $healthItems = [
+                ['label'=>'Database','ok'=>true,              'icon'=>'database',  'detail'=>$stats['db_driver']??'mysql'],
+                ['label'=>'Cache',   'ok'=>$stats['cache_config']==='CACHED','icon'=>'cpu','detail'=>$stats['cache_config']==='CACHED'?'Cached':'Not Cached'],
+                ['label'=>'Storage', 'ok'=>$dp<90,            'icon'=>'hard-drive','detail'=>$dp.'% used'],
+                ['label'=>'Debug',   'ok'=>!$debugOn,         'icon'=>'bug',       'detail'=>$debugOn?'Active':'Off'],
+                ['label'=>'Session', 'ok'=>true,              'icon'=>'lock',      'detail'=>$stats['session_driver']??'file'],
+            ];
+        @endphp
+        @foreach($healthItems as $hi)
+        @php $hiOk=$hi['ok']; @endphp
+        <div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 10px;border-radius:10px;background:{{ $hiOk?'rgba(16,185,129,.05)':'rgba(244,63,94,.05)' }};border:1px solid {{ $hiOk?'rgba(16,185,129,.18)':'rgba(244,63,94,.18)' }};transition:all .2s ease"
+             onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:{{ $hiOk?'rgba(16,185,129,.1)':'rgba(244,63,94,.1)' }};color:{{ $hiOk?'#10b981':'#f43f5e' }}">
+                <i data-lucide="{{ $hi['icon'] }}" style="width:16px;height:16px"></i>
+            </div>
+            <span style="font-size:.76rem;font-weight:700;color:var(--txt-head)">{{ $hi['label'] }}</span>
+            <span style="font-size:.65rem;color:var(--txt-dim);font-family:'Geist Mono',monospace;text-align:center">{{ $hi['detail'] }}</span>
+            <div style="width:5px;height:5px;border-radius:50%;background:{{ $hiOk?'#10b981':'#f43f5e' }};box-shadow:0 0 8px {{ $hiOk?'#10b981':'#f43f5e' }};animation:pulseGlow 2s infinite"></div>
+        </div>
+        @endforeach
+    </div>
+</div>
+
 </div>
 
 <style>
-/* Chart.js canvas sizing */
-#dash-activity-chart { max-height: 140px; }
-
-/* Shimmer animation for disk bar */
-@keyframes shimmer {
-    0%   { transform: translateX(-100%); }
-    100% { transform: translateX(300%); }
-}
-
-/* Stat counter animation */
-@keyframes countUp {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.num[data-count] {
-    animation: countUp .5s var(--ease) both;
-}
+#dash-activity-chart { max-height: 150px; }
+@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(300%)} }
+@keyframes countUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.num[data-count] { animation: countUp .5s var(--ease) both; }
 </style>
 
 <script>
@@ -498,27 +461,20 @@ function initDashChart() {
     gradFill.addColorStop(1,   'rgba(99,102,241,0.00)');
 
     new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: labels,
             datasets: [{
                 data: data,
-                fill: true,
-                backgroundColor: gradFill,
-                borderColor: '#6366f1',
-                borderWidth: 2,
-                pointBackgroundColor: data.map(function(v, i) {
-                    return i === data.length - 1 ? '#818cf8' : 'transparent';
+                backgroundColor: data.map(function(v, i) {
+                    return i === data.length - 1 ? 'rgba(99,102,241,.9)' : 'rgba(99,102,241,.35)';
                 }),
-                pointBorderColor: data.map(function(v, i) {
-                    return i === data.length - 1 ? '#6366f1' : 'transparent';
+                borderColor: data.map(function(v, i) {
+                    return i === data.length - 1 ? '#818cf8' : 'rgba(99,102,241,.5)';
                 }),
-                pointRadius: data.map(function(v, i) {
-                    return i === data.length - 1 ? 5 : 0;
-                }),
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: '#818cf8',
-                tension: 0.45,
+                borderWidth: 1.5,
+                borderRadius: 6,
+                borderSkipped: false,
             }]
         },
         options: {
