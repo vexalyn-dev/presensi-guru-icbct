@@ -141,6 +141,13 @@
         </div>
     </div>
 
+    {{-- ── Banner Vexalyn Dev ── --}}
+    <div style="margin-bottom:20px;border-radius:16px;overflow:hidden;position:relative;border:1px solid rgba(99,102,241,.2)">
+        <img src="{{ asset('images/banner-vexalyn-dev.png') }}" alt="Vexalyn Dev Banner"
+             style="width:100%;display:block;max-height:180px;object-fit:cover;object-position:center">
+        <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,9,18,.6) 0%,transparent 60%);pointer-events:none"></div>
+    </div>
+
     @if($debugOn)
     <div class="alert alert-warn" role="alert">
         <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
@@ -320,8 +327,74 @@
                     }
                 @endphp
                 <canvas id="dash-activity-chart" style="width:100%;height:100px"
-                    data-labels="{{ htmlspecialchars(json_encode($activityLabels), ENT_QUOTES) }}"
-                    data-values="{{ htmlspecialchars(json_encode($activityData), ENT_QUOTES) }}"></canvas>
+                    data-labels='@json($activityLabels)'
+                    data-values='@json($activityData)'></canvas>
+            </div>
+
+            {{-- Quick Stats Presensi Hari Ini --}}
+            @php
+                $todayTotal  = \App\Models\Attendance::whereDate('date', today())->count();
+                $todayHadir  = \App\Models\Attendance::whereDate('date', today())->where('status','Hadir')->count();
+                $todayTelat  = \App\Models\Attendance::whereDate('date', today())->whereIn('status',['Terlambat','Tepat Waktu'])->count();
+                $todayAlpha  = \App\Models\User::where('role','guru')->where('is_active',true)->count() - $todayTotal;
+                $todayAlpha  = max(0, $todayAlpha);
+            @endphp
+            <div class="card" style="padding:16px 18px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:6px">
+                        <i data-lucide="calendar-check" style="width:15px;height:15px;color:#10b981"></i>
+                        Presensi Hari Ini
+                    </span>
+                    <span style="font-size:0.7rem;font-family:'Geist Mono',monospace;color:var(--txt-dim)">{{ now()->locale('id')->isoFormat('D MMM') }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                    <div style="text-align:center;padding:10px 6px;border-radius:8px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15)">
+                        <div style="font-size:1.4rem;font-weight:800;color:#34d399;letter-spacing:-.02em">{{ $todayHadir }}</div>
+                        <div style="font-size:0.65rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace;margin-top:2px">Hadir</div>
+                    </div>
+                    <div style="text-align:center;padding:10px 6px;border-radius:8px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15)">
+                        <div style="font-size:1.4rem;font-weight:800;color:#fbbf24;letter-spacing:-.02em">{{ $todayTelat }}</div>
+                        <div style="font-size:0.65rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace;margin-top:2px">Terlambat</div>
+                    </div>
+                    <div style="text-align:center;padding:10px 6px;border-radius:8px;background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.15)">
+                        <div style="font-size:1.4rem;font-weight:800;color:#f87171;letter-spacing:-.02em">{{ $todayAlpha }}</div>
+                        <div style="font-size:0.65rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace;margin-top:2px">Belum</div>
+                    </div>
+                </div>
+                @if($todayTotal > 0)
+                @php $pct = round($todayHadir / max(1, \App\Models\User::where('role','guru')->where('is_active',true)->count()) * 100); @endphp
+                <div style="margin-top:10px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                        <span style="font-size:0.7rem;color:var(--txt-dim)">Tingkat kehadiran</span>
+                        <span style="font-size:0.7rem;font-weight:700;color:#34d399;font-family:'Geist Mono',monospace">{{ $pct }}%</span>
+                    </div>
+                    <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
+                        <div style="height:100%;width:{{ $pct }}%;background:linear-gradient(90deg,#10b981,#06b6d4);border-radius:4px;transition:width 1s ease"></div>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            {{-- Environment Quick Info --}}
+            <div class="card" style="padding:16px 18px">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+                    <i data-lucide="terminal" style="width:15px;height:15px;color:var(--accent)"></i>
+                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head)">Environment</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                    @foreach([
+                        ['k'=>'PHP',        'v'=>PHP_VERSION,                    'c'=>'#818cf8'],
+                        ['k'=>'Laravel',    'v'=>'v'.app()->version(),            'c'=>'#f87171'],
+                        ['k'=>'Timezone',   'v'=>config('app.timezone','UTC'),    'c'=>'#06b6d4'],
+                        ['k'=>'Queue',      'v'=>config('queue.default','sync'),  'c'=>'#34d399'],
+                        ['k'=>'Mail',       'v'=>config('mail.default','smtp'),   'c'=>'#fbbf24'],
+                    ] as $ei)
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.02)">
+                        <span style="font-size:0.72rem;color:var(--txt-dim);font-family:'Geist Mono',monospace">{{ $ei['k'] }}</span>
+                        <span style="font-size:0.75rem;font-weight:600;color:{{ $ei['c'] }};font-family:'Geist Mono',monospace">{{ $ei['v'] }}</span>
+                    </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
@@ -1141,32 +1214,119 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
 <div id="tab-profile" class="tab-content">
 
 <style>
-.cp-hero { position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#050912 0%,#0f172a 40%,#0d1b2a 100%);border:1px solid rgba(99,102,241,.25);padding:36px 32px 28px;margin-bottom:24px; }
-.cp-hero::before { content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 120% at 80% 50%,rgba(99,102,241,.12) 0%,transparent 60%),radial-gradient(ellipse 40% 80% at 10% 80%,rgba(6,182,212,.08) 0%,transparent 60%);pointer-events:none; }
-.cp-hero canvas { position:absolute;inset:0;width:100%;height:100%;opacity:.18;pointer-events:none; }
-.cp-avatar-wrap { position:relative;width:88px;height:88px;flex-shrink:0; }
-.cp-avatar-ring { position:absolute;inset:-4px;border-radius:50%;background:conic-gradient(from 0deg,#6366f1,#06b6d4,#10b981,#6366f1);animation:cpRingSpin 4s linear infinite; }
-.cp-avatar { position:relative;z-index:1;width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #050912; }
-@keyframes cpRingSpin { to{transform:rotate(360deg)} }
-.cp-badge { position:absolute;bottom:0;right:0;z-index:2;width:22px;height:22px;border-radius:50%;background:#10b981;border:3px solid #050912;box-shadow:0 0 8px #10b981; }
-.cp-field { background:rgba(9,13,22,.7);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:11px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--txt-head);width:100%;transition:border-color .2s,box-shadow .2s;outline:none; }
-.cp-field:focus { border-color:rgba(99,102,241,.6);box-shadow:0 0 0 3px rgba(99,102,241,.15),0 0 16px rgba(99,102,241,.1); }
-.cp-label { font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--txt-dim);margin-bottom:6px;display:block;font-family:'Geist Mono',monospace; }
-.cp-card { background:rgba(9,13,22,.6);border:1px solid rgba(99,102,241,.15);border-radius:14px;padding:24px;position:relative;overflow:hidden; }
-.cp-card::after { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(99,102,241,.4),transparent); }
-.cp-totp-display { font-family:'Geist Mono',monospace;font-size:2.4rem;font-weight:800;letter-spacing:.3em;color:#34d399;text-shadow:0 0 20px rgba(16,185,129,.5),0 0 40px rgba(16,185,129,.2);text-align:center;padding:24px;background:rgba(16,185,129,.05);border-radius:12px;border:1px solid rgba(16,185,129,.2); }
-.cp-totp-timer { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;font-size:.78rem;color:var(--txt-sub); }
-.cp-progress { height:3px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;margin-top:8px; }
-.cp-progress-bar { height:100%;background:linear-gradient(90deg,#10b981,#06b6d4);border-radius:3px;transition:width .5s linear;box-shadow:0 0 8px rgba(16,185,129,.5); }
-.cp-stat-mini { display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px; }
-.cp-stat-mini b { font-size:1.35rem;font-weight:800;color:var(--txt-head);letter-spacing:-.02em; }
-.cp-stat-mini span { font-size:.7rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace; }
-.cp-section-title { font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-dim);font-family:'Geist Mono',monospace;margin-bottom:16px;display:flex;align-items:center;gap:8px; }
-.cp-section-title::after { content:'';flex:1;height:1px;background:rgba(255,255,255,.06); }
+/* ── Profile Tab Styles ── */
+.cp-hero {
+    position: relative; overflow: hidden; border-radius: 20px;
+    background: linear-gradient(135deg, #060b16 0%, #0d1425 50%, #0a1628 100%);
+    border: 1px solid rgba(99,102,241,.3);
+    padding: 40px 36px 32px; margin-bottom: 24px;
+    box-shadow: 0 0 60px rgba(99,102,241,.08), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.cp-hero::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+        radial-gradient(ellipse 55% 100% at 85% 50%, rgba(99,102,241,.14) 0%, transparent 65%),
+        radial-gradient(ellipse 35% 70% at 5% 90%, rgba(6,182,212,.09) 0%, transparent 60%),
+        radial-gradient(ellipse 25% 50% at 50% 0%, rgba(139,92,246,.07) 0%, transparent 60%);
+}
+.cp-hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .12; pointer-events: none; }
+.cp-avatar-wrap { position: relative; width: 96px; height: 96px; flex-shrink: 0; }
+.cp-avatar-ring {
+    position: absolute; inset: -4px; border-radius: 50%;
+    background: conic-gradient(from 0deg, #6366f1, #06b6d4, #10b981, #818cf8, #6366f1);
+    animation: cpRingSpin 5s linear infinite;
+}
+.cp-avatar-ring::before {
+    content: ''; position: absolute; inset: 3px; border-radius: 50%;
+    background: #060b16;
+}
+.cp-avatar {
+    position: relative; z-index: 1; width: 96px; height: 96px;
+    border-radius: 50%; object-fit: cover; border: 3px solid #0d1425;
+    transition: transform .3s ease;
+}
+.cp-avatar-wrap:hover .cp-avatar { transform: scale(1.04); }
+@keyframes cpRingSpin { to { transform: rotate(360deg); } }
+.cp-online-dot {
+    position: absolute; bottom: 3px; right: 3px; z-index: 2;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #10b981; border: 3px solid #060b16;
+    box-shadow: 0 0 10px rgba(16,185,129,.8);
+    animation: cpOnlinePulse 2.5s ease-in-out infinite;
+}
+@keyframes cpOnlinePulse {
+    0%,100% { box-shadow: 0 0 8px rgba(16,185,129,.7); }
+    50%      { box-shadow: 0 0 18px rgba(16,185,129,1); }
+}
+.cp-badge-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: .68rem; font-weight: 700; padding: 4px 12px;
+    border-radius: 20px; letter-spacing: .1em; font-family: 'Geist Mono', monospace;
+    background: rgba(99,102,241,.15); color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,.35);
+}
+.cp-stat-mini {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    padding: 16px 12px; background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.07); border-radius: 12px;
+    transition: all .2s ease;
+}
+.cp-stat-mini:hover { background: rgba(99,102,241,.06); border-color: rgba(99,102,241,.25); transform: translateY(-2px); }
+.cp-stat-mini b { font-size: 1.5rem; font-weight: 800; color: var(--txt-head); letter-spacing: -.03em; line-height: 1; }
+.cp-stat-mini span { font-size: .65rem; color: var(--txt-dim); text-transform: uppercase; letter-spacing: .08em; font-family: 'Geist Mono', monospace; }
+
+/* Cards */
+.cp-card {
+    background: rgba(8,12,24,.7); border: 1px solid rgba(99,102,241,.12);
+    border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+.cp-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,.5), rgba(6,182,212,.3), transparent);
+}
+.cp-section-title {
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--txt-dim); font-family: 'Geist Mono', monospace;
+    margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+}
+.cp-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.05); }
+.cp-field {
+    background: rgba(6,9,18,.8); border: 1px solid rgba(99,102,241,.18);
+    border-radius: 10px; padding: 12px 15px; font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .88rem; color: var(--txt-head); width: 100%;
+    transition: border-color .2s, box-shadow .2s; outline: none;
+}
+.cp-field:focus {
+    border-color: rgba(99,102,241,.55);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.12), 0 0 20px rgba(99,102,241,.08);
+}
+.cp-field::placeholder { color: rgba(100,116,139,.6); }
+.cp-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--txt-dim); margin-bottom: 7px; display: block; font-family: 'Geist Mono', monospace;
+}
+
+/* Password strength */
+.cp-progress { height: 4px; background: rgba(255,255,255,.05); border-radius: 4px; overflow: hidden; margin-top: 10px; }
+.cp-progress-bar { height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4); border-radius: 4px; transition: width .4s ease, background .4s ease; }
+
+/* Session info rows */
+.cp-session-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 13px;
+    background: rgba(255,255,255,.02); border-radius: 9px;
+    border: 1px solid rgba(255,255,255,.04); transition: background .15s;
+}
+.cp-session-row:hover { background: rgba(99,102,241,.04); }
+.cp-session-icon {
+    width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+    background: rgba(6,182,212,.08); border: 1px solid rgba(6,182,212,.18);
+}
 </style>
 
 @php
-    $devUser = auth()->user();
+    $devUser  = auth()->user();
     $devPhoto = ($devUser->photo_path ?: $devUser->photo)
         ? asset('storage/' . ($devUser->photo_path ?: $devUser->photo))
         : asset('images/profile-dev.png');
@@ -1175,176 +1335,259 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
     $totalPresensi  = \App\Models\Attendance::whereDate('date', today())->count();
 @endphp
 
-{{-- Hero Banner --}}
+{{-- ── Hero Banner ── --}}
 <div class="cp-hero">
     <canvas id="cp-hero-canvas"></canvas>
-    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-        <div style="position:relative;cursor:pointer" onclick="document.getElementById('cp-photo-input').click()" title="Ganti foto">
+    <div style="position:relative;z-index:1;display:flex;align-items:center;gap:28px;flex-wrap:wrap">
+
+        {{-- Avatar --}}
+        <div style="position:relative;cursor:pointer;flex-shrink:0"
+             onclick="document.getElementById('cp-photo-input').click()" title="Klik untuk ganti foto profil">
             <div class="cp-avatar-wrap">
                 <div class="cp-avatar-ring"></div>
                 <img id="cp-avatar-img" src="{{ $devPhoto }}" class="cp-avatar" alt="{{ $devUser->name }}">
             </div>
-            <div class="cp-badge"></div>
+            <div class="cp-online-dot"></div>
+            {{-- Camera overlay on hover --}}
+            <div style="position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;z-index:3"
+                 onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                <i data-lucide="camera" style="width:20px;height:20px;color:#fff"></i>
+            </div>
         </div>
         <input type="file" id="cp-photo-input" accept="image/*" hidden onchange="cpPreviewPhoto(this)">
-        <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
-                <h2 id="cp-name-display" style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;color:#f8fafc;margin:0">{{ $devUser->name }}</h2>
-                <span style="font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3);font-family:'Geist Mono',monospace;letter-spacing:.08em">DEVELOPER</span>
+
+        {{-- Info --}}
+        <div style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+                <h2 id="cp-name-display"
+                    style="font-size:1.65rem;font-weight:800;letter-spacing:-.04em;color:#f8fafc;margin:0;line-height:1">
+                    {{ $devUser->name }}
+                </h2>
+                <span class="cp-badge-pill">
+                    <i data-lucide="terminal" style="width:11px;height:11px"></i>
+                    DEVELOPER
+                </span>
             </div>
-            <p style="font-size:.85rem;color:#64748b;margin:0 0 10px;font-family:'Geist Mono',monospace">{{ $devUser->email }}</p>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                <span style="display:inline-flex;align-items:center;gap:5px;font-size:.72rem;color:#34d399;font-family:'Geist Mono',monospace">
-                    <span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:pulseGlow 2s infinite"></span>
+            <p style="font-size:.83rem;color:#475569;margin:0 0 12px;font-family:'Geist Mono',monospace">
+                {{ $devUser->email }}
+            </p>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:.72rem;color:#34d399;font-family:'Geist Mono',monospace">
+                    <span style="width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;animation:pulseGlow 2s infinite"></span>
                     Online
                 </span>
-                <span style="color:rgba(255,255,255,.12)">·</span>
-                <span style="font-size:.72rem;color:#475569;font-family:'Geist Mono',monospace">Bergabung {{ $devUser->created_at->locale('id')->isoFormat('MMM YYYY') }}</span>
-                <span style="color:rgba(255,255,255,.12)">·</span>
-                <span style="font-size:.72rem;color:#475569;font-family:'Geist Mono',monospace">ID #{{ $devUser->id }}</span>
+                <span style="color:rgba(255,255,255,.1)">|</span>
+                <span style="font-size:.72rem;color:#475569;font-family:'Geist Mono',monospace">
+                    Bergabung {{ $devUser->created_at->locale('id')->isoFormat('MMM YYYY') }}
+                </span>
+                <span style="color:rgba(255,255,255,.1)">|</span>
+                <span style="font-size:.72rem;color:#475569;font-family:'Geist Mono',monospace">
+                    UID #{{ $devUser->id }}
+                </span>
             </div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,80px);gap:8px;flex-shrink:0">
-            <div class="cp-stat-mini"><b>{{ $totalUsers }}</b><span>Users</span></div>
-            <div class="cp-stat-mini"><b>{{ $totalGuruAktif }}</b><span>Aktif</span></div>
-            <div class="cp-stat-mini"><b>{{ $totalPresensi }}</b><span>Scan</span></div>
+
+        {{-- Mini stats --}}
+        <div style="display:grid;grid-template-columns:repeat(3,90px);gap:10px;flex-shrink:0">
+            <div class="cp-stat-mini"><b>{{ $totalUsers }}</b><span>Pengguna</span></div>
+            <div class="cp-stat-mini"><b>{{ $totalGuruAktif }}</b><span>Guru Aktif</span></div>
+            <div class="cp-stat-mini"><b>{{ $totalPresensi }}</b><span>Scan Hari Ini</span></div>
         </div>
     </div>
 </div>
 
 {{-- Flash messages --}}
 @if(session('success'))
-<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#34d399;font-size:.85rem;font-weight:600;margin-bottom:20px">
-    <i data-lucide="check-circle" style="width:16px;height:16px;flex-shrink:0"></i>
+<div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#34d399;font-size:.85rem;font-weight:600;margin-bottom:20px">
+    <i data-lucide="check-circle-2" style="width:17px;height:17px;flex-shrink:0"></i>
     {{ session('success') }}
 </div>
 @endif
 @if($errors->any())
-<div style="display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-radius:10px;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);color:#f87171;font-size:.85rem;font-weight:600;margin-bottom:20px">
-    <div style="display:flex;align-items:center;gap:10px"><i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0"></i> Ada kesalahan yang perlu diperbaiki:</div>
-    <ul style="margin:4px 0 0 26px;padding:0;font-weight:400">
-        @foreach($errors->all() as $err)
-            <li>{{ $err }}</li>
-        @endforeach
+<div style="padding:13px 18px;border-radius:12px;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);color:#f87171;font-size:.85rem;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:6px">
+        <i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0"></i>
+        Ada kesalahan:
+    </div>
+    <ul style="margin:0 0 0 22px;padding:0;font-weight:400;line-height:1.8">
+        @foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach
     </ul>
 </div>
 @endif
 
-{{-- 2-col grid --}}
+{{-- ── 2-col layout: Kiri (form) | Kanan (sesi) ── --}}
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
 
-    {{-- Kiri: Edit Profil + Ganti Password --}}
-    <div style="display:flex;flex-direction:column;gap:20px">
+    {{-- ════ Kolom Kiri: Identitas + Password ════ --}}
+    <div style="display:flex;flex-direction:column;gap:18px">
+
+        {{-- Card Identitas --}}
         <div class="cp-card">
-            <p class="cp-section-title"><i data-lucide="user" style="width:14px;height:14px;color:var(--accent)"></i> Identitas Developer</p>
-            <form action="{{ route('developer.profile.update', $secret) }}" method="POST" enctype="multipart/form-data">
+            <p class="cp-section-title">
+                <i data-lucide="user" style="width:13px;height:13px;color:var(--accent)"></i>
+                Identitas Developer
+            </p>
+            <form action="{{ url('dev-panel/'.$secret.'/profile') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <input type="file" name="photo" id="cp-photo-hidden" accept="image/*" hidden>
-                <div style="display:flex;flex-direction:column;gap:14px">
-                    <div><label class="cp-label">Nama Lengkap</label>
-                        <input type="text" name="name" class="cp-field" value="{{ old('name', $devUser->name) }}" required oninput="document.getElementById('cp-name-display').textContent=this.value">
+                <div style="display:flex;flex-direction:column;gap:15px">
+                    <div>
+                        <label class="cp-label">Nama Lengkap</label>
+                        <input type="text" name="name" class="cp-field"
+                               value="{{ old('name', $devUser->name) }}" required
+                               oninput="document.getElementById('cp-name-display').textContent=this.value||'Developer'">
                     </div>
-                    <div><label class="cp-label">Email</label>
-                        <input type="email" name="email" class="cp-field" value="{{ old('email', $devUser->email) }}" required>
+                    <div>
+                        <label class="cp-label">Alamat Email</label>
+                        <input type="email" name="email" class="cp-field"
+                               value="{{ old('email', $devUser->email) }}" required>
                     </div>
-                    <div><label class="cp-label">Nomor Telepon</label>
-                        <input type="text" name="phone" class="cp-field" value="{{ old('phone', $devUser->phone ?? '') }}" placeholder="08xxxxxxxxxx">
+                    <div>
+                        <label class="cp-label">Nomor Telepon</label>
+                        <input type="text" name="phone" class="cp-field"
+                               value="{{ old('phone', $devUser->phone ?? '') }}"
+                               placeholder="08xx-xxxx-xxxx">
                     </div>
                 </div>
-                <div style="display:flex;justify-content:flex-end;margin-top:18px">
-                    <button type="submit" class="btn"><i data-lucide="save" style="width:15px;height:15px"></i> Simpan</button>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                    <button type="submit" class="btn">
+                        <i data-lucide="save" style="width:15px;height:15px"></i>
+                        Simpan Perubahan
+                    </button>
                 </div>
             </form>
         </div>
 
+        {{-- Card Ganti Password --}}
         <div class="cp-card">
-            <p class="cp-section-title"><i data-lucide="lock" style="width:14px;height:14px;color:#f43f5e"></i> Keamanan Akun</p>
-            <form action="{{ route('developer.profile.password', $secret) }}" method="POST">
+            <p class="cp-section-title">
+                <i data-lucide="key-round" style="width:13px;height:13px;color:#f43f5e"></i>
+                Keamanan Akun
+            </p>
+            <form action="{{ url('dev-panel/'.$secret.'/profile/password') }}" method="POST">
                 @csrf
                 <div style="display:flex;flex-direction:column;gap:14px">
-                    <div><label class="cp-label">Password Lama</label><input type="password" name="current_password" class="cp-field" required placeholder="••••••••"></div>
-                    <div><label class="cp-label">Password Baru</label><input type="password" name="password" id="cp-pw-new" class="cp-field" required minlength="8" placeholder="Min. 8 karakter"></div>
-                    <div><label class="cp-label">Konfirmasi Password</label><input type="password" name="password_confirmation" class="cp-field" required minlength="8" placeholder="Ulangi password baru"></div>
                     <div>
+                        <label class="cp-label">Password Saat Ini</label>
+                        <input type="password" name="current_password" class="cp-field"
+                               required placeholder="••••••••">
+                    </div>
+                    <div>
+                        <label class="cp-label">Password Baru</label>
+                        <input type="password" name="password" id="cp-pw-new" class="cp-field"
+                               required minlength="8" placeholder="Minimal 8 karakter">
                         <div class="cp-progress"><div id="cp-pw-bar" class="cp-progress-bar" style="width:0%"></div></div>
-                        <p id="cp-pw-hint" style="font-size:.7rem;color:var(--txt-dim);margin-top:5px;font-family:'Geist Mono',monospace">Masukkan password baru</p>
+                        <p id="cp-pw-hint" style="font-size:.69rem;color:var(--txt-dim);margin-top:6px;font-family:'Geist Mono',monospace">
+                            Masukkan password baru
+                        </p>
+                    </div>
+                    <div>
+                        <label class="cp-label">Konfirmasi Password</label>
+                        <input type="password" name="password_confirmation" class="cp-field"
+                               required minlength="8" placeholder="Ulangi password baru">
                     </div>
                 </div>
-                <div style="display:flex;justify-content:flex-end;margin-top:18px">
-                    <button type="submit" class="btn btn-danger"><i data-lucide="lock" style="width:15px;height:15px"></i> Ganti Password</button>
+                <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                    <button type="submit" class="btn btn-danger">
+                        <i data-lucide="shield-check" style="width:15px;height:15px"></i>
+                        Perbarui Password
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- Kanan: 2FA + Session --}}
-    <div style="display:flex;flex-direction:column;gap:20px">
-        <div class="cp-card">
-            <p class="cp-section-title"><i data-lucide="shield-check" style="width:14px;height:14px;color:#10b981"></i> Two-Factor Authentication</p>
-            <div style="text-align:center;margin-bottom:16px">
-                <p style="font-size:.8rem;color:var(--txt-sub);margin-bottom:12px">Kode OTP berubah tiap 30 detik. Gunakan Google Authenticator atau Authy.</p>
-                <div class="cp-totp-display" id="cp-totp-code">--- ---</div>
-                <div class="cp-totp-timer"><i data-lucide="timer" style="width:13px;height:13px"></i><span id="cp-totp-countdown">30</span>s tersisa</div>
-                <div class="cp-progress"><div id="cp-totp-bar" class="cp-progress-bar" style="width:100%"></div></div>
-            </div>
-            <div style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:10px;padding:14px">
-                <p style="font-size:.78rem;font-weight:600;color:#34d399;margin-bottom:8px">Setup Authenticator</p>
-                <p style="font-size:.75rem;color:var(--txt-sub);line-height:1.6;margin:0">1. Install Google Authenticator / Authy<br>2. Masukkan secret key TOTP dari admin<br>3. Masukkan 6-digit OTP saat login</p>
-                <div style="display:flex;gap:8px;margin-top:10px">
-                    <input type="text" class="cp-field" placeholder="Secret key TOTP..." id="cp-totp-secret-input" style="flex:1;font-family:'Geist Mono',monospace;font-size:.85rem">
-                    <button type="button" onclick="cpInitTotp()" class="btn" style="padding:11px 14px"><i data-lucide="key" style="width:14px;height:14px"></i></button>
-                </div>
-            </div>
-        </div>
+    {{-- ════ Kolom Kanan: Sesi & Info Akun ════ --}}
+    <div style="display:flex;flex-direction:column;gap:18px">
 
+        {{-- Card Sesi Aktif --}}
         <div class="cp-card">
-            <p class="cp-section-title"><i data-lucide="activity" style="width:14px;height:14px;color:#06b6d4"></i> Sesi & Keamanan</p>
-            <div style="display:flex;flex-direction:column;gap:10px">
+            <p class="cp-section-title">
+                <i data-lucide="activity" style="width:13px;height:13px;color:#06b6d4"></i>
+                Sesi Aktif
+            </p>
+            <div style="display:flex;flex-direction:column;gap:8px">
                 @php
                     $sessionItems = [
-                        ['label'=>'IP Address',    'value'=>request()->ip(),                                      'icon'=>'map-pin'],
-                        ['label'=>'Browser',       'value'=>substr(request()->userAgent()??'-',0,42).'…',          'icon'=>'monitor'],
-                        ['label'=>'Login Terakhir','value'=>$devUser->updated_at->locale('id')->diffForHumans(),  'icon'=>'clock'],
-                        ['label'=>'Session Driver','value'=>config('session.driver','file'),                       'icon'=>'database'],
-                        ['label'=>'Role',          'value'=>strtoupper($devUser->role??'developer'),               'icon'=>'shield'],
+                        ['label'=>'IP Address',     'val'=>request()->ip(),                                     'icon'=>'map-pin',    'color'=>'rgba(6,182,212,.1)',   'border'=>'rgba(6,182,212,.2)'],
+                        ['label'=>'Browser',        'val'=>substr(request()->userAgent()??'-',0,38).'…',         'icon'=>'monitor',    'color'=>'rgba(99,102,241,.1)',  'border'=>'rgba(99,102,241,.2)'],
+                        ['label'=>'Login Terakhir', 'val'=>$devUser->updated_at->locale('id')->diffForHumans(), 'icon'=>'clock',      'color'=>'rgba(16,185,129,.1)',  'border'=>'rgba(16,185,129,.2)'],
+                        ['label'=>'Session Driver', 'val'=>config('session.driver','file'),                      'icon'=>'database',   'color'=>'rgba(245,158,11,.1)',  'border'=>'rgba(245,158,11,.2)'],
+                        ['label'=>'Role',           'val'=>strtoupper($devUser->role??'developer'),              'icon'=>'shield',     'color'=>'rgba(139,92,246,.1)',  'border'=>'rgba(139,92,246,.2)'],
+                        ['label'=>'Environment',    'val'=>strtoupper(config('app.env','production')),           'icon'=>'server',     'color'=>'rgba(244,63,94,.1)',   'border'=>'rgba(244,63,94,.2)'],
                     ];
                 @endphp
                 @foreach($sessionItems as $si)
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.04)">
-                    <div style="width:28px;height:28px;border-radius:7px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <div class="cp-session-row">
+                    <div class="cp-session-icon"
+                         style="background:{{ $si['color'] }};border-color:{{ $si['border'] }}">
                         <i data-lucide="{{ $si['icon'] }}" style="width:13px;height:13px;color:#06b6d4"></i>
                     </div>
                     <div style="min-width:0;flex:1">
-                        <p style="font-size:.68rem;color:var(--txt-dim);margin:0;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.06em">{{ $si['label'] }}</p>
-                        <p style="font-size:.82rem;font-weight:600;color:var(--txt-head);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $si['value'] }}</p>
+                        <p style="font-size:.66rem;color:var(--txt-dim);margin:0;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.07em">{{ $si['label'] }}</p>
+                        <p style="font-size:.82rem;font-weight:600;color:var(--txt-head);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $si['val'] }}</p>
                     </div>
                 </div>
                 @endforeach
             </div>
-            <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05)">
-                <form action="{{ route('logout') }}" method="POST" onsubmit="return confirmAction(this,'⚠ Yakin ingin keluar?','danger')">
-                    @csrf
-                    <button type="submit" class="btn btn-ghost btn-block" style="border-color:rgba(244,63,94,.3);color:#f87171">
-                        <i data-lucide="log-out" style="width:15px;height:15px"></i> Keluar dari Sesi
-                    </button>
-                </form>
+        </div>
+
+        {{-- Card Info Akun --}}
+        <div class="cp-card">
+            <p class="cp-section-title">
+                <i data-lucide="info" style="width:13px;height:13px;color:#818cf8"></i>
+                Info Akun
+            </p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+                @foreach([
+                    ['l'=>'ID Pengguna',    'v'=>'#'.$devUser->id,                                              'mono'=>true],
+                    ['l'=>'Tanggal Daftar', 'v'=>$devUser->created_at->locale('id')->isoFormat('D MMMM YYYY'),  'mono'=>false],
+                    ['l'=>'Email Verified', 'v'=>$devUser->email_verified_at ? '✓ Terverifikasi' : '✗ Belum',  'mono'=>true],
+                    ['l'=>'Status',         'v'=>$devUser->is_active ? 'Aktif' : 'Nonaktif',                    'mono'=>true],
+                ] as $ai)
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.04)">
+                    <span style="font-size:.72rem;color:var(--txt-dim){{ $ai['mono'] ? ';font-family:\'Geist Mono\',monospace' : '' }}">{{ $ai['l'] }}</span>
+                    <span style="font-size:.8rem;font-weight:600;color:var(--txt-head){{ $ai['mono'] ? ';font-family:\'Geist Mono\',monospace' : '' }}">{{ $ai['v'] }}</span>
+                </div>
+                @endforeach
             </div>
         </div>
+
+        {{-- Logout button --}}
+        <form action="{{ route('logout') }}" method="POST"
+              onsubmit="return confirmAction(this,'⚠️ Yakin ingin keluar dari Developer Panel?','danger')">
+            @csrf
+            <button type="submit" class="btn btn-ghost btn-block"
+                    style="border-color:rgba(244,63,94,.3);color:#f87171;gap:8px">
+                <i data-lucide="log-out" style="width:15px;height:15px"></i>
+                Keluar dari Sesi
+            </button>
+        </form>
     </div>
 </div>
 
 <script>
 /* Hero canvas particles */
 (function(){
-    var c=document.getElementById('cp-hero-canvas'); if(!c)return;
+    var c=document.getElementById('cp-hero-canvas');if(!c)return;
     var ctx=c.getContext('2d'),W,H,pts=[];
     function resize(){W=c.width=c.parentElement.offsetWidth;H=c.height=c.parentElement.offsetHeight;}
-    resize(); window.addEventListener('resize',resize);
-    for(var i=0;i<40;i++) pts.push({x:Math.random()*1200,y:Math.random()*300,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.2,r:Math.random()*1.5+.5});
+    resize();window.addEventListener('resize',resize);
+    for(var i=0;i<50;i++) pts.push({
+        x:Math.random()*1400,y:Math.random()*400,
+        vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.18,
+        r:Math.random()*1.8+.4,
+        c:Math.random()>.5?'rgba(99,102,241,.65)':'rgba(6,182,212,.45)'
+    });
     function draw(){
         ctx.clearRect(0,0,W,H);
-        pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-            ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(99,102,241,.7)';ctx.fill();});
+        pts.forEach(function(p){
+            p.x+=p.vx;p.y+=p.vy;
+            if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+            if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+            ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+            ctx.fillStyle=p.c;ctx.fill();
+        });
         requestAnimationFrame(draw);
     }
     draw();
@@ -1355,7 +1598,7 @@ function cpPreviewPhoto(input){
     var r=new FileReader();
     r.onload=function(e){
         document.getElementById('cp-avatar-img').src=e.target.result;
-        var dt=new DataTransfer(); dt.items.add(input.files[0]);
+        var dt=new DataTransfer();dt.items.add(input.files[0]);
         document.getElementById('cp-photo-hidden').files=dt.files;
     };
     r.readAsDataURL(input.files[0]);
@@ -1363,18 +1606,17 @@ function cpPreviewPhoto(input){
 
 document.getElementById('cp-pw-new')?.addEventListener('input',function(){
     var v=this.value,score=0;
-    if(v.length>=8)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
-    var pct=score*25,colors=['#f43f5e','#f43f5e','#f59e0b','#10b981','#10b981'],labels=['Terlalu lemah','Lemah','Sedang','Kuat','Sangat kuat'];
+    if(v.length>=8)score++;
+    if(/[A-Z]/.test(v))score++;
+    if(/[0-9]/.test(v))score++;
+    if(/[^A-Za-z0-9]/.test(v))score++;
+    var pct=score*25;
+    var colors=['#f43f5e','#f43f5e','#f59e0b','#10b981','#10b981'];
+    var labels=['Terlalu lemah','Lemah','Sedang','Kuat','Sangat kuat'];
     var bar=document.getElementById('cp-pw-bar'),hint=document.getElementById('cp-pw-hint');
     if(bar){bar.style.width=pct+'%';bar.style.background='linear-gradient(90deg,'+colors[score]+','+(score>2?'#06b6d4':colors[score])+')';}
     if(hint){hint.textContent=v.length?labels[score]:'Masukkan password baru';hint.style.color=v.length?colors[score]:'';}
 });
-
-var cpTotpSecret='',cpTotpInterval=null;
-function cpInitTotp(){var i=document.getElementById('cp-totp-secret-input');if(!i||!i.value.trim())return;cpTotpSecret=i.value.trim().toUpperCase().replace(/\s/g,'');if(cpTotpInterval)clearInterval(cpTotpInterval);cpTickTotp();cpTotpInterval=setInterval(cpTickTotp,1000);}
-function cpTickTotp(){var now=Math.floor(Date.now()/1000),rem=30-(now%30);var cd=document.getElementById('cp-totp-countdown'),bar=document.getElementById('cp-totp-bar');if(cd)cd.textContent=rem;if(bar)bar.style.width=(rem/30*100)+'%';if(cpTotpSecret)cpGenerateTotp(cpTotpSecret,Math.floor(Date.now()/30000)).then(function(code){var el=document.getElementById('cp-totp-code');if(el)el.textContent=code.slice(0,3)+' '+code.slice(3);});}
-async function cpGenerateTotp(secret,counter){try{var kb=base32Decode(secret);if(!kb)return'------';var key=await crypto.subtle.importKey('raw',kb,{name:'HMAC',hash:'SHA-1'},false,['sign']);var buf=new ArrayBuffer(8),view=new DataView(buf);view.setUint32(4,counter,false);var sig=await crypto.subtle.sign('HMAC',key,buf),arr=new Uint8Array(sig),offset=arr[19]&0xf;var code=((arr[offset]&0x7f)<<24|(arr[offset+1]&0xff)<<16|(arr[offset+2]&0xff)<<8|(arr[offset+3]&0xff))%1000000;return String(code).padStart(6,'0');}catch(e){return'------';}}
-function base32Decode(s){var alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',bits=0,value=0,output=[];for(var i=0;i<s.length;i++){var idx=alpha.indexOf(s[i].toUpperCase());if(idx<0)continue;value=(value<<5)|idx;bits+=5;if(bits>=8){output.push((value>>>(bits-8))&0xff);bits-=8;}}return output.length?new Uint8Array(output):null;}
 </script>
 </div>
 

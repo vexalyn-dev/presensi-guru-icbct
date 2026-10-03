@@ -1957,27 +1957,30 @@ textarea.input { resize: vertical; min-height: 85px; }
     var splash= document.getElementById('dev-splash');
 
     var bootLines = [
-        { txt: '<span style="color:#6366f1">▶</span> Menginisialisasi Dev Panel...', pct: 10, delay: 0 },
-        { txt: '<span style="color:#10b981">✓</span> Memverifikasi kredensial developer', pct: 25, delay: 300 },
-        { txt: '<span style="color:#10b981">✓</span> Memuat konfigurasi sistem', pct: 42, delay: 550 },
-        { txt: '<span style="color:#10b981">✓</span> Koneksi database: <span style="color:#34d399">OK</span>', pct: 58, delay: 780 },
-        { txt: '<span style="color:#10b981">✓</span> Cache engine: <span style="color:#34d399">Aktif</span>', pct: 72, delay: 980 },
-        { txt: '<span style="color:#06b6d4">⟳</span> Kompilasi antarmuka konsol...', pct: 88, delay: 1150 },
-        { txt: '<span style="color:#10b981">✓</span> Sistem siap — <span style="color:#818cf8">selamat datang, Developer</span>', pct: 100, delay: 1380 },
+        { txt: '<span style="color:#6366f1">▶</span> Menginisialisasi Dev Panel...', pct: 8, delay: 0 },
+        { txt: '<span style="color:#10b981">✓</span> Memverifikasi kredensial developer', pct: 18, delay: 520 },
+        { txt: '<span style="color:#10b981">✓</span> Memeriksa izin akses & role', pct: 30, delay: 1050 },
+        { txt: '<span style="color:#10b981">✓</span> Memuat konfigurasi sistem', pct: 42, delay: 1600 },
+        { txt: '<span style="color:#10b981">✓</span> Koneksi database: <span style="color:#34d399">OK</span>', pct: 55, delay: 2150 },
+        { txt: '<span style="color:#10b981">✓</span> Cache engine: <span style="color:#34d399">Aktif</span>', pct: 67, delay: 2680 },
+        { txt: '<span style="color:#f59e0b">⟳</span> Memuat modul APK & iOS manager...', pct: 78, delay: 3100 },
+        { txt: '<span style="color:#10b981">✓</span> Mengambil data sistem real-time', pct: 88, delay: 3550 },
+        { txt: '<span style="color:#06b6d4">⟳</span> Kompilasi antarmuka konsol...', pct: 95, delay: 4000 },
+        { txt: '<span style="color:#10b981">✓</span> Sistem siap — <span style="color:#818cf8">selamat datang, Developer</span>', pct: 100, delay: 4500 },
     ];
 
     bootLines.forEach(function(item) {
         setTimeout(function() {
             var p = document.createElement('div');
             p.innerHTML = item.txt;
-            p.style.cssText = 'opacity:0;transform:translateY(4px);transition:opacity .25s ease,transform .25s ease';
+            p.style.cssText = 'opacity:0;transform:translateY(5px);transition:opacity .35s ease,transform .35s ease';
             lines.appendChild(p);
             requestAnimationFrame(function() {
                 requestAnimationFrame(function() {
                     p.style.opacity = '1'; p.style.transform = 'translateY(0)';
                 });
             });
-            if (bar) bar.style.width = item.pct + '%';
+            if (bar) { bar.style.transition = 'width .5s cubic-bezier(.4,0,.2,1)'; bar.style.width = item.pct + '%'; }
             if (stat) stat.textContent = item.pct < 100 ? 'Memuat... ' + item.pct + '%' : 'Siap masuk ✓';
         }, item.delay);
     });
@@ -1985,10 +1988,11 @@ textarea.input { resize: vertical; min-height: 85px; }
     /* ── Dismiss dan reveal UI ── */
     setTimeout(function() {
         if (!splash) return;
+        splash.style.transition = 'opacity .7s ease, transform .7s ease';
         splash.style.opacity = '0';
-        splash.style.transform = 'scale(1.03)';
-        setTimeout(function() { splash.style.display = 'none'; }, 650);
-    }, 1900);
+        splash.style.transform = 'scale(1.04)';
+        setTimeout(function() { splash.style.display = 'none'; }, 750);
+    }, 5100);
 })();
 </script>
 <div class="scrim" id="scrim"></div>
@@ -2019,24 +2023,42 @@ textarea.input { resize: vertical; min-height: 85px; }
         <button type="button" onclick="switchTab('system')" id="nav-system" class="nav-item"><i data-lucide="cpu"></i> System State</button>
         <button type="button" onclick="switchTab('releases')" id="nav-releases" class="nav-item"><i data-lucide="git-pull-request"></i> Releases</button>
 
-        <div class="nav-label">Tautan & Preferensi</div>
+        <div class="nav-label">Tautan &amp; Preferensi</div>
         <button type="button" onclick="switchTab('profile')" id="nav-profile" class="nav-item"><i data-lucide="user-circle-2"></i> Profil Developer</button>
         <a href="https://github.com/vexalyn-dev/presensi-guru-icbct" target="_blank" rel="noopener" class="nav-item"><i data-lucide="git-branch"></i> Repository</a>
         <a href="{{ url('/dashboard') }}" class="nav-item"><i data-lucide="external-link"></i> Main App</a>
-        <button type="button" onclick="switchTab('settings')" id="nav-settings" class="nav-item"><i data-lucide="settings"></i> Settings & Tema</button>
+        <button type="button" onclick="switchTab('settings')" id="nav-settings" class="nav-item"><i data-lucide="settings"></i> Settings &amp; Tema</button>
     </nav>
 
     <div class="side-foot">
-        <div class="me">
-            <img src="https://ui-avatars.com/api/?name=Vio+Atmajaya&background=6366f1&color=fff&bold=true" alt="Vio Atmajaya">
-            <div style="min-width:0">
-                <p class="n trunc">Vio Atmajaya</p>
+        @php
+            $sidebarUser  = auth()->user();
+            $sidebarPhoto = ($sidebarUser->photo_path ?: $sidebarUser->photo)
+                ? asset('storage/'.($sidebarUser->photo_path ?: $sidebarUser->photo))
+                : asset('images/profile-dev.png');
+        @endphp
+        <div class="me" style="cursor:pointer" onclick="switchTab('profile')" title="Buka Profil">
+            <img src="{{ $sidebarPhoto }}" alt="{{ $sidebarUser->name }}"
+                 style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(99,102,241,.5);flex-shrink:0">
+            <div style="min-width:0;flex:1">
+                <p class="n trunc">{{ $sidebarUser->name }}</p>
                 <p class="r trunc" style="display:flex;align-items:center;gap:5px;">
-                    <span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;"></span>
+                    <span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;flex-shrink:0"></span>
                     developer console
                 </p>
             </div>
         </div>
+        {{-- Logout di sidebar bawah --}}
+        <form action="{{ route('logout') }}" method="POST"
+              style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)"
+              onsubmit="return confirmAction(this,'Yakin ingin keluar dari Developer Panel?','danger')">
+            @csrf
+            <button type="submit" class="nav-item"
+                    style="width:100%;color:#f87171;border-color:rgba(244,63,94,.15);background:rgba(244,63,94,.05)">
+                <i data-lucide="log-out" style="width:17px;height:17px"></i>
+                Keluar dari Panel
+            </button>
+        </form>
     </div>
 </aside>
 
