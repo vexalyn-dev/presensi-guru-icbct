@@ -1922,15 +1922,27 @@ textarea.input { resize: vertical; min-height: 85px; }
 
 <script>
 (function() {
+    var splash = document.getElementById('dev-splash');
+
+    /* ── Cek apakah splash sudah pernah ditampilkan di sesi ini ── */
+    var splashKey = 'dev_splash_shown';
+    var alreadyShown = false;
+    try { alreadyShown = !!sessionStorage.getItem(splashKey); } catch(e) {}
+
+    if (alreadyShown) {
+        /* Sudah login & splash sudah tampil — sembunyikan langsung tanpa animasi */
+        if (splash) { splash.style.display = 'none'; }
+        return;
+    }
+
     /* ── Canvas grid animation ── */
     var c = document.getElementById('splash-canvas');
     if (c) {
         var ctx = c.getContext('2d');
-        var W, H, cols, rows;
+        var W, H;
         function resize() {
             W = c.width  = window.innerWidth;
             H = c.height = window.innerHeight;
-            cols = Math.ceil(W / 50); rows = Math.ceil(H / 50);
         }
         resize(); window.addEventListener('resize', resize);
         var t = 0;
@@ -1954,7 +1966,6 @@ textarea.input { resize: vertical; min-height: 85px; }
     var lines = document.getElementById('splash-lines');
     var bar   = document.getElementById('splash-bar');
     var stat  = document.getElementById('splash-status');
-    var splash= document.getElementById('dev-splash');
 
     var bootLines = [
         { txt: '<span style="color:#6366f1">▶</span> Menginisialisasi Dev Panel...', pct: 8, delay: 0 },
@@ -1985,13 +1996,17 @@ textarea.input { resize: vertical; min-height: 85px; }
         }, item.delay);
     });
 
-    /* ── Dismiss dan reveal UI ── */
+    /* ── Dismiss, reveal UI, lalu tandai splash sudah ditampilkan ── */
     setTimeout(function() {
         if (!splash) return;
         splash.style.transition = 'opacity .7s ease, transform .7s ease';
         splash.style.opacity = '0';
         splash.style.transform = 'scale(1.04)';
-        setTimeout(function() { splash.style.display = 'none'; }, 750);
+        setTimeout(function() {
+            splash.style.display = 'none';
+            /* Tandai sudah tampil — tidak akan muncul lagi sampai logout */
+            try { sessionStorage.setItem(splashKey, '1'); } catch(e) {}
+        }, 750);
     }, 5100);
 })();
 </script>
@@ -2051,7 +2066,7 @@ textarea.input { resize: vertical; min-height: 85px; }
         {{-- Logout di sidebar bawah --}}
         <form action="{{ route('logout') }}" method="POST"
               style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)"
-              onsubmit="return confirmAction(this,'Yakin ingin keluar dari Developer Panel?','danger')">
+              onsubmit="if(!confirmAction(this,'Yakin ingin keluar dari Developer Panel?','danger'))return false;try{sessionStorage.removeItem('dev_splash_shown');}catch(e){}return true;">
             @csrf
             <button type="submit" class="nav-item"
                     style="width:100%;color:#f87171;border-color:rgba(244,63,94,.15);background:rgba(244,63,94,.05)">
@@ -2072,13 +2087,16 @@ textarea.input { resize: vertical; min-height: 85px; }
         <div class="top-r">
             <span class="clock mono" id="live-clock">--:--:--</span>
             <span class="env"><i></i><span>{{ strtoupper(app()->environment()) }}</span></span>
-            <button type="button" class="ibtn" onclick="switchTab('settings')" aria-label="Tema & Settings" title="Ganti Tema & Settings">
-                <i data-lucide="palette" style="width:16px;height:16px"></i>
+            {{-- Avatar profil developer di pojok kanan atas --}}
+            @php $topUser = auth()->user(); $topPhoto = ($topUser->photo_path ?: $topUser->photo) ? asset('storage/'.($topUser->photo_path ?: $topUser->photo)) : asset('images/profile-dev.png'); @endphp
+            <button type="button" onclick="switchTab('profile')" title="Profil Developer"
+                    style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:8px;border-radius:10px;padding:5px 10px 5px 5px;transition:background .2s;border:1px solid transparent"
+                    onmouseover="this.style.background='rgba(99,102,241,.1)';this.style.borderColor='rgba(99,102,241,.25)'"
+                    onmouseout="this.style.background='none';this.style.borderColor='transparent'">
+                <img src="{{ $topPhoto }}" alt="{{ $topUser->name }}"
+                     style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid rgba(99,102,241,.45);flex-shrink:0">
+                <span style="font-size:.8rem;font-weight:600;color:var(--txt-head);white-space:nowrap;display:none" class="dev-name-top">{{ $topUser->name }}</span>
             </button>
-            <form action="{{ route('logout') }}" method="POST" style="display:inline" onsubmit="return confirmAction(this, 'Yakin ingin keluar dari developer panel?')">
-                @csrf
-                <button type="submit" class="ibtn" aria-label="Logout" title="Keluar"><i data-lucide="log-out" style="width:16px;height:16px"></i></button>
-            </form>
         </div>
     </header>
 

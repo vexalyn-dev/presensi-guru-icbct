@@ -115,10 +115,11 @@
 {{-- ═════════ TAB: DASHBOARD ═════════ --}}
 <div id="tab-dashboard" class="tab-content">
 
+    {{-- ── Greeting Header ── --}}
     <div class="dash-header">
         <div class="dash-top">
             <div>
-                <h2 class="greeting">{{ $greeting }}, <span style="background: linear-gradient(135deg, #a5b4fc 20%, #818cf8 50%, #6366f1); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Developer</span></h2>
+                <h2 class="greeting">{{ $greeting }}, <span style="background:linear-gradient(135deg,#a5b4fc 20%,#818cf8 50%,#6366f1);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Developer</span></h2>
                 <p class="subtext">
                     Sistem aktif di <b>{{ $host }}</b> &nbsp;·&nbsp; {{ now()->locale('id')->isoFormat('dddd, D MMM YYYY') }} &nbsp;·&nbsp; pukul <span id="dash-clock-text">{{ now()->format('H:i') }}</span> WIB.
                     @if(($stats['pending_leaves'] ?? 0) > 0)
@@ -141,48 +142,52 @@
         </div>
     </div>
 
-    {{-- ── Banner Vexalyn Dev ── --}}
-    <div style="margin-bottom:20px;border-radius:16px;overflow:hidden;position:relative;border:1px solid rgba(99,102,241,.2)">
+    {{-- ── Banner Vexalyn Dev (full width, lebih tinggi) ── --}}
+    <div style="margin-bottom:24px;border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(99,102,241,.2);box-shadow:0 8px 32px rgba(99,102,241,.12)">
         <img src="{{ asset('images/banner-vexalyn-dev.png') }}" alt="Vexalyn Dev Banner"
-             style="width:100%;display:block;max-height:180px;object-fit:cover;object-position:center">
-        <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,9,18,.6) 0%,transparent 60%);pointer-events:none"></div>
+             style="width:100%;display:block;height:220px;object-fit:cover;object-position:center top">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(5,9,18,.55) 100%);pointer-events:none"></div>
     </div>
 
     @if($debugOn)
-    <div class="alert alert-warn" role="alert">
+    <div class="alert alert-warn" role="alert" style="margin-bottom:20px">
         <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;margin-top:1px"></i>
         <span><b>Debug mode aktif.</b> Matikan <code>APP_DEBUG</code> di environment production agar detail konfigurasi dan error trace terlindungi.</span>
     </div>
     @endif
 
-    {{-- ── Stats Row ── --}}
-    <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px">
-        @php
-            $statCards = [
-                ['label'=>'Total Pengguna',  'value'=>$stats['total_users']??0,     'icon'=>'users',          'color'=>'violet', 'suffix'=>''],
-                ['label'=>'Guru Aktif',      'value'=>$stats['total_teachers']??0,  'icon'=>'graduation-cap', 'color'=>'sky',    'suffix'=>''],
-                ['label'=>'Operator/Admin',  'value'=>$stats['total_operators']??0, 'icon'=>'shield-check',   'color'=>'ok',     'suffix'=>''],
-                ['label'=>'Izin Pending',    'value'=>$stats['pending_leaves']??0,  'icon'=>'clock',          'color'=>($stats['pending_leaves']??0)>0?'warn':'ok', 'suffix'=>''],
-            ];
-        @endphp
+    {{-- ── Stat Cards — desain premium ── --}}
+    @php
+        $statCards = [
+            ['label'=>'Total Pengguna',  'value'=>$stats['total_users']??0,     'icon'=>'users',          'color'=>'#818cf8', 'bg'=>'rgba(99,102,241,.08)',  'border'=>'rgba(99,102,241,.2)'],
+            ['label'=>'Guru Aktif',      'value'=>$stats['total_teachers']??0,  'icon'=>'graduation-cap', 'color'=>'#38bdf8', 'bg'=>'rgba(56,189,248,.08)',  'border'=>'rgba(56,189,248,.2)'],
+            ['label'=>'Operator/Admin',  'value'=>$stats['total_operators']??0, 'icon'=>'shield-check',   'color'=>'#34d399', 'bg'=>'rgba(52,211,153,.08)',  'border'=>'rgba(52,211,153,.2)'],
+            ['label'=>'Izin Pending',    'value'=>$stats['pending_leaves']??0,  'icon'=>'clock',          'color'=>($stats['pending_leaves']??0)>0?'#fbbf24':'#34d399', 'bg'=>($stats['pending_leaves']??0)>0?'rgba(251,191,36,.08)':'rgba(52,211,153,.08)', 'border'=>($stats['pending_leaves']??0)>0?'rgba(251,191,36,.2)':'rgba(52,211,153,.2)'],
+        ];
+    @endphp
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
         @foreach($statCards as $sc)
-        <div class="card stat" style="cursor:default">
-            <div class="stat-head">
-                <span class="ico t-{{ $sc['color'] }}" style="width:30px;height:30px;border-radius:8px">
-                    <i data-lucide="{{ $sc['icon'] }}" style="width:15px;height:15px"></i>
-                </span>
-                {{ $sc['label'] }}
+        <div style="position:relative;overflow:hidden;border-radius:14px;background:{{ $sc['bg'] }};border:1px solid {{ $sc['border'] }};padding:20px 22px;transition:transform .2s,box-shadow .2s"
+             onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.25)'"
+             onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="position:absolute;top:-20px;right:-10px;width:80px;height:80px;border-radius:50%;background:{{ $sc['bg'] }};opacity:.5;filter:blur(12px);pointer-events:none"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid {{ $sc['border'] }};display:flex;align-items:center;justify-content:center">
+                    <i data-lucide="{{ $sc['icon'] }}" style="width:17px;height:17px;color:{{ $sc['color'] }}"></i>
+                </div>
+                <span style="font-size:.65rem;font-weight:700;color:{{ $sc['color'] }};font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em;opacity:.8">Live</span>
             </div>
-            <div class="num" data-count="{{ $sc['value'] }}">{{ $sc['value'] }}</div>
+            <div class="num" data-count="{{ $sc['value'] }}" style="font-size:2.1rem;font-weight:800;color:#f8fafc;letter-spacing:-.04em;line-height:1;margin-bottom:6px">{{ $sc['value'] }}</div>
+            <p style="font-size:.72rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.08em;font-family:'Geist Mono',monospace;margin:0">{{ $sc['label'] }}</p>
         </div>
         @endforeach
     </div>
 
-    {{-- ── Main 3-col grid ── --}}
-    <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:20px;margin-bottom:20px">
+    {{-- ── Main Grid: Kiri (2/3) + Kanan (1/3) ── --}}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
 
-        {{-- Kiri: System Info + Quick Actions --}}
-        <div style="display:flex;flex-direction:column;gap:20px">
+        {{-- ═══ Kolom Kiri ═══ --}}
+        <div style="display:flex;flex-direction:column;gap:18px">
 
             {{-- System Info --}}
             <div class="card">
@@ -208,12 +213,12 @@
                 <div class="actions">
                     <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirmAction(this,'🧹 Bersihkan semua cache?\n(config, route, view, app cache)')" class="action">
                         <span class="ico t-sky"><i data-lucide="trash-2" style="width:17px;height:17px"></i></span>
-                        <div><b>Sapu Jagat</b><small>Hapus cache config, route, & view</small></div>
+                        <div><b>Sapu Jagat</b><small>Hapus cache config, route, &amp; view</small></div>
                         <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                     </a>
                     <a href="{{ url('/fix-session?secret='.$secret) }}" onclick="return confirmAction(this,'🔧 Perbaiki session dir & hapus semua cache?')" class="action">
                         <span class="ico t-warn"><i data-lucide="wrench" style="width:17px;height:17px"></i></span>
-                        <div><b>Fix Session</b><small>Perbaiki permissions & clear cache</small></div>
+                        <div><b>Fix Session</b><small>Perbaiki permissions &amp; clear cache</small></div>
                         <i data-lucide="arrow-up-right" class="go" style="width:16px;height:16px"></i>
                     </a>
                     <a href="{{ route('developer.optimize', $secret) }}" onclick="return confirmAction(this,'⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
@@ -235,8 +240,8 @@
             </div>
         </div>
 
-        {{-- Kanan: Server + Disk + Cache Health --}}
-        <div style="display:flex;flex-direction:column;gap:20px">
+        {{-- ═══ Kolom Kanan ═══ --}}
+        <div style="display:flex;flex-direction:column;gap:18px">
 
             {{-- Server Info --}}
             <div class="card">
@@ -271,117 +276,71 @@
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
                     <span style="font-size:0.78rem;font-weight:600;color:var(--txt-sub);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace">Disk Usage</span>
                     @php $dp = $stats['disk_percent']??0; $dc = $dp>90?'#f43f5e':($dp>70?'#f59e0b':'#10b981'); @endphp
-                    <span style="font-size:0.85rem;font-weight:700;color:{{ $dc }};font-family:'Geist Mono',monospace">{{ $dp }}%</span>
+                    <span style="font-size:0.85rem;font-weight:700;font-family:'Geist Mono',monospace;color:{{ $dc }}">{{ $dp }}%</span>
                 </div>
-                {{-- Radial gauge --}}
-                <div style="display:flex;justify-content:center;margin-bottom:14px">
+                <div style="display:flex;align-items:center;gap:20px">
                     @php
-                        $r = 52; $cx = 64; $cy = 64;
+                        $r = 48; $cx = 56; $cy = 56;
                         $circ = 2 * 3.14159 * $r;
                         $filled = $circ * ($dp / 100);
                         $empty  = $circ - $filled;
                         $dcGlow = $dc . '80';
                     @endphp
-                    <svg width="128" height="128" viewBox="0 0 128 128">
-                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
-                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="{{ $dc }}" stroke-width="10" stroke-dasharray="{{ $filled }} {{ $empty }}" stroke-dashoffset="{{ $circ * 0.25 }}" stroke-linecap="round" style="filter:drop-shadow(0 0 6px {{ $dcGlow }});transition:stroke-dasharray 1s ease"/>
-                        <text x="{{ $cx }}" y="{{ $cy }}" text-anchor="middle" dominant-baseline="middle" fill="{{ $dc }}" font-size="22" font-weight="800" font-family="'Geist Mono',monospace">{{ $dp }}%</text>
-                        <text x="{{ $cx }}" y="{{ $cy + 18 }}" text-anchor="middle" dominant-baseline="middle" fill="var(--txt-dim)" font-size="9" font-family="'Plus Jakarta Sans',sans-serif">{{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }}GB / {{ round($stats['disk_total']/1073741824,1) }}GB</text>
+                    <svg width="112" height="112" viewBox="0 0 112 112" style="flex-shrink:0">
+                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/>
+                        <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $r }}" fill="none" stroke="{{ $dc }}" stroke-width="9"
+                                stroke-dasharray="{{ $filled }} {{ $empty }}" stroke-dashoffset="{{ $circ * 0.25 }}"
+                                stroke-linecap="round" style="filter:drop-shadow(0 0 6px {{ $dcGlow }});transition:stroke-dasharray 1s ease"/>
+                        <text x="{{ $cx }}" y="{{ $cy - 3 }}" text-anchor="middle" dominant-baseline="middle"
+                              fill="{{ $dc }}" font-size="18" font-weight="800" font-family="'Geist Mono',monospace">{{ $dp }}%</text>
+                        <text x="{{ $cx }}" y="{{ $cy + 14 }}" text-anchor="middle" dominant-baseline="middle"
+                              fill="rgba(100,116,139,.8)" font-size="8" font-family="'Plus Jakarta Sans',sans-serif">used</text>
                     </svg>
-                </div>
-                {{-- Cache health badges --}}
-                <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-                    @php
-                        $caches = [
-                            ['label'=>'Config',  'ok'=>$stats['cache_config']==='CACHED'],
-                            ['label'=>'Routes',  'ok'=>$stats['cache_route']==='CACHED'],
-                            ['label'=>'Views',   'ok'=>$stats['cache_view']==='CACHED'],
-                        ];
-                    @endphp
-                    @foreach($caches as $c)
-                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:600;padding:4px 10px;border-radius:6px;font-family:'Geist Mono',monospace;background:{{ $c['ok']?'rgba(16,185,129,.12)':'rgba(244,63,94,.12)' }};color:{{ $c['ok']?'#34d399':'#f87171' }};border:1px solid {{ $c['ok']?'rgba(16,185,129,.3)':'rgba(244,63,94,.3)' }}">
-                        @if($c['ok'])<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>
-                        @else<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>@endif
-                        {{ $c['label'] }}
-                    </span>
-                    @endforeach
+                    <div style="flex:1">
+                        <p style="font-size:.75rem;color:var(--txt-dim);margin:0 0 8px">
+                            {{ round(($stats['disk_total']-$stats['disk_free'])/1073741824,1) }} GB dipakai dari {{ round($stats['disk_total']/1073741824,1) }} GB
+                        </p>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap">
+                            @foreach([['label'=>'Config','ok'=>$stats['cache_config']==='CACHED'],['label'=>'Routes','ok'=>$stats['cache_route']==='CACHED'],['label'=>'Views','ok'=>$stats['cache_view']==='CACHED']] as $c)
+                            <span style="display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:20px;font-family:'Geist Mono',monospace;background:{{ $c['ok']?'rgba(16,185,129,.1)':'rgba(244,63,94,.1)' }};color:{{ $c['ok']?'#34d399':'#f87171' }};border:1px solid {{ $c['ok']?'rgba(16,185,129,.25)':'rgba(244,63,94,.25)' }}">
+                                @if($c['ok'])<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>@else<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>@endif
+                                {{ $c['label'] }}
+                            </span>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {{-- Chart: User Growth (last 7 days attendance activity) --}}
+            {{-- Chart Aktivitas 7 Hari --}}
             <div class="card" style="padding:18px">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head)">
-                        <i data-lucide="bar-chart-2" style="width:15px;height:15px;vertical-align:middle;margin-right:5px;color:var(--accent)"></i>
+                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:6px">
+                        <i data-lucide="bar-chart-2" style="width:15px;height:15px;color:var(--accent)"></i>
                         Aktivitas 7 Hari
                     </span>
                     <span class="live" style="font-size:0.72rem"><i></i> Live</span>
                 </div>
                 @php
-                    $activityData = [];
-                    $activityLabels = [];
+                    $activityData = []; $activityLabels = [];
                     for ($d = 6; $d >= 0; $d--) {
                         $date = now()->subDays($d);
                         $activityLabels[] = $date->locale('id')->isoFormat('D MMM');
-                        $activityData[] = \App\Models\Attendance::whereDate('date', $date->toDateString())->count();
+                        $activityData[]   = \App\Models\Attendance::whereDate('date', $date->toDateString())->count();
                     }
                 @endphp
-                <canvas id="dash-activity-chart" style="width:100%;height:100px"
-                    data-labels='@json($activityLabels)'
-                    data-values='@json($activityData)'></canvas>
-            </div>
-
-            {{-- Quick Stats Presensi Hari Ini --}}
-            @php
-                $todayTotal  = \App\Models\Attendance::whereDate('date', today())->count();
-                $todayHadir  = \App\Models\Attendance::whereDate('date', today())->where('status','Hadir')->count();
-                $todayTelat  = \App\Models\Attendance::whereDate('date', today())->whereIn('status',['Terlambat','Tepat Waktu'])->count();
-                $todayAlpha  = \App\Models\User::where('role','guru')->where('is_active',true)->count() - $todayTotal;
-                $todayAlpha  = max(0, $todayAlpha);
-            @endphp
-            <div class="card" style="padding:16px 18px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:6px">
-                        <i data-lucide="calendar-check" style="width:15px;height:15px;color:#10b981"></i>
-                        Presensi Hari Ini
-                    </span>
-                    <span style="font-size:0.7rem;font-family:'Geist Mono',monospace;color:var(--txt-dim)">{{ now()->locale('id')->isoFormat('D MMM') }}</span>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-                    <div style="text-align:center;padding:10px 6px;border-radius:8px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15)">
-                        <div style="font-size:1.4rem;font-weight:800;color:#34d399;letter-spacing:-.02em">{{ $todayHadir }}</div>
-                        <div style="font-size:0.65rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace;margin-top:2px">Hadir</div>
-                    </div>
-                    <div style="text-align:center;padding:10px 6px;border-radius:8px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15)">
-                        <div style="font-size:1.4rem;font-weight:800;color:#fbbf24;letter-spacing:-.02em">{{ $todayTelat }}</div>
-                        <div style="font-size:0.65rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace;margin-top:2px">Terlambat</div>
-                    </div>
-                    <div style="text-align:center;padding:10px 6px;border-radius:8px;background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.15)">
-                        <div style="font-size:1.4rem;font-weight:800;color:#f87171;letter-spacing:-.02em">{{ $todayAlpha }}</div>
-                        <div style="font-size:0.65rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.06em;font-family:'Geist Mono',monospace;margin-top:2px">Belum</div>
-                    </div>
-                </div>
-                @if($todayTotal > 0)
-                @php $pct = round($todayHadir / max(1, \App\Models\User::where('role','guru')->where('is_active',true)->count()) * 100); @endphp
-                <div style="margin-top:10px">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                        <span style="font-size:0.7rem;color:var(--txt-dim)">Tingkat kehadiran</span>
-                        <span style="font-size:0.7rem;font-weight:700;color:#34d399;font-family:'Geist Mono',monospace">{{ $pct }}%</span>
-                    </div>
-                    <div style="height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden">
-                        <div style="height:100%;width:{{ $pct }}%;background:linear-gradient(90deg,#10b981,#06b6d4);border-radius:4px;transition:width 1s ease"></div>
-                    </div>
-                </div>
-                @endif
+                <canvas id="dash-activity-chart" style="width:100%;height:110px"
+                        data-labels='@json($activityLabels)'
+                        data-values='@json($activityData)'></canvas>
             </div>
 
             {{-- Environment Quick Info --}}
             <div class="card" style="padding:16px 18px">
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
                     <i data-lucide="terminal" style="width:15px;height:15px;color:var(--accent)"></i>
-                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head)">Environment</span>
+                    <span style="font-size:0.82rem;font-weight:700;color:var(--txt-head)">Runtime Info</span>
                 </div>
-                <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;flex-direction:column;gap:5px">
                     @foreach([
                         ['k'=>'PHP',        'v'=>PHP_VERSION,                    'c'=>'#818cf8'],
                         ['k'=>'Laravel',    'v'=>'v'.app()->version(),            'c'=>'#f87171'],
@@ -389,9 +348,9 @@
                         ['k'=>'Queue',      'v'=>config('queue.default','sync'),  'c'=>'#34d399'],
                         ['k'=>'Mail',       'v'=>config('mail.default','smtp'),   'c'=>'#fbbf24'],
                     ] as $ei)
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.02)">
-                        <span style="font-size:0.72rem;color:var(--txt-dim);font-family:'Geist Mono',monospace">{{ $ei['k'] }}</span>
-                        <span style="font-size:0.75rem;font-weight:600;color:{{ $ei['c'] }};font-family:'Geist Mono',monospace">{{ $ei['v'] }}</span>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03)">
+                        <span style="font-size:.71rem;color:var(--txt-dim);font-family:'Geist Mono',monospace">{{ $ei['k'] }}</span>
+                        <span style="font-size:.74rem;font-weight:600;color:{{ $ei['c'] }};font-family:'Geist Mono',monospace">{{ $ei['v'] }}</span>
                     </div>
                     @endforeach
                 </div>
@@ -1387,12 +1346,7 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
             </div>
         </div>
 
-        {{-- Mini stats --}}
-        <div style="display:grid;grid-template-columns:repeat(3,90px);gap:10px;flex-shrink:0">
-            <div class="cp-stat-mini"><b>{{ $totalUsers }}</b><span>Pengguna</span></div>
-            <div class="cp-stat-mini"><b>{{ $totalGuruAktif }}</b><span>Guru Aktif</span></div>
-            <div class="cp-stat-mini"><b>{{ $totalPresensi }}</b><span>Scan Hari Ini</span></div>
-        </div>
+        {{-- Mini stats — dihapus per permintaan --}}
     </div>
 </div>
 
@@ -1542,7 +1496,6 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
                 @foreach([
                     ['l'=>'ID Pengguna',    'v'=>'#'.$devUser->id,                                              'mono'=>true],
                     ['l'=>'Tanggal Daftar', 'v'=>$devUser->created_at->locale('id')->isoFormat('D MMMM YYYY'),  'mono'=>false],
-                    ['l'=>'Email Verified', 'v'=>$devUser->email_verified_at ? '✓ Terverifikasi' : '✗ Belum',  'mono'=>true],
                     ['l'=>'Status',         'v'=>$devUser->is_active ? 'Aktif' : 'Nonaktif',                    'mono'=>true],
                 ] as $ai)
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.04)">
