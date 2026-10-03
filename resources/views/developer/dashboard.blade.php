@@ -133,7 +133,7 @@
 {{-- ════════════════════════════════════════
      BARIS 1: Greeting (kiri) + Banner (kanan)
      ════════════════════════════════════════ --}}
-<div style="display:grid;grid-template-columns:1fr 1.6fr;gap:20px;margin-bottom:20px;align-items:stretch">
+<div style="display:grid;grid-template-columns:1fr 1.6fr;gap:20px;margin-bottom:20px;align-items:stretch" class="dash-hero-grid">
 
     {{-- Greeting Card --}}
     <div style="position:relative;overflow:hidden;border-radius:18px;background:linear-gradient(135deg,rgba(9,13,28,.95) 0%,rgba(15,20,40,.95) 100%);border:1px solid rgba(99,102,241,.2);padding:28px 28px 24px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 4px 24px rgba(99,102,241,.08)">
@@ -195,7 +195,7 @@
             'border'=>($stats['pending_leaves']??0)>0?'rgba(251,191,36,.18)':'rgba(52,211,153,.18)'],
     ];
 @endphp
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px" class="dash-stat-grid">
     @foreach($statCards as $sc)
     <div style="position:relative;overflow:hidden;border-radius:14px;background:{{ $sc['bg'] }};border:1px solid {{ $sc['border'] }};padding:18px 20px;transition:transform .2s,box-shadow .2s;cursor:default"
          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 28px rgba(0,0,0,.25)'"
@@ -216,9 +216,7 @@
 {{-- ════════════════════════════════════════
      BARIS 3: Sistem Info (kiri) + Aksi Cepat (kanan)
      ════════════════════════════════════════ --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
-
-    {{-- Informasi Sistem --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px" class="dash-info-grid">
     <div class="card">
         <div class="card-head">
             <h3><i data-lucide="activity" style="width:17px;height:17px;color:#34d399"></i> Informasi Sistem</h3>
@@ -262,7 +260,7 @@
 {{-- ════════════════════════════════════════
      BARIS 4: Chart (kiri lebar) + Server Info (kanan)
      ════════════════════════════════════════ --}}
-<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px">
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px" class="dash-chart-grid">
 
     {{-- Chart Bar Aktivitas 7 Hari --}}
     <div class="card" style="padding:20px 22px 16px;display:flex;flex-direction:column">
@@ -322,7 +320,7 @@
 {{-- ════════════════════════════════════════
      BARIS 5: Disk Usage bar (kiri) + Runtime Info (kanan)
      ════════════════════════════════════════ --}}
-<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px">
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px" class="dash-chart-grid">
 
     {{-- Disk Usage — bar progress premium --}}
     <div class="card" style="padding:22px 24px">
@@ -587,7 +585,7 @@
         </h3>
         <span class="live"><i></i> All Systems Operational</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px" class="dash-health-grid">
         @php
             $healthItems = [
                 ['label'=>'Database','ok'=>true,              'icon'=>'database',  'detail'=>$stats['db_driver']??'mysql'],
@@ -1632,7 +1630,7 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
 @endif
 
 {{-- ── 2-col layout: Kiri (form) | Kanan (sesi) ── --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="cp-form-grid">
 
     {{-- ════ Kolom Kiri: Identitas + Password ════ --}}
     <div style="display:flex;flex-direction:column;gap:18px">

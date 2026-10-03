@@ -1913,6 +1913,12 @@ textarea.input { resize: vertical; min-height: 85px; }
 
   /* Grid collapse */
   .stats { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .dash-stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .dash-hero-grid { grid-template-columns: 1fr !important; }
+  .dash-info-grid { grid-template-columns: 1fr !important; }
+  .dash-chart-grid { grid-template-columns: 1fr !important; }
+  .dash-health-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .cp-form-grid { grid-template-columns: 1fr !important; }
   .info { grid-template-columns: 1fr; }
   .info > div:nth-child(odd) { border-right: 0; }
   .info > div:nth-last-child(2) { border-bottom: 1px solid var(--line-subtle); }
@@ -2185,7 +2191,7 @@ textarea.input { resize: vertical; min-height: 85px; }
                 <img src="{{ $topPhoto }}" alt="{{ $topUser->name }}"
                      style="width:32px;height:32px;border-radius:50%;object-fit:cover;
                             border:2px solid rgba(99,102,241,.5);flex-shrink:0">
-                <div style="text-align:left;min-width:0">
+                <div style="text-align:left;min-width:0" class="dev-name-top">
                     <p style="margin:0;font-size:.82rem;font-weight:650;color:var(--txt-head);
                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">
                         {{ $topUser->name }}
