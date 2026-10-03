@@ -240,29 +240,19 @@
             <h3><i data-lucide="zap" style="width:17px;height:17px;color:#818cf8"></i> Aksi Cepat</h3>
         </div>
         <div class="actions">
-            <a href="{{ route('developer.clear-cache',$secret) }}" onclick="return confirmAction(this,'🧹 Bersihkan semua cache?')" class="action">
-                <span class="ico t-sky"><i data-lucide="trash-2" style="width:16px;height:16px"></i></span>
-                <div><b>Sapu Jagat</b><small>Hapus cache config, route &amp; view</small></div>
-                <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
-            </a>
-            <a href="{{ url('/fix-session?secret='.$secret) }}" onclick="return confirmAction(this,'🔧 Perbaiki session dir?')" class="action">
+            <a href="{{ url('/fix-session?secret='.$secret) }}" onclick="return confirmAction(this,'🔧 Perbaiki session dir & hapus semua cache?')" class="action">
                 <span class="ico t-warn"><i data-lucide="wrench" style="width:16px;height:16px"></i></span>
                 <div><b>Fix Session</b><small>Perbaiki permissions &amp; clear cache</small></div>
                 <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
             </a>
-            <a href="{{ route('developer.optimize',$secret) }}" onclick="return confirmAction(this,'⚡ Rebuild semua cache?')" class="action">
+            <a href="{{ route('developer.optimize',$secret) }}" onclick="return confirmAction(this,'⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
                 <span class="ico" style="background:rgba(250,204,21,.12);color:#facc15;border:1px solid rgba(250,204,21,.3)"><i data-lucide="zap" style="width:16px;height:16px"></i></span>
                 <div><b>Optimize</b><small>Bangun ulang cache config, route &amp; view</small></div>
                 <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
             </a>
-            <a href="{{ route('developer.migrate',$secret) }}" onclick="return confirmAction(this,'🗄️ Jalankan migration?')" class="action">
+            <a href="{{ route('developer.migrate',$secret) }}" onclick="return confirmAction(this,'🗄️ Jalankan database migration?\nPastikan backup sudah ada!')" class="action">
                 <span class="ico t-ok"><i data-lucide="database" style="width:16px;height:16px"></i></span>
                 <div><b>Run Migration</b><small>artisan migrate --force</small></div>
-                <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
-            </a>
-            <a href="{{ route('developer.run-seeder',$secret) }}" onclick="return confirmAction(this,'🌱 Jalankan seeder?')" class="action">
-                <span class="ico t-violet"><i data-lucide="sprout" style="width:16px;height:16px"></i></span>
-                <div><b>Run Seeder</b><small>db:seed --force</small></div>
                 <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
             </a>
         </div>
@@ -275,7 +265,7 @@
 <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px">
 
     {{-- Chart Bar Aktivitas 7 Hari --}}
-    <div class="card" style="padding:20px 22px">
+    <div class="card" style="padding:20px 22px 16px;display:flex;flex-direction:column">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
             <span style="font-size:.85rem;font-weight:700;color:var(--txt-head);display:flex;align-items:center;gap:7px">
                 <i data-lucide="bar-chart-2" style="width:15px;height:15px;color:var(--accent)"></i>
@@ -283,7 +273,7 @@
             </span>
             <span class="live" style="font-size:.7rem"><i></i> Live</span>
         </div>
-        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px">
             <span style="font-size:1.9rem;font-weight:800;color:#f8fafc;letter-spacing:-.04em;line-height:1">{{ $latestVal }}</span>
             <span style="font-size:.7rem;font-weight:600;padding:2px 9px;border-radius:20px;font-family:'Geist Mono',monospace;
                 {{ $changeDiff>=0?'background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.22)':'background:rgba(244,63,94,.1);color:#f87171;border:1px solid rgba(244,63,94,.22)' }}">
@@ -291,9 +281,13 @@
             </span>
             <span style="font-size:.68rem;color:var(--txt-dim);margin-left:auto;font-family:'Geist Mono',monospace">scan / hari</span>
         </div>
-        <canvas id="dash-activity-chart" style="width:100%;height:140px"
-                data-labels='@json($activityLabels)'
-                data-values='@json($activityData)'></canvas>
+        {{-- Canvas wrapper flex-grow agar chart isi sisa ruang card --}}
+        <div style="flex:1;min-height:160px;position:relative">
+            <canvas id="dash-activity-chart"
+                    style="position:absolute;inset:0;width:100%!important;height:100%!important"
+                    data-labels='@json($activityLabels)'
+                    data-values='@json($activityData)'></canvas>
+        </div>
     </div>
 
     {{-- Server Info --}}
@@ -358,7 +352,7 @@
             <span style="font-size:.6rem;color:rgba(100,116,139,.45);font-family:'Geist Mono',monospace">{{ $lbl }}</span>
             @endforeach
         </div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px">
             @foreach([['label'=>'Config','ok'=>$stats['cache_config']==='CACHED'],['label'=>'Routes','ok'=>$stats['cache_route']==='CACHED'],['label'=>'Views','ok'=>$stats['cache_view']==='CACHED']] as $c)
             <span style="display:inline-flex;align-items:center;gap:5px;font-size:.69rem;font-weight:600;padding:5px 12px;border-radius:20px;font-family:'Geist Mono',monospace;background:{{ $c['ok']?'rgba(16,185,129,.08)':'rgba(244,63,94,.08)' }};color:{{ $c['ok']?'#34d399':'#f87171' }};border:1px solid {{ $c['ok']?'rgba(16,185,129,.2)':'rgba(244,63,94,.2)' }}">
                 @if($c['ok'])<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>@else<svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg>@endif
@@ -366,6 +360,197 @@
             </span>
             @endforeach
         </div>
+
+        {{-- ── Ping Monitor dengan Wave Animation Premium ── --}}
+        <div style="border-top:1px solid rgba(255,255,255,.05);padding-top:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <span style="font-size:.68rem;font-weight:700;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.1em;font-family:'Geist Mono',monospace;display:flex;align-items:center;gap:6px">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#818cf8"><path d="M2 12h3l3-9 4 18 3-12 2 3h5"/></svg>
+                    Network Ping
+                </span>
+                <span id="ping-value" style="font-size:.72rem;font-weight:700;color:#34d399;font-family:'Geist Mono',monospace;transition:color .3s">— ms</span>
+            </div>
+
+            {{-- Wave SVG Container --}}
+            <div style="position:relative;height:48px;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04)">
+                <svg id="ping-wave-svg" viewBox="0 0 300 48" preserveAspectRatio="none"
+                     style="position:absolute;inset:0;width:100%;height:100%">
+                    <defs>
+                        <linearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#6366f1" stop-opacity="0.5"/>
+                            <stop offset="100%" stop-color="#6366f1" stop-opacity="0.02"/>
+                        </linearGradient>
+                        <linearGradient id="waveGradGood" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#10b981" stop-opacity="0.45"/>
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0.02"/>
+                        </linearGradient>
+                        <linearGradient id="waveGradWarn" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.45"/>
+                            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.02"/>
+                        </linearGradient>
+                        <linearGradient id="waveGradBad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.45"/>
+                            <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.02"/>
+                        </linearGradient>
+                        <filter id="pingGlow">
+                            <feGaussianBlur stdDeviation="1.2" result="blur"/>
+                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    {{-- Area fill --}}
+                    <path id="ping-area" d="M0,48 L0,38 L300,38 L300,48 Z" fill="url(#waveGradGood)"/>
+                    {{-- Line --}}
+                    <path id="ping-line" d="M0,38 L300,38" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#pingGlow)"/>
+                    {{-- Moving dot --}}
+                    <circle id="ping-dot" cx="300" cy="38" r="3" fill="#10b981" filter="url(#pingGlow)"/>
+                    {{-- Glow ring --}}
+                    <circle id="ping-ring" cx="300" cy="38" r="3" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0"/>
+                </svg>
+
+                {{-- Gridlines --}}
+                <svg viewBox="0 0 300 48" preserveAspectRatio="none"
+                     style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.3">
+                    @for($gi=1;$gi<=3;$gi++)
+                    <line x1="0" y1="{{ $gi*12 }}" x2="300" y2="{{ $gi*12 }}" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
+                    @endfor
+                    @for($gi=1;$gi<=5;$gi++)
+                    <line x1="{{ $gi*50 }}" y1="0" x2="{{ $gi*50 }}" y2="48" stroke="rgba(255,255,255,.06)" stroke-width=".5" stroke-dasharray="2,3"/>
+                    @endfor
+                </svg>
+            </div>
+
+            {{-- Ping stats row --}}
+            <div style="display:flex;gap:0;margin-top:8px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.05)">
+                @foreach([['id'=>'ping-min','label'=>'MIN'],['id'=>'ping-avg','label'=>'AVG'],['id'=>'ping-max','label'=>'MAX']] as $ps)
+                <div style="flex:1;padding:6px 0;text-align:center;background:rgba(255,255,255,.02);{{ !$loop->last?'border-right:1px solid rgba(255,255,255,.05)':'' }}">
+                    <p style="margin:0;font-size:.58rem;color:var(--txt-dim);text-transform:uppercase;letter-spacing:.1em;font-family:'Geist Mono',monospace">{{ $ps['label'] }}</p>
+                    <p id="{{ $ps['id'] }}" style="margin:0;font-size:.75rem;font-weight:700;color:var(--txt-head);font-family:'Geist Mono',monospace">—</p>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        <style>
+        @keyframes pingRingExpand {
+            0%  { r: 3; stroke-opacity: 0.8; }
+            100%{ r: 10; stroke-opacity: 0; }
+        }
+        </style>
+        <script>
+        (function() {
+            var POINTS   = 30;          /* titik di wave */
+            var INTERVAL = 1500;        /* ms antar ping */
+            var history  = Array(POINTS).fill(null);
+            var minPing  = Infinity, maxPing = 0, sumPing = 0, cntPing = 0;
+
+            var linePath  = document.getElementById('ping-line');
+            var areaPath  = document.getElementById('ping-area');
+            var dot       = document.getElementById('ping-dot');
+            var ring      = document.getElementById('ping-ring');
+            var valEl     = document.getElementById('ping-value');
+            var minEl     = document.getElementById('ping-min');
+            var avgEl     = document.getElementById('ping-avg');
+            var maxEl     = document.getElementById('ping-max');
+
+            function getColor(ms) {
+                if (ms === null) return '#6366f1';
+                if (ms < 80)    return '#10b981';
+                if (ms < 200)   return '#f59e0b';
+                return '#f43f5e';
+            }
+            function getGradId(ms) {
+                if (ms === null) return 'url(#waveGrad)';
+                if (ms < 80)    return 'url(#waveGradGood)';
+                if (ms < 200)   return 'url(#waveGradWarn)';
+                return 'url(#waveGradBad)';
+            }
+
+            function buildPath(pts) {
+                /* Normalize ke tinggi SVG (48px), nilai lebih tinggi = spike ke atas */
+                var valid = pts.filter(function(v) { return v !== null; });
+                var peak  = valid.length ? Math.max.apply(null, valid) : 100;
+                peak      = Math.max(peak, 50);           /* minimum range */
+                var W = 300, H = 48, PAD_TOP = 6, BASE = H;
+
+                var coords = pts.map(function(v, i) {
+                    var x = (i / (pts.length - 1)) * W;
+                    var y = v === null ? BASE - 4 : BASE - PAD_TOP - ((v / peak) * (H - PAD_TOP - 6));
+                    return [x, y];
+                });
+
+                /* Smooth catmull-rom curve */
+                function smooth(p0, p1, p2, p3, t) {
+                    return 0.5 * ((2*p1[1]) + (-p0[1]+p2[1])*t + (2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t*t + (-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t*t*t);
+                }
+                var d = 'M' + coords[0][0] + ',' + coords[0][1];
+                for (var i = 1; i < coords.length; i++) {
+                    var p0 = coords[Math.max(i-2,0)];
+                    var p1 = coords[i-1];
+                    var p2 = coords[i];
+                    var p3 = coords[Math.min(i+1,coords.length-1)];
+                    var cp1x = p1[0] + (p2[0]-p0[0])/6;
+                    var cp1y = p1[1] + (p2[1]-p0[1])/6;
+                    var cp2x = p2[0] - (p3[0]-p1[0])/6;
+                    var cp2y = p2[1] - (p3[1]-p1[1])/6;
+                    d += ' C'+cp1x+','+cp1y+' '+cp2x+','+cp2y+' '+p2[0]+','+p2[1];
+                }
+                var last = coords[coords.length-1];
+                var area = d + ' L'+last[0]+','+BASE+' L0,'+BASE+' Z';
+                return { line: d, area: area, last: last };
+            }
+
+            function triggerRing(x, y, color) {
+                ring.setAttribute('cx', x);
+                ring.setAttribute('cy', y);
+                ring.setAttribute('stroke', color);
+                ring.style.animation = 'none';
+                ring.getBoundingClientRect(); /* reflow */
+                ring.style.animation = 'pingRingExpand .7s cubic-bezier(.2,0,.8,1) forwards';
+            }
+
+            function doPing() {
+                var t0 = performance.now();
+                fetch(window.location.href, { method: 'HEAD', cache: 'no-store' })
+                    .then(function() {
+                        var ms = Math.round(performance.now() - t0);
+                        history.shift(); history.push(ms);
+
+                        /* stats */
+                        cntPing++; sumPing += ms;
+                        if (ms < minPing) minPing = ms;
+                        if (ms > maxPing) maxPing = ms;
+
+                        var color = getColor(ms);
+                        var gradId = getGradId(ms);
+
+                        var r = buildPath(history);
+                        linePath.setAttribute('d', r.line);
+                        areaPath.setAttribute('d', r.area);
+                        areaPath.setAttribute('fill', gradId);
+                        linePath.setAttribute('stroke', color);
+                        dot.setAttribute('cx', r.last[0]);
+                        dot.setAttribute('cy', r.last[1]);
+                        dot.setAttribute('fill', color);
+                        triggerRing(r.last[0], r.last[1], color);
+
+                        valEl.textContent = ms + ' ms';
+                        valEl.style.color = color;
+                        minEl.textContent = minPing + ' ms';
+                        avgEl.textContent = Math.round(sumPing/cntPing) + ' ms';
+                        maxEl.textContent = maxPing + ' ms';
+                    })
+                    .catch(function() {
+                        history.shift(); history.push(null);
+                        valEl.textContent = 'timeout';
+                        valEl.style.color = '#f43f5e';
+                    });
+            }
+
+            /* mulai setelah page load */
+            setTimeout(doPing, 400);
+            setInterval(doPing, INTERVAL);
+        })();
+        </script>
     </div>
 
     {{-- Runtime Info --}}
@@ -430,10 +615,11 @@
 </div>
 
 <style>
-#dash-activity-chart { max-height: 150px; }
 @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(300%)} }
 @keyframes countUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 .num[data-count] { animation: countUp .5s var(--ease) both; }
+/* chart wrapper min-height agar tidak collapse */
+#dash-activity-chart { display:block; }
 </style>
 
 <script>
