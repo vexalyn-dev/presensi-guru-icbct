@@ -1591,6 +1591,25 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
 
         {{-- Mini stats — dihapus per permintaan --}}
     </div>
+
+    {{-- Settings shortcut — tampil di mobile (akses cepat ke tab settings) --}}
+    <div style="position:relative;z-index:1;margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <p style="margin:0;font-size:.75rem;color:var(--txt-dim);font-family:'Geist Mono',monospace;display:flex;align-items:center;gap:6px">
+            <i data-lucide="info" style="width:13px;height:13px;color:var(--accent)"></i>
+            Kelola tampilan, tema & preferensi panel
+        </p>
+        <button type="button" onclick="switchTab('settings')"
+                style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;
+                       background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);
+                       border-radius:10px;color:#a5b4fc;font:inherit;font-size:.82rem;font-weight:650;
+                       cursor:pointer;transition:all .2s ease;letter-spacing:.01em"
+                onmouseover="this.style.background='rgba(99,102,241,.18)';this.style.borderColor='rgba(99,102,241,.5)'"
+                onmouseout="this.style.background='rgba(99,102,241,.1)';this.style.borderColor='rgba(99,102,241,.3)'">
+            <i data-lucide="settings-2" style="width:15px;height:15px"></i>
+            Settings &amp; Tema
+            <i data-lucide="arrow-right" style="width:13px;height:13px;opacity:.6"></i>
+        </button>
+    </div>
 </div>
 
 {{-- Flash messages --}}

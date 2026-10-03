@@ -475,13 +475,16 @@ class DeveloperController extends Controller
     {
         if (!$this->verifySecret($secret)) abort(404);
 
-        Artisan::call('config:clear');
-        Artisan::call('route:clear');
+        // Simpan session sebelum clear, urutan: view & route dulu, config terakhir
+        // supaya session terenkripsi tidak putus di tengah jalan
         Artisan::call('view:clear');
-        Artisan::call('cache:clear');
+        Artisan::call('route:clear');
         Artisan::call('event:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');  // config paling akhir
 
-        return back()->with('success', '🧹 Semua cache berhasil dibersihkan (config, route, view, app cache).');
+        return redirect()->route('developer.dashboard', $secret)
+            ->with('success', '🧹 Semua cache berhasil dibersihkan (config, route, view, app cache).');
     }
 
     /**
@@ -510,12 +513,14 @@ class DeveloperController extends Controller
     {
         if (!$this->verifySecret($secret)) abort(404);
 
-        Artisan::call('optimize');
+        // config:cache duluan agar APP_KEY terbaca sebelum route/view di-cache
         Artisan::call('config:cache');
+        Artisan::call('optimize');
         Artisan::call('route:cache');
         Artisan::call('view:cache');
 
-        return back()->with('success', '⚡ Optimasi selesai — config, route, view sudah di-cache.');
+        return redirect()->route('developer.dashboard', $secret)
+            ->with('success', '⚡ Optimasi selesai — config, route, view sudah di-cache.');
     }
 
     /**

@@ -1805,6 +1805,11 @@ textarea.input { resize: vertical; min-height: 85px; }
 }
 ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
+/* ─── Bottom Nav Mobile ─── */
+.bottom-nav {
+  display: none;
+}
+
 /* ─── Responsive Media Queries ─── */
 @media(max-width: 1200px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
@@ -1822,22 +1827,120 @@ textarea.input { resize: vertical; min-height: 85px; }
   .content { padding: 20px 18px 36px; }
   .clock { display: none; }
 }
-@media(max-width: 640px) {
-  .stats { grid-template-columns: 1fr; }
+@media(max-width: 768px) {
+  /* Sidebar: swipe-drawer tetap ada tapi burger juga tetap */
+  .side { transform: translateX(-101%); }
+  .burger { display: inline-grid; }
+
+  /* Topbar: sembunyikan env badge & profile name, cukup foto saja */
+  .env span { display: none; }
+  .env { padding: 4px 8px; gap: 4px; }
+  .dev-name-top { display: none !important; }
+
+  /* Content: padding lebih kecil + ruang bottom nav */
+  .content { padding: 16px 14px 90px; }
+
+  /* Bottom Nav aktif */
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    height: 68px;
+    align-items: stretch;
+    background: rgba(9, 13, 22, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(99, 102, 241, 0.15);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45), 0 -1px 0 rgba(99,102,241,0.08);
+    padding: 0 4px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .bn-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    color: rgba(148, 163, 184, 0.6);
+    padding: 8px 4px 6px;
+    border-radius: 12px;
+    transition: color 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bn-item svg, .bn-item i { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .bn-item span {
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .bn-item.active {
+    color: #fff;
+  }
+  .bn-item.active svg, .bn-item.active i {
+    color: var(--accent);
+    transform: translateY(-2px) scale(1.12);
+    filter: drop-shadow(0 0 6px var(--accent-glow));
+  }
+  .bn-item.active span { color: var(--accent); }
+  /* Active indicator pill */
+  .bn-item.active::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    border-radius: 0 0 4px 4px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    top: 0;
+  }
+  .bn-item:active { transform: scale(0.9); }
+
+  /* Grid collapse */
+  .stats { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
   .info { grid-template-columns: 1fr; }
   .info > div:nth-child(odd) { border-right: 0; }
   .info > div:nth-last-child(2) { border-bottom: 1px solid var(--line-subtle); }
-  .tl-list { padding-left: 42px; }
-  .tl-dot { left: -42px; }
+  .tl-list { padding-left: 40px; }
+  .tl-dot { left: -40px; }
   .tl-top { flex-direction: column; gap: 8px; }
   .dash-top { flex-direction: column; }
   .dash-actions { width: 100%; }
-  .rel-stats { grid-template-columns: 1fr; }
+  .rel-stats { grid-template-columns: repeat(2, 1fr); }
+  .rel-grid { grid-template-columns: 1fr; }
+  .si-row { grid-template-columns: 1fr 1fr; }
 }
+
 @media(max-width: 480px) {
-  .env span { display: none; }
-  .env { padding: 4px 8px; }
+  .stats { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .rel-stats { grid-template-columns: 1fr; }
+  .content { padding: 12px 12px 90px; }
+  /* Topbar: hide topbar profile name & env on tiny screens */
+  .top { padding: 0 12px; gap: 8px; }
 }
+
+@media(max-width: 380px) {
+  .stats { grid-template-columns: 1fr !important; }
+  .bn-item span { display: none; }
+  .bottom-nav { height: 58px; }
+  .content { padding-bottom: 72px; }
+}
+
 @media(prefers-reduced-motion: reduce) {
   .dp *, .dp *::before, .dp *::after {
     animation: none !important;
@@ -2123,6 +2226,59 @@ textarea.input { resize: vertical; min-height: 85px; }
     </div>
 </main>
 
+{{-- ══ MOBILE BOTTOM NAV ══ --}}
+<nav class="bottom-nav" id="bottom-nav" aria-label="Navigasi utama mobile">
+
+    {{-- Dashboard --}}
+    <button type="button" class="bn-item active" id="bn-dashboard" onclick="switchTab('dashboard')" aria-label="Dashboard">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span>Dashboard</span>
+    </button>
+
+    {{-- Android --}}
+    <button type="button" class="bn-item" id="bn-apk" onclick="switchTab('apk')" aria-label="Android Manager">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 16.5a7 7 0 0 1 14 0"/><circle cx="9" cy="16" r=".5" fill="currentColor"/><circle cx="15" cy="16" r=".5" fill="currentColor"/>
+            <path d="M6.5 8.5 5 6m12.5 2.5L19 6"/><rect x="5" y="8" width="14" height="10" rx="2"/>
+        </svg>
+        <span>Android</span>
+    </button>
+
+    {{-- iOS --}}
+    <button type="button" class="bn-item" id="bn-ios" onclick="switchTab('ios')" aria-label="iOS Manager">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+            <path d="M9 12c0-1.66 1.34-3 3-3 .88 0 1.67.38 2.22.98"/>
+            <path d="M15 12c0 1.66-1.34 3-3 3-.88 0-1.67-.38-2.22-.98"/>
+            <line x1="12" y1="6" x2="12" y2="6.01"/>
+        </svg>
+        <span>iOS</span>
+    </button>
+
+    {{-- System --}}
+    <button type="button" class="bn-item" id="bn-system" onclick="switchTab('system')" aria-label="System State">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+            <rect x="9" y="9" width="6" height="6"/>
+            <path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>
+        </svg>
+        <span>System</span>
+    </button>
+
+    {{-- Releases --}}
+    <button type="button" class="bn-item" id="bn-releases" onclick="switchTab('releases')" aria-label="Releases">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+            <path d="M6 9v6M9 6h9"/><path d="M15 18h-9"/>
+        </svg>
+        <span>Releases</span>
+    </button>
+
+</nav>
+
 <script>
     const tabs = ['dashboard', 'apk', 'ios', 'system', 'releases', 'settings', 'profile'];
     const titles = {
@@ -2165,6 +2321,13 @@ textarea.input { resize: vertical; min-height: 85px; }
         if (titleEl) {
             titleEl.innerHTML = `<i data-lucide="${iconName}" style="width:18px;height:18px;color:var(--accent);vertical-align:middle;margin-right:6px"></i> <span>${titles[tabId]}</span>`;
         }
+
+        // Sync bottom nav active state
+        ['dashboard','apk','ios','system','releases'].forEach(t => {
+            document.getElementById('bn-' + t)?.classList.remove('active');
+        });
+        const bnEl = document.getElementById('bn-' + tabId);
+        if (bnEl) bnEl.classList.add('active');
 
         try { history.replaceState(null, '', '#' + tabId); sessionStorage.setItem('dev_tab', tabId); } catch (e) {}
         toggleSide(false);
