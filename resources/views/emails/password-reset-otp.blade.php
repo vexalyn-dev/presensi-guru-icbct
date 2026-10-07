@@ -96,14 +96,15 @@ body {
 .footer-text { font-size: 12px; color: #94A3B8; line-height: 1.6; }
 @media only screen and (max-width: 600px) {
     .email-container { border-radius: 16px; }
-    .email-header { padding: 28px 24px 24px; }
-    .header-logo-box { width: 68px; height: 68px; }
-    .email-body { padding: 28px 24px 24px; }
-    .greeting { font-size: 20px; }
+    .email-header { padding: 24px 20px 20px; }
+    .header-logo-box { width: 62px; height: 62px; border-radius: 14px; }
+    .email-body { padding: 24px 20px 20px; }
+    .greeting { font-size: 18px; }
     .body-text { font-size: 14px; }
-    .otp-code { font-size: 34px; letter-spacing: 7px; }
-    .otp-box { padding: 18px 28px; }
-    .email-footer { padding: 16px 24px; }
+    .otp-code { font-size: 32px; letter-spacing: 6px; }
+    .otp-box { padding: 18px 20px; }
+    .email-footer { padding: 14px 20px; }
+    .info-box { font-size: 12px; padding: 12px 14px; }
 }
 </style>
 </head>
@@ -171,7 +172,11 @@ body {
         <div class="email-footer">
             <p class="footer-text">
                 © {{ date('Y') }} <strong style="color:#475569;">{{ $appName }}</strong> &nbsp;·&nbsp; Sistem Presensi Digital<br>
-                <span style="font-size:11px;color:#CBD5E1;">Email ini dikirim otomatis, mohon jangan dibalas.</span>
+                <span style="font-size:11px;color:#CBD5E1;">Developed By <a href="https://vexalyndev.my.id" target="_blank" style="color:#CBD5E1;text-decoration:none;">Vexalyn Dev</a></span>
+            </p>
+            {{-- Unique token per email — mencegah Gmail trim konten sebagai duplikat --}}
+            <p style="font-size:0;line-height:0;color:transparent;opacity:0;max-height:0;overflow:hidden;mso-hide:all;">
+                ref:{{ substr(md5($otp . now()->timestamp), 0, 12) }}
             </p>
         </div>
 

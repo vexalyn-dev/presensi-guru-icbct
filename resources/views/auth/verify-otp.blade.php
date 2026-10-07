@@ -205,8 +205,6 @@
         .auth-credit a { color: #94a3b8; text-decoration: none; transition: color 0.2s ease; margin-left: 4px; }
         .auth-credit a:hover { color: #FACC15; }
         .mobile-credit { display: none; }
-
-        /* ════════════════ MOBILE ≤ 768px ════════════════ */
         @media (max-width: 768px) {
             html, body { height: 100%; min-height: 100vh; background: #080F1E; padding: 0; margin: 0; display: block; }
             body { display: flex; flex-direction: column; align-items: stretch; }

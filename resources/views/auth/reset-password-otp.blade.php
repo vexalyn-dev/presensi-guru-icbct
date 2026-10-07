@@ -161,13 +161,35 @@
         input[type="password"]::-ms-reveal,
         input[type="password"]::-ms-clear { display: none !important; width:0; height:0; }
 
+        /* Credit */
+        .auth-credit {
+            text-align: center; padding: 14px 16px 20px;
+            font-size: 11px; font-family: 'Inter', sans-serif; font-weight: 600;
+            color: #94a3b8; text-transform: uppercase; letter-spacing: 0.12em;
+            margin-top: 18px; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-credit a { color: #94a3b8; text-decoration: none; transition: color 0.2s ease; margin-left: 4px; }
+        .auth-credit a:hover { color: #FACC15; }
+        .mobile-credit { display: none; }
+
         /* Mobile */
         @media (max-width: 768px) {
             html, body { height: 100%; background: #080F1E; padding: 0; margin: 0; display: flex; flex-direction: column; }
-            .page-wrap { width: 100%; max-width: 100%; min-height: 100vh; min-height: 100svh; flex-direction: column; border-radius: 0; box-shadow: none; animation: none; }
+            body { align-items: stretch; }
+            .auth-credit { display: none !important; }
+            .mobile-credit {
+                display: flex !important; position: fixed; bottom: 0; left: 0; right: 0;
+                align-items: center; justify-content: center;
+                width: 100%; padding: 10px 16px 20px;
+                font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+                color: #94a3b8; background: #FFFFFF; z-index: 9999;
+            }
+            .mobile-credit a { color: #94a3b8; text-decoration: none; margin-left: 4px; }
+            .page-wrap { width: 100%; max-width: 100%; min-height: 100vh; min-height: 100svh; flex-direction: column; border-radius: 0; box-shadow: none; animation: none; overflow: visible; }
             .left-panel { width: 100%; padding: 52px 28px 48px; border-radius: 0; flex-shrink: 0; }
             .logo-box { width: 100px; height: 100px; border-radius: 26px; }
-            .right-panel { flex: 1; padding: 48px 28px 52px; background: #FFFFFF; border-radius: 32px 32px 0 0; margin-top: -28px; box-shadow: 0 -4px 32px rgba(15,23,42,0.18); z-index: 2; position: relative; }
+            .right-panel { flex: 1; padding: 40px 28px 80px; background: #FFFFFF; border-radius: 32px 32px 0 0; margin-top: -28px; box-shadow: 0 -4px 32px rgba(15,23,42,0.18); z-index: 2; position: relative; }
             .form-title { font-size: 1.75rem; }
             .form-sub { font-size: 0.88rem; margin-bottom: 28px; margin-top: 8px; }
             .input-wrap input { height: 56px; border-radius: 14px; font-size: 15px; padding: 0 52px 0 48px; }
@@ -175,12 +197,12 @@
         }
         @media (max-width: 480px) {
             .left-panel { padding: 44px 24px 40px; }
-            .right-panel { padding: 34px 22px 48px; }
+            .right-panel { padding: 34px 22px 80px; }
             .form-title { font-size: 1.6rem; }
         }
         @media (max-width: 390px) {
             .left-panel { padding: 38px 20px 34px; }
-            .right-panel { padding: 28px 18px 44px; }
+            .right-panel { padding: 28px 18px 80px; }
             .form-title { font-size: 1.45rem; }
             .input-wrap input { height: 52px; }
             .btn-submit { height: 52px; }
@@ -303,6 +325,12 @@
     </div>
 
 </div>
+
+<!-- Credit Desktop -->
+<div class="auth-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+
+<!-- Credit Mobile -->
+<div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
 
 <script>
     function togglePassword(id, btn) {

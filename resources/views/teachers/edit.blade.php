@@ -403,7 +403,53 @@
             </div>
         </form>
 
-        {{-- Premium Delete Modal implementation --}}
+        {{-- ── Modal Hapus Foto Profil ── --}}
+        <div id="modal-hapus-foto"
+             style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(10,15,30,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;"
+             onclick="if(event.target===this) closeHapusFotoModal()">
+            <div style="background:#fff;border-radius:20px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 32px 64px rgba(15,23,42,0.28);animation:hapusFotoIn 0.25s cubic-bezier(0.22,1,0.36,1);">
+                {{-- Header --}}
+                <div style="background:linear-gradient(135deg,#FEF2F2,#FFF5F5);border-bottom:1px solid #FECACA;padding:20px 24px;display:flex;align-items:center;gap:12px;">
+                    <div style="width:40px;height:40px;background:#FEE2E2;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="20" height="20" fill="none" stroke="#DC2626" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p style="font-size:0.95rem;font-weight:700;color:#0F172A;margin:0;">Hapus Foto Profil</p>
+                        <p style="font-size:0.75rem;color:#94A3B8;margin:0;">Tindakan ini tidak dapat dibatalkan</p>
+                    </div>
+                </div>
+                {{-- Body --}}
+                <div style="padding:20px 24px;">
+                    <p style="font-size:0.88rem;color:#475569;line-height:1.6;margin:0;">
+                        Foto profil akan dihapus dan kembali ke foto <strong style="color:#0F172A;">default</strong>. Lanjutkan?
+                    </p>
+                </div>
+                {{-- Footer --}}
+                <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
+                    <button type="button" onclick="closeHapusFotoModal()"
+                        style="padding:10px 20px;background:#F1F5F9;border:1.5px solid #E2E8F0;border-radius:10px;font-size:0.85rem;font-weight:600;color:#475569;cursor:pointer;transition:all 0.15s;"
+                        onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">
+                        Batal
+                    </button>
+                    <button type="button" onclick="confirmHapusFoto()"
+                        style="padding:10px 20px;background:#DC2626;border:none;border-radius:10px;font-size:0.85rem;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;"
+                        onmouseover="this.style.background='#B91C1C'" onmouseout="this.style.background='#DC2626'">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Ya, Hapus Foto
+                    </button>
+                </div>
+            </div>
+        </div>
+        <style>
+            @keyframes hapusFotoIn {
+                from { opacity:0; transform:scale(0.94) translateY(12px); }
+                to   { opacity:1; transform:scale(1) translateY(0); }
+            }
+        </style>
         <div x-show="deleteModalOpen" x-cloak @keydown.escape.window="closeDeleteModal()"
             class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0"
             :class="!deleteModalOpen && 'pointer-events-none'" role="dialog" aria-modal="true">
@@ -612,7 +658,17 @@
 
             // ─── Hapus Foto Profil ──────────────────────────────
             function deleteTeacherPhoto() {
-                if (!confirm('Hapus foto profil? Foto akan kembali ke default.')) return;
+                var modal = document.getElementById('modal-hapus-foto');
+                if (modal) modal.style.display = 'flex';
+            }
+
+            function closeHapusFotoModal() {
+                var modal = document.getElementById('modal-hapus-foto');
+                if (modal) modal.style.display = 'none';
+            }
+
+            function confirmHapusFoto() {
+                closeHapusFotoModal();
 
                 // Tambahkan hidden input flag delete
                 var existing = document.getElementById('delete_photo_flag');

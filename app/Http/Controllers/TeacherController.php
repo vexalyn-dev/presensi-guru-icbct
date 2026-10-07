@@ -245,7 +245,7 @@ class TeacherController extends Controller
             'subjects.*' => 'exists:subjects,id',
             'is_active' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'delete_photo' => 'nullable|in:0,1',
+            'delete_photo' => 'nullable|string',
         ]);
 
         $updateData = [
@@ -276,11 +276,15 @@ class TeacherController extends Controller
                 'exists' => Storage::disk('public')->exists($photoPath),
             ]);
         } elseif ($request->input('delete_photo') == '1') {
-            // Hapus foto profil
+            // Hapus foto profil — null-kan kedua kolom
             if ($teacher->photo) {
                 Storage::disk('public')->delete($teacher->photo);
             }
-            $updateData['photo'] = null;
+            if ($teacher->photo_path) {
+                Storage::disk('public')->delete($teacher->photo_path);
+            }
+            $updateData['photo']      = null;
+            $updateData['photo_path'] = null;
         }
 
         $teacher->update($updateData);
@@ -290,13 +294,21 @@ class TeacherController extends Controller
 
         // Update teacher record (sync major_specialty with first subject)
         if ($teacher->teacher) {
-            $teacher->teacher->update([
+            $teacherUpdate = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
                 'address' => $validated['address'] ?? null,
                 'is_active' => $request->has('is_active') ? (bool)$request->is_active : $teacher->is_active,
-            ]);
+            ];
+            // Null-kan photo di Teacher record juga saat hapus foto
+            if ($request->input('delete_photo') == '1') {
+                if ($teacher->teacher->photo) Storage::disk('public')->delete($teacher->teacher->photo);
+                if ($teacher->teacher->photo_path) Storage::disk('public')->delete($teacher->teacher->photo_path);
+                $teacherUpdate['photo']      = null;
+                $teacherUpdate['photo_path'] = null;
+            }
+            $teacher->teacher->update($teacherUpdate);
 
             // Sync subjects via pivot table
             if (!empty($validated['subjects'])) {
