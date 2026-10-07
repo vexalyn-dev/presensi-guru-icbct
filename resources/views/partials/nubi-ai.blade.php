@@ -91,7 +91,7 @@
                         <div class="w-7 h-7 rounded-full bg-navy-800 flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-navy-700">
                             <img :src="userPhoto" :alt="userName"
                                  class="w-7 h-7 object-cover"
-                                 @error="$el.src='https://ui-avatars.com/api/?name='+userName+'&background=0F172A&color=fff&size=32'">
+                                 x-on:error="$el.src='https://ui-avatars.com/api/?name='+userName+'&background=0F172A&color=fff&size=32'">
                         </div>
                     </template>
                 </div>
