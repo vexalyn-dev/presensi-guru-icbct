@@ -222,145 +222,59 @@
                                     </div>
                                 </div>
 
-                                <!-- Mata Pelajaran Multi-Select -->
+                                <!-- Mata Pelajaran Multi-Select (Pure JS) -->
                                 @php
                                     $subjectOptions = $subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray();
                                 @endphp
-                                <div class="md:col-span-2" x-data="{
-                                    open: false,
-                                    search: '',
-                                    options: {{ Js::from($subjectOptions) }},
-                                    selected: {{ Js::from($teacherSubjectIds) }},
-                                    triggerRect: null,
-                                    get filteredOptions() {
-                                        if (!this.search) return this.options;
-                                        const q = this.search.toLowerCase();
-                                        return this.options.filter(s => s.name.toLowerCase().includes(q));
-                                    },
-                                    get names() {
-                                        return this.selected.map(id => this.options.find(t => t.id == id)?.name).filter(Boolean);
-                                    },
-                                    openDropdown() {
-                                        const el = this.$refs.trigger;
-                                        const rect = el.getBoundingClientRect();
-                                        this.triggerRect = {
-                                            top: rect.bottom + window.scrollY,
-                                            left: rect.left + window.scrollX,
-                                            width: rect.width
-                                        };
-                                        this.open = true;
-                                        this.$nextTick(() => {
-                                            const dd = document.getElementById('mapel-dropdown-' + this.$id('dd'));
-                                            if (!dd) return;
-                                            dd.style.top   = this.triggerRect.top + 6 + 'px';
-                                            dd.style.left  = this.triggerRect.left + 'px';
-                                            dd.style.width = this.triggerRect.width + 'px';
-                                        });
-                                    }
-                                }" @keydown.escape.window="open = false">
+                                <div class="md:col-span-2">
                                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Mata Pelajaran</label>
-
-                                    {{-- Trigger --}}
-                                    <div x-ref="trigger" @click="open ? open=false : openDropdown()"
-                                         class="relative cursor-pointer select-none">
-                                        <i data-lucide="book-open" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10"></i>
-                                        <div class="w-full pl-11 pr-10 py-3 min-h-[48px] flex items-center
-                                                    bg-slate-50 dark:bg-slate-700/50
-                                                    border-2 border-slate-200 dark:border-slate-600
-                                                    rounded-xl text-sm transition-all
-                                                    hover:border-blue-400 dark:hover:border-blue-500"
-                                             :class="open
-                                                ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/20 bg-white dark:bg-slate-700'
-                                                : (selected.length > 0 ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20' : '')">
-                                            <template x-if="selected.length > 0">
-                                                <span class="text-slate-800 dark:text-slate-200 font-medium truncate" x-text="names.join(', ')"></span>
-                                            </template>
-                                            <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih mata pelajaran...</span>
+                                    <div class="relative" id="mapel-wrap">
+                                        {{-- Trigger --}}
+                                        <div id="mapel-trigger"
+                                             class="relative cursor-pointer select-none"
+                                             onclick="mapelToggle()">
+                                            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                            </svg>
+                                            <div id="mapel-display"
+                                                 class="w-full pl-10 pr-10 py-3 min-h-[46px] flex items-center bg-slate-50 border-2 border-slate-200 rounded-xl text-sm transition-all hover:border-blue-400">
+                                                <span id="mapel-placeholder" class="text-slate-400">Pilih mata pelajaran...</span>
+                                                <span id="mapel-selected-text" class="text-slate-800 font-medium truncate hidden"></span>
+                                            </div>
+                                            <svg id="mapel-chevron" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                            </svg>
                                         </div>
-                                        <i data-lucide="chevron-down"
-                                           class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200"
-                                           :class="open ? 'rotate-180' : ''"></i>
-                                    </div>
 
-                                    {{-- Hidden inputs --}}
-                                    <template x-for="sid in selected" :key="sid">
-                                        <input type="hidden" name="subjects[]" :value="sid">
-                                    </template>
-
-                                    {{-- Dropdown — di-render di body via fixed positioning --}}
-                                    <template x-teleport="body">
-                                        <div x-show="open"
-                                             x-transition:enter="transition ease-out duration-150"
-                                             x-transition:enter-start="opacity-0 translate-y-[-6px] scale-[0.98]"
-                                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                             x-transition:leave="transition ease-in duration-100"
-                                             x-transition:leave-start="opacity-100"
-                                             x-transition:leave-end="opacity-0"
-                                             @click.outside="open = false"
-                                             style="position:fixed;z-index:99999;"
-                                             class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
-                                             x-cloak>
-
+                                        {{-- Dropdown Panel --}}
+                                        <div id="mapel-dropdown"
+                                             class="hidden absolute left-0 right-0 top-full mt-1.5 z-[9999] bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden"
+                                             style="min-width:100%;">
                                             {{-- Search --}}
-                                            <div class="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/60">
+                                            <div class="p-2.5 border-b border-slate-100 bg-slate-50">
                                                 <div class="relative">
-                                                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
-                                                    <input type="text" x-model="search"
-                                                           @click.stop
+                                                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                                    </svg>
+                                                    <input id="mapel-search" type="text"
                                                            placeholder="Cari mata pelajaran..."
-                                                           class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                           oninput="mapelSearch(this.value)"
+                                                           onclick="event.stopPropagation()"
+                                                           class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                                 </div>
                                             </div>
-
-                                            {{-- Options --}}
-                                            <div class="max-h-56 overflow-y-auto p-1.5">
-                                                <template x-for="subj in filteredOptions" :key="subj.id">
-                                                    <label @click.stop
-                                                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-150"
-                                                           :class="selected.includes(subj.id)
-                                                               ? 'bg-blue-50 dark:bg-blue-900/30'
-                                                               : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'">
-                                                        {{-- Custom checkbox --}}
-                                                        <div class="flex-shrink-0 w-4.5 h-4.5 rounded-[5px] border-2 flex items-center justify-center transition-all"
-                                                             :class="selected.includes(subj.id)
-                                                                 ? 'bg-blue-500 border-blue-500'
-                                                                 : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500'"
-                                                             style="width:18px;height:18px;min-width:18px;">
-                                                            <svg x-show="selected.includes(subj.id)" width="11" height="11" viewBox="0 0 12 12" fill="none">
-                                                                <path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                            </svg>
-                                                            <input type="checkbox" :value="subj.id" x-model="selected" class="sr-only">
-                                                        </div>
-                                                        {{-- Avatar --}}
-                                                        <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
-                                                             style="background:linear-gradient(135deg,#1e3a5f,#0f172a);">
-                                                            <span x-text="subj.name.charAt(0).toUpperCase()"></span>
-                                                        </div>
-                                                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate" x-text="subj.name"></span>
-                                                    </label>
-                                                </template>
-                                                <div x-show="filteredOptions.length === 0"
-                                                     class="py-8 text-center text-slate-400 text-sm">
-                                                    <i data-lucide="search-x" class="w-7 h-7 mx-auto mb-2 opacity-40"></i>
-                                                    <p>Tidak ada mapel ditemukan</p>
-                                                </div>
-                                            </div>
-
+                                            {{-- List --}}
+                                            <div id="mapel-list" class="max-h-56 overflow-y-auto p-1.5"></div>
                                             {{-- Footer --}}
-                                            <template x-if="selected.length > 0">
-                                                <div class="px-3 py-2.5 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/60 flex items-center justify-between">
-                                                    <span class="text-xs text-slate-500 dark:text-slate-400">
-                                                        <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selected.length"></span> dipilih
-                                                    </span>
-                                                    <button type="button" @click.stop="selected = []"
-                                                            class="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors">
-                                                        Hapus semua
-                                                    </button>
-                                                </div>
-                                            </template>
+                                            <div id="mapel-footer" class="hidden px-3 py-2 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+                                                <span class="text-xs text-slate-500"><span id="mapel-count" class="font-bold text-slate-700">0</span> dipilih</span>
+                                                <button type="button" onclick="mapelClearAll()" class="text-xs font-semibold text-red-500 hover:text-red-700">Hapus semua</button>
+                                            </div>
                                         </div>
-                                    </template>
 
+                                        {{-- Hidden inputs container --}}
+                                        <div id="mapel-hidden-inputs"></div>
+                                    </div>
                                     @error('subjects')<p class="mt-2 text-xs text-red-500 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
                                 </div>
 
@@ -552,6 +466,12 @@
         </div>
     </div>
 
+        {{-- Blade data injection via data attributes (avoids VS Code JS parser false positives) --}}
+        <div id="mapel-data"
+             data-options="{{ e(json_encode($subjectOptions)) }}"
+             data-selected="{{ e(json_encode($teacherSubjectIds)) }}"
+             style="display:none;"></div>
+
         <script>
             /** 
              * Define components globally for maximum reliability 
@@ -695,6 +615,150 @@
                     reader.readAsDataURL(file);
                 }
             }
+
+            // ─── Mapel Multi-Select (Pure JS) ──────────────────
+            /* global MAPEL_OPTIONS, MAPEL_SELECTED */
+            (function() {
+                var _mapelEl = document.getElementById('mapel-data');
+                var MAPEL_OPTIONS  = _mapelEl ? JSON.parse(_mapelEl.dataset.options  || '[]') : [];
+                var MAPEL_SELECTED = _mapelEl ? JSON.parse(_mapelEl.dataset.selected || '[]') : [];
+                var isOpen = false;
+
+                function mapelRender(filter) {
+                    var list = document.getElementById('mapel-list');
+                    if (!list) return;
+                    var q = (filter || '').toLowerCase();
+                    var filtered = q
+                        ? MAPEL_OPTIONS.filter(function(s){ return s.name.toLowerCase().indexOf(q) >= 0; })
+                        : MAPEL_OPTIONS;
+
+                    if (filtered.length === 0) {
+                        list.innerHTML = '<div style="padding:24px 0;text-align:center;color:#94a3b8;font-size:13px;">Tidak ada mapel ditemukan</div>';
+                        return;
+                    }
+
+                    list.innerHTML = filtered.map(function(s) {
+                        var checked = MAPEL_SELECTED.indexOf(s.id) >= 0;
+                        var initial = s.name.charAt(0).toUpperCase();
+                        return '<label onclick="mapelToggleItem(' + s.id + ',event)" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:background 0.12s;background:' + (checked ? '#EFF6FF' : 'transparent') + ';" onmouseover="if(!this.dataset.checked)this.style.background=\'#F8FAFC\'" onmouseout="this.style.background=\'' + (checked ? '#EFF6FF' : 'transparent') + '\'"  data-id="' + s.id + '" data-checked="' + (checked ? '1' : '') + '">'
+                            + '<div style="flex-shrink:0;width:18px;height:18px;border-radius:5px;border:2px solid ' + (checked ? '#3B82F6' : '#CBD5E1') + ';background:' + (checked ? '#3B82F6' : '#fff') + ';display:flex;align-items:center;justify-content:center;transition:all 0.15s;">'
+                            + (checked ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '')
+                            + '</div>'
+                            + '<div style="flex-shrink:0;width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#1e3a5f,#0f172a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">' + initial + '</div>'
+                            + '<span style="font-size:13px;font-weight:500;color:#374151;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + s.name + '</span>'
+                            + '</label>';
+                    }).join('');
+                }
+
+                function mapelUpdateDisplay() {
+                    var placeholder = document.getElementById('mapel-placeholder');
+                    var selectedText = document.getElementById('mapel-selected-text');
+                    var display = document.getElementById('mapel-display');
+                    var footer = document.getElementById('mapel-footer');
+                    var countEl = document.getElementById('mapel-count');
+                    var hiddenContainer = document.getElementById('mapel-hidden-inputs');
+
+                    var names = MAPEL_SELECTED.map(function(id) {
+                        var s = MAPEL_OPTIONS.find(function(o){ return o.id == id; });
+                        return s ? s.name : null;
+                    }).filter(Boolean);
+
+                    if (names.length > 0) {
+                        placeholder.classList.add('hidden');
+                        selectedText.classList.remove('hidden');
+                        selectedText.textContent = names.join(', ');
+                        display.style.borderColor = '#93C5FD';
+                        display.style.background = '#EFF6FF';
+                        if (footer) { footer.classList.remove('hidden'); footer.style.display='flex'; }
+                        if (countEl) countEl.textContent = names.length;
+                    } else {
+                        placeholder.classList.remove('hidden');
+                        selectedText.classList.add('hidden');
+                        display.style.borderColor = '';
+                        display.style.background = '';
+                        if (footer) { footer.classList.add('hidden'); footer.style.display='none'; }
+                    }
+
+                    // Sync hidden inputs
+                    if (hiddenContainer) {
+                        hiddenContainer.innerHTML = MAPEL_SELECTED.map(function(id) {
+                            return '<input type="hidden" name="subjects[]" value="' + id + '">';
+                        }).join('');
+                    }
+                }
+
+                window.mapelToggle = function() {
+                    var dd = document.getElementById('mapel-dropdown');
+                    var chevron = document.getElementById('mapel-chevron');
+                    var display = document.getElementById('mapel-display');
+                    isOpen = !isOpen;
+                    if (isOpen) {
+                        dd.classList.remove('hidden');
+                        chevron.style.transform = 'translateY(-50%) rotate(180deg)';
+                        display.style.borderColor = '#3B82F6';
+                        display.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.15)';
+                        display.style.background = '#fff';
+                        document.getElementById('mapel-search').value = '';
+                        mapelRender('');
+                        setTimeout(function(){ document.getElementById('mapel-search').focus(); }, 50);
+                    } else {
+                        dd.classList.add('hidden');
+                        chevron.style.transform = 'translateY(-50%) rotate(0deg)';
+                        display.style.boxShadow = '';
+                        if (MAPEL_SELECTED.length > 0) {
+                            display.style.borderColor = '#93C5FD';
+                            display.style.background = '#EFF6FF';
+                        } else {
+                            display.style.borderColor = '';
+                            display.style.background = '';
+                        }
+                    }
+                };
+
+                window.mapelToggleItem = function(id, e) {
+                    e.stopPropagation();
+                    var idx = MAPEL_SELECTED.indexOf(id);
+                    if (idx >= 0) {
+                        MAPEL_SELECTED.splice(idx, 1);
+                    } else {
+                        MAPEL_SELECTED.push(id);
+                    }
+                    mapelRender(document.getElementById('mapel-search').value);
+                    mapelUpdateDisplay();
+                };
+
+                window.mapelSearch = function(val) {
+                    mapelRender(val);
+                };
+
+                window.mapelClearAll = function() {
+                    MAPEL_SELECTED.length = 0;
+                    mapelRender(document.getElementById('mapel-search') ? document.getElementById('mapel-search').value : '');
+                    mapelUpdateDisplay();
+                };
+
+                // Close on outside click
+                document.addEventListener('click', function(e) {
+                    var wrap = document.getElementById('mapel-wrap');
+                    if (wrap && !wrap.contains(e.target) && isOpen) {
+                        window.mapelToggle();
+                    }
+                });
+
+                // ESC key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && isOpen) window.mapelToggle();
+                });
+
+                // Init on DOM ready
+                document.addEventListener('DOMContentLoaded', function() {
+                    mapelUpdateDisplay();
+                });
+                // Also init immediately in case DOMContentLoaded already fired
+                if (document.readyState !== 'loading') {
+                    mapelUpdateDisplay();
+                }
+            })();
 
             // ─── Photo Preview (klik foto bulat) ───────────────
             function previewTeacherPhoto(input) {

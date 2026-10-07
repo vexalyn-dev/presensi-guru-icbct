@@ -65,8 +65,8 @@
 
             {{-- Info nama --}}
             <div class="flex-1 min-w-0 text-center md:text-left md:pt-12">
-                <h2 class="text-xl md:text-2xl font-bold text-navy-800 dark:text-white mb-1 leading-tight truncate">{{ auth()->user()->name }}</h2>
-                <p class="text-slate-500 dark:text-slate-400 mb-2 truncate">{{ auth()->user()->email }}</p>
+                <h2 class="text-xl md:text-2xl font-bold text-navy-800 dark:text-white mb-1 leading-tight break-words">{{ auth()->user()->name }}</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-2 break-all">{{ auth()->user()->email }}</p>
                 <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
                     <span class="inline-flex items-center px-3 py-1 bg-navy-100 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300 rounded-full text-sm font-semibold">
                         {{ auth()->user()->role_name ?? 'Guru' }}

@@ -704,7 +704,7 @@
                             <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-navy-900 rounded-full pulse-dot" style="display:inline-block!important; animation:pulse-green 2s infinite!important;"></span>
                         </div>
                         <div class="hidden md:block text-left min-w-0">
-                            <p class="text-[11px] font-semibold text-navy-800 dark:text-white leading-tight truncate">{{ Auth::user()->name }}</p>
+                            <p class="text-[11px] font-semibold text-navy-800 dark:text-white leading-tight break-words max-w-[160px]">{{ Auth::user()->name }}</p>
                             <div class="flex items-center">
                                 <span class="text-[9px] text-green-600 dark:text-green-400 font-medium">
                                     {{ Auth::user()->role_label }}
@@ -730,8 +730,8 @@
                                     <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-navy-800 dark:border-slate-700 rounded-full pulse-dot" style="display:inline-block!important; animation:pulse-green 2s infinite!important;"></span>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-slate-300 truncate">{{ Auth::user()->email }}</p>
+                                    <p class="text-sm font-semibold text-white break-words leading-snug">{{ Auth::user()->name }}</p>
+                                    <p class="text-xs text-slate-300 break-all">{{ Auth::user()->email }}</p>
                                     <div class="flex items-center gap-1.5 mt-1.5">
                                         <span class="w-2 h-2 bg-green-400 rounded-full pulse-dot" style="display:inline-block!important; animation:pulse-green 2s infinite!important;"></span>
                                         <span class="text-[10px] text-green-400 font-medium">Online Sekarang</span>

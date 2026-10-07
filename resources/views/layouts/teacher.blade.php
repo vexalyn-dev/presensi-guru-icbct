@@ -409,7 +409,7 @@
                                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
                                      onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
                                 <div class="hidden sm:block text-left">
-                                    <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[120px]">{{ auth()->user()->name }}</p>
+                                    <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[180px]">{{ auth()->user()->name }}</p>
                                     <div class="flex items-center gap-1.5 mt-0.5">
                                         <span class="text-[10px] text-slate-500 dark:text-slate-400">Guru</span>
                                         @if($teacherSubject)
@@ -450,7 +450,7 @@
                                              class="w-10 h-10 rounded-full object-cover border-2 border-white/30 flex-shrink-0"
                                              onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
                                         <div class="min-w-0">
-                                            <p class="text-sm font-bold text-white truncate">{{ auth()->user()->name }}</p>
+                                            <p class="text-sm font-bold text-white break-words leading-snug">{{ auth()->user()->name }}</p>
                                             <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                                                 <span class="text-[10px] text-white/70">Guru</span>
                                                 @if($teacherSubject)

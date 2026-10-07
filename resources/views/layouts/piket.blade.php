@@ -358,7 +358,7 @@
                                      data-default-src="{{ asset('images/default-operator.png') }}"
                                      onerror="this.onerror=null; this.src=this.dataset.defaultSrc;">
                                 <div class="hidden sm:block text-left">
-                                    <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[120px]">{{ auth()->user()->name }}</p>
+                                    <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[180px]">{{ auth()->user()->name }}</p>
                                     <div class="flex items-center gap-1.5 mt-0.5">
                                         <span class="text-[10px] text-slate-500 dark:text-slate-400">Guru</span>
                                         @if($teacherSubject)
@@ -400,7 +400,7 @@
                                              data-default-src="{{ asset('images/default-operator.png') }}"
                                              onerror="this.onerror=null; this.src=this.dataset.defaultSrc;">
                                         <div class="min-w-0">
-                                            <p class="text-sm font-bold text-white truncate">{{ auth()->user()->name }}</p>
+                                            <p class="text-sm font-bold text-white break-words leading-snug">{{ auth()->user()->name }}</p>
                                             <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                                                 <span class="text-[10px] text-white/70">Guru</span>
                                                 @if($teacherSubject)
