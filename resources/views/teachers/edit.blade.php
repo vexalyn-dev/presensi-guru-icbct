@@ -466,12 +466,9 @@
         </div>
     </div>
 
-        {{-- Blade data injection via data attributes (avoids VS Code JS parser false positives) --}}
-        @php $subjectOptionsForJs = $subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray(); @endphp
-        <div id="mapel-data"
-             data-options="@js($subjectOptionsForJs)"
-             data-selected="@js($teacherSubjectIds)"
-             style="display:none;"></div>
+        {{-- Blade data injection — gunakan window variable agar tidak ada masalah HTML encoding --}}
+        <script>window.__mapelOptions={!! json_encode($subjects->map(fn($s)=>['id'=>$s->id,'name'=>$s->name])->values()) !!};window.__mapelSelected={!! json_encode($teacherSubjectIds) !!};</script>
+        <div id="mapel-data" style="display:none;"></div>
 
         <script>
             /** 
@@ -620,13 +617,8 @@
             // ─── Mapel Multi-Select (Pure JS) ──────────────────
             /* global MAPEL_OPTIONS, MAPEL_SELECTED */
             (function() {
-                var _mapelEl = document.getElementById('mapel-data');
-                var MAPEL_OPTIONS  = [];
-                var MAPEL_SELECTED = [];
-                try {
-                    if (_mapelEl && _mapelEl.dataset.options)  MAPEL_OPTIONS  = JSON.parse(_mapelEl.dataset.options);
-                    if (_mapelEl && _mapelEl.dataset.selected) MAPEL_SELECTED = JSON.parse(_mapelEl.dataset.selected);
-                } catch(e) { console.error('Mapel data parse error:', e); }
+                var MAPEL_OPTIONS  = Array.isArray(window.__mapelOptions)  ? window.__mapelOptions  : [];
+                var MAPEL_SELECTED = Array.isArray(window.__mapelSelected) ? window.__mapelSelected : [];
                 var isOpen = false;
 
                 function mapelRender(filter) {
