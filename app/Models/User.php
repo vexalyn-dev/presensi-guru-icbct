@@ -500,6 +500,31 @@ class User extends Authenticatable
     }
 
     /**
+     * Ambil nama mapel dari relasi Teacher → subjects (via subject_teacher pivot).
+     * Ini adalah cara yang benar karena pivot menggunakan teachers.id bukan users.id.
+     * Fallback ke kolom users.subject (string lama) jika tidak ada relasi teacher.
+     */
+    public function getSubjectDisplayAttribute(): string
+    {
+        // Coba ambil dari relasi teacher (teachers.id → subject_teacher → subjects)
+        if ($this->teacher && $this->teacher->relationLoaded('subjects')) {
+            $names = $this->teacher->subjects->pluck('name')->filter()->join(', ');
+            if ($names) {
+                return $names;
+            }
+        } elseif ($this->teacher) {
+            // Lazy load jika belum ter-load
+            $names = $this->teacher->subjects()->pluck('name')->filter()->join(', ');
+            if ($names) {
+                return $names;
+            }
+        }
+
+        // Fallback ke kolom subject lama di users table
+        return $this->subject ?? '';
+    }
+
+    /**
      * Get total teaching hours per week from active subjects
      */
     public function getTotalHoursAttribute(): int

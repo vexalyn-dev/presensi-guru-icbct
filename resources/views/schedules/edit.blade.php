@@ -31,11 +31,11 @@
                 <div class="flex-1">
                     <h1 class="text-2xl font-bold text-navy-800 dark:text-white mb-2">{{ $teacher->name }}</h1>
                     <div class="flex items-center gap-3 flex-wrap">
-                        @if($teacher->subject)
+                        @if($teacher->subject_display)
                             <span
                                 class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-xl text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wide shadow-sm">
                                 <i data-lucide="book-open" class="w-4 h-4"></i>
-                                <span>{{ $teacher->subject }}</span>
+                                <span>{{ $teacher->subject_display }}</span>
                             </span>
                         @endif
                         <span class="inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400">

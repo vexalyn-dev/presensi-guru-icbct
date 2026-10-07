@@ -469,22 +469,54 @@ class DeveloperController extends Controller
     // ─────────────────────────────────────────────
 
     /**
+     * Simpan user ID ke plain session (tidak ter-encrypt), jalankan
+     * Artisan commands yang bisa invalidate session, lalu re-login user
+     * secara programmatic sebelum redirect agar tidak ke-logout.
+     */
+    private function runWithSessionPreserve(string $secret, callable $callback, string $successMsg): \Illuminate\Http\RedirectResponse
+    {
+        // 1. Catat user ID sekarang (sebelum cache/config diutak-atik)
+        $userId = auth()->id();
+
+        // 2. Flush & simpan flash message ke session native PHP supaya
+        //    tidak hilang walau Laravel session di-regenerate
+        session()->save();
+
+        // 3. Jalankan semua Artisan commands
+        $callback();
+
+        // 4. Re-login user — session baru akan dibuat dengan key yang
+        //    sudah ter-cache ulang, sehingca enkripsi kembali valid
+        if ($userId) {
+            \Illuminate\Support\Facades\Auth::loginUsingId($userId, true);
+        }
+
+        // 5. Regenerate session ID untuk keamanan (mencegah session fixation)
+        session()->regenerate(true);
+
+        // 6. Redirect dengan flash message
+        return redirect()->route('developer.index', $secret)
+            ->with('success', $successMsg);
+    }
+
+    /**
      * Clear semua cache (config, route, view, application cache).
      */
     public function clearCache(string $secret)
     {
         if (!$this->verifySecret($secret)) abort(404);
 
-        // Simpan session sebelum clear, urutan: view & route dulu, config terakhir
-        // supaya session terenkripsi tidak putus di tengah jalan
-        Artisan::call('view:clear');
-        Artisan::call('route:clear');
-        Artisan::call('event:clear');
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');  // config paling akhir
-
-        return redirect()->route('developer.index', $secret)
-            ->with('success', '🧹 Semua cache berhasil dibersihkan (config, route, view, app cache).');
+        return $this->runWithSessionPreserve(
+            $secret,
+            function () {
+                Artisan::call('view:clear');
+                Artisan::call('route:clear');
+                Artisan::call('event:clear');
+                Artisan::call('cache:clear');
+                Artisan::call('config:clear');
+            },
+            '🧹 Semua cache berhasil dibersihkan (config, route, view, app cache).'
+        );
     }
 
     /**
@@ -494,11 +526,13 @@ class DeveloperController extends Controller
     {
         if (!$this->verifySecret($secret)) abort(404);
 
+        $output = 'Tidak ada migration baru.';
         try {
             Artisan::call('migrate', ['--force' => true]);
-            $output = trim(Artisan::output()) ?: 'Tidak ada migration baru.';
-            // Ambil max 300 char agar tidak membanjiri flash message
-            $output = strlen($output) > 300 ? substr($output, 0, 300) . '...' : $output;
+            $raw = trim(Artisan::output());
+            if ($raw) {
+                $output = strlen($raw) > 300 ? substr($raw, 0, 300) . '...' : $raw;
+            }
         } catch (\Throwable $e) {
             return back()->with('error', '❌ Migration gagal. Cek log server untuk detail.');
         }
@@ -513,14 +547,17 @@ class DeveloperController extends Controller
     {
         if (!$this->verifySecret($secret)) abort(404);
 
-        // config:cache duluan agar APP_KEY terbaca sebelum route/view di-cache
-        Artisan::call('config:cache');
-        Artisan::call('optimize');
-        Artisan::call('route:cache');
-        Artisan::call('view:cache');
-
-        return redirect()->route('developer.index', $secret)
-            ->with('success', '⚡ Optimasi selesai — config, route, view sudah di-cache.');
+        return $this->runWithSessionPreserve(
+            $secret,
+            function () {
+                // config:cache duluan agar APP_KEY terbaca sebelum route/view di-cache
+                Artisan::call('config:cache');
+                Artisan::call('optimize');
+                Artisan::call('route:cache');
+                Artisan::call('view:cache');
+            },
+            '⚡ Optimasi selesai — config, route, view sudah di-cache.'
+        );
     }
 
     /**
@@ -545,18 +582,20 @@ class DeveloperController extends Controller
             return back()->with('error', '❌ Gagal menulis .env: ' . $e->getMessage());
         }
 
-        try {
-            Artisan::call('config:clear');
-            Artisan::call('config:cache');
-            Artisan::call('view:clear');
-            Artisan::call('route:clear');
-        } catch (\Throwable $e) {
-            return back()->with('error', '❌ Gagal rebuild cache: ' . $e->getMessage());
-        }
-
-        return back()->with('success', $target
+        $successMsg = $target
             ? '⚠️ Debug mode AKTIFkan — refresh halaman untuk melihat perubahan.'
-            : '✅ Debug mode MATIKAN — refresh halaman untuk melihat perubahan.');
+            : '✅ Debug mode MATIKAN — refresh halaman untuk melihat perubahan.';
+
+        return $this->runWithSessionPreserve(
+            $secret,
+            function () {
+                Artisan::call('config:clear');
+                Artisan::call('config:cache');
+                Artisan::call('view:clear');
+                Artisan::call('route:clear');
+            },
+            $successMsg
+        );
     }
 
     // ─────────────────────────────────────────────
@@ -712,9 +751,12 @@ class DeveloperController extends Controller
      */
     public function runSeederPanel(string $secret)
     {
+        if (!$this->verifySecret($secret)) abort(404);
+
         Artisan::call('db:seed', ['--force' => true]);
         $output = trim(Artisan::output());
-        return redirect()->back()->with('success', 'Seeder berhasil dijalankan.' . ($output ? ' Output: ' . $output : ''));
+        return redirect()->route('developer.index', $secret)
+            ->with('success', '✅ Seeder berhasil dijalankan.' . ($output ? ' Output: ' . $output : ''));
     }
 
     /**
@@ -722,8 +764,11 @@ class DeveloperController extends Controller
      */
     public function clearRoutes(string $secret)
     {
+        if (!$this->verifySecret($secret)) abort(404);
+
         Artisan::call('route:clear');
         Artisan::call('view:clear');
-        return redirect()->back()->with('success', '✅ Route & view cache dibersihkan. Refresh halaman.');
+        return redirect()->route('developer.index', $secret)
+            ->with('success', '✅ Route & view cache dibersihkan. Refresh halaman.');
     }
 }

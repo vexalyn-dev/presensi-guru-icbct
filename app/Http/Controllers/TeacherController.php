@@ -274,6 +274,12 @@ class TeacherController extends Controller
                 'path' => $photoPath,
                 'exists' => Storage::disk('public')->exists($photoPath),
             ]);
+        } elseif ($request->input('delete_photo') == '1') {
+            // Hapus foto profil
+            if ($teacher->photo) {
+                Storage::disk('public')->delete($teacher->photo);
+            }
+            $updateData['photo'] = null;
         }
 
         $teacher->update($updateData);

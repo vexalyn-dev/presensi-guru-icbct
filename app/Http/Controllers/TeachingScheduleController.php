@@ -13,9 +13,9 @@ class TeachingScheduleController extends Controller
 {
     public function index()
     {
-        $teachers = User::where('role', 'guru')
+        $teachers = User::whereIn('role', ['guru', 'developer'])
             ->where('is_active', true)
-            ->with(['teachingSchedules.classroom', 'teachingSchedules.subject'])
+            ->with(['teachingSchedules.classroom', 'teachingSchedules.subject', 'teacher.subjects'])
             ->get();
 
         return view('teaching-schedules.index', compact('teachers'));

@@ -101,7 +101,7 @@
                                 <h3 class="text-base font-bold text-navy-800 dark:text-white truncate mb-1">{{ $teacher->name }}</h3>
                                 <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                                     <i data-lucide="book-open" class="w-3.5 h-3.5 flex-shrink-0"></i>
-                                    <span class="truncate">{{ $teacher->subject ?: 'Belum ada mata pelajaran' }}</span>
+                                    <span class="truncate">{{ $teacher->subject_display ?: 'Belum ada mata pelajaran' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -168,7 +168,7 @@
                             <h3 class="text-lg font-bold text-navy-800 dark:text-white truncate mb-1">{{ $teacher->name }}</h3>
                             <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                                 <i data-lucide="book-open" class="w-3.5 h-3.5 flex-shrink-0"></i>
-                                <span class="truncate">{{ $teacher->subject ?: 'Belum ada mata pelajaran' }}</span>
+                                <span class="truncate">{{ $teacher->subject_display ?: 'Belum ada mata pelajaran' }}</span>
                             </div>
                         </div>
                     </div>

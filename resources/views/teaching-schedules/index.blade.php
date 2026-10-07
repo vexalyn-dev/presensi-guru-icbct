@@ -56,10 +56,10 @@
                          class="w-14 h-14 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 group-hover:border-gold-400 transition-colors shadow-md flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <h3 class="text-base font-bold text-navy-800 dark:text-white truncate mb-1.5">{{ $teacher->name }}</h3>
-                        @if($teacher->subject)
+                        @if($teacher->subject_display)
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-gradient-to-r from-gold-400 to-gold-500 text-navy-900 rounded-md text-xs font-bold">
                                 <i data-lucide="book-open" class="w-3 h-3"></i>
-                                {{ $teacher->subject }}
+                                {{ $teacher->subject_display }}
                             </span>
                         @else
                             <span class="text-xs text-slate-400 italic">Belum ada mata pelajaran</span>
@@ -175,10 +175,10 @@
                     {{-- Nama + mapel --}}
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-navy-800 dark:text-white truncate">{{ $teacher->name }}</h3>
-                        @if($teacher->subject)
+                        @if($teacher->subject_display)
                         <span class="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-gold-400 text-navy-900 rounded-md text-[11px] font-bold max-w-full truncate">
                             <i data-lucide="book-open" class="w-3 h-3 flex-shrink-0"></i>
-                            <span class="truncate">{{ $teacher->subject }}</span>
+                            <span class="truncate">{{ $teacher->subject_display }}</span>
                         </span>
                         @else
                         <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 italic">Belum ada mata pelajaran</p>

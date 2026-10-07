@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('password_reset_otps', function (Blueprint $table) {
             $table->string('email')->index();
-            $table->string('otp', 6);        // 6-digit OTP (plain, akan di-hash saat disimpan)
+            $table->string('otp');             // bcrypt hash dari 6-digit OTP
             $table->timestamp('expires_at');  // berlaku 10 menit
             $table->boolean('used')->default(false);
             $table->timestamps();

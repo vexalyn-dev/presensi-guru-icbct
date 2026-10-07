@@ -106,24 +106,35 @@
                                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-3">Foto
                                         Profile</label>
                                     <div class="flex items-center gap-4">
-                                        <div class="relative">
-                                            <img id="photo-preview-main" src="{{ $teacher->photo_url }}"
-                                                class="w-20 h-20 rounded-full object-cover border-4 border-slate-200 dark:border-slate-700 shadow-lg transition-transform hover:scale-105 duration-300">
-                                            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 border-2 border-white dark:border-slate-800 rounded-full flex items-center justify-center shadow-sm">
-                                                <i data-lucide="camera" class="w-3 h-3 text-white"></i>
-                                            </div>
+                                        {{-- Avatar bulat: klik untuk upload --}}
+                                        <div class="relative flex-shrink-0">
+                                            <input type="file" name="photo" accept="image/*" id="photo-upload"
+                                                class="hidden" onchange="previewTeacherPhoto(this)">
+                                            <label for="photo-upload" class="block cursor-pointer group/avatar" title="Klik untuk ganti foto">
+                                                <img id="photo-preview-main" src="{{ $teacher->photo_url }}"
+                                                    class="w-20 h-20 rounded-full object-cover border-4 border-slate-200 dark:border-slate-700 shadow-lg transition-all duration-300 group-hover/avatar:brightness-75">
+                                                {{-- Overlay upload icon --}}
+                                                <div class="absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                                    <div class="flex flex-col items-center gap-0.5">
+                                                        <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 0L8 8m4-4l4 4"/>
+                                                        </svg>
+                                                        <span style="font-size:9px;color:#fff;font-weight:700;letter-spacing:0.02em;">UPLOAD</span>
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
                                         <div class="flex-1">
                                             <div class="relative">
-                                                <input type="file" name="photo" accept="image/*" id="photo-upload"
-                                                    class="hidden" onchange="previewImage(this)">
-                                                <label for="photo-upload"
-                                                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95">
-                                                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                                                    Ubah Foto Profil
-                                                </label>
+                                                {{-- Tombol Hapus Foto Profil --}}
+                                                <button type="button" onclick="deleteTeacherPhoto()"
+                                                    id="btn-delete-photo"
+                                                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-700 border border-red-200 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95">
+                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                    Hapus Foto Profil
+                                                </button>
                                             </div>
-                                            <p id="photo-filename" class="text-[10px] text-slate-400 mt-2 font-medium italic">Disarankan ukuran 1:1, Maksimal 2MB</p>
+                                            <p id="photo-filename" class="text-[10px] text-slate-400 mt-2 font-medium italic">Klik foto untuk ganti • Disarankan 1:1 • Maks. 2MB</p>
                                         </div>
                                     </div>
                                 </div>
@@ -575,6 +586,56 @@
                     }
                     reader.readAsDataURL(file);
                 }
+            }
+
+            // ─── Photo Preview (klik foto bulat) ───────────────
+            function previewTeacherPhoto(input) {
+                if (!input.files || !input.files[0]) return;
+                var file = input.files[0];
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran foto melebihi 2MB. Silakan pilih foto yang lebih kecil.');
+                    input.value = '';
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var preview = document.getElementById('photo-preview-main');
+                    if (preview) preview.src = e.target.result;
+                    var info = document.getElementById('photo-filename');
+                    if (info) { info.textContent = '✓ ' + file.name + ' — siap disimpan'; info.style.color = '#16a34a'; }
+                    // Hapus flag DELETE kalau sebelumnya mau hapus
+                    var delInput = document.getElementById('delete_photo_flag');
+                    if (delInput) delInput.remove();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // ─── Hapus Foto Profil ──────────────────────────────
+            function deleteTeacherPhoto() {
+                if (!confirm('Hapus foto profil? Foto akan kembali ke default.')) return;
+
+                // Tambahkan hidden input flag delete
+                var existing = document.getElementById('delete_photo_flag');
+                if (!existing) {
+                    var flag = document.createElement('input');
+                    flag.type  = 'hidden';
+                    flag.name  = 'delete_photo';
+                    flag.id    = 'delete_photo_flag';
+                    flag.value = '1';
+                    document.querySelector('form').appendChild(flag);
+                }
+
+                // Reset preview ke avatar default
+                var preview = document.getElementById('photo-preview-main');
+                if (preview) preview.src = '{{ asset("images/default-avatar.png") }}';
+
+                // Reset file input
+                var fileInput = document.getElementById('photo-upload');
+                if (fileInput) fileInput.value = '';
+
+                // Update info text
+                var info = document.getElementById('photo-filename');
+                if (info) { info.textContent = 'Foto akan dihapus saat kamu klik Simpan Perubahan'; info.style.color = '#ef4444'; }
             }
 
             // Toggle Password Visibility

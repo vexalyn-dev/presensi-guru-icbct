@@ -431,9 +431,15 @@ Route::get('/fix-session', function () {
         abort(404);
     }
 
+    // Simpan user ID sebelum cache di-clear
+    $userId = auth()->id();
+
     $sessionDir = storage_path('framework/sessions');
     @mkdir($sessionDir, 0777, true);
     @chmod($sessionDir, 0777);
+
+    // Save session sekarang
+    session()->save();
 
     Artisan::call('config:clear');
     Artisan::call('route:clear');
@@ -441,7 +447,15 @@ Route::get('/fix-session', function () {
     Artisan::call('cache:clear');
     Artisan::call('event:clear');
 
-    return redirect()->back()->with('success', '✅ Session & cache berhasil diperbaiki. Refresh halaman.');
+    // Re-login user agar tidak ke-logout setelah cache di-clear
+    if ($userId) {
+        \Illuminate\Support\Facades\Auth::loginUsingId($userId, true);
+    }
+    session()->regenerate(true);
+
+    return redirect()
+        ->route('developer.index', $secret)
+        ->with('success', '✅ Session & cache berhasil diperbaiki. Refresh halaman.');
 });
 
 Route::middleware(['auth'])->group(function () {
