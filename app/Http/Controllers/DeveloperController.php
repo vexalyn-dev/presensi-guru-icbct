@@ -483,7 +483,7 @@ class DeveloperController extends Controller
         Artisan::call('cache:clear');
         Artisan::call('config:clear');  // config paling akhir
 
-        return redirect()->route('developer.dashboard', $secret)
+        return redirect()->route('developer.index', $secret)
             ->with('success', '🧹 Semua cache berhasil dibersihkan (config, route, view, app cache).');
     }
 
@@ -519,7 +519,7 @@ class DeveloperController extends Controller
         Artisan::call('route:cache');
         Artisan::call('view:cache');
 
-        return redirect()->route('developer.dashboard', $secret)
+        return redirect()->route('developer.index', $secret)
             ->with('success', '⚡ Optimasi selesai — config, route, view sudah di-cache.');
     }
 
