@@ -354,7 +354,7 @@ function nubiAI() {
     .dark #nubi-messages::-webkit-scrollbar-thumb { background: #334155; }
 
     /* Mobile: lebih kecil dan posisi lebih ke tengah */
-    @media (max-width: 400px) {
+    @@media (max-width: 400px) {
         #nubi-ai-widget {
             right: 12px;
             bottom: 12px;
