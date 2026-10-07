@@ -1,17 +1,19 @@
 {{--
     Nubi AI Chat Widget
-    Floating chat bot yang membantu guru menggunakan aplikasi ini.
-    Diinjeksi ke semua layout (app.blade.php, teacher.blade.php, piket.blade.php)
+    - Draggable (tahan klik kiri + drag)
+    - Ctrl+Del untuk sembunyikan/tampilkan
+    - Chat modal muncul ke atas & menyesuaikan posisi
+    - Hanya untuk: Admin, Operator, Guru Piket, Developer
 --}}
 
 {{-- ══ NUBI AI FLOATING WIDGET ══ --}}
-<div id="nubi-ai-widget" 
+<div id="nubi-ai-widget"
      data-chat-url="{{ route('nubi-ai.chat') }}"
      data-user-photo="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff&size=32' }}"
      data-user-name="{{ urlencode(auth()->user()->name) }}"
      x-data="nubiAI()"
      x-init="init()"
-     class="fixed bottom-6 right-6 z-[9990] select-none">
+     style="position: fixed; bottom: 24px; right: 24px; z-index: 9990; user-select: none;">
 
     {{-- ── Chat Modal ── --}}
     <div id="nubi-chat-modal"
@@ -23,7 +25,8 @@
          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
          x-transition:leave-end="opacity-0 translate-y-4 scale-95"
          x-cloak
-         class="absolute bottom-20 right-0 w-[340px] sm:w-[380px] bg-white dark:bg-navy-900 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"
+         :style="modalStyle"
+         class="absolute w-[340px] sm:w-[380px] bg-white dark:bg-navy-900 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"
          style="max-height: 520px;">
 
         {{-- Header --}}
@@ -38,7 +41,7 @@
                     <span class="text-[10px] text-slate-300">Asisten Aplikasi ICB CT</span>
                 </div>
             </div>
-            <button @click="open = false"
+            <button x-on:click="open = false"
                     class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
@@ -69,7 +72,6 @@
             {{-- Chat messages --}}
             <template x-for="(msg, index) in messages" :key="index">
                 <div :class="msg.role === 'user' ? 'flex items-end justify-end gap-2' : 'flex items-start gap-2.5'">
-
                     {{-- Bot avatar --}}
                     <template x-if="msg.role === 'assistant'">
                         <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 flex items-center justify-center flex-shrink-0 overflow-hidden border border-slate-200 dark:border-slate-700">
@@ -78,8 +80,8 @@
                     </template>
 
                     {{-- Message bubble --}}
-                    <div :class="msg.role === 'user' 
-                            ? 'bg-navy-800 text-white rounded-2xl rounded-br-sm px-3.5 py-2.5 max-w-[80%]' 
+                    <div :class="msg.role === 'user'
+                            ? 'bg-navy-800 text-white rounded-2xl rounded-br-sm px-3.5 py-2.5 max-w-[80%]'
                             : 'bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[80%]'">
                         <p class="text-xs leading-relaxed whitespace-pre-wrap"
                            :class="msg.role === 'user' ? 'text-white' : 'text-slate-700 dark:text-slate-200'"
@@ -114,45 +116,45 @@
             </template>
         </div>
 
-        {{-- Quick suggestions (only shown when no messages yet) --}}
+        {{-- Quick suggestions --}}
         <template x-if="messages.length === 0 && !typing">
             <div class="px-4 pb-2 flex flex-wrap gap-1.5 flex-shrink-0">
-                <button @click="sendSuggestion('Berapa guru yang hadir hari ini?')"
+                <button x-on:click="sendSuggestion('Berapa guru yang hadir hari ini?')"
                         class="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-slate-600 dark:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700">
                     📊 Kehadiran hari ini
                 </button>
-                <button @click="sendSuggestion('Siapa saja guru yang belum presensi hari ini?')"
+                <button x-on:click="sendSuggestion('Siapa saja guru yang belum presensi hari ini?')"
                         class="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-slate-600 dark:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700">
                     ⏳ Belum presensi
                 </button>
-                <button @click="sendSuggestion('Ada berapa pengajuan izin yang belum disetujui?')"
+                <button x-on:click="sendSuggestion('Ada berapa pengajuan izin yang belum disetujui?')"
                         class="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-slate-600 dark:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700">
                     📝 Izin pending
                 </button>
-                <button @click="sendSuggestion('Bagaimana cara menyetujui pengajuan izin guru?')"
+                <button x-on:click="sendSuggestion('Bagaimana cara menyetujui pengajuan izin guru?')"
                         class="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-slate-600 dark:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700">
                     ✅ Cara approve izin
                 </button>
-                <button @click="sendSuggestion('Bagaimana cara export laporan presensi?')"
+                <button x-on:click="sendSuggestion('Bagaimana cara export laporan presensi?')"
                         class="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-slate-600 dark:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700">
-                    � Export laporan
+                    📈 Export laporan
                 </button>
             </div>
         </template>
 
         {{-- Input Area --}}
         <div class="px-3 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-navy-900/50 flex-shrink-0">
-            <form @submit.prevent="sendMessage()" class="flex gap-2 items-end">
+            <form x-on:submit.prevent="sendMessage()" class="flex gap-2 items-end">
                 <textarea
                     x-model="inputMessage"
-                    @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
+                    x-on:keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
                     :disabled="typing"
                     rows="1"
                     placeholder="Tanya sesuatu..."
                     class="flex-1 text-xs bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-800/20 dark:focus:ring-gold-400/20 focus:border-navy-800 dark:focus:border-gold-400 resize-none transition-colors disabled:opacity-60"
                     style="max-height: 80px; overflow-y: auto;"
                     x-ref="inputRef"
-                    @input="autoResize($el)"></textarea>
+                    x-on:input="autoResize($el)"></textarea>
                 <button type="submit"
                         :disabled="typing || !inputMessage.trim()"
                         class="w-9 h-9 rounded-xl bg-navy-800 hover:bg-navy-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all flex-shrink-0 hover:scale-105 active:scale-95">
@@ -160,40 +162,45 @@
                 </button>
             </form>
             <p class="text-[9px] text-slate-400 dark:text-slate-500 mt-1.5 text-center">
-                Nubi AI hanya membantu seputar penggunaan aplikasi ini
+                Nubi AI · Dibuat oleh Vexalyn Dev
             </p>
         </div>
     </div>
 
-    {{-- ── Floating Trigger Button ── --}}
-    <div class="relative flex flex-col items-center">
-        {{-- Tooltip "Sembunyikan Nubi AI" saat open --}}
-        <div x-show="open" x-cloak
-             class="absolute -top-8 right-0 whitespace-nowrap text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full shadow-sm">
-            Sembunyikan Nubi AI
+    {{-- ── Floating Robot Button ── --}}
+    <div class="relative flex flex-col items-center" style="width: 80px;">
+
+        {{-- Tooltip Ctrl+Del --}}
+        <div x-show="showTooltip" x-cloak
+             style="position:absolute; bottom: 88px; right: 0; white-space:nowrap;"
+             class="text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full shadow-sm pointer-events-none">
+            Ctrl+Del untuk sembunyikan
         </div>
 
-        {{-- Robot button --}}
-        <button @click="toggleChat()"
-                class="relative group flex items-center justify-center w-16 h-16 rounded-full shadow-[0_8px_24px_rgba(15,23,42,0.2)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.3)] transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none"
-                :class="open ? 'ring-2 ring-gold-400/60 ring-offset-2' : ''"
-                title="Nubi AI — Asisten Penggunaan Aplikasi">
-            
+        {{-- Robot button — draggable handle --}}
+        <div id="nubi-drag-handle"
+             x-on:mousedown="startDrag($event)"
+             :style="{ cursor: dragging ? 'grabbing' : 'grab' }"
+             class="relative flex items-center justify-center"
+             style="width: 80px; height: 80px;">
+
             {{-- Pulse ring saat closed --}}
-            <span x-show="!open" class="absolute inset-0 rounded-full bg-navy-800/20 animate-ping" style="animation-duration: 2.5s;"></span>
+            <span x-show="!open" class="absolute inset-0 rounded-full bg-navy-800/15 animate-ping" style="animation-duration: 3s;"></span>
 
-            {{-- Robot GIF --}}
-            <img src="{{ asset('images/Nubi-AI.gif') }}" 
-                 alt="Nubi AI" 
-                 class="w-16 h-16 object-contain drop-shadow-lg transition-transform duration-300"
-                 :class="open ? 'scale-95' : 'group-hover:scale-105'">
+            {{-- Robot GIF — ukuran besar, setara robot headset --}}
+            <img src="{{ asset('images/Nubi-AI.gif') }}"
+                 alt="Nubi AI"
+                 x-on:click="!dragging && toggleChat()"
+                 class="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-200 select-none"
+                 :class="open ? 'scale-95' : 'hover:scale-105'"
+                 draggable="false">
 
-            {{-- Unread badge (muncul saat ada pesan baru dari bot tapi modal tertutup) --}}
+            {{-- Unread badge --}}
             <span x-show="unreadCount > 0 && !open" x-cloak
-                  class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white dark:border-navy-900 rounded-full flex items-center justify-center">
+                  class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white dark:border-navy-900 rounded-full flex items-center justify-center pointer-events-none">
                 <span class="text-[9px] text-white font-bold" x-text="unreadCount > 9 ? '9+' : unreadCount"></span>
             </span>
-        </button>
+        </div>
     </div>
 </div>
 
@@ -209,30 +216,183 @@ function nubiAI() {
         chatUrl: '',
         userPhoto: '',
         userName: '',
+        showTooltip: false,
+
+        // Drag state
+        dragging: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        widgetStartRight: 24,
+        widgetStartBottom: 24,
+        hasDragged: false,
+        modalStyle: '',
 
         init() {
-            // Baca config dari data-* attribute (hindari Blade syntax di dalam JS)
             const widget = document.getElementById('nubi-ai-widget');
             this.chatUrl   = widget ? widget.dataset.chatUrl   : '';
             this.userPhoto = widget ? widget.dataset.userPhoto : '';
             this.userName  = widget ? decodeURIComponent(widget.dataset.userName || '') : '';
 
-            // Restore chat history from sessionStorage
+            // Restore chat history
             try {
                 const saved = sessionStorage.getItem('nubi_chat_history');
                 if (saved) this.messages = JSON.parse(saved);
             } catch (e) {}
+
+            // Restore posisi dari localStorage
+            try {
+                const pos = JSON.parse(localStorage.getItem('nubi_pos') || 'null');
+                if (pos && widget) {
+                    widget.style.right  = pos.right  + 'px';
+                    widget.style.bottom = pos.bottom + 'px';
+                    widget.style.left   = 'auto';
+                    widget.style.top    = 'auto';
+                }
+            } catch (e) {}
+
+            // Keyboard shortcut: Ctrl + Delete
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Delete') {
+                    e.preventDefault();
+                    const w = document.getElementById('nubi-ai-widget');
+                    if (w) {
+                        if (w.style.display === 'none') {
+                            w.style.display = '';
+                        } else {
+                            w.style.display = 'none';
+                            this.open = false;
+                        }
+                    }
+                }
+            });
+
+            // Tooltip hint sekali
+            setTimeout(() => {
+                this.showTooltip = true;
+                setTimeout(() => { this.showTooltip = false; }, 3000);
+            }, 2000);
+
+            // Bind drag events ke document
+            document.addEventListener('mousemove', (e) => this.onDragMove(e));
+            document.addEventListener('mouseup',   (e) => this.onDragEnd(e));
         },
 
         toggleChat() {
             this.open = !this.open;
             if (this.open) {
                 this.unreadCount = 0;
+                this.updateModalStyle();
                 this.$nextTick(() => {
                     this.scrollToBottom();
                     if (this.$refs.inputRef) this.$refs.inputRef.focus();
                 });
             }
+        },
+
+        // ── Drag logic ──
+        startDrag(e) {
+            if (e.button !== 0) return;
+            this.dragging  = false; // tentukan di move
+            this.hasDragged = false;
+            this.dragStartX = e.clientX;
+            this.dragStartY = e.clientY;
+
+            const widget = document.getElementById('nubi-ai-widget');
+            const rect   = widget.getBoundingClientRect();
+            // simpan posisi awal sebagai right/bottom dari viewport
+            this.widgetStartRight  = window.innerWidth  - rect.right;
+            this.widgetStartBottom = window.innerHeight - rect.bottom;
+
+            e.preventDefault();
+        },
+
+        onDragMove(e) {
+            if (this.dragStartX === undefined || (!this.dragging && Math.abs(e.clientX - this.dragStartX) < 4 && Math.abs(e.clientY - this.dragStartY) < 4)) return;
+            if (this.dragStartX === undefined) return;
+
+            const dx = e.clientX - this.dragStartX;
+            const dy = e.clientY - this.dragStartY;
+            if (!this.dragging && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+                this.dragging = true;
+                this.hasDragged = true;
+            }
+            if (!this.dragging) return;
+
+            const widget = document.getElementById('nubi-ai-widget');
+            if (!widget) return;
+
+            // right berkurang kalau gerak ke kanan (karena fixed right)
+            let newRight  = this.widgetStartRight  - dx;
+            let newBottom = this.widgetStartBottom + dy;
+
+            // Clamp agar tidak keluar layar
+            const wW = widget.offsetWidth  || 80;
+            const wH = widget.offsetHeight || 80;
+            newRight  = Math.max(8, Math.min(window.innerWidth  - wW - 8, newRight));
+            newBottom = Math.max(8, Math.min(window.innerHeight - wH - 8, newBottom));
+
+            widget.style.right  = newRight  + 'px';
+            widget.style.bottom = newBottom + 'px';
+            widget.style.left   = 'auto';
+            widget.style.top    = 'auto';
+
+            if (this.open) this.updateModalStyle();
+        },
+
+        onDragEnd(e) {
+            if (!this.dragging) {
+                this.dragStartX = undefined;
+                return;
+            }
+            this.dragging = false;
+            this.dragStartX = undefined;
+
+            // Simpan posisi ke localStorage
+            const widget = document.getElementById('nubi-ai-widget');
+            if (widget) {
+                try {
+                    localStorage.setItem('nubi_pos', JSON.stringify({
+                        right:  parseFloat(widget.style.right)  || 24,
+                        bottom: parseFloat(widget.style.bottom) || 24,
+                    }));
+                } catch (e) {}
+            }
+        },
+
+        // Hitung posisi modal supaya selalu muncul ke atas & tidak kepotong
+        updateModalStyle() {
+            this.$nextTick(() => {
+                const widget = document.getElementById('nubi-ai-widget');
+                const modal  = document.getElementById('nubi-chat-modal');
+                if (!widget || !modal) return;
+
+                const wRect     = widget.getBoundingClientRect();
+                const modalH    = 520;
+                const modalW    = window.innerWidth >= 640 ? 380 : 340;
+                const gap       = 8;
+                const padding   = 8;
+
+                // Default: muncul ke atas
+                let bottom = wRect.height + gap;
+                let right  = 0;
+
+                // Cek apakah modal kepotong di atas
+                if (wRect.top - modalH - gap < padding) {
+                    // Muncul ke bawah kalau tidak muat ke atas
+                    bottom = -(modalH + gap);
+                }
+
+                // Cek apakah modal kepotong di kiri
+                if (wRect.left - modalW + wRect.width < padding) {
+                    right = -(modalW - wRect.width);
+                    right = Math.min(right, 0);
+                }
+
+                modal.style.bottom = bottom + 'px';
+                modal.style.right  = right  + 'px';
+                modal.style.top    = 'auto';
+                modal.style.left   = 'auto';
+            });
         },
 
         async sendMessage() {
@@ -241,17 +401,13 @@ function nubiAI() {
 
             this.inputMessage = '';
             this.$nextTick(() => {
-                if (this.$refs.inputRef) {
-                    this.$refs.inputRef.style.height = 'auto';
-                }
+                if (this.$refs.inputRef) this.$refs.inputRef.style.height = 'auto';
             });
 
-            // Add user message
             this.messages.push({ role: 'user', content: msg });
             this.saveHistory();
             this.scrollToBottom();
 
-            // Show typing
             this.typing = true;
             this.scrollToBottom();
 
@@ -270,16 +426,14 @@ function nubiAI() {
                 });
 
                 const data = await response.json();
-
-                if (data.error) {
-                    this.messages.push({ role: 'assistant', content: '❌ ' + data.error });
-                } else {
-                    this.messages.push({ role: 'assistant', content: data.reply });
-                    if (!this.open) this.unreadCount++;
-                }
+                this.messages.push({
+                    role: 'assistant',
+                    content: data.error ? '❌ ' + data.error : data.reply
+                });
+                if (!this.open) this.unreadCount++;
 
             } catch (err) {
-                this.messages.push({ role: 'assistant', content: '❌ Gagal terhubung ke Nubi AI. Periksa koneksi internet kamu.' });
+                this.messages.push({ role: 'assistant', content: '❌ Gagal terhubung ke Nubi AI. Periksa koneksi internet.' });
             } finally {
                 this.typing = false;
                 this.saveHistory();
@@ -294,37 +448,24 @@ function nubiAI() {
 
         scrollToBottom() {
             this.$nextTick(() => {
-                const container = document.getElementById('nubi-messages');
-                if (container) {
-                    container.scrollTop = container.scrollHeight;
-                }
+                const c = document.getElementById('nubi-messages');
+                if (c) c.scrollTop = c.scrollHeight;
             });
         },
 
         saveHistory() {
             try {
-                // Simpan maks 30 pesan di sessionStorage
-                const toSave = this.messages.slice(-30);
-                sessionStorage.setItem('nubi_chat_history', JSON.stringify(toSave));
+                sessionStorage.setItem('nubi_chat_history', JSON.stringify(this.messages.slice(-30)));
             } catch (e) {}
         },
 
         formatMessage(text) {
             if (!text) return '';
-            // Escape HTML
-            let safe = text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-
-            // Bold **text** atau *text*
-            safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-            safe = safe.replace(/\*(.+?)\*/g, '<em>$1</em>');
-
-            // Newlines
-            safe = safe.replace(/\n/g, '<br>');
-
-            return safe;
+            let s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            s = s.replace(/\n/g, '<br>');
+            return s;
         },
 
         autoResize(el) {
@@ -337,31 +478,20 @@ function nubiAI() {
 
 {{-- ══ NUBI AI STYLES ══ --}}
 <style>
-    /* Pastikan widget tidak ketutup sidebar/header */
     #nubi-ai-widget {
-        z-index: 9990;
+        touch-action: none;
     }
-
-    /* Smooth scroll di message container */
     #nubi-messages {
         scroll-behavior: smooth;
     }
-
-    /* Custom scrollbar di chat */
     #nubi-messages::-webkit-scrollbar { width: 4px; }
     #nubi-messages::-webkit-scrollbar-track { background: transparent; }
     #nubi-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
     .dark #nubi-messages::-webkit-scrollbar-thumb { background: #334155; }
 
-    /* Mobile: lebih kecil dan posisi lebih ke tengah */
     @@media (max-width: 400px) {
-        #nubi-ai-widget {
-            right: 12px;
-            bottom: 12px;
-        }
         #nubi-chat-modal {
-            width: calc(100vw - 24px) !important;
-            right: -4px !important;
+            width: calc(100vw - 32px) !important;
         }
     }
 </style>
