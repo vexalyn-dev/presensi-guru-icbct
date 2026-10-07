@@ -200,10 +200,11 @@
                                         <i data-lucide="lock"
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                                         <input type="password" name="password" id="password"
+                                            placeholder="••••••••"
                                             class="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('password') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                                        <button type="button" onclick="togglePassword('password')"
+                                        <button type="button" id="password-toggle" onclick="togglePassword('password', 'password-toggle')"
                                             class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
-                                            <i data-lucide="eye" class="w-4 h-4"></i>
+                                            <svg id="password-eye-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                         </button>
                                     </div>
                                     <p class="text-xs text-slate-500 mt-1">Kosongkan jika tidak ingin mengubah</p>
@@ -904,20 +905,23 @@
             }
 
             // Toggle Password Visibility
-            function togglePassword(id) {
-                const input = document.getElementById(id);
-                if (!input) return;
-                const btn = input.parentElement.querySelector('button[onclick*="togglePassword"]');
-                const icon = btn ? btn.querySelector('i[data-lucide]') : null;
+            var _pwEyeSVG    = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+            var _pwEyeOffSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+            function togglePassword(inputId, btnId) {
+                var input = document.getElementById(inputId);
+                var btn   = document.getElementById(btnId);
+                if (!input || !btn) return;
 
                 if (input.type === 'password') {
                     input.type = 'text';
-                    if (icon) { icon.setAttribute('data-lucide', 'eye-off'); }
+                    btn.innerHTML = _pwEyeOffSVG;
+                    btn.title = 'Sembunyikan password';
                 } else {
                     input.type = 'password';
-                    if (icon) { icon.setAttribute('data-lucide', 'eye'); }
+                    btn.innerHTML = _pwEyeSVG;
+                    btn.title = 'Tampilkan password';
                 }
-                if (icon && window.lucide) lucide.createIcons();
             }
 
             // Auto-hide Toast
