@@ -200,9 +200,9 @@
                                         <i data-lucide="lock"
                                             class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                                         <input type="password" name="password" id="password"
-                                            class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('password') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                            class="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 {{ $errors->has('password') ? 'border-red-500 dark:border-red-500' : 'border-slate-200 dark:border-slate-600' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                                         <button type="button" onclick="togglePassword('password')"
-                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
                                             <i data-lucide="eye" class="w-4 h-4"></i>
                                         </button>
                                     </div>
@@ -907,13 +907,17 @@
             function togglePassword(id) {
                 const input = document.getElementById(id);
                 if (!input) return;
-                
+                const btn = input.parentElement.querySelector('button[onclick*="togglePassword"]');
+                const icon = btn ? btn.querySelector('i[data-lucide]') : null;
+
                 if (input.type === 'password') {
                     input.type = 'text';
+                    if (icon) { icon.setAttribute('data-lucide', 'eye-off'); }
                 } else {
                     input.type = 'password';
+                    if (icon) { icon.setAttribute('data-lucide', 'eye'); }
                 }
-                if (window.lucide) lucide.createIcons();
+                if (icon && window.lucide) lucide.createIcons();
             }
 
             // Auto-hide Toast
