@@ -21,7 +21,7 @@
                     
                     <div>
                         <div class="flex items-center gap-2 mb-2">
-                            <h2 class="text-2xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">Selamat Datang, {{ Auth::user()->name }}! <span class="bg-clip-text-none text-white">👋</span></h2>
+                            <h2 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">Selamat Datang, {{ Auth::user()->name }}! <span class="bg-clip-text-none text-white">👋</span></h2>
                             <span class="w-2.5 h-2.5 bg-green-500 rounded-full pulse-dot flex-shrink-0" style="display:inline-block!important; animation:pulse-green 2s infinite!important;"></span>
                         </div>
                         <p class="text-slate-300 text-sm">Kelola presensi guru dengan mudah dan efisien</p>
@@ -385,7 +385,7 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto hidden md:block">
             <table class="w-full">
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>
@@ -492,6 +492,33 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Mobile card list --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            @forelse($recentAttendances as $att)
+            <div class="px-4 py-3 flex items-center gap-3">
+                <div class="relative flex-shrink-0">
+                    <img src="{{ $att->user->photo_url }}" class="w-10 h-10 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700">
+                    <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 {{ $att->user->is_active ? 'bg-green-500' : 'bg-slate-400' }} border-2 border-white dark:border-slate-800 rounded-full"></div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-navy-800 dark:text-white truncate">{{ $att->user->name }}</p>
+                    <div class="flex flex-wrap items-center gap-2 mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
+                        <span>{{ \Carbon\Carbon::parse($att->date)->format('d M Y') }}</span>
+                        @if($att->check_in)<span class="flex items-center gap-0.5 text-green-600"><i data-lucide="log-in" class="w-3 h-3"></i>{{ \Carbon\Carbon::parse($att->check_in)->format('H:i') }}</span>@endif
+                        @if($att->check_out)<span class="flex items-center gap-0.5 text-blue-500"><i data-lucide="log-out" class="w-3 h-3"></i>{{ \Carbon\Carbon::parse($att->check_out)->format('H:i') }}</span>@endif
+                    </div>
+                </div>
+                @php
+                    $statusClasses = ['Hadir'=>'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400','Terlambat'=>'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400','Izin'=>'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400','Alpha'=>'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'];
+                    $sc = $statusClasses[$att->status] ?? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
+                @endphp
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0 {{ $sc }}">{{ $att->status }}</span>
+            </div>
+            @empty
+            <div class="px-4 py-8 text-center text-sm text-slate-400">Belum ada data presensi</div>
+            @endforelse
         </div>
     </div>
 </div>

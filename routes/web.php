@@ -22,6 +22,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetOtpController;
 use App\Http\Controllers\TeachingScheduleController;
 use App\Http\Controllers\ClassAttendanceController;
 use App\Http\Controllers\Teacher\ProfileController as TeacherProfileController;
@@ -86,13 +87,24 @@ Route::middleware(['guest'])->group(function () {
         ->middleware('throttle:5,1')
         ->name('register.post');
 
-    // Password Reset
+    // Password Reset via OTP
     Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
         ->middleware('throttle:3,1')
         ->name('password.email');
-    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
-    Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+
+    // OTP Verification
+    Route::get('/verify-otp', [PasswordResetOtpController::class, 'showVerifyForm'])->name('password.verify-otp');
+    Route::post('/verify-otp', [PasswordResetOtpController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('password.otp.verify');
+    Route::post('/verify-otp/resend', [PasswordResetOtpController::class, 'resendOtp'])
+        ->middleware('throttle:3,1')
+        ->name('password.otp.resend');
+
+    // New Password (setelah OTP terverifikasi)
+    Route::get('/reset-password', [PasswordResetOtpController::class, 'showResetForm'])->name('password.reset.form');
+    Route::post('/reset-password', [PasswordResetOtpController::class, 'resetPassword'])->name('password.otp.reset');
 });
 
 // Protected Routes

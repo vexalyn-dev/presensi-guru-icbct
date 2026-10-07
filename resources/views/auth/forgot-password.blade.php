@@ -454,7 +454,7 @@
         {{-- Form state --}}
         <div id="formState" @if(session('status')) hidden @endif>
             <p class="section-title">Lupa Password?</p>
-            <p class="section-sub">Masukkan email terdaftar dan kami akan mengirimkan link untuk mereset password Anda.</p>
+            <p class="section-sub">Masukkan email terdaftar dan kami akan mengirimkan kode OTP untuk mereset password Anda.</p>
 
             @if ($errors->any())
             <div class="alert alert-error">
@@ -484,7 +484,7 @@
                 </div>
 
                 <button type="submit" class="btn-primary" id="fpBtn">
-                    <span class="btn-text">Kirim Link Reset</span>
+                    <span class="btn-text">Kirim Kode OTP</span>
                     <span class="btn-spinner"><div class="spinner"></div></span>
                 </button>
             </form>
@@ -505,11 +505,11 @@
                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <p class="sent-title">Email Terkirim!</p>
+            <p class="sent-title">Kode OTP Terkirim!</p>
             <p class="sent-desc">
-                Link reset password telah dikirim ke<br>
+                Kode OTP reset password telah dikirim ke<br>
                 <span class="sent-email" id="sentEmail">{{ old('email') }}</span><br><br>
-                Silakan cek inbox atau folder spam Anda.
+                Silakan cek inbox atau folder spam Anda, lalu masukkan kode tersebut di halaman berikutnya.
             </p>
 
             <a href="{{ route('login') }}" class="btn-primary" style="text-decoration:none;">

@@ -274,7 +274,51 @@
 
     <!-- Table -->
     <div class="card overflow-hidden" x-show="!loading">
-        <div class="overflow-x-auto">
+
+        {{-- ── MOBILE CARD VIEW (< md) ── --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            <template x-for="att in attendances" :key="att.id">
+                <div class="p-4">
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <img x-show="att.user?.photo_url" :src="att.user?.photo_url || ''" :alt="att.user?.name || '?'"
+                                 class="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0 profile-avatar"
+                                 x-on:error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'">
+                            <div x-show="!att.user?.photo_url"
+                                 class="profile-avatar bg-gradient-to-br from-gold-400 to-gold-500 flex items-center justify-center text-navy-900 font-bold text-sm flex-shrink-0">
+                                <span x-text="att.user?.name?.charAt(0)?.toUpperCase() || '?'"></span>
+                            </div>
+                            <p class="text-sm font-semibold text-navy-800 dark:text-white truncate" x-text="att.user?.name || '-'"></p>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0"
+                              :class="getStatusClass(att.status)" x-text="att.status"></span>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="calendar" class="w-3 h-3"></i>
+                            <span x-text="formatDate(att.date)"></span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="log-in" class="w-3 h-3 text-green-500"></i>
+                            <span x-text="formatTime(att.check_in)" class="font-mono"></span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="log-out" class="w-3 h-3 text-red-400"></i>
+                            <span x-text="formatTime(att.check_out)" class="font-mono"></span>
+                        </span>
+                    </div>
+                </div>
+            </template>
+            <template x-if="attendances.length === 0 && !loading">
+                <div class="px-4 py-12 text-center">
+                    <i data-lucide="inbox" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada data presensi</p>
+                </div>
+            </template>
+        </div>
+
+        {{-- ── DESKTOP TABLE (>= md) ── --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>

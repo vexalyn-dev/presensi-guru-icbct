@@ -157,7 +157,7 @@
             </div>
             <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-semibold">{{ count($performance) }} guru</span>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto hidden md:block">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800">
@@ -208,9 +208,35 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Mobile card list --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            @forelse($performance as $i => $row)
+            @php $pctBar = min(100, ($row['avg_menit'] / 120) * 100); @endphp
+            <div class="px-4 py-3 flex items-center gap-3">
+                <span class="text-xs font-mono text-slate-400 w-5 flex-shrink-0">{{ $i+1 }}</span>
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                    {{ strtoupper(substr($row['user']->name ?? 'X', 0, 1)) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-navy-800 dark:text-white truncate">{{ $row['user']->name ?? '-' }}</p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[10px] text-slate-400">{{ $row['total_sesi'] }} sesi</span>
+                        <span class="font-bold font-mono text-xs {{ $row['avg_menit'] >= 90 ? 'text-emerald-600 dark:text-emerald-400' : ($row['avg_menit'] >= 45 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400') }}">{{ $row['rata_rata_durasi'] }}</span>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden mt-1.5">
+                        <div class="h-full rounded-full {{ $row['avg_menit'] >= 90 ? 'bg-emerald-500' : ($row['avg_menit'] >= 45 ? 'bg-amber-500' : 'bg-red-500') }}" style="width: {{ $pctBar }}%"></div>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="px-4 py-10 text-center">
+                <p class="text-sm text-slate-400">Tidak ada data untuk {{ $selectedMonthLabel }}.</p>
+            </div>
+            @endforelse
+        </div>
     </div>
 </div>
-
 
 <script>
 // Dropdown Portal (sama persis dengan attendance.blade.php)

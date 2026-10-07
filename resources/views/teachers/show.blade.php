@@ -6,10 +6,10 @@
 <div class="fade-in">
     
     <!-- Page Header with Modern Back Button -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div class="flex items-center gap-4">
             <!-- Modern Back Button -->
-            <a href="{{ route('teachers.index') }}" class="group flex items-center gap-2.5 px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
+            <a href="{{ route('teachers.index') }}" class="group flex items-center gap-2.5 px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 flex-shrink-0">
                 <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
                 <span>Kembali</span>
             </a>
@@ -105,7 +105,38 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                {{-- Mobile card list --}}
+                <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                    @forelse($attendances as $att)
+                    @php
+                        $statusConfigM = [
+                            'Hadir'    => ['bg' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',  'icon' => 'check-circle'],
+                            'Terlambat'=> ['bg' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400','icon' => 'clock'],
+                            'Izin'     => ['bg' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',       'icon' => 'file-check'],
+                            'Alpha'    => ['bg' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',           'icon' => 'x-circle'],
+                        ];
+                        $cfgM = $statusConfigM[$att->status] ?? $statusConfigM['Hadir'];
+                    @endphp
+                    <div class="px-4 py-3 flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-semibold text-navy-800 dark:text-white">{{ \Carbon\Carbon::parse($att->date)->format('d M Y') }}</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-2">
+                                <span class="flex items-center gap-1"><i data-lucide="log-in" class="w-3 h-3 text-green-500"></i>{{ $att->check_in ?? '-' }}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="log-out" class="w-3 h-3 text-blue-500"></i>{{ $att->check_out ?? '-' }}</span>
+                            </p>
+                        </div>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0 {{ $cfgM['bg'] }}">
+                            <i data-lucide="{{ $cfgM['icon'] }}" class="w-3.5 h-3.5"></i>
+                            {{ $att->status }}
+                        </span>
+                    </div>
+                    @empty
+                    <div class="px-4 py-8 text-center text-sm text-slate-400">Belum ada riwayat presensi</div>
+                    @endforelse
+                </div>
+
+                {{-- Desktop table --}}
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-slate-50 dark:bg-slate-800/50">
                             <tr>
@@ -151,32 +182,11 @@
                                     <td class="px-6 py-4">
                                         @php
                                             $statusConfig = [
-                                                'Hadir' => [
-                                                    'bg' => 'bg-green-100 dark:bg-green-900/30',
-                                                    'text' => 'text-green-700 dark:text-green-400',
-                                                    'icon' => 'check-circle',
-                                                    'iconColor' => 'text-green-600 dark:text-green-400'
-                                                ],
-                                                'Terlambat' => [
-                                                    'bg' => 'bg-yellow-100 dark:bg-yellow-900/30',
-                                                    'text' => 'text-yellow-700 dark:text-yellow-400',
-                                                    'icon' => 'clock',
-                                                    'iconColor' => 'text-yellow-600 dark:text-yellow-400'
-                                                ],
-                                                'Izin' => [
-                                                    'bg' => 'bg-blue-100 dark:bg-blue-900/30',
-                                                    'text' => 'text-blue-700 dark:text-blue-400',
-                                                    'icon' => 'file-check',
-                                                    'iconColor' => 'text-blue-600 dark:text-blue-400'
-                                                ],
-                                                'Alpha' => [
-                                                    'bg' => 'bg-red-100 dark:bg-red-900/30',
-                                                    'text' => 'text-red-700 dark:text-red-400',
-                                                    'icon' => 'x-circle',
-                                                    'iconColor' => 'text-red-600 dark:text-red-400'
-                                                ],
+                                                'Hadir' => ['bg' => 'bg-green-100 dark:bg-green-900/30','text' => 'text-green-700 dark:text-green-400','icon' => 'check-circle','iconColor' => 'text-green-600 dark:text-green-400'],
+                                                'Terlambat' => ['bg' => 'bg-yellow-100 dark:bg-yellow-900/30','text' => 'text-yellow-700 dark:text-yellow-400','icon' => 'clock','iconColor' => 'text-yellow-600 dark:text-yellow-400'],
+                                                'Izin' => ['bg' => 'bg-blue-100 dark:bg-blue-900/30','text' => 'text-blue-700 dark:text-blue-400','icon' => 'file-check','iconColor' => 'text-blue-600 dark:text-blue-400'],
+                                                'Alpha' => ['bg' => 'bg-red-100 dark:bg-red-900/30','text' => 'text-red-700 dark:text-red-400','icon' => 'x-circle','iconColor' => 'text-red-600 dark:text-red-400'],
                                             ];
-                                            
                                             $config = $statusConfig[$att->status] ?? $statusConfig['Hadir'];
                                         @endphp
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold {{ $config['bg'] }} {{ $config['text'] }}">

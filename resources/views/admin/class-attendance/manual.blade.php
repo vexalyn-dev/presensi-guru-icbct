@@ -301,7 +301,7 @@
             </span>
         </div>
         
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto hidden md:block">
             <table class="w-full">
                 <thead>
                     <tr class="bg-slate-50 dark:bg-slate-800/50">
@@ -396,6 +396,53 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Mobile card list --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            @forelse($schedules as $schedule)
+            @php $att = $schedule->todayAttendance; @endphp
+            <div class="p-4 flex items-start gap-3">
+                <img src="{{ $schedule->user->teacher->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($schedule->user->name) . '&background=0F172A&color=fff' }}"
+                     class="w-10 h-10 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <p class="text-sm font-bold text-navy-800 dark:text-white truncate">{{ $schedule->user->name }}</p>
+                        @if($att)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold {{ $att->status === 'Hadir' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' }}">{{ $att->status }}</span>
+                        @else
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Belum</span>
+                        @endif
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+                        <span class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded font-bold text-[10px]">{{ $schedule->classroom->name }}</span>
+                        <span>Jam ke-{{ $schedule->period }}</span>
+                        <span>{{ $schedule->subject->name ?? '-' }}</span>
+                        @if($att && $att->check_in_time)
+                        <span class="flex items-center gap-0.5 text-green-600"><i data-lucide="log-in" class="w-3 h-3"></i>{{ \Carbon\Carbon::parse($att->check_in_time)->format('H:i') }}</span>
+                        @endif
+                        @if($att && $att->check_out_time)
+                        <span class="flex items-center gap-0.5 text-red-500"><i data-lucide="log-out" class="w-3 h-3"></i>{{ \Carbon\Carbon::parse($att->check_out_time)->format('H:i') }}</span>
+                        @endif
+                    </div>
+                </div>
+                @if($att)
+                <form method="POST" action="{{ route('admin.class-attendance.manual.destroy', $att->id) }}"
+                      onsubmit="return confirm('Yakin hapus presensi ini?')" class="flex-shrink-0">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="p-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 rounded-lg transition-all">
+                        <i data-lucide="trash-2" class="w-4 h-4 text-red-600 dark:text-red-400"></i>
+                    </button>
+                </form>
+                @endif
+            </div>
+            @empty
+            <div class="px-4 py-10 text-center">
+                <i data-lucide="inbox" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada jadwal hari ini</p>
+            </div>
+            @endforelse
         </div>
     </div>
 </div>

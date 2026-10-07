@@ -75,8 +75,8 @@
 
     <!-- Action Bar -->
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <form action="{{ route('teachers.index') }}" method="GET" id="filterForm" class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            <div class="relative flex-1 lg:w-80">
+        <form action="{{ route('teachers.index') }}" method="GET" id="filterForm" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+            <div class="relative flex-1 sm:w-64 lg:w-80">
                 <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                 <input type="text" id="teacherSearch" name="search" value="{{ request('search') }}" placeholder="Cari nama, kode guru, telepon..."
                        class="w-full pl-11 pr-4 py-3 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 transition-all shadow-sm hover:shadow-md"
@@ -226,7 +226,92 @@
 
     <!-- Teachers Table -->
     <div class="card overflow-hidden">
-        <div class="overflow-x-auto">
+
+        {{-- ═══════════════════════════════════════
+             MOBILE CARD LIST (< md breakpoint)
+        ═══════════════════════════════════════ --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            @forelse($teachers as $teacher)
+            @php
+                $idGuruM = $teacher->id_guru ?: 'GURU-' . str_pad($teacher->id, 5, '0', STR_PAD_LEFT);
+                $numericIdM = '00000';
+                if (preg_match('/GURU-(\d{5})/', $idGuruM, $matchesM)) { $numericIdM = $matchesM[1]; }
+                else { $numericIdM = str_pad(preg_replace('/\D/', '', $idGuruM), 5, '0', STR_PAD_LEFT); }
+                $displayCodeM = 'SMKICBCT-' . $numericIdM;
+                $mapelObjsM = optional($teacher->teacher)->subjects ?? collect();
+                $mapelNamesM = $mapelObjsM->pluck('name')->filter()->unique()->values();
+                $mapelM = count($mapelNamesM) > 0 ? $mapelNamesM : (optional($teacher->teacher)->major_specialty ?? $teacher->subject);
+                $mapelM = $mapelM instanceof \Illuminate\Support\Collection ? $mapelM->join(', ') : ($mapelM ?: '');
+            @endphp
+            <div class="p-4">
+                <div class="flex items-start gap-3">
+                    {{-- Checkbox --}}
+                    <label class="tcb-label mt-1 flex-shrink-0" style="margin:0;">
+                        <div class="tcb-box" aria-hidden="true">
+                            <svg class="tcb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <input type="checkbox" name="teacher_ids[]" value="{{ $teacher->id }}"
+                               class="tcb-native teacher-checkbox" onchange="updateBulkActions()">
+                    </label>
+                    {{-- Avatar --}}
+                    <img src="{{ $teacher->photo_url }}" alt="{{ $teacher->name }}"
+                         class="w-11 h-11 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
+                    {{-- Info --}}
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <p class="text-sm font-bold text-navy-800 dark:text-white truncate">{{ $teacher->name }}</p>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold
+                                {{ $teacher->is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $teacher->is_active ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                                {{ $teacher->is_active ? 'Aktif' : 'Nonaktif' }}
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-mono mt-0.5">{{ $displayCodeM }}</p>
+                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                            @if($teacher->teacher_code)
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Kode: <span class="font-semibold">{{ $teacher->teacher_code }}</span></span>
+                            @endif
+                            @if($mapelM)
+                                <span class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-[10px] font-bold uppercase">{{ $mapelM }}</span>
+                            @endif
+                        </div>
+                        @if($teacher->email)
+                            <p class="text-[10px] text-slate-400 truncate mt-0.5">{{ $teacher->email }}</p>
+                        @endif
+                        {{-- Aksi --}}
+                        <div class="flex items-center gap-1.5 mt-2.5">
+                            <a href="{{ route('teachers.show', $teacher) }}"
+                               class="flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-[11px] font-medium text-slate-600 dark:text-slate-400 transition-all">
+                                <i data-lucide="eye" class="w-3 h-3"></i> Detail
+                            </a>
+                            <a href="{{ route('teachers.edit', $teacher) }}"
+                               class="flex items-center gap-1 px-2.5 py-1.5 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg text-[11px] font-medium text-blue-600 dark:text-blue-400 transition-all">
+                                <i data-lucide="pencil" class="w-3 h-3"></i> Edit
+                            </a>
+                            <button type="button"
+                                    class="flex items-center gap-1 px-2.5 py-1.5 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-lg text-[11px] font-medium text-red-600 dark:text-red-400 transition-all delete-btn"
+                                    data-delete-url="{{ route('teachers.destroy', $teacher) }}"
+                                    data-delete-label="{{ $teacher->name }}">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="px-4 py-12 text-center">
+                <i data-lucide="users" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada data guru</p>
+            </div>
+            @endforelse
+        </div>
+
+        {{-- ═══════════════════════════════════════
+             DESKTOP TABLE (>= md breakpoint)
+        ═══════════════════════════════════════ --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full" id="teachersTable">
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>
@@ -367,7 +452,7 @@
     @endforelse
 </tbody>
             </table>
-        </div>
+        </div>{{-- end desktop table --}}
 
         @if($teachers->hasPages())
             <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">

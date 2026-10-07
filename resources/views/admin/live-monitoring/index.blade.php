@@ -458,7 +458,39 @@
                 x-text="data.belum_scan_keluar.length + ' guru'"
             ></span>
         </div>
-        <div class="overflow-x-auto">
+
+        {{-- Mobile card list --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            <template x-for="(item, i) in data.belum_scan_keluar" :key="i">
+                <div class="px-4 py-3 flex items-center gap-3">
+                    <template x-if="item.user.photo">
+                        <img :src="item.user.photo" :alt="item.user.name" class="w-9 h-9 rounded-full object-cover flex-shrink-0"/>
+                    </template>
+                    <template x-if="!item.user.photo">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0" x-text="item.user.initial"></div>
+                    </template>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-navy-800 dark:text-white truncate" x-text="item.user.name"></p>
+                        <p class="text-[10px] text-slate-400 font-mono" x-text="item.user.teacher_code"></p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                  :class="item.status_presensi === 'Tepat Waktu' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'">
+                                <span x-text="item.status_presensi"></span>
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-mono">Masuk: <span x-text="item.check_in_time"></span></span>
+                        </div>
+                    </div>
+                    <span class="text-blue-600 dark:text-blue-400 font-mono font-bold text-xs flex-shrink-0" x-text="formatDuration(item.timestamp_masuk)"></span>
+                </div>
+            </template>
+            <div x-show="data.belum_scan_keluar.length === 0" class="px-5 py-10 text-center">
+                <i data-lucide="check-circle" class="w-8 h-8 text-emerald-400 mx-auto mb-2"></i>
+                <p class="text-sm text-slate-400">Semua guru sudah scan keluar.</p>
+            </div>
+        </div>
+
+        {{-- Desktop table --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr
@@ -582,7 +614,37 @@
                 x-text="data.sudah_scan_keluar.length + ' guru'"
             ></span>
         </div>
-        <div class="overflow-x-auto">
+
+        {{-- Mobile card --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            <template x-for="(item, i) in data.sudah_scan_keluar" :key="i">
+                <div class="px-4 py-3 flex items-center gap-3">
+                    <template x-if="item.user.photo">
+                        <img :src="item.user.photo" :alt="item.user.name" class="w-9 h-9 rounded-full object-cover flex-shrink-0"/>
+                    </template>
+                    <template x-if="!item.user.photo">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0" x-text="item.user.initial"></div>
+                    </template>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-navy-800 dark:text-white truncate" x-text="item.user.name"></p>
+                        <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                  :class="item.status_presensi === 'Tepat Waktu' || item.status_presensi === 'Hadir' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'">
+                                <span x-text="item.status_presensi"></span>
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-mono"><span x-text="item.check_in_time"></span> – <span x-text="item.check_out_time"></span></span>
+                        </div>
+                    </div>
+                    <span class="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-xs flex-shrink-0" x-text="item.durasi_label"></span>
+                </div>
+            </template>
+            <div x-show="data.sudah_scan_keluar.length === 0" class="px-5 py-10 text-center">
+                <i data-lucide="clock" class="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                <p class="text-sm text-slate-400">Belum ada guru yang scan keluar hari ini.</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto hidden md:block">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800 text-left">

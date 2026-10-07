@@ -115,7 +115,44 @@
 
     <!-- Data Table -->
     <div class="card overflow-hidden">
-        <div class="overflow-x-auto">
+
+        {{-- Mobile card list --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            @forelse($classAttendances as $att)
+            <div class="px-4 py-3">
+                <div class="flex items-center justify-between gap-3 mb-1.5">
+                    <div>
+                        <p class="text-sm font-bold text-navy-800 dark:text-white">{{ \Carbon\Carbon::parse($att->date)->format('d M Y') }}</p>
+                        <p class="text-[10px] text-slate-500">{{ \Carbon\Carbon::parse($att->date)->locale('id')->isoFormat('dddd') }}</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0
+                        {{ ($att->status === 'Hadir' || $att->status === 'Tepat Waktu' || $att->status === 'Selesai') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : '' }}
+                        {{ $att->status === 'Terlambat' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : '' }}
+                        {{ ($att->status === 'Izin' || $att->status === 'Sakit') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : '' }}
+                        {{ $att->status === 'Alpha' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : '' }}">
+                        {{ $att->status }}
+                    </span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
+                    <span class="font-semibold text-navy-700 dark:text-slate-300">{{ $att->classroom->name ?? '-' }}</span>
+                    <span>•</span>
+                    <span>{{ $att->teachingSchedule?->subject?->name ?? $att->subject?->name ?? '-' }}</span>
+                    <span>•</span>
+                    <span>Jam ke-{{ $att->period }}</span>
+                    @if($att->check_in_time)<span class="flex items-center gap-0.5 text-green-600"><i data-lucide="log-in" class="w-3 h-3"></i>{{ \Carbon\Carbon::parse($att->check_in_time)->format('H:i') }}</span>@endif
+                    @if($att->check_out_time)<span class="flex items-center gap-0.5 text-blue-500"><i data-lucide="log-out" class="w-3 h-3"></i>{{ \Carbon\Carbon::parse($att->check_out_time)->format('H:i') }}</span>@endif
+                </div>
+            </div>
+            @empty
+            <div class="px-4 py-10 text-center">
+                <i data-lucide="inbox" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Tidak ada data presensi kelas</p>
+            </div>
+            @endforelse
+        </div>
+
+        {{-- Desktop table --}}
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>

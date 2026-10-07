@@ -170,7 +170,7 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full hidden sm:table">
                 <thead class="bg-slate-50 dark:bg-slate-800/50">
                     <tr>
                         <th class="px-6 py-4 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
@@ -254,6 +254,41 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- Mobile card list (< sm) --}}
+            <div class="sm:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                @forelse($holidays as $holiday)
+                <div class="px-4 py-3 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                        <span class="text-[9px] font-bold text-white dark:text-navy-900 uppercase leading-none">{{ $holiday->date->format('M') }}</span>
+                        <span class="text-sm font-bold text-white dark:text-navy-900 leading-none">{{ $holiday->date->format('d') }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-navy-800 dark:text-white truncate">{{ $holiday->name }}</p>
+                        <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                            <span class="text-[10px] text-slate-500">{{ $holiday->date->locale('id')->isoFormat('dddd, D MMMM Y') }}</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full {{ $holiday->type === 'national' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' }}">
+                                {{ $holiday->type === 'national' ? 'Nasional' : 'Sekolah' }}
+                            </span>
+                            @if($holiday->is_recurring)
+                            <span class="text-[10px] text-gold-600 dark:text-gold-400">↻ Berulang</span>
+                            @endif
+                        </div>
+                    </div>
+                    @if(auth()->user()->canAccessAdmin())
+                    <button onclick="openDeleteModal({{ json_encode(['id' => $holiday->id, 'name' => $holiday->name]) }})"
+                            class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all flex-shrink-0">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                    @endif
+                </div>
+                @empty
+                <div class="px-4 py-12 text-center">
+                    <i data-lucide="calendar-off" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Belum ada hari libur</p>
+                </div>
+                @endforelse
+            </div>
         </div>
 
         @if($holidays->hasPages())

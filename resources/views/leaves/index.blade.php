@@ -160,28 +160,28 @@
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2 flex-shrink-0">
+                <div class="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
                     @if($leave->status === 'pending')
                     <form action="{{ route($routeApprove, $leave) }}" method="POST" class="inline">
                         @csrf
                         <input type="hidden" name="admin_notes" value="Disetujui">
-                        <button type="submit" class="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
+                        <button type="submit" class="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
                             <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                            Setujui
+                            <span class="hidden sm:inline">Setujui</span>
                         </button>
                     </form>
                     <form action="{{ route($routeReject, $leave) }}" method="POST" class="inline">
                         @csrf
                         <input type="hidden" name="admin_notes" value="Ditolak">
-                        <button type="submit" onclick="return confirm('Yakin ingin menolak pengajuan ini?')" class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
+                        <button type="submit" onclick="return confirm('Yakin ingin menolak pengajuan ini?')" class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
                             <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                            Tolak
+                            <span class="hidden sm:inline">Tolak</span>
                         </button>
                     </form>
                     @endif
-                    <a href="{{ route($routeShow, $leave) }}" class="px-3 py-2 bg-navy-800 dark:bg-gold-400 hover:bg-navy-900 dark:hover:bg-gold-500 text-white dark:text-navy-900 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5">
+                    <a href="{{ route($routeShow, $leave) }}" class="px-3 py-2 bg-navy-800 dark:bg-gold-400 hover:bg-navy-900 dark:hover:bg-gold-500 text-white dark:text-navy-900 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
                         <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                        Detail
+                        <span class="hidden sm:inline">Detail</span>
                     </a>
                 </div>
             </div>

@@ -594,7 +594,7 @@
          data-unread-url="{{ Auth::user()->isAdmin() ? route('notifications.api.unread') : route('teacher.notifications.api.unread') }}"
          data-user-id="{{ Auth::id() }}"></div>
 
-    <div class="lg:ml-64 min-h-screen flex flex-col transition-all duration-300">
+    <div class="lg:ml-64 min-h-screen flex flex-col transition-all duration-300 min-w-0">
         
         <!-- Top Header -->
         <header class="sticky top-0 z-30 bg-white/80 dark:bg-navy-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-5 h-16 flex items-center justify-between">
@@ -770,7 +770,7 @@
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 p-5 lg:p-6 overflow-x-hidden">
+        <main class="flex-1 px-4 py-5 sm:px-5 sm:py-5 lg:p-6 overflow-x-hidden">
             @if (session('success') || session('error') || session('warning'))
             <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 2000)" x-show="show"
                  x-transition:leave="transition ease-in duration-300"

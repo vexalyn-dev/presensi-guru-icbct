@@ -146,7 +146,7 @@
             <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-semibold">{{ count($report) }} guru</span>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto hidden md:block">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800">
@@ -176,39 +176,23 @@
                             </div>
                         </td>
                         <td class="px-5 py-3.5 text-center text-slate-600 dark:text-slate-300 font-semibold">{{ $row['total'] }}</td>
+                        <td class="px-5 py-3.5 text-center"><span class="font-bold text-emerald-600 dark:text-emerald-400 text-base">{{ $row['hadir'] }}</span></td>
                         <td class="px-5 py-3.5 text-center">
-                            <span class="font-bold text-emerald-600 dark:text-emerald-400 text-base">{{ $row['hadir'] }}</span>
-                        </td>
-                        <td class="px-5 py-3.5 text-center">
-                            @if($row['telat'] > 0)
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold">
-                                <i data-lucide="clock" class="w-3 h-3"></i>{{ $row['telat'] }}
-                            </span>
-                            @else <span class="text-slate-300 dark:text-slate-600 text-xs">-</span> @endif
+                            @if($row['telat'] > 0)<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold"><i data-lucide="clock" class="w-3 h-3"></i>{{ $row['telat'] }}</span>
+                            @else<span class="text-slate-300 dark:text-slate-600 text-xs">-</span>@endif
                         </td>
                         <td class="px-5 py-3.5 text-center text-blue-600 dark:text-blue-400 font-medium">{{ $row['izin_sakit'] ?: '-' }}</td>
                         <td class="px-5 py-3.5 text-center">
-                            @if($row['alpha'] > 0)
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-bold">
-                                <i data-lucide="x" class="w-3 h-3"></i>{{ $row['alpha'] }}
-                            </span>
-                            @else <span class="text-slate-300 dark:text-slate-600 text-xs">-</span> @endif
+                            @if($row['alpha'] > 0)<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-bold"><i data-lucide="x" class="w-3 h-3"></i>{{ $row['alpha'] }}</span>
+                            @else<span class="text-slate-300 dark:text-slate-600 text-xs">-</span>@endif
                         </td>
                         <td class="px-5 py-3.5 text-center">
                             @php $pct = $row['persentase_ketepatan']; @endphp
-                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold
-                                {{ $pct >= 90 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : ($pct >= 70 ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400') }}">
-                                {{ $pct }}%
-                            </span>
+                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold {{ $pct >= 90 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : ($pct >= 70 ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400') }}">{{ $pct }}%</span>
                         </td>
                         <td class="px-5 py-3.5 text-center">
-                            @if($row['incomplete_scans'] > 0)
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-bold">
-                                <i data-lucide="alert-triangle" class="w-3 h-3"></i>{{ $row['incomplete_scans'] }}
-                            </span>
-                            @else
-                            <span class="text-emerald-500 flex justify-center"><i data-lucide="check" class="w-4 h-4"></i></span>
-                            @endif
+                            @if($row['incomplete_scans'] > 0)<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-bold"><i data-lucide="alert-triangle" class="w-3 h-3"></i>{{ $row['incomplete_scans'] }}</span>
+                            @else<span class="text-emerald-500 flex justify-center"><i data-lucide="check" class="w-4 h-4"></i></span>@endif
                         </td>
                     </tr>
                     @empty
@@ -219,6 +203,54 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Mobile card list --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+            @forelse($report as $i => $row)
+            @php $pct = $row['persentase_ketepatan']; @endphp
+            <div class="p-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-xs flex-shrink-0">
+                        {{ strtoupper(substr($row['user']->name ?? 'X', 0, 1)) }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-navy-800 dark:text-white text-sm truncate">{{ $row['user']->name ?? '-' }}</p>
+                        <p class="text-[10px] text-slate-400 font-mono">{{ $row['user']->teacher_code ?? '' }}</p>
+                    </div>
+                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold flex-shrink-0 {{ $pct >= 90 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : ($pct >= 70 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400') }}">{{ $pct }}%</span>
+                </div>
+                <div class="grid grid-cols-4 gap-2 text-center">
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-2">
+                        <p class="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">Hadir</p>
+                        <p class="text-base font-bold text-emerald-700 dark:text-emerald-300">{{ $row['hadir'] }}</p>
+                    </div>
+                    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2">
+                        <p class="text-[9px] text-amber-600 dark:text-amber-400 font-semibold">Terlambat</p>
+                        <p class="text-base font-bold text-amber-700 dark:text-amber-300">{{ $row['telat'] }}</p>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-2">
+                        <p class="text-[9px] text-red-600 dark:text-red-400 font-semibold">Alpha</p>
+                        <p class="text-base font-bold text-red-700 dark:text-red-300">{{ $row['alpha'] }}</p>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
+                        <p class="text-[9px] text-blue-600 dark:text-blue-400 font-semibold">Izin</p>
+                        <p class="text-base font-bold text-blue-700 dark:text-blue-300">{{ $row['izin_sakit'] ?: 0 }}</p>
+                    </div>
+                </div>
+                @if($row['incomplete_scans'] > 0)
+                <div class="mt-2 flex items-center gap-1.5 text-[11px] text-orange-600 dark:text-orange-400 font-medium">
+                    <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                    {{ $row['incomplete_scans'] }} scan tidak lengkap
+                </div>
+                @endif
+            </div>
+            @empty
+            <div class="px-4 py-12 text-center">
+                <i data-lucide="inbox" class="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2"></i>
+                <p class="text-sm text-slate-400">Tidak ada data presensi untuk {{ $selectedMonthLabel }}.</p>
+            </div>
+            @endforelse
         </div>
     </div>
 </div>

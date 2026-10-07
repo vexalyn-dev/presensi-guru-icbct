@@ -78,16 +78,42 @@
 
     {{-- Filter Bar --}}
     <div class="card p-4">
-        <form method="GET" action="{{ route('activity-logs.index') }}" id="filter-form" class="flex flex-wrap gap-3">
+        <form method="GET" action="{{ route('activity-logs.index') }}" id="filter-form" class="flex flex-col sm:flex-row flex-wrap gap-3">
             {{-- Search --}}
-            <div class="relative flex-1 min-w-[200px]">
+            <div class="relative w-full sm:flex-1 sm:min-w-[200px]">
                 <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                 <input type="text" name="search" value="{{ request('search') }}"
                        placeholder="Cari deskripsi atau IP address..."
                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
 
-            {{-- Dropdown Kategori --}}
+            {{-- Tanggal --}}
+            <div class="flex items-center gap-2 flex-wrap">
+                <div class="relative">
+                    <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                    <input type="date" name="date_from" value="{{ request('date_from') }}"
+                           class="pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                </div>
+                <span class="text-slate-400 text-sm">s/d</span>
+                <div class="relative">
+                    <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                    <input type="date" name="date_to" value="{{ request('date_to') }}"
+                           class="pl-9 pr-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="submit" class="px-5 py-2.5 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+                    <i data-lucide="search" class="w-4 h-4"></i> Filter
+                </button>
+                @if(request()->hasAny(['search', 'category', 'user_id', 'date_from', 'date_to']))
+                    <a href="{{ route('activity-logs.index') }}" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center gap-2">
+                        <i data-lucide="x" class="w-4 h-4"></i> Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
             <div x-data="{
                     open: false,
                     selected: '{{ request('category') }}',
