@@ -627,7 +627,7 @@
 
                 // Reset preview ke avatar default
                 var preview = document.getElementById('photo-preview-main');
-                if (preview) preview.src = '{{ asset("images/default-avatar.png") }}';
+                if (preview) preview.src = '{{ asset("images/default-teacher.png") }}';
 
                 // Reset file input
                 var fileInput = document.getElementById('photo-upload');

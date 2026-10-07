@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Hash;
 
 class PasswordResetOtp extends Model
 {
+    protected $primaryKey = 'email';
+    protected $keyType    = 'string';
+    public $incrementing  = false;
+
     protected $fillable = ['email', 'otp', 'expires_at', 'used'];
 
     protected $casts = [

@@ -245,6 +245,7 @@ class TeacherController extends Controller
             'subjects.*' => 'exists:subjects,id',
             'is_active' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'delete_photo' => 'nullable|in:0,1',
         ]);
 
         $updateData = [

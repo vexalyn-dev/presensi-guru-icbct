@@ -654,12 +654,158 @@ body.dp {
   width: 100% !important;
   margin: 0;
 }
-.flash {
+.flash-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(4,7,18,0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fmBackdropIn .25s ease forwards;
+}
+@keyframes fmBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.flash-modal-backdrop.leaving {
+  animation: fmBackdropOut .3s ease forwards;
+}
+@keyframes fmBackdropOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+.flash-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 22px;
+  overflow: hidden;
+  animation: fmSlideIn .35s cubic-bezier(.22,1,.36,1) forwards;
+  box-shadow: 0 32px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+}
+@keyframes fmSlideIn {
+  from { opacity: 0; transform: translateY(28px) scale(.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.flash-modal.leaving {
+  animation: fmSlideOut .25s ease forwards;
+}
+@keyframes fmSlideOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(14px) scale(.96); }
+}
+/* success */
+.fm-success { background: linear-gradient(145deg,#0a1628 0%,#0d1f3c 50%,#091a2e 100%); border: 1px solid rgba(16,185,129,.22); }
+.fm-success .fm-glow  { background: radial-gradient(ellipse 70% 50% at 50% 0%,rgba(16,185,129,.18),transparent); }
+.fm-success .fm-icon  { background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.25); color: #34d399; box-shadow: 0 0 28px rgba(16,185,129,.25); }
+.fm-success .fm-title { color: #34d399; }
+.fm-success .fm-bar   { background: linear-gradient(90deg,#10b981,#34d399); }
+.fm-success .fm-close { color: rgba(52,211,153,.6); border: 1px solid rgba(52,211,153,.2); }
+.fm-success .fm-close:hover { background: rgba(52,211,153,.1); color: #34d399; border-color: rgba(52,211,153,.4); }
+/* error */
+.fm-error { background: linear-gradient(145deg,#160a0a 0%,#2a0f0f 50%,#1a0808 100%); border: 1px solid rgba(244,63,94,.22); }
+.fm-error .fm-glow  { background: radial-gradient(ellipse 70% 50% at 50% 0%,rgba(244,63,94,.18),transparent); }
+.fm-error .fm-icon  { background: rgba(244,63,94,.12); border: 1px solid rgba(244,63,94,.25); color: #f87171; box-shadow: 0 0 28px rgba(244,63,94,.25); }
+.fm-error .fm-title { color: #f87171; }
+.fm-error .fm-bar   { background: linear-gradient(90deg,#f43f5e,#f87171); }
+.fm-error .fm-close { color: rgba(248,113,113,.6); border: 1px solid rgba(248,113,113,.2); }
+.fm-error .fm-close:hover { background: rgba(248,113,113,.1); color: #f87171; border-color: rgba(248,113,113,.4); }
+/* warning */
+.fm-warning { background: linear-gradient(145deg,#15100a 0%,#2a1d08 50%,#1a1208 100%); border: 1px solid rgba(245,158,11,.22); }
+.fm-warning .fm-glow  { background: radial-gradient(ellipse 70% 50% at 50% 0%,rgba(245,158,11,.18),transparent); }
+.fm-warning .fm-icon  { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.25); color: #fbbf24; box-shadow: 0 0 28px rgba(245,158,11,.25); }
+.fm-warning .fm-title { color: #fbbf24; }
+.fm-warning .fm-bar   { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+.fm-warning .fm-close { color: rgba(251,191,36,.6); border: 1px solid rgba(251,191,36,.2); }
+.fm-warning .fm-close:hover { background: rgba(251,191,36,.1); color: #fbbf24; border-color: rgba(251,191,36,.4); }
+
+.fm-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.fm-body {
+  position: relative;
+  padding: 32px 28px 28px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  align-items: center;
+  text-align: center;
+  gap: 0;
 }
+.fm-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+.fm-icon svg { width: 28px; height: 28px; }
+.fm-title {
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -.02em;
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+.fm-msg {
+  font-size: .83rem;
+  color: rgba(203,213,225,.75);
+  line-height: 1.65;
+  margin: 0 0 22px;
+  max-width: 340px;
+}
+.fm-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 22px;
+  border-radius: 10px;
+  font-size: .8rem;
+  font-weight: 650;
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+  transition: all .18s ease;
+  margin-bottom: 4px;
+}
+.fm-progress {
+  height: 3px;
+  width: 100%;
+  background: rgba(255,255,255,.06);
+  position: relative;
+  overflow: hidden;
+}
+.fm-bar {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  animation: fmProgress var(--fm-dur, 4s) linear forwards;
+}
+@keyframes fmProgress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+.fm-dots {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 14px;
+}
+.fm-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  transition: background .2s;
+}
+.fm-dot.active { background: rgba(255,255,255,.5); }
 .scrim {
   position: fixed;
   inset: 0;
@@ -2208,24 +2354,99 @@ textarea.input { resize: vertical; min-height: 85px; }
     </header>
 
     <div class="content">
-        @if(session('success') || session('error') || session('warning'))
-        <div class="flash"
-             x-data="{ show: true }"
-             x-init="setTimeout(() => show = false, 2000)"
-             x-show="show"
-             x-transition:leave="transition ease-in duration-300"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0">
-            @if(session('success'))
-                <div class="alert alert-ok" role="status"><i data-lucide="check-circle-2" style="width:18px;height:18px;flex-shrink:0"></i><span>{{ session('success') }}</span></div>
-            @endif
-            @if(session('error'))
-                <div class="alert alert-err" role="alert"><i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0"></i><span>{{ session('error') }}</span></div>
-            @endif
-            @if(session('warning'))
-                <div class="alert alert-warn" role="alert"><i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0"></i><span>{{ session('warning') }}</span></div>
-            @endif
+        @php
+            $fmType    = session('success') ? 'success' : (session('error') ? 'error' : (session('warning') ? 'warning' : null));
+            $fmMessage = session('success') ?? session('error') ?? session('warning') ?? null;
+            $fmTitles  = ['success' => 'Berhasil!', 'error' => 'Gagal!', 'warning' => 'Perhatian!'];
+            $fmDur     = 4500; // ms
+        @endphp
+        @if($fmType && $fmMessage)
+        {{-- ══ FLASH RESULT MODAL ══ --}}
+        <div id="fm-backdrop" class="flash-modal-backdrop" role="dialog" aria-modal="true" aria-label="Notifikasi" onclick="fmDismiss()">
+            <div id="fm-modal" class="flash-modal fm-{{ $fmType }}" onclick="event.stopPropagation()">
+                <div class="fm-glow"></div>
+                <div class="fm-body">
+                    {{-- Icon --}}
+                    <div class="fm-icon">
+                        @if($fmType === 'success')
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        @elseif($fmType === 'error')
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        @else
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        @endif
+                    </div>
+
+                    {{-- Title --}}
+                    <p class="fm-title">{{ $fmTitles[$fmType] }}</p>
+
+                    {{-- Message --}}
+                    <p class="fm-msg">{{ $fmMessage }}</p>
+
+                    {{-- Close button --}}
+                    <button type="button" class="fm-close" onclick="fmDismiss()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Tutup
+                    </button>
+
+                    {{-- Dots indicator --}}
+                    <div class="fm-dots" id="fm-dots">
+                        <div class="fm-dot active" id="fmd-0"></div>
+                        <div class="fm-dot" id="fmd-1"></div>
+                        <div class="fm-dot" id="fmd-2"></div>
+                    </div>
+                </div>
+
+                {{-- Progress bar --}}
+                <div class="fm-progress">
+                    <div class="fm-bar" id="fm-bar" style="--fm-dur:{{ $fmDur }}ms"></div>
+                </div>
+            </div>
         </div>
+        <script>
+        (function(){
+            var dur    = {{ $fmDur }};
+            var timer  = null;
+            var dotInt = null;
+            var step   = 0;
+
+            function fmDismiss(){
+                clearTimeout(timer);
+                clearInterval(dotInt);
+                var bd = document.getElementById('fm-backdrop');
+                var md = document.getElementById('fm-modal');
+                if(!bd) return;
+                bd.classList.add('leaving');
+                md.classList.add('leaving');
+                setTimeout(function(){ if(bd) bd.remove(); }, 320);
+            }
+            window.fmDismiss = fmDismiss;
+
+            // Auto-dismiss
+            timer = setTimeout(fmDismiss, dur);
+
+            // Dot animation (cycle 3 dots every dur/3 ms)
+            var interval = Math.floor(dur / 3);
+            dotInt = setInterval(function(){
+                step = (step + 1) % 3;
+                for(var i=0;i<3;i++){
+                    var d = document.getElementById('fmd-'+i);
+                    if(d) d.classList.toggle('active', i===step);
+                }
+            }, interval);
+
+            // Keyboard ESC
+            document.addEventListener('keydown', function(e){
+                if(e.key === 'Escape') fmDismiss();
+            }, { once: true });
+        })();
+        </script>
         @endif
 
         @yield('content')

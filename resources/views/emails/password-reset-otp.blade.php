@@ -71,7 +71,7 @@ body {
     box-shadow: 0 8px 24px rgba(15,23,42,0.28);
 }
 .otp-code {
-    font-size: 42px; font-weight: 900; color: #FACC15;
+    font-size: 42px; font-weight: 900; color: #FFFFFF;
     letter-spacing: 10px; font-family: 'Courier New', Courier, monospace;
     line-height: 1;
 }

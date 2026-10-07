@@ -123,7 +123,7 @@
             width: 52px; height: 62px;
             text-align: center; font-size: 1.6rem; font-weight: 800;
             color: #0F172A; background: #F8FAFC;
-            border: 1.5px solid #E2E8F0; border-radius: 14px;
+            border: 1.5px solid #E2E8F0; border-radius: 8px;
             outline: none; font-family: 'Inter', monospace;
             transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
             -webkit-appearance: none; appearance: none;
@@ -254,7 +254,7 @@
             }
             .section-title { font-size: 1.75rem; margin-bottom: 8px; }
             .section-sub   { font-size: 0.88rem; margin-bottom: 28px; }
-            .otp-digit { width: 46px; height: 58px; font-size: 1.5rem; border-radius: 12px; }
+            .otp-digit { width: 46px; height: 58px; font-size: 1.5rem; border-radius: 8px; }
             .otp-group { gap: 8px; }
             .btn-primary { height: 56px; border-radius: 16px; font-size: 1.02rem; }
         }
@@ -269,7 +269,7 @@
             .mobile-header-band { padding: 38px 20px 34px; }
             .card-body { padding: 28px 18px 80px; }
             .section-title { font-size: 1.45rem; }
-            .otp-digit { width: 38px; height: 50px; font-size: 1.25rem; border-radius: 10px; }
+            .otp-digit { width: 38px; height: 50px; font-size: 1.25rem; border-radius: 8px; }
             .otp-group { gap: 6px; }
         }
     </style>
