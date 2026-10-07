@@ -49,4 +49,10 @@ return [
         'token' => env('FONNTE_TOKEN', ''),
         'url'   => env('FONNTE_URL', 'https://api.fonnte.com/send'),
     ],
+
+    'nubi_ai' => [
+        'api_key'  => env('NUBI_AI_API_KEY', ''),
+        'base_url' => env('NUBI_AI_BASE_URL', 'https://apihub.agnes-ai.com/v1'),
+        'model'    => env('NUBI_AI_MODEL', 'agnes-3.0-flash'),
+    ],
 ];

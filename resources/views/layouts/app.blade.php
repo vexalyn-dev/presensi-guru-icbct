@@ -887,6 +887,12 @@
 
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
 
+    {{-- ── NUBI AI CHAT WIDGET ── --}}
+    {{-- Tampil untuk Admin, Operator, dan Developer --}}
+    @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isDeveloper()))
+        @include('partials.nubi-ai')
+    @endif
+
     {{-- ── LOGOUT LOADING OVERLAY ── --}}
     <div id="logout-overlay"
          style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,15,30,0.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;">

@@ -522,6 +522,12 @@
 
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
 
+    {{-- ── NUBI AI CHAT WIDGET ── --}}
+    {{-- Tampil untuk Guru Piket --}}
+    @if(Auth::check() && Auth::user()->isGuruPiket())
+        @include('partials.nubi-ai')
+    @endif
+
     @stack('scripts')
 
     {{-- ── LOGOUT LOADING OVERLAY ── --}}

@@ -57,6 +57,10 @@ Route::post('/webhooks/github', [\App\Http\Controllers\GitHubWebhookController::
     ->name('webhooks.github')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
+// Nubi AI — Chat endpoint (hanya untuk user yang sudah login)
+Route::middleware(['auth'])->post('/nubi-ai/chat', [\App\Http\Controllers\NubiAiController::class, 'chat'])
+    ->name('nubi-ai.chat');
+
 // Landing page
 Route::get('/', function () {
     if (Auth::check()) {
