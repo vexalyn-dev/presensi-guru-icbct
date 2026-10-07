@@ -248,9 +248,9 @@
 
                                         {{-- Dropdown Panel --}}
                                         <div id="mapel-dropdown"
-                                             class="hidden absolute left-0 right-0 top-full mt-1.5 z-[9999] bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden"
-                                             style="min-width:100%;">
-                                            {{-- Search --}}
+                                             class="hidden absolute left-0 right-0 bottom-full mb-1.5 z-[9999] bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden"
+                                             style="min-width:100%; transform-origin: bottom center; transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34,1.56,0.64,1); opacity:0; transform: scaleY(0.92) translateY(6px);"
+                                             >{{-- Search --}}
                                             <div class="p-2.5 border-b border-slate-100 bg-slate-50">
                                                 <div class="relative">
                                                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -467,8 +467,9 @@
     </div>
 
         {{-- Blade data injection via data attributes (avoids VS Code JS parser false positives) --}}
+        @php $subjectOptionsForJs = $subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray(); @endphp
         <div id="mapel-data"
-             data-options="@js($subjectOptions)"
+             data-options="@js($subjectOptionsForJs)"
              data-selected="@js($teacherSubjectIds)"
              style="display:none;"></div>
 
@@ -697,7 +698,12 @@
                     var display = document.getElementById('mapel-display');
                     isOpen = !isOpen;
                     if (isOpen) {
+                        // Show with animation
                         dd.classList.remove('hidden');
+                        // Force reflow so transition fires
+                        dd.getBoundingClientRect();
+                        dd.style.opacity = '1';
+                        dd.style.transform = 'scaleY(1) translateY(0)';
                         chevron.style.transform = 'translateY(-50%) rotate(180deg)';
                         display.style.borderColor = '#3B82F6';
                         display.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.15)';
@@ -706,7 +712,10 @@
                         mapelRender('');
                         setTimeout(function(){ document.getElementById('mapel-search').focus(); }, 50);
                     } else {
-                        dd.classList.add('hidden');
+                        // Hide with animation
+                        dd.style.opacity = '0';
+                        dd.style.transform = 'scaleY(0.92) translateY(6px)';
+                        setTimeout(function(){ dd.classList.add('hidden'); }, 160);
                         chevron.style.transform = 'translateY(-50%) rotate(0deg)';
                         display.style.boxShadow = '';
                         if (MAPEL_SELECTED.length > 0) {
