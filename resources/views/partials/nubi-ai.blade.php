@@ -180,8 +180,7 @@
         {{-- Robot button — draggable handle --}}
         <div id="nubi-drag-handle"
              x-on:mousedown="startDrag($event)"
-             :style="{ cursor: dragging ? 'grabbing' : 'grab' }"
-             class="relative flex items-center justify-center"
+             class="nubi-drag-handle relative flex items-center justify-center"
              style="width: 80px; height: 80px;">
 
             {{-- Pulse ring saat closed --}}
@@ -292,70 +291,88 @@ function nubiAI() {
         // ── Drag logic ──
         startDrag(e) {
             if (e.button !== 0) return;
-            this.dragging  = false; // tentukan di move
-            this.hasDragged = false;
-            this.dragStartX = e.clientX;
-            this.dragStartY = e.clientY;
+            this.hasDragged  = false;
+            this.dragging    = false;
+            this.dragStartX  = e.clientX;
+            this.dragStartY  = e.clientY;
 
+            // Simpan posisi widget sebagai left/top saat ini
             const widget = document.getElementById('nubi-ai-widget');
             const rect   = widget.getBoundingClientRect();
-            // simpan posisi awal sebagai right/bottom dari viewport
-            this.widgetStartRight  = window.innerWidth  - rect.right;
-            this.widgetStartBottom = window.innerHeight - rect.bottom;
+            this._initLeft = rect.left;
+            this._initTop  = rect.top;
 
             e.preventDefault();
         },
 
         onDragMove(e) {
-            if (this.dragStartX === undefined || (!this.dragging && Math.abs(e.clientX - this.dragStartX) < 4 && Math.abs(e.clientY - this.dragStartY) < 4)) return;
             if (this.dragStartX === undefined) return;
 
             const dx = e.clientX - this.dragStartX;
             const dy = e.clientY - this.dragStartY;
-            if (!this.dragging && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
-                this.dragging = true;
+
+            // Aktifkan drag hanya setelah bergerak > 6px (threshold)
+            if (!this.dragging) {
+                if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+                this.dragging   = true;
                 this.hasDragged = true;
+                document.body.classList.add('nubi-dragging');
             }
-            if (!this.dragging) return;
 
             const widget = document.getElementById('nubi-ai-widget');
             if (!widget) return;
 
-            // right berkurang kalau gerak ke kanan (karena fixed right)
-            let newRight  = this.widgetStartRight  - dx;
-            let newBottom = this.widgetStartBottom + dy;
-
-            // Clamp agar tidak keluar layar
             const wW = widget.offsetWidth  || 80;
             const wH = widget.offsetHeight || 80;
-            newRight  = Math.max(8, Math.min(window.innerWidth  - wW - 8, newRight));
-            newBottom = Math.max(8, Math.min(window.innerHeight - wH - 8, newBottom));
 
-            widget.style.right  = newRight  + 'px';
-            widget.style.bottom = newBottom + 'px';
-            widget.style.left   = 'auto';
-            widget.style.top    = 'auto';
+            // Hitung posisi left/top baru
+            let newLeft = this._initLeft + dx;
+            let newTop  = this._initTop  + dy;
+
+            // Clamp agar tidak keluar viewport
+            newLeft = Math.max(8, Math.min(window.innerWidth  - wW - 8, newLeft));
+            newTop  = Math.max(8, Math.min(window.innerHeight - wH - 8, newTop));
+
+            // Pakai left/top saat drag (lebih natural)
+            widget.style.left   = newLeft + 'px';
+            widget.style.top    = newTop  + 'px';
+            widget.style.right  = 'auto';
+            widget.style.bottom = 'auto';
 
             if (this.open) this.updateModalStyle();
         },
 
         onDragEnd(e) {
             if (!this.dragging) {
+                // Tidak drag → reset state saja
                 this.dragStartX = undefined;
                 return;
             }
-            this.dragging = false;
+
+            // Kembalikan cursor
+            document.body.classList.remove('nubi-dragging');
+            this.dragging   = false;
             this.dragStartX = undefined;
 
-            // Simpan posisi ke localStorage
+            // Convert posisi left/top ke right/bottom lalu simpan
             const widget = document.getElementById('nubi-ai-widget');
             if (widget) {
+                const rect    = widget.getBoundingClientRect();
+                const newRight  = window.innerWidth  - rect.right;
+                const newBottom = window.innerHeight - rect.bottom;
+
+                // Switch balik ke right/bottom agar konsisten dengan fixed positioning
+                widget.style.right  = Math.max(8, newRight)  + 'px';
+                widget.style.bottom = Math.max(8, newBottom) + 'px';
+                widget.style.left   = 'auto';
+                widget.style.top    = 'auto';
+
                 try {
                     localStorage.setItem('nubi_pos', JSON.stringify({
-                        right:  parseFloat(widget.style.right)  || 24,
-                        bottom: parseFloat(widget.style.bottom) || 24,
+                        right:  Math.max(8, newRight),
+                        bottom: Math.max(8, newBottom),
                     }));
-                } catch (e) {}
+                } catch (err) {}
             }
         },
 
@@ -480,6 +497,20 @@ function nubiAI() {
 <style>
     #nubi-ai-widget {
         touch-action: none;
+    }
+    /* Cursor grab di robot handle */
+    .nubi-drag-handle {
+        cursor: grab;
+    }
+    .nubi-drag-handle:active,
+    body.nubi-dragging .nubi-drag-handle {
+        cursor: grabbing;
+    }
+    /* Paksa grabbing cursor ke seluruh halaman saat drag */
+    body.nubi-dragging,
+    body.nubi-dragging * {
+        cursor: grabbing !important;
+        user-select: none !important;
     }
     #nubi-messages {
         scroll-behavior: smooth;
