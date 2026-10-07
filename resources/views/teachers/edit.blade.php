@@ -226,11 +226,12 @@
                                 @php
                                     $subjectOptions = $subjects->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray();
                                 @endphp
-                                <div x-data="{
+                                <div class="md:col-span-2" x-data="{
                                     open: false,
                                     search: '',
                                     options: {{ Js::from($subjectOptions) }},
                                     selected: {{ Js::from($teacherSubjectIds) }},
+                                    triggerRect: null,
                                     get filteredOptions() {
                                         if (!this.search) return this.options;
                                         const q = this.search.toLowerCase();
@@ -238,86 +239,129 @@
                                     },
                                     get names() {
                                         return this.selected.map(id => this.options.find(t => t.id == id)?.name).filter(Boolean);
+                                    },
+                                    openDropdown() {
+                                        const el = this.$refs.trigger;
+                                        const rect = el.getBoundingClientRect();
+                                        this.triggerRect = {
+                                            top: rect.bottom + window.scrollY,
+                                            left: rect.left + window.scrollX,
+                                            width: rect.width
+                                        };
+                                        this.open = true;
+                                        this.$nextTick(() => {
+                                            const dd = document.getElementById('mapel-dropdown-' + this.$id('dd'));
+                                            if (!dd) return;
+                                            dd.style.top   = this.triggerRect.top + 6 + 'px';
+                                            dd.style.left  = this.triggerRect.left + 'px';
+                                            dd.style.width = this.triggerRect.width + 'px';
+                                        });
                                     }
-                                }">
+                                }" @keydown.escape.window="open = false">
                                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Mata Pelajaran</label>
-                                    <div class="relative" @click.outside="open = false" style="overflow: visible;">
 
-                                        <!-- Trigger -->
-                                        <div @click="open = !open" class="relative group cursor-pointer">
-                                            <i data-lucide="book-open" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                                            <div class="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 transition-all hover:border-navy-300 dark:hover:border-gold-600 min-h-[52px] flex items-center gap-2"
-                                                 :class="{'ring-2 ring-navy-800 dark:ring-gold-500 border-blue-400 dark:border-blue-500': open, 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700': selected.length > 0}">
-                                                <template x-if="selected.length > 0">
-                                                    <span class="text-blue-700 dark:text-blue-300 font-semibold truncate"
-                                                          x-text="names.join(', ')"></span>
-                                                </template>
-                                                <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih mata pelajaran...</span>
-                                            </div>
-                                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 transition-transform duration-300"
-                                               :class="{'rotate-180': open}"></i>
+                                    {{-- Trigger --}}
+                                    <div x-ref="trigger" @click="open ? open=false : openDropdown()"
+                                         class="relative cursor-pointer select-none">
+                                        <i data-lucide="book-open" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10"></i>
+                                        <div class="w-full pl-11 pr-10 py-3 min-h-[48px] flex items-center
+                                                    bg-slate-50 dark:bg-slate-700/50
+                                                    border-2 border-slate-200 dark:border-slate-600
+                                                    rounded-xl text-sm transition-all
+                                                    hover:border-blue-400 dark:hover:border-blue-500"
+                                             :class="open
+                                                ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/20 bg-white dark:bg-slate-700'
+                                                : (selected.length > 0 ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20' : '')">
+                                            <template x-if="selected.length > 0">
+                                                <span class="text-slate-800 dark:text-slate-200 font-medium truncate" x-text="names.join(', ')"></span>
+                                            </template>
+                                            <span x-show="selected.length === 0" class="text-slate-400 dark:text-slate-500">Pilih mata pelajaran...</span>
                                         </div>
+                                        <i data-lucide="chevron-down"
+                                           class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200"
+                                           :class="open ? 'rotate-180' : ''"></i>
+                                    </div>
 
-                                        <!-- Dropdown -->
+                                    {{-- Hidden inputs --}}
+                                    <template x-for="sid in selected" :key="sid">
+                                        <input type="hidden" name="subjects[]" :value="sid">
+                                    </template>
+
+                                    {{-- Dropdown — di-render di body via fixed positioning --}}
+                                    <template x-teleport="body">
                                         <div x-show="open"
                                              x-transition:enter="transition ease-out duration-150"
-                                             x-transition:enter-start="opacity-0 -translate-y-1 scale-98"
+                                             x-transition:enter-start="opacity-0 translate-y-[-6px] scale-[0.98]"
                                              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                                              x-transition:leave="transition ease-in duration-100"
                                              x-transition:leave-start="opacity-100"
-                                             x-transition:leave-end="opacity-0 -translate-y-1"
-                                             class="absolute left-0 right-0 top-full z-[9999] mt-2 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
-                                             x-cloak @click.stop>
+                                             x-transition:leave-end="opacity-0"
+                                             @click.outside="open = false"
+                                             style="position:fixed;z-index:99999;"
+                                             class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                             x-cloak>
 
-                                            <!-- Search -->
-                                            <div class="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                                            {{-- Search --}}
+                                            <div class="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/60">
                                                 <div class="relative">
-                                                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                                    <input type="text" x-model="search" placeholder="Cari mapel..."
-                                                           class="w-full pl-10 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
+                                                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
+                                                    <input type="text" x-model="search"
+                                                           @click.stop
+                                                           placeholder="Cari mata pelajaran..."
+                                                           class="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                                 </div>
                                             </div>
 
-                                            <!-- Options -->
-                                            <div class="max-h-60 overflow-y-auto p-2">
+                                            {{-- Options --}}
+                                            <div class="max-h-56 overflow-y-auto p-1.5">
                                                 <template x-for="subj in filteredOptions" :key="subj.id">
-                                                    <label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-navy-50 dark:hover:bg-navy-900/20"
-                                                           :class="selected.includes(subj.id) ? 'bg-navy-50 dark:bg-navy-900/20 border border-navy-200 dark:border-navy-800' : ''">
-                                                        <input type="checkbox" :value="subj.id" x-model="selected" class="cb-nichek">
-                                                        <div class="cb-box flex-shrink-0" :class="selected.includes(subj.id) ? 'checked' : ''">
-                                                            <svg class="cb-check" width="13" height="13" viewBox="0 0 13 13" fill="none">
-                                                                <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <label @click.stop
+                                                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-150"
+                                                           :class="selected.includes(subj.id)
+                                                               ? 'bg-blue-50 dark:bg-blue-900/30'
+                                                               : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                                                        {{-- Custom checkbox --}}
+                                                        <div class="flex-shrink-0 w-4.5 h-4.5 rounded-[5px] border-2 flex items-center justify-center transition-all"
+                                                             :class="selected.includes(subj.id)
+                                                                 ? 'bg-blue-500 border-blue-500'
+                                                                 : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500'"
+                                                             style="width:18px;height:18px;min-width:18px;">
+                                                            <svg x-show="selected.includes(subj.id)" width="11" height="11" viewBox="0 0 12 12" fill="none">
+                                                                <path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                                             </svg>
+                                                            <input type="checkbox" :value="subj.id" x-model="selected" class="sr-only">
                                                         </div>
-                                                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-sm flex-shrink-0">
+                                                        {{-- Avatar --}}
+                                                        <div class="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
+                                                             style="background:linear-gradient(135deg,#1e3a5f,#0f172a);">
                                                             <span x-text="subj.name.charAt(0).toUpperCase()"></span>
                                                         </div>
-                                                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-300" x-text="subj.name"></span>
+                                                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate" x-text="subj.name"></span>
                                                     </label>
                                                 </template>
-                                                <div x-show="filteredOptions.length === 0" class="p-4 text-center text-slate-500 dark:text-slate-400 text-sm">
-                                                    <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                                <div x-show="filteredOptions.length === 0"
+                                                     class="py-8 text-center text-slate-400 text-sm">
+                                                    <i data-lucide="search-x" class="w-7 h-7 mx-auto mb-2 opacity-40"></i>
                                                     <p>Tidak ada mapel ditemukan</p>
                                                 </div>
                                             </div>
 
-                                            <!-- Footer -->
-                                            <div x-show="selected.length > 0" class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
-                                                <div class="flex items-center justify-between">
-                                                    <p class="text-xs text-slate-600 dark:text-slate-400">
-                                                        <span class="font-bold" x-text="selected.length"></span> mapel dipilih
-                                                    </p>
-                                                    <button type="button" @click="selected = []" class="text-xs text-red-600 dark:text-red-400 hover:underline">Hapus semua</button>
+                                            {{-- Footer --}}
+                                            <template x-if="selected.length > 0">
+                                                <div class="px-3 py-2.5 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/60 flex items-center justify-between">
+                                                    <span class="text-xs text-slate-500 dark:text-slate-400">
+                                                        <span class="font-bold text-slate-700 dark:text-slate-300" x-text="selected.length"></span> dipilih
+                                                    </span>
+                                                    <button type="button" @click.stop="selected = []"
+                                                            class="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors">
+                                                        Hapus semua
+                                                    </button>
                                                 </div>
-                                            </div>
+                                            </template>
                                         </div>
+                                    </template>
 
-                                        <!-- Hidden Inputs -->
-                                        <template x-for="sid in selected" :key="sid">
-                                            <input type="hidden" name="subjects[]" :value="sid">
-                                        </template>
-                                    </div>
-                                    @error('subjects')<p class="mt-2 text-xs text-red-500 flex items-center gap-1 animate-shake"><i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
+                                    @error('subjects')<p class="mt-2 text-xs text-red-500 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}</p>@enderror
                                 </div>
 
                             </div>
@@ -600,6 +644,24 @@
                         document.body.style.overflow = 'auto';
                     },
                     init() {
+                        // Reposition mapel dropdown on scroll/resize
+                        const reposition = () => {
+                            document.querySelectorAll('[x-data]').forEach(el => {
+                                const comp = el._x_dataStack?.[0];
+                                if (comp && comp.open && comp.triggerRect !== undefined) {
+                                    const ref = el.querySelector('[x-ref="trigger"]') || el;
+                                    const rect = ref.getBoundingClientRect();
+                                    const dd = el.querySelector('[style*="position:fixed"]');
+                                    if (dd) {
+                                        dd.style.top   = (rect.bottom + window.scrollY + 6) + 'px';
+                                        dd.style.left  = (rect.left + window.scrollX) + 'px';
+                                        dd.style.width = rect.width + 'px';
+                                    }
+                                }
+                            });
+                        };
+                        window.addEventListener('scroll', reposition, true);
+                        window.addEventListener('resize', reposition);
                         return; // Ensure no cleanup function is returned
                     }
                 };
