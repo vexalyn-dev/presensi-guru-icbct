@@ -466,9 +466,9 @@
         </div>
     </div>
 
-        {{-- Blade data injection — gunakan window variable agar tidak ada masalah HTML encoding --}}
-        <script>window.__mapelOptions={!! json_encode($subjects->map(fn($s)=>['id'=>$s->id,'name'=>$s->name])->values()) !!};window.__mapelSelected={!! json_encode($teacherSubjectIds) !!};</script>
-        <div id="mapel-data" style="display:none;"></div>
+        {{-- Blade data injection — pakai type=application/json agar VS Code tidak parse sebagai JS --}}
+        <script type="application/json" id="mapel-json-options">{!! json_encode($subjects->map(fn($s)=>['id'=>$s->id,'name'=>$s->name])->values()) !!}</script>
+        <script type="application/json" id="mapel-json-selected">{!! json_encode($teacherSubjectIds) !!}</script>
 
         <script>
             /** 
@@ -617,9 +617,87 @@
             // ─── Mapel Multi-Select (Pure JS) ──────────────────
             /* global MAPEL_OPTIONS, MAPEL_SELECTED */
             (function() {
-                var MAPEL_OPTIONS  = Array.isArray(window.__mapelOptions)  ? window.__mapelOptions  : [];
-                var MAPEL_SELECTED = Array.isArray(window.__mapelSelected) ? window.__mapelSelected : [];
+                var MAPEL_OPTIONS  = JSON.parse(document.getElementById('mapel-json-options').textContent  || '[]');
+                var MAPEL_SELECTED = JSON.parse(document.getElementById('mapel-json-selected').textContent || '[]');
                 var isOpen = false;
+
+                // ── Icon palette untuk setiap mata pelajaran ──
+                var MAPEL_ICONS = [
+                    // Bahasa & Sastra
+                    { keys: ['bahasa indonesia','sastra','menulis','membaca'],
+                      bg:'#EDE9FE', color:'#7C3AED',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>' },
+                    // Bahasa Asing
+                    { keys: ['bahasa inggris','bahasa jepang','bahasa arab','bahasa jerman','bahasa perancis','bahasa mandarin','bahasa sunda','bahasa asing'],
+                      bg:'#DBEAFE', color:'#2563EB',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' },
+                    // Matematika
+                    { keys: ['matematika','kalkulus','statistika','aljabar','geometri'],
+                      bg:'#FEF3C7', color:'#D97706',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>' },
+                    // IPA / Sains
+                    { keys: ['fisika','kimia','biologi','ipa','sains','astronomi'],
+                      bg:'#D1FAE5', color:'#059669',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0h11m-11 0a2 2 0 0 1-2 2H3m20-2v4a2 2 0 0 1-2 2H9"/></svg>' },
+                    // IPS / Sosial
+                    { keys: ['ips','geografi','sejarah','ekonomi','sosiologi','antropologi','ilmu sosial'],
+                      bg:'#FEE2E2', color:'#DC2626',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>' },
+                    // TIK / Komputer
+                    { keys: ['tik','komputer','pemrograman','teknologi','informatika','rekayasa','jaringan','sistem','database','coding','software','hardware'],
+                      bg:'#DBEAFE', color:'#1D4ED8',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
+                    // Seni & Budaya
+                    { keys: ['seni','budaya','musik','tari','teater','gambar','lukis','desain','kriya','prakarya'],
+                      bg:'#FCE7F3', color:'#DB2777',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#DB2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>' },
+                    // Olahraga
+                    { keys: ['olahraga','penjaskes','penjas','jasmani','kesehatan','kebugaran','renang','atletik'],
+                      bg:'#DCFCE7', color:'#16A34A',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24M14.12 9.88l4.24-4.24m-9.9 9.9l-4.24 4.24"/></svg>' },
+                    // Agama
+                    { keys: ['agama','pendidikan agama','pai','paq','quran','aqidah','fiqh','akhlak','ibadah'],
+                      bg:'#FEF9C3', color:'#CA8A04',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#CA8A04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' },
+                    // PKN / Kewarganegaraan
+                    { keys: ['pkn','kewarganegaraan','pancasila','ppkn','civic'],
+                      bg:'#FEE2E2', color:'#B91C1C',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
+                    // BK / Konseling
+                    { keys: ['bimbingan','konseling','bk','psikologi','bp'],
+                      bg:'#EDE9FE', color:'#6D28D9',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' },
+                    // Teknik / Kejuruan
+                    { keys: ['teknik','otomotif','mesin','elektro','listrik','las','bangunan','konstruksi','sipil','mekatronika','manufaktur'],
+                      bg:'#FEF3C7', color:'#B45309',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>' },
+                    // Default fallback
+                    { keys: [],
+                      bg:'#F1F5F9', color:'#64748B',
+                      svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>' },
+                ];
+
+                // Palet warna fallback — diacak berdasarkan id agar setiap mapel konsisten
+                var FALLBACK_PALETTES = [
+                    { bg:'#DBEAFE', svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>' },
+                    { bg:'#D1FAE5', svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' },
+                    { bg:'#FEF3C7', svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' },
+                    { bg:'#FCE7F3', svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#DB2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>' },
+                    { bg:'#EDE9FE', svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' },
+                    { bg:'#FEE2E2', svg:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+                ];
+
+                function mapelGetIcon(id, name) {
+                    var lower = (name || '').toLowerCase();
+                    for (var i = 0; i < MAPEL_ICONS.length - 1; i++) {
+                        var entry = MAPEL_ICONS[i];
+                        for (var k = 0; k < entry.keys.length; k++) {
+                            if (lower.indexOf(entry.keys[k]) >= 0) return entry;
+                        }
+                    }
+                    // Fallback: pilih palet berdasarkan id agar konsisten
+                    return FALLBACK_PALETTES[id % FALLBACK_PALETTES.length];
+                }
 
                 function mapelRender(filter) {
                     var list = document.getElementById('mapel-list');
@@ -636,12 +714,12 @@
 
                     list.innerHTML = filtered.map(function(s) {
                         var checked = MAPEL_SELECTED.indexOf(s.id) >= 0;
-                        var initial = s.name.charAt(0).toUpperCase();
+                        var iconData = mapelGetIcon(s.id, s.name);
                         return '<label onclick="mapelToggleItem(' + s.id + ',event)" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:background 0.12s;background:' + (checked ? '#EFF6FF' : 'transparent') + ';" onmouseover="if(!this.dataset.checked)this.style.background=\'#F8FAFC\'" onmouseout="this.style.background=\'' + (checked ? '#EFF6FF' : 'transparent') + '\'"  data-id="' + s.id + '" data-checked="' + (checked ? '1' : '') + '">'
                             + '<div style="flex-shrink:0;width:18px;height:18px;border-radius:5px;border:2px solid ' + (checked ? '#3B82F6' : '#CBD5E1') + ';background:' + (checked ? '#3B82F6' : '#fff') + ';display:flex;align-items:center;justify-content:center;transition:all 0.15s;">'
                             + (checked ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '')
                             + '</div>'
-                            + '<div style="flex-shrink:0;width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#1e3a5f,#0f172a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">' + initial + '</div>'
+                            + '<div style="flex-shrink:0;width:32px;height:32px;border-radius:9px;background:' + iconData.bg + ';display:flex;align-items:center;justify-content:center;">' + iconData.svg + '</div>'
                             + '<span style="font-size:13px;font-weight:500;color:#374151;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + s.name + '</span>'
                             + '</label>';
                     }).join('');
