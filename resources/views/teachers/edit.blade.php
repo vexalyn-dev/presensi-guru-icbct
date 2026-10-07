@@ -468,8 +468,8 @@
 
         {{-- Blade data injection via data attributes (avoids VS Code JS parser false positives) --}}
         <div id="mapel-data"
-             data-options="{{ e(json_encode($subjectOptions)) }}"
-             data-selected="{{ e(json_encode($teacherSubjectIds)) }}"
+             data-options="@js($subjectOptions)"
+             data-selected="@js($teacherSubjectIds)"
              style="display:none;"></div>
 
         <script>
@@ -620,8 +620,12 @@
             /* global MAPEL_OPTIONS, MAPEL_SELECTED */
             (function() {
                 var _mapelEl = document.getElementById('mapel-data');
-                var MAPEL_OPTIONS  = _mapelEl ? JSON.parse(_mapelEl.dataset.options  || '[]') : [];
-                var MAPEL_SELECTED = _mapelEl ? JSON.parse(_mapelEl.dataset.selected || '[]') : [];
+                var MAPEL_OPTIONS  = [];
+                var MAPEL_SELECTED = [];
+                try {
+                    if (_mapelEl && _mapelEl.dataset.options)  MAPEL_OPTIONS  = JSON.parse(_mapelEl.dataset.options);
+                    if (_mapelEl && _mapelEl.dataset.selected) MAPEL_SELECTED = JSON.parse(_mapelEl.dataset.selected);
+                } catch(e) { console.error('Mapel data parse error:', e); }
                 var isOpen = false;
 
                 function mapelRender(filter) {
