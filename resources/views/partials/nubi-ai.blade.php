@@ -13,6 +13,13 @@
      data-user-name="{{ urlencode(auth()->user()->name) }}"
      x-data="nubiAI()"
      x-init="init()"
+     x-show="!widgetHidden"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 scale-100"
+     x-transition:leave-end="opacity-0 scale-75"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 scale-75"
+     x-transition:enter-end="opacity-100 scale-100"
      style="position: fixed; bottom: 24px; right: 24px; z-index: 9990; user-select: none;">
 
     {{-- ── Chat Modal ── --}}
@@ -189,7 +196,7 @@
             {{-- Robot GIF — ukuran besar, setara robot headset --}}
             <img src="{{ asset('images/Nubi-AI.gif') }}"
                  alt="Nubi AI"
-                 x-on:click="!dragging && toggleChat()"
+                 x-on:click="!hasDragged && toggleChat()"
                  class="w-20 h-20 object-contain drop-shadow-lg transition-transform duration-200 select-none"
                  :class="open ? 'scale-95' : 'hover:scale-105'"
                  draggable="false">
@@ -216,6 +223,7 @@ function nubiAI() {
         userPhoto: '',
         userName: '',
         showTooltip: false,
+        widgetHidden: false,
 
         // Drag state
         dragging: false,
@@ -249,18 +257,13 @@ function nubiAI() {
                 }
             } catch (e) {}
 
-            // Keyboard shortcut: Ctrl + Delete
+            // Keyboard shortcut: Ctrl + Delete — toggle sembunyikan/tampilkan widget
             document.addEventListener('keydown', (e) => {
                 if (e.ctrlKey && e.key === 'Delete') {
                     e.preventDefault();
-                    const w = document.getElementById('nubi-ai-widget');
-                    if (w) {
-                        if (w.style.display === 'none') {
-                            w.style.display = '';
-                        } else {
-                            w.style.display = 'none';
-                            this.open = false;
-                        }
+                    this.widgetHidden = !this.widgetHidden;
+                    if (this.widgetHidden) {
+                        this.open = false;
                     }
                 }
             });
@@ -278,6 +281,8 @@ function nubiAI() {
 
         toggleChat() {
             this.open = !this.open;
+            // Reset hasDragged setelah click diproses
+            this.hasDragged = false;
             if (this.open) {
                 this.unreadCount = 0;
                 this.updateModalStyle();
@@ -302,7 +307,11 @@ function nubiAI() {
             this._initLeft = rect.left;
             this._initTop  = rect.top;
 
-            e.preventDefault();
+            // Cursor grab saat tahan klik (belum drag)
+            const handle = document.getElementById('nubi-drag-handle');
+            if (handle) handle.style.cursor = 'grab';
+
+            // JANGAN preventDefault di sini agar click tetap bisa jalan
         },
 
         onDragMove(e) {
@@ -316,6 +325,7 @@ function nubiAI() {
                 if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
                 this.dragging   = true;
                 this.hasDragged = true;
+                // Cursor grabbing saat drag aktif — seluruh halaman
                 document.body.classList.add('nubi-dragging');
             }
 
@@ -325,15 +335,12 @@ function nubiAI() {
             const wW = widget.offsetWidth  || 80;
             const wH = widget.offsetHeight || 80;
 
-            // Hitung posisi left/top baru
             let newLeft = this._initLeft + dx;
             let newTop  = this._initTop  + dy;
 
-            // Clamp agar tidak keluar viewport
             newLeft = Math.max(8, Math.min(window.innerWidth  - wW - 8, newLeft));
             newTop  = Math.max(8, Math.min(window.innerHeight - wH - 8, newTop));
 
-            // Pakai left/top saat drag (lebih natural)
             widget.style.left   = newLeft + 'px';
             widget.style.top    = newTop  + 'px';
             widget.style.right  = 'auto';
@@ -343,25 +350,28 @@ function nubiAI() {
         },
 
         onDragEnd(e) {
+            const handle = document.getElementById('nubi-drag-handle');
+
             if (!this.dragging) {
-                // Tidak drag → reset state saja
+                // Tidak drag → reset cursor ke pointer, state saja
+                if (handle) handle.style.cursor = 'pointer';
                 this.dragStartX = undefined;
                 return;
             }
 
-            // Kembalikan cursor
+            // Selesai drag — kembalikan cursor
             document.body.classList.remove('nubi-dragging');
+            if (handle) handle.style.cursor = 'pointer';
             this.dragging   = false;
             this.dragStartX = undefined;
 
             // Convert posisi left/top ke right/bottom lalu simpan
             const widget = document.getElementById('nubi-ai-widget');
             if (widget) {
-                const rect    = widget.getBoundingClientRect();
+                const rect      = widget.getBoundingClientRect();
                 const newRight  = window.innerWidth  - rect.right;
                 const newBottom = window.innerHeight - rect.bottom;
 
-                // Switch balik ke right/bottom agar konsisten dengan fixed positioning
                 widget.style.right  = Math.max(8, newRight)  + 'px';
                 widget.style.bottom = Math.max(8, newBottom) + 'px';
                 widget.style.left   = 'auto';
@@ -498,15 +508,11 @@ function nubiAI() {
     #nubi-ai-widget {
         touch-action: none;
     }
-    /* Cursor grab di robot handle */
+    /* Cursor default pointer di robot, JS yang urus grab/grabbing */
     .nubi-drag-handle {
-        cursor: grab;
+        cursor: pointer;
     }
-    .nubi-drag-handle:active,
-    body.nubi-dragging .nubi-drag-handle {
-        cursor: grabbing;
-    }
-    /* Paksa grabbing cursor ke seluruh halaman saat drag */
+    /* Paksa grabbing cursor ke seluruh halaman saat drag aktif */
     body.nubi-dragging,
     body.nubi-dragging * {
         cursor: grabbing !important;
