@@ -890,7 +890,7 @@
     {{-- ── NUBI AI CHAT WIDGET ── --}}
     {{-- Tampil untuk Admin, Operator, dan Developer --}}
     @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isDeveloper()))
-        @include('partials.nubi-ai')
+        @include('partials.leo-ai')
     @endif
 
     {{-- ── LOGOUT LOADING OVERLAY ── --}}

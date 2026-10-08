@@ -1,4 +1,4 @@
-# 🏫 ICB CT — Sistem Presensi Guru
+# <img src="public/images/logo.png" height="28" style="vertical-align:middle;"> ICB CT — Sistem Presensi Guru
 
 <div align="center">
 
@@ -59,7 +59,7 @@
 - [x] Mode Manual — perlu konfirmasi guru piket sebelum presensi tercatat
 - [x] Auto-detect Masuk/Keluar berdasarkan status absen hari itu
 
-### 🏫 Presensi Kelas
+### <img src="public/images/logo.png" height="18" style="vertical-align:middle;"> Presensi Kelas
 
 - [x] QR Code scanning real-time via kamera
 - [x] Mode Masuk & Keluar
@@ -193,7 +193,7 @@ Leo AI adalah asisten virtual berbasis kecerdasan buatan yang terintegrasi langs
 | 📊 Data kehadiran real-time | *"Berapa guru yang hadir hari ini?"* |
 | ⏳ Guru belum presensi | *"Siapa aja yang belum absen?"* |
 | 📝 Status izin | *"Ada berapa pengajuan izin yang pending?"* |
-| 🏫 Kelas aktif | *"Berapa sesi kelas yang sedang berlangsung?"* |
+| <img src="public/images/logo.png" height="16" style="vertical-align:middle;"> Kelas aktif | *"Berapa sesi kelas yang sedang berlangsung?"* |
 | 📖 Panduan fitur | *"Bagaimana cara export laporan presensi?"* |
 | ⚙️ Cara penggunaan | *"Bagaimana cara menambah data guru baru?"* |
 

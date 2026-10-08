@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class NubiAiController extends Controller
+class LeoAiController extends Controller
 {
     /**
      * Ambil data real-time dari database untuk dijadikan konteks AI.
@@ -154,18 +154,84 @@ Tanggal & Waktu: {$todayStr}, pukul {$now}
 === AKHIR DATA REAL-TIME ===
 CONTEXT;
         } catch (\Throwable $e) {
-            Log::warning('Nubi AI: gagal ambil data real-time', ['error' => $e->getMessage()]);
+            Log::warning('Leo AI: gagal ambil data real-time', ['error' => $e->getMessage()]);
             return '=== DATA REAL-TIME: Tidak tersedia saat ini ===';
         }
     }
 
     /**
-     * System prompt untuk Nubi AI.
+     * Test koneksi ke Leo AI API — khusus developer untuk debug.
+     * Akses: GET /leo-ai/test
+     */
+    public function testConnection()
+    {
+        $user = auth()->user();
+        if (! $user || $user->role !== 'developer') {
+            abort(403, 'Hanya developer yang bisa mengakses halaman ini.');
+        }
+
+        $apiKey  = config('services.nubi_ai.api_key');
+        $baseUrl = rtrim(config('services.nubi_ai.base_url', 'https://apihub.agnes-ai.com/v1'), '/');
+        $model   = config('services.nubi_ai.model', 'agnes-3.0-flash');
+
+        $result = [
+            'config' => [
+                'api_key_set'    => ! empty($apiKey),
+                'api_key_prefix' => ! empty($apiKey) ? substr($apiKey, 0, 8) . '...' : '(kosong)',
+                'base_url'       => $baseUrl,
+                'model'          => $model,
+            ],
+            'env_check' => [
+                'LEO_AI_API_KEY'  => ! empty(env('LEO_AI_API_KEY')) ? 'SET' : 'TIDAK SET',
+                'LEO_AI_BASE_URL' => env('LEO_AI_BASE_URL', '(pakai default)'),
+                'LEO_AI_MODEL'    => env('LEO_AI_MODEL', '(pakai default)'),
+            ],
+        ];
+
+        if (empty($apiKey)) {
+            $result['status']  = 'GAGAL';
+            $result['message'] = 'API key kosong. Jalankan: php artisan config:clear';
+            return response()->json($result, 500);
+        }
+
+        try {
+            $response = Http::withToken($apiKey)
+                ->timeout(15)
+                ->connectTimeout(8)
+                ->post("{$baseUrl}/chat/completions", [
+                    'model'      => $model,
+                    'messages'   => [['role' => 'user', 'content' => 'ping']],
+                    'max_tokens' => 10,
+                ]);
+
+            $result['http_status'] = $response->status();
+            $result['response']    = $response->json();
+
+            if ($response->successful()) {
+                $reply = data_get($response->json(), 'choices.0.message.content', '');
+                $result['status']  = 'OK';
+                $result['message'] = 'Koneksi berhasil! Reply: ' . $reply;
+            } else {
+                $result['status']  = 'GAGAL';
+                $result['message'] = 'API mengembalikan status ' . $response->status();
+            }
+
+        } catch (\Throwable $e) {
+            $result['status']    = 'ERROR';
+            $result['message']   = $e->getMessage();
+            $result['exception'] = get_class($e);
+        }
+
+        return response()->json($result, $result['status'] === 'OK' ? 200 : 500);
+    }
+
+    /**
+     * System prompt untuk Leo AI.
      */
     private function systemPrompt(): string
     {
         return <<<PROMPT
-Kamu adalah Nubi AI, asisten cerdas untuk aplikasi Presensi Guru ICB CT milik SMK ICB Cinta Teknika.
+Kamu adalah Leo AI, asisten cerdas untuk aplikasi Presensi Guru ICB CT milik SMK ICB Cinta Teknika.
 Tugasmu adalah membantu operator, admin, guru piket, dan developer dalam:
 1. Menggunakan dan memahami fitur-fitur aplikasi
 2. Menjawab pertanyaan tentang data kehadiran, izin, dan statistik guru secara real-time
@@ -208,7 +274,7 @@ PROMPT;
     }
 
     /**
-     * Handle pesan chat dari user ke Nubi AI.
+     * Handle pesan chat dari user ke Leo AI.
      */
     public function chat(Request $request)
     {
@@ -231,8 +297,9 @@ PROMPT;
         $model   = config('services.nubi_ai.model', 'agnes-3.0-flash');
 
         if (empty($apiKey)) {
+            Log::error('Leo AI: API key kosong. Pastikan LEO_AI_API_KEY sudah diset di .env dan config cache sudah di-clear.');
             return response()->json([
-                'error' => 'Nubi AI belum dikonfigurasi. Hubungi administrator.',
+                'error' => 'Leo AI belum dikonfigurasi. Hubungi administrator.',
             ], 500);
         }
 
@@ -244,7 +311,7 @@ PROMPT;
             ->toArray();
 
         // Ambil konteks data real-time dan gabungkan ke system prompt
-        $realtimeData   = $this->getRealtimeContext();
+        $realtimeData     = $this->getRealtimeContext();
         $fullSystemPrompt = $this->systemPrompt() . "\n\n" . $realtimeData;
 
         $messages = array_merge(
@@ -265,34 +332,49 @@ PROMPT;
                 ]);
 
             if ($response->failed()) {
-                Log::warning('Nubi AI API error', [
-                    'status' => $response->status(),
+                $responseBody = $response->json() ?? [];
+                $apiError     = data_get($responseBody, 'error.message')
+                             ?? data_get($responseBody, 'message')
+                             ?? 'Unknown API error';
+
+                Log::warning('Leo AI API error', [
+                    'status'   => $response->status(),
+                    'body'     => $responseBody,
+                    'api_key_prefix' => substr($apiKey, 0, 8) . '...',
                 ]);
 
-                return response()->json([
-                    'error' => 'Maaf, Nubi AI sedang tidak tersedia. Silakan coba lagi.',
-                ], 503);
+                // Pesan error yang lebih spesifik berdasarkan HTTP status
+                $userMessage = match ($response->status()) {
+                    401 => 'Leo AI: API key tidak valid. Hubungi administrator.',
+                    402 => 'Leo AI: Kuota API habis. Hubungi administrator.',
+                    429 => 'Leo AI sedang sibuk. Tunggu sebentar lalu coba lagi.',
+                    default => 'Leo AI sedang tidak tersedia. Silakan coba lagi.',
+                };
+
+                return response()->json(['error' => $userMessage], 503);
             }
 
             $reply = data_get($response->json(), 'choices.0.message.content');
             if (! is_string($reply) || trim($reply) === '') {
-                Log::warning('Nubi AI returned an invalid response', [
+                Log::warning('Leo AI returned an invalid response', [
                     'status' => $response->status(),
+                    'body'   => $response->json(),
                 ]);
 
                 return response()->json([
-                    'error' => 'Nubi AI mengirim jawaban yang tidak valid. Silakan coba lagi.',
+                    'error' => 'Leo AI mengirim jawaban yang tidak valid. Silakan coba lagi.',
                 ], 503);
             }
 
             return response()->json(['reply' => $reply]);
 
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            Log::error('Nubi AI connection failed', ['error' => $e->getMessage()]);
+            Log::error('Leo AI connection failed', ['error' => $e->getMessage()]);
 
             return response()->json([
-                'error' => 'Koneksi ke Nubi AI gagal. Periksa koneksi internet dan coba lagi.',
+                'error' => 'Koneksi ke Leo AI gagal. Periksa koneksi internet dan coba lagi.',
             ], 503);
         }
     }
 }
+

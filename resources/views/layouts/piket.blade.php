@@ -525,7 +525,7 @@
     {{-- ── NUBI AI CHAT WIDGET ── --}}
     {{-- Tampil untuk Guru Piket --}}
     @if(Auth::check() && Auth::user()->isGuruPiket())
-        @include('partials.nubi-ai')
+        @include('partials.leo-ai')
     @endif
 
     @stack('scripts')

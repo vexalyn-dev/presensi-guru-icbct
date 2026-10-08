@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AttendanceController;
@@ -57,9 +57,13 @@ Route::post('/webhooks/github', [\App\Http\Controllers\GitHubWebhookController::
     ->name('webhooks.github')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
-// Nubi AI — Chat endpoint (hanya untuk user yang sudah login)
-Route::middleware(['auth'])->post('/nubi-ai/chat', [\App\Http\Controllers\NubiAiController::class, 'chat'])
+// Leo AI — Chat endpoint (hanya untuk user yang sudah login)
+Route::middleware(['auth'])->post('/leo-ai/chat', [\App\Http\Controllers\LeoAiController::class, 'chat'])
     ->name('nubi-ai.chat');
+
+// Leo AI — Test koneksi API (khusus developer)
+Route::middleware(['auth'])->get('/leo-ai/test', [\App\Http\Controllers\LeoAiController::class, 'testConnection'])
+    ->name('nubi-ai.test');
 
 // Landing page
 Route::get('/', function () {

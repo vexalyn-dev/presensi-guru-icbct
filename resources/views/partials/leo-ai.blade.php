@@ -462,24 +462,82 @@ function leoContextMenu(e) {
 
 function leoHideWidget() {
     document.getElementById('leo-context-menu').style.display = 'none';
+
+    // Ambil posisi robot saat ini untuk diberikan ke floating button
+    const leoBtn = document.getElementById('leo-btn');
+    if (leoBtn) {
+        const r = leoBtn.getBoundingClientRect();
+        // Simpan posisi tengah robot sebagai acuan posisi floating
+        const floatRight  = window.innerWidth  - r.right;
+        const floatBottom = window.innerHeight - r.bottom;
+        try {
+            localStorage.setItem('leo_show_pos', JSON.stringify({
+                right:  Math.max(0, floatRight),
+                bottom: Math.max(0, floatBottom),
+            }));
+        } catch(_) {}
+    }
+
+    // Sembunyikan robot via Alpine
     const widget = document.getElementById('leo-ai-widget');
     if (widget && widget._x_dataStack) {
         const data = widget._x_dataStack[0];
         if (data) { data.hidden = true; data.open = false; }
     } else {
-        const btn = document.getElementById('leo-btn');
+        if (leoBtn)   leoBtn.style.display   = 'none';
         const modal = document.getElementById('leo-modal');
-        if (btn)   btn.style.display   = 'none';
         if (modal) modal.style.display = 'none';
     }
+
+    // Tampilkan floating button di posisi robot
     const showBtn = document.getElementById('leo-show-btn');
     if (showBtn) {
+        // Terapkan posisi tersimpan
+        try {
+            const p = JSON.parse(localStorage.getItem('leo_show_pos') ?? 'null');
+            if (p && typeof p.right === 'number') {
+                const bW = 80, bH = 80;
+                const right  = Math.max(0, Math.min(window.innerWidth  - bW, p.right));
+                const bottom = Math.max(0, Math.min(window.innerHeight - bH, p.bottom));
+                showBtn.style.right  = right  + 'px';
+                showBtn.style.bottom = bottom + 'px';
+                showBtn.style.left   = 'auto';
+                showBtn.style.top    = 'auto';
+            }
+        } catch(_) {}
         showBtn.style.display = 'block';
         _leoInitShowBtnDrag(showBtn);
     }
 }
 
 function leoShowWidget() {
+    const showBtn = document.getElementById('leo-show-btn');
+
+    // Ambil posisi floating button untuk diberikan ke robot
+    if (showBtn) {
+        const r = showBtn.getBoundingClientRect();
+        const leoBtn = document.getElementById('leo-btn');
+        if (leoBtn) {
+            const bW = 110, bH = 130;
+            // Hitung posisi robot agar pojok kanan bawahnya sejajar dengan floating btn
+            const newRight  = window.innerWidth  - r.right  - (bW - 80);
+            const newBottom = window.innerHeight - r.bottom - (bH - 80);
+            leoBtn.style.right  = Math.max(0, newRight)  + 'px';
+            leoBtn.style.bottom = Math.max(0, newBottom) + 'px';
+            leoBtn.style.left   = 'auto';
+            leoBtn.style.top    = 'auto';
+            // Simpan posisi robot baru
+            try {
+                localStorage.setItem('leo_pos', JSON.stringify({
+                    right:  Math.max(0, newRight),
+                    bottom: Math.max(0, newBottom),
+                }));
+            } catch(_) {}
+        }
+        showBtn.style.display = 'none';
+    }
+
+    // Tampilkan robot via Alpine
     const widget = document.getElementById('leo-ai-widget');
     if (widget && widget._x_dataStack) {
         const data = widget._x_dataStack[0];
@@ -488,8 +546,6 @@ function leoShowWidget() {
         const btn = document.getElementById('leo-btn');
         if (btn) btn.style.display = '';
     }
-    const showBtn = document.getElementById('leo-show-btn');
-    if (showBtn) showBtn.style.display = 'none';
 }
 
 // Drag untuk floating show button

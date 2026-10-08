@@ -2679,9 +2679,9 @@ textarea.input { resize: vertical; min-height: 85px; }
 </script>
 @yield('scripts')
 
-    {{-- ── NUBI AI CHAT WIDGET ── --}}
+    {{-- ── LEO AI CHAT WIDGET ── --}}
     @if(Auth::check() && Auth::user()->isDeveloper())
-        @include('partials.nubi-ai')
+        @include('partials.leo-ai')
     @endif
 </body>
 </html>
