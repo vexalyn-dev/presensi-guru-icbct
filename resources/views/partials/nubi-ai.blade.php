@@ -2,28 +2,31 @@
     Nubi AI Chat Widget
     - Klik robot  → buka/tutup chat
     - Tahan + drag → pindah posisi
-    - Ctrl+Del     → sembunyikan/tampilkan
+    - Ctrl+Shift+D → sembunyikan/tampilkan
 --}}
 
 {{-- Widget wrapper — Alpine scope --}}
 <div id="nubi-ai-widget"
      data-chat-url="{{ route('nubi-ai.chat') }}"
      data-user-photo="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff&size=32' }}"
-     data-user-name="{{ urlencode(auth()->user()->name) }}"
+     data-user-name="{{ auth()->user()->name }}"
      x-data="nubiAI()"
      x-init="init()">
 
     {{-- ── Chat Modal (posisi fixed, dihitung JS) ── --}}
     <div id="nubi-modal"
-         x-show="open"
+         x-show="open && !hidden"
          x-cloak
+         role="dialog"
+         aria-modal="true"
+         aria-label="Percakapan dengan Nubi AI"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100"
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         style="position:fixed; z-index:9991; width:360px; max-height:520px; transform-origin:bottom right;"
+         style="position:fixed; z-index:9991; width:360px; max-height:calc(100vh - 16px); max-height:calc(100dvh - 16px); transform-origin:bottom right;"
          class="bg-white dark:bg-navy-900 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
 
         {{-- Header --}}
@@ -38,7 +41,9 @@
                     <span class="text-[10px] text-slate-300">Asisten Aplikasi ICB CT</span>
                 </div>
             </div>
-            <button x-on:click="open = false"
+            <button x-on:click="closeChat()"
+                    type="button"
+                    aria-label="Tutup percakapan"
                     class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
@@ -46,7 +51,8 @@
 
         {{-- Messages --}}
         <div id="nubi-messages"
-             style="flex:1; overflow-y:auto; padding:16px; min-height:200px; max-height:310px; scroll-behavior:smooth;"
+             x-ref="messages"
+             style="flex:1; overflow-y:auto; padding:16px; min-height:0; max-height:310px; scroll-behavior:smooth;"
              class="space-y-3">
 
             <template x-if="messages.length === 0">
@@ -73,7 +79,9 @@
                     </template>
                     <div :class="msg.role === 'user'
                             ? 'bg-navy-800 text-white rounded-2xl rounded-br-sm px-3.5 py-2.5 max-w-[85%]'
-                            : 'bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]'">
+                                : (msg.failed
+                                    ? 'bg-red-50 dark:bg-red-900/20 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]'
+                                    : 'bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]')">
                         <p class="text-xs leading-relaxed"
                            :class="msg.role === 'user' ? 'text-white' : 'text-slate-700 dark:text-slate-200'"
                            x-html="fmt(msg.content)"></p>
@@ -81,7 +89,7 @@
                     <template x-if="msg.role === 'user'">
                         <div class="w-7 h-7 rounded-full bg-navy-800 border-2 border-navy-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
                             <img :src="userPhoto" class="w-7 h-7 object-cover"
-                                 x-on:error="$el.src='https://ui-avatars.com/api/?name='+userName+'&background=0F172A&color=fff&size=32'">
+                                 x-on:error="$el.src='https://ui-avatars.com/api/?name='+encodeURIComponent(userName)+'&background=0F172A&color=fff&size=32'">
                         </div>
                     </template>
                 </div>
@@ -106,11 +114,11 @@
         {{-- Quick suggestions --}}
         <template x-if="messages.length === 0 && !typing">
             <div class="px-4 pb-2 flex flex-wrap gap-1.5 flex-shrink-0">
-                <button x-on:click="suggest('Berapa guru yang hadir hari ini?')" class="nubi-chip">📊 Kehadiran hari ini</button>
-                <button x-on:click="suggest('Siapa saja guru yang belum presensi hari ini?')" class="nubi-chip">⏳ Belum presensi</button>
-                <button x-on:click="suggest('Ada berapa pengajuan izin yang belum disetujui?')" class="nubi-chip">📝 Izin pending</button>
-                <button x-on:click="suggest('Bagaimana cara menyetujui pengajuan izin guru?')" class="nubi-chip">✅ Approve izin</button>
-                <button x-on:click="suggest('Bagaimana cara export laporan presensi?')" class="nubi-chip">📈 Export laporan</button>
+                <button type="button" x-on:click="suggest('Berapa guru yang hadir hari ini?')" class="nubi-chip">Kehadiran hari ini</button>
+                <button type="button" x-on:click="suggest('Siapa saja guru yang belum presensi hari ini?')" class="nubi-chip">Belum presensi</button>
+                <button type="button" x-on:click="suggest('Ada berapa pengajuan izin yang belum disetujui?')" class="nubi-chip">Izin pending</button>
+                <button type="button" x-on:click="suggest('Bagaimana cara menyetujui pengajuan izin guru?')" class="nubi-chip">Setujui izin</button>
+                <button type="button" x-on:click="suggest('Bagaimana cara export laporan presensi?')" class="nubi-chip">Export laporan</button>
             </div>
         </template>
 
@@ -118,7 +126,7 @@
         <div class="px-3 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-navy-900/50 flex-shrink-0">
             <form x-on:submit.prevent="send()" class="flex gap-2 items-end">
                 <textarea x-model="input"
-                          x-on:keydown.enter.prevent="if (!$event.shiftKey) send()"
+                          x-on:keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); send(); }"
                           :disabled="typing"
                           rows="1"
                           placeholder="Tanya sesuatu..."
@@ -136,8 +144,14 @@
     </div>
 
     {{-- ── Robot Button (posisi fixed, diatur JS) ── --}}
-    <div id="nubi-btn"
-         style="position:fixed; bottom:24px; right:24px; z-index:9990; width:80px; height:80px; cursor:pointer;">
+    <button id="nubi-btn"
+         type="button"
+         x-show="!hidden"
+         aria-label="Buka percakapan Nubi AI"
+         aria-controls="nubi-modal"
+         aria-keyshortcuts="Control+Shift+D"
+         :aria-expanded="open"
+         style="position:fixed; bottom:24px; right:24px; z-index:9990; width:80px; height:80px; cursor:pointer; padding:0; border:0; background:transparent; touch-action:none; user-select:none;">
         <span x-show="!open"
               class="absolute inset-0 rounded-full bg-navy-800/10 animate-ping pointer-events-none"
               style="animation-duration:3s;"></span>
@@ -147,21 +161,17 @@
              class="w-20 h-20 object-contain drop-shadow-lg select-none"
              draggable="false"
              style="transition:transform 0.15s ease;">
-        <span x-show="unread > 0 && !open" x-cloak
-              class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 border-2 border-white dark:border-navy-900 rounded-full flex items-center justify-center pointer-events-none">
-            <span class="text-[9px] text-white font-bold" x-text="unread > 9 ? '9+' : unread"></span>
-        </span>
-    </div>
+    </button>
 </div>
 
 <script>
 function nubiAI() {
     return {
         open:      false,
+        hidden:    false,
         typing:    false,
         input:     '',
         messages:  [],
-        unread:    0,
         chatUrl:   '',
         userPhoto: '',
         userName:  '',
@@ -171,36 +181,44 @@ function nubiAI() {
             const w = document.getElementById('nubi-ai-widget');
             this.chatUrl   = w?.dataset.chatUrl   ?? '';
             this.userPhoto = w?.dataset.userPhoto ?? '';
-            this.userName  = w ? decodeURIComponent(w.dataset.userName ?? '') : '';
+            this.userName  = w?.dataset.userName ?? '';
 
             // ── Restore chat history ──
             try {
                 const s = sessionStorage.getItem('nubi_chat');
-                if (s) this.messages = JSON.parse(s);
+                const saved = s ? JSON.parse(s) : [];
+                if (Array.isArray(saved)) {
+                    this.messages = saved.filter(message =>
+                        message
+                        && ['user', 'assistant'].includes(message.role)
+                        && typeof message.content === 'string'
+                    ).map(message => ({
+                        role: message.role,
+                        content: message.content,
+                        failed: message.failed === true,
+                    })).slice(-30);
+                }
             } catch (_) {}
 
             // ── Setup drag & click di robot button ──
             this._initDrag();
 
-            // ── Ctrl+Del: sembunyikan/tampilkan ──
+            // ── Ctrl+Shift+D: sembunyikan/tampilkan ──
             document.addEventListener('keydown', (e) => {
-                if (e.ctrlKey && e.key === 'Delete') {
+                if (e.key === 'Escape' && this.open) {
                     e.preventDefault();
-                    const btn   = document.getElementById('nubi-btn');
-                    const modal = document.getElementById('nubi-modal');
-                    if (!btn) return;
-                    const isHidden = btn.dataset.hidden === '1';
-                    if (isHidden) {
-                        btn.style.display   = '';
-                        if (modal) modal.style.display = '';
-                        btn.dataset.hidden  = '0';
-                    } else {
-                        btn.style.display   = 'none';
-                        if (modal) modal.style.display = 'none';
-                        btn.dataset.hidden  = '1';
-                        this.open = false;
-                    }
+                    this.closeChat();
+                    return;
                 }
+
+                if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey && e.key.toLowerCase() === 'd') {
+                    e.preventDefault();
+                    this.hidden = !this.hidden;
+                    if (this.hidden) this.closeChat();
+                }
+            });
+            window.addEventListener('resize', () => {
+                if (this.open) this.$nextTick(() => this._posModal());
             });
         },
 
@@ -223,9 +241,9 @@ function nubiAI() {
                 }
             } catch (_) {}
 
-            let pressing   = false; // mousedown aktif
-            let dragging   = false; // sudah lewati threshold
-            let didDrag    = false; // pernah drag di gesture ini
+            let activePointer = null;
+            let dragging   = false;
+            let didDrag    = false;
             let startMX = 0, startMY = 0;
             let startBL = 0, startBT = 0;
 
@@ -238,14 +256,15 @@ function nubiAI() {
                 this.toggleChat();
             });
 
-            // ── mousedown: catat posisi awal ──
-            btn.addEventListener('mousedown', (e) => {
-                if (e.button !== 0) return;
-                pressing  = true;
+            // ── Pointer events support mouse, pen, and touch ──
+            btn.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                activePointer = e.pointerId;
                 dragging  = false;
                 didDrag   = false;
                 startMX   = e.clientX;
                 startMY   = e.clientY;
+                btn.setPointerCapture(e.pointerId);
 
                 // Posisi btn saat ini dalam koordinat left/top
                 const r  = btn.getBoundingClientRect();
@@ -260,12 +279,10 @@ function nubiAI() {
 
                 // Cursor: grab (tanda siap drag)
                 btn.style.cursor = 'grab';
-                // Tidak preventDefault — biar 'click' event tetap bisa fire
             });
 
-            // ── mousemove: drag kalau sudah lewati threshold ──
-            document.addEventListener('mousemove', (e) => {
-                if (!pressing) return;
+            btn.addEventListener('pointermove', (e) => {
+                if (e.pointerId !== activePointer) return;
 
                 const dx = e.clientX - startMX;
                 const dy = e.clientY - startMY;
@@ -294,11 +311,9 @@ function nubiAI() {
                 if (this.open) this._posModal();
             });
 
-            // ── mouseup: selesai drag ──
-            document.addEventListener('mouseup', (e) => {
-                if (!pressing || e.button !== 0) return;
-                pressing = false;
-
+            const finishDrag = (e) => {
+                if (e.pointerId !== activePointer) return;
+                activePointer = null;
                 // Reset cursor & transform
                 document.body.style.cursor = '';
                 btn.style.cursor           = 'pointer';
@@ -315,19 +330,27 @@ function nubiAI() {
                     } catch (_) {}
                 }
                 // Klik ditangani oleh 'click' event di atas, bukan di sini
-            });
+            };
+            btn.addEventListener('pointerup', finishDrag);
+            btn.addEventListener('pointercancel', finishDrag);
         },
 
         toggleChat() {
             this.open = !this.open;
             if (this.open) {
-                this.unread = 0;
                 this.$nextTick(() => {
                     this._posModal();
                     this._scrollBottom();
                     if (this.$refs.inp) this.$refs.inp.focus();
                 });
             }
+        },
+
+        closeChat() {
+            this.open = false;
+            this.$nextTick(() => {
+                if (!this.hidden) document.getElementById('nubi-btn')?.focus();
+            });
         },
 
         // Hitung posisi modal agar tidak keluar viewport
@@ -337,12 +360,13 @@ function nubiAI() {
             if (!btn || !modal) return;
 
             const br  = btn.getBoundingClientRect();
-            const mW  = 360;
-            const mH  = 520;
-            const gap = 10;
-            const pad = 8;
             const vW  = window.innerWidth;
             const vH  = window.innerHeight;
+            const gap = 10;
+            const pad = 8;
+            const mW  = Math.min(360, vW - pad * 2);
+            modal.style.width = mW + 'px';
+            const mH  = modal.getBoundingClientRect().height || Math.min(520, vH - pad * 2);
 
             // Horizontal: rata kanan dengan robot, geser kalau kepotong
             let left = br.right - mW;
@@ -364,6 +388,10 @@ function nubiAI() {
         async send() {
             const msg = this.input.trim();
             if (!msg || this.typing) return;
+            const history = this.messages
+                .filter(message => ['user', 'assistant'].includes(message.role) && !message.failed)
+                .slice(-10)
+                .map(({ role, content }) => ({ role, content }));
             this.input = '';
             if (this.$refs.inp) this.$refs.inp.style.height = 'auto';
 
@@ -373,26 +401,45 @@ function nubiAI() {
             this.typing = true;
 
             try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                if (!this.chatUrl || !csrfToken) {
+                    throw new Error('Nubi AI belum siap. Muat ulang halaman dan coba lagi.');
+                }
+
                 const res  = await fetch(this.chatUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json',
                     },
                     body: JSON.stringify({
                         message: msg,
-                        history: this.messages.slice(-10).filter(m => m.role !== 'error'),
+                        history,
                     }),
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.error || (res.status === 419
+                        ? 'Sesi kamu sudah berakhir. Muat ulang halaman lalu coba lagi.'
+                        : 'Nubi AI sedang tidak tersedia. Silakan coba lagi.'));
+                }
+                if (typeof data.reply !== 'string' || !data.reply.trim()) {
+                    throw new Error(data.error || 'Nubi AI mengirim jawaban kosong. Silakan coba lagi.');
+                }
+
                 this.messages.push({
                     role: 'assistant',
-                    content: data.error ? '❌ ' + data.error : data.reply,
+                    content: data.reply,
                 });
-                if (!this.open) this.unread++;
-            } catch (_) {
-                this.messages.push({ role: 'assistant', content: '❌ Gagal terhubung ke Nubi AI.' });
+            } catch (error) {
+                this.messages.push({
+                    role: 'assistant',
+                    content: error instanceof TypeError
+                        ? 'Koneksi ke Nubi AI gagal. Periksa jaringan lalu coba lagi.'
+                        : (error instanceof Error ? error.message : 'Nubi AI gagal memproses pesan. Silakan coba lagi.'),
+                    failed: true,
+                });
             } finally {
                 this.typing = false;
                 this._save();
@@ -404,7 +451,7 @@ function nubiAI() {
 
         _scrollBottom() {
             this.$nextTick(() => {
-                const c = document.getElementById('nubi-messages');
+                const c = this.$refs.messages;
                 if (c) c.scrollTop = c.scrollHeight;
             });
         },
@@ -414,7 +461,7 @@ function nubiAI() {
         },
 
         fmt(text) {
-            if (!text) return '';
+            if (typeof text !== 'string' || !text) return '';
             let s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
             s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
@@ -438,6 +485,12 @@ function nubiAI() {
     .nubi-chip:hover { background: #e2e8f0; }
     .dark .nubi-chip { background: #1e293b; border-color: #334155; color: #94a3b8; }
     .dark .nubi-chip:hover { background: #334155; }
+    #nubi-ai-widget button:focus-visible,
+    #nubi-ai-widget textarea:focus-visible {
+        outline: 2px solid #0f172a;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 5px #fff;
+    }
     @@media (max-width: 400px) {
         #nubi-modal { width: calc(100vw - 24px) !important; }
     }
