@@ -176,7 +176,7 @@
 
 <div align="center">
 
-<img src="public/mascot/mascot-ai.png" alt="Leo AI — Asisten Cerdas ICB CT" width="120" />
+<img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/lion_mascot_animation/lion_mascot_blink_loop.gif" alt="Leo AI — Asisten Cerdas ICB CT" width="120" />
 
 ### Leo AI — Asisten Cerdas Presensi Guru ICB CT
 
