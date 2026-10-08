@@ -154,7 +154,7 @@
 - [x] Loading states & skeleton
 - [x] Modal animasi premium (spring cubic-bezier)
 
-### 🤖 Nubi AI — Asisten Cerdas
+### 🤖 Leo AI — Asisten Cerdas
 
 - [x] Floating chat widget di semua halaman admin, operator, guru piket & developer
 - [x] Terhubung ke **Agnes AI API** (OpenAI-compatible)
@@ -167,26 +167,26 @@
 - [x] Quick suggestions saat chat pertama kali dibuka
 - [x] Riwayat percakapan tersimpan di sessionStorage
 - [x] Typing indicator animasi
-- [x] Unread badge saat ada balasan baru tapi modal tertutup
+- [x] Klik kanan robot → context menu → sembunyikan/tampilkan
 - [x] Dibuat oleh **Vexalyn Dev**, dijaga aksesnya hanya untuk role yang berwenang
 
 ---
 
-## 🤖 Nubi AI
+## 🤖 Leo AI
 
 <div align="center">
 
-<img src="public/images/Nubi-AI.gif" alt="Nubi AI — Asisten Cerdas ICB CT" width="160" />
+<img src="public/mascot/mascot-ai.png" alt="Leo AI — Asisten Cerdas ICB CT" width="120" />
 
-### Nubi AI — Asisten Cerdas Presensi Guru ICB CT
+### Leo AI — Asisten Cerdas Presensi Guru ICB CT
 
 > *Dibuat oleh **Vexalyn Dev** · Powered by **Agnes AI***
 
 </div>
 
-Nubi AI adalah asisten virtual berbasis kecerdasan buatan yang terintegrasi langsung di dalam aplikasi. Dirancang untuk membantu operator, admin, dan guru piket agar tidak perlu buka manual atau tanya-tanya lagi.
+Leo AI adalah asisten virtual berbasis kecerdasan buatan yang terintegrasi langsung di dalam aplikasi. Dirancang untuk membantu operator, admin, dan guru piket agar tidak perlu buka manual atau tanya-tanya lagi.
 
-**Apa yang bisa ditanyain ke Nubi AI?**
+**Apa yang bisa ditanyain ke Leo AI?**
 
 | Pertanyaan | Contoh |
 | ----------- | ------- |
@@ -199,11 +199,11 @@ Nubi AI adalah asisten virtual berbasis kecerdasan buatan yang terintegrasi lang
 
 **Cara kerja:**
 
-Setiap kali pertanyaan dikirim, Nubi AI secara otomatis mengambil data terkini dari database (kehadiran, izin, kelas) dan menggabungkannya sebagai konteks ke model AI. Jadi jawabannya selalu up-to-date.
+Setiap kali pertanyaan dikirim, Leo AI secara otomatis mengambil data terkini dari database (kehadiran, izin, kelas) dan menggabungkannya sebagai konteks ke model AI. Jadi jawabannya selalu up-to-date.
 
 **Akses:**
 
-| Role | Akses Nubi AI |
+| Role | Akses Leo AI |
 | ------ | -------------- |
 | Admin | ✅ |
 | Operator | ✅ |
@@ -214,9 +214,9 @@ Setiap kali pertanyaan dikirim, Nubi AI secara otomatis mengambil data terkini d
 **Konfigurasi di `.env`:**
 
 ```env
-NUBI_AI_API_KEY=your-agnes-ai-key
-NUBI_AI_BASE_URL=https://apihub.agnes-ai.com/v1
-NUBI_AI_MODEL=agnes-3.0-flash
+LEO_AI_API_KEY=your-agnes-ai-key
+LEO_AI_BASE_URL=https://apihub.agnes-ai.com/v1
+LEO_AI_MODEL=agnes-3.0-flash
 ```
 
 ---
@@ -747,7 +747,7 @@ Lihat [LICENSE](LICENSE) untuk teks lengkapnya.
 - [Leaflet.js](https://leafletjs.com/)
 - [Chart.js](https://www.chartjs.org/)
 - [PhpSpreadsheet](https://phpspreadsheet.readthedocs.io/)
-- [Agnes AI](https://agnes-ai.com/) — AI backend untuk Nubi AI
+- [Agnes AI](https://agnes-ai.com/) — AI backend untuk Leo AI
 - [ClickUp API](https://clickup.com/api)
 
 ---

@@ -1,16 +1,17 @@
 {{--
-    Nubi AI Chat Widget
-    - Klik robot  → buka/tutup chat (popup)
-    - Tahan + drag → pindah posisi robot
-    - Ctrl+Shift+D → sembunyikan/tampilkan
-    - ESC         → tutup chat
+    Leo AI Chat Widget
+    - Klik robot         → buka chat (popup)
+    - Tahan + drag       → pindah posisi robot
+    - Klik kanan robot   → context menu → Sembunyikan Robot
+    - Tombol mata (pojok kanan bawah) → tampilkan kembali
+    - ESC                → tutup chat
 --}}
 
-<div id="nubi-ai-widget"
+<div id="leo-ai-widget"
      data-chat-url="{{ route('nubi-ai.chat') }}"
      data-user-photo="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff&size=32' }}"
      data-user-name="{{ auth()->user()->name }}"
-     x-data="nubiAI()"
+     x-data="leoAI()"
      x-init="init()">
 
     {{-- ── Backdrop overlay ── --}}
@@ -27,12 +28,12 @@
          aria-hidden="true"></div>
 
     {{-- ── Chat Popup ── --}}
-    <div id="nubi-modal"
+    <div id="leo-modal"
          x-show="open && !hidden"
          x-cloak
          role="dialog"
          aria-modal="true"
-         aria-label="Percakapan dengan Nubi AI"
+         aria-label="Percakapan dengan Leo AI"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95 translate-y-4"
          x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -48,7 +49,7 @@
                 <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-8 h-8 object-contain">
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-bold text-white leading-tight">Nubi AI</p>
+                <p class="text-sm font-bold text-white leading-tight">Leo AI</p>
                 <div class="flex items-center gap-1.5 mt-0.5">
                     <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse inline-block"></span>
                     <span class="text-[10px] text-slate-300">Asisten Aplikasi ICB CT</span>
@@ -63,7 +64,7 @@
         </div>
 
         {{-- Messages --}}
-        <div id="nubi-messages"
+        <div id="leo-messages"
              x-ref="messages"
              style="flex:1; overflow-y:auto; padding:16px; min-height:0; max-height:340px; scroll-behavior:smooth;"
              class="space-y-3">
@@ -75,7 +76,7 @@
                     </div>
                     <div class="bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]">
                         <p class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
-                            Halo! Saya <strong>Nubi AI</strong> 👋<br>
+                            Halo! Saya <strong>Leo AI</strong> 👋<br>
                             Dibuat oleh <strong>Vexalyn Dev</strong> untuk membantu kamu menggunakan aplikasi <strong>Presensi Guru ICB CT</strong>.<br><br>
                             Ada yang bisa saya bantu? 😊
                         </p>
@@ -127,11 +128,11 @@
         {{-- Quick suggestions --}}
         <template x-if="messages.length === 0 && !typing">
             <div class="px-4 pb-2 flex flex-wrap gap-1.5 flex-shrink-0">
-                <button type="button" x-on:click="suggest('Berapa guru yang hadir hari ini?')" class="nubi-chip">Kehadiran hari ini</button>
-                <button type="button" x-on:click="suggest('Siapa saja guru yang belum presensi hari ini?')" class="nubi-chip">Belum presensi</button>
-                <button type="button" x-on:click="suggest('Ada berapa pengajuan izin yang belum disetujui?')" class="nubi-chip">Izin pending</button>
-                <button type="button" x-on:click="suggest('Bagaimana cara menyetujui pengajuan izin guru?')" class="nubi-chip">Setujui izin</button>
-                <button type="button" x-on:click="suggest('Bagaimana cara export laporan presensi?')" class="nubi-chip">Export laporan</button>
+                <button type="button" x-on:click="suggest('Berapa guru yang hadir hari ini?')" class="leo-chip">Kehadiran hari ini</button>
+                <button type="button" x-on:click="suggest('Siapa saja guru yang belum presensi hari ini?')" class="leo-chip">Belum presensi</button>
+                <button type="button" x-on:click="suggest('Ada berapa pengajuan izin yang belum disetujui?')" class="leo-chip">Izin pending</button>
+                <button type="button" x-on:click="suggest('Bagaimana cara menyetujui pengajuan izin guru?')" class="leo-chip">Setujui izin</button>
+                <button type="button" x-on:click="suggest('Bagaimana cara export laporan presensi?')" class="leo-chip">Export laporan</button>
             </div>
         </template>
 
@@ -152,42 +153,62 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                 </button>
             </form>
-            <p class="text-[9px] text-slate-400 mt-1.5 text-center">Nubi AI · Dibuat oleh Vexalyn Dev</p>
+            <p class="text-[9px] text-slate-400 mt-1.5 text-center">Leo AI · Dibuat oleh Vexalyn Dev</p>
         </div>
     </div>
 
     {{-- ── Robot Button (draggable, berdiri di layar) ── --}}
-    <button id="nubi-btn"
+    <button id="leo-btn"
             type="button"
             x-show="!hidden"
             x-cloak
-            aria-label="Buka percakapan Nubi AI"
-            aria-controls="nubi-modal"
-            aria-keyshortcuts="Control+Shift+D"
+            aria-label="Buka percakapan Leo AI"
+            aria-controls="leo-modal"
             :aria-expanded="open"
+            oncontextmenu="leoContextMenu(event)"
             style="position:fixed; bottom:0; right:32px; z-index:9991; width:110px; height:130px; padding:0; border:0; background:transparent; touch-action:none; user-select:none; cursor:pointer; display:flex; align-items:flex-end; justify-content:center;">
 
         {{-- Ground shadow --}}
-        <span class="nubi-shadow" aria-hidden="true"></span>
-
-        {{-- Online ping dot --}}
-        <span x-show="!open" class="nubi-ping-dot" aria-hidden="true">
-            <span class="nubi-ping-ring"></span>
-        </span>
+        <span class="leo-shadow" aria-hidden="true"></span>
 
         {{-- Robot image --}}
-        <img id="nubi-img"
+        <img id="leo-img"
              src="{{ asset('mascot/mascot-ai.png') }}"
-             alt="Nubi AI"
+             alt="Leo AI"
              draggable="false"
-             class="nubi-robot-img select-none"
+             class="leo-robot-img select-none"
              style="width:110px; height:120px; object-fit:contain; object-position:bottom;">
     </button>
 
 </div>
 
+{{-- ── Leo Context Menu (klik kanan robot) ── --}}
+<div id="leo-context-menu"
+     style="display:none; position:fixed; z-index:99999; min-width:180px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; box-shadow:0 8px 24px rgba(15,23,42,0.15); overflow:hidden;"
+     class="dark:!bg-slate-800 dark:!border-slate-700">
+    <div class="px-3 py-2 border-b border-slate-100 dark:border-slate-700">
+        <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Leo AI</p>
+    </div>
+    <button onclick="leoHideWidget()"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        Sembunyikan Robot
+    </button>
+</div>
+
+{{-- ── Tombol tampilkan kembali (saat robot hidden) ── --}}
+<button id="leo-show-btn"
+        onclick="leoShowWidget()"
+        title="Tampilkan Leo AI"
+        style="display:none; position:fixed; bottom:0; right:32px; z-index:99998; width:80px; height:80px; border:none; background:transparent; cursor:pointer; padding:0;"
+        class="hover:scale-110 transition-transform">
+    <img src="{{ asset('mascot/floating-leo.jpg') }}"
+         alt="Tampilkan Leo AI"
+         style="width:80px; height:80px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(15,23,42,0.25));">
+</button>
+
 <script>
-function nubiAI() {
+function leoAI() {
     return {
         open:      false,
         hidden:    false,
@@ -199,14 +220,14 @@ function nubiAI() {
         userName:  '',
 
         init() {
-            const w = document.getElementById('nubi-ai-widget');
+            const w = document.getElementById('leo-ai-widget');
             this.chatUrl   = w?.dataset.chatUrl   ?? '';
             this.userPhoto = w?.dataset.userPhoto ?? '';
             this.userName  = w?.dataset.userName  ?? '';
 
             // Restore chat history
             try {
-                const saved = JSON.parse(sessionStorage.getItem('nubi_chat') ?? '[]');
+                const saved = JSON.parse(sessionStorage.getItem('leo_chat') ?? '[]');
                 if (Array.isArray(saved)) {
                     this.messages = saved
                         .filter(m => m && ['user','assistant'].includes(m.role) && typeof m.content === 'string')
@@ -217,33 +238,22 @@ function nubiAI() {
 
             this._initDrag();
 
-            // Keyboard shortcuts
+            // ESC → tutup chat
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && this.open) {
                     e.preventDefault();
                     this.closeChat();
-                    return;
-                }
-                if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey && (e.key === 'D' || e.key === 'd')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this._toggleHidden();
                 }
             });
         },
 
-        _toggleHidden() {
-            this.hidden = !this.hidden;
-            if (this.hidden && this.open) this.open = false;
-        },
-
         _initDrag() {
-            const btn = document.getElementById('nubi-btn');
+            const btn = document.getElementById('leo-btn');
             if (!btn) return;
 
             // Restore saved position
             try {
-                const p = JSON.parse(localStorage.getItem('nubi_pos') ?? 'null');
+                const p = JSON.parse(localStorage.getItem('leo_pos') ?? 'null');
                 if (p && typeof p.right === 'number' && typeof p.bottom === 'number') {
                     const bW = 110, bH = 130;
                     btn.style.right  = Math.max(0, Math.min(window.innerWidth  - bW, p.right))  + 'px';
@@ -295,7 +305,7 @@ function nubiAI() {
                     const curL = parseFloat(btn.style.left) || 0;
                     const curT = parseFloat(btn.style.top)  || 0;
                     try {
-                        localStorage.setItem('nubi_pos', JSON.stringify({
+                        localStorage.setItem('leo_pos', JSON.stringify({
                             right:  window.innerWidth  - curL - 110,
                             bottom: window.innerHeight - curT - 130,
                         }));
@@ -313,8 +323,10 @@ function nubiAI() {
         },
 
         toggleChat() {
-            this.open = !this.open;
-            if (this.open) {
+            // Klik robot = SELALU buka, tidak toggle tutup
+            // Tutup hanya lewat tombol X, ESC, atau backdrop
+            if (!this.open) {
+                this.open = true;
                 this.$nextTick(() => {
                     this._scrollBottom();
                     if (this.$refs.inp) this.$refs.inp.focus();
@@ -325,7 +337,7 @@ function nubiAI() {
         closeChat() {
             this.open = false;
             this.$nextTick(() => {
-                if (!this.hidden) document.getElementById('nubi-btn')?.focus();
+                if (!this.hidden) document.getElementById('leo-btn')?.focus();
             });
         },
 
@@ -349,7 +361,7 @@ function nubiAI() {
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
                 if (!this.chatUrl || !csrfToken) {
-                    throw new Error('Nubi AI belum siap. Muat ulang halaman dan coba lagi.');
+                    throw new Error('Leo AI belum siap. Muat ulang halaman dan coba lagi.');
                 }
 
                 const res = await fetch(this.chatUrl, {
@@ -367,10 +379,10 @@ function nubiAI() {
                 if (!res.ok) {
                     throw new Error(data.error || (res.status === 419
                         ? 'Sesi kamu sudah berakhir. Muat ulang halaman lalu coba lagi.'
-                        : 'Nubi AI sedang tidak tersedia. Silakan coba lagi.'));
+                        : 'Leo AI sedang tidak tersedia. Silakan coba lagi.'));
                 }
                 if (typeof data.reply !== 'string' || !data.reply.trim()) {
-                    throw new Error(data.error || 'Nubi AI mengirim jawaban kosong. Silakan coba lagi.');
+                    throw new Error(data.error || 'Leo AI mengirim jawaban kosong. Silakan coba lagi.');
                 }
 
                 this.messages.push({ role: 'assistant', content: data.reply });
@@ -379,8 +391,8 @@ function nubiAI() {
                 this.messages.push({
                     role: 'assistant',
                     content: error instanceof TypeError
-                        ? 'Koneksi ke Nubi AI gagal. Periksa jaringan lalu coba lagi.'
-                        : (error instanceof Error ? error.message : 'Nubi AI gagal memproses pesan. Silakan coba lagi.'),
+                        ? 'Koneksi ke Leo AI gagal. Periksa jaringan lalu coba lagi.'
+                        : (error instanceof Error ? error.message : 'Leo AI gagal memproses pesan. Silakan coba lagi.'),
                     failed: true,
                 });
             } finally {
@@ -400,7 +412,7 @@ function nubiAI() {
         },
 
         _save() {
-            try { sessionStorage.setItem('nubi_chat', JSON.stringify(this.messages.slice(-30))); } catch(_) {}
+            try { sessionStorage.setItem('leo_chat', JSON.stringify(this.messages.slice(-30))); } catch(_) {}
         },
 
         fmt(text) {
@@ -413,61 +425,112 @@ function nubiAI() {
         },
     };
 }
+
+// ── Context menu klik kanan robot ──
+function leoContextMenu(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const menu = document.getElementById('leo-context-menu');
+    if (!menu) return;
+    menu.style.display = 'block';
+    let x = e.clientX, y = e.clientY;
+    requestAnimationFrame(() => {
+        const mW = menu.offsetWidth  || 180;
+        const mH = menu.offsetHeight || 80;
+        if (x + mW > window.innerWidth)  x = window.innerWidth  - mW - 8;
+        if (y + mH > window.innerHeight) y = window.innerHeight - mH - 8;
+        menu.style.left = x + 'px';
+        menu.style.top  = y + 'px';
+    });
+}
+
+function leoHideWidget() {
+    document.getElementById('leo-context-menu').style.display = 'none';
+    const widget = document.getElementById('leo-ai-widget');
+    if (widget && widget._x_dataStack) {
+        const data = widget._x_dataStack[0];
+        if (data) { data.hidden = true; data.open = false; }
+    } else {
+        const btn = document.getElementById('leo-btn');
+        const modal = document.getElementById('leo-modal');
+        if (btn)   btn.style.display   = 'none';
+        if (modal) modal.style.display = 'none';
+    }
+    const showBtn = document.getElementById('leo-show-btn');
+    if (showBtn) showBtn.style.display = 'flex';
+}
+
+function leoShowWidget() {
+    const widget = document.getElementById('leo-ai-widget');
+    if (widget && widget._x_dataStack) {
+        const data = widget._x_dataStack[0];
+        if (data) data.hidden = false;
+    } else {
+        const btn = document.getElementById('leo-btn');
+        if (btn) btn.style.display = '';
+    }
+    const showBtn = document.getElementById('leo-show-btn');
+    if (showBtn) showBtn.style.display = 'none';
+}
+
+// Tutup context menu saat klik di luar atau ESC
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('leo-context-menu');
+    if (menu && !menu.contains(e.target)) menu.style.display = 'none';
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const menu = document.getElementById('leo-context-menu');
+        if (menu) menu.style.display = 'none';
+    }
+});
 </script>
 
 <style>
     /* ── Scrollbar ── */
-    #nubi-messages::-webkit-scrollbar { width: 4px; }
-    #nubi-messages::-webkit-scrollbar-track { background: transparent; }
-    #nubi-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
-    .dark #nubi-messages::-webkit-scrollbar-thumb { background: #334155; }
+    #leo-messages::-webkit-scrollbar { width: 4px; }
+    #leo-messages::-webkit-scrollbar-track { background: transparent; }
+    #leo-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+    .dark #leo-messages::-webkit-scrollbar-thumb { background: #334155; }
 
     /* ── Chip buttons ── */
-    .nubi-chip {
+    .leo-chip {
         font-size: 11px; padding: 3px 10px; border-radius: 9999px;
         background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569;
         cursor: pointer; transition: background 0.15s;
     }
-    .nubi-chip:hover { background: #e2e8f0; }
-    .dark .nubi-chip { background: #1e293b; border-color: #334155; color: #94a3b8; }
-    .dark .nubi-chip:hover { background: #334155; }
+    .leo-chip:hover { background: #e2e8f0; }
+    .dark .leo-chip { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    .dark .leo-chip:hover { background: #334155; }
 
     /* ── Focus ── */
-    #nubi-ai-widget button:focus-visible,
-    #nubi-ai-widget textarea:focus-visible {
+    #leo-ai-widget button:focus-visible,
+    #leo-ai-widget textarea:focus-visible {
         outline: 2px solid #0f172a;
         outline-offset: 2px;
     }
 
-    /* ── Robot idle float ── */
-    .nubi-robot-img {
+    /* ── Robot — diam, no float animation ── */
+    .leo-robot-img {
         filter: drop-shadow(0 10px 20px rgba(15,23,42,0.2));
-        transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s ease;
-        animation: nubi-float 3.5s ease-in-out infinite;
-    }
-    @@keyframes nubi-float {
-        0%, 100% { transform: translateY(0px); }
-        50%       { transform: translateY(-8px); }
+        transition: transform 0.2s ease, filter 0.2s ease;
     }
 
     /* ── Hover / active ── */
-    #nubi-btn:hover .nubi-robot-img {
-        animation: none;
-        transform: translateY(-10px) scale(1.05);
+    #leo-btn:hover .leo-robot-img {
+        transform: scale(1.05);
         filter: drop-shadow(0 14px 28px rgba(15,23,42,0.28));
     }
-    #nubi-btn:active .nubi-robot-img {
-        animation: none;
-        transform: scale(0.95) !important;
+    #leo-btn:active .leo-robot-img {
+        transform: scale(0.95);
     }
-    #nubi-btn.is-dragging .nubi-robot-img {
-        animation: none !important;
+    #leo-btn.is-dragging .leo-robot-img {
         transform: scale(0.92) rotate(3deg) !important;
         filter: drop-shadow(0 6px 12px rgba(15,23,42,0.3)) !important;
     }
 
     /* ── Ground shadow ── */
-    .nubi-shadow {
+    .leo-shadow {
         position: absolute;
         bottom: 2px; left: 50%;
         transform: translateX(-50%);
@@ -476,52 +539,22 @@ function nubiAI() {
         border-radius: 50%;
         filter: blur(5px);
         pointer-events: none;
-        animation: nubi-shadow-pulse 3.5s ease-in-out infinite;
-    }
-    @@keyframes nubi-shadow-pulse {
-        0%, 100% { width: 64px; opacity: 0.6; }
-        50%       { width: 44px; opacity: 0.3; }
-    }
-    #nubi-btn.is-dragging .nubi-shadow { animation: none; width: 50px; opacity: 0.4; }
-
-    /* ── Online ping dot ── */
-    .nubi-ping-dot {
-        position: absolute;
-        top: 14px; right: 8px;
-        width: 12px; height: 12px;
-        background: #34d399;
-        border: 2px solid white;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 1;
-    }
-    .nubi-ping-ring {
-        position: absolute;
-        inset: -2px;
-        border-radius: 50%;
-        background: #34d399;
-        opacity: 0.6;
-        animation: nubi-ping 2s cubic-bezier(0,0,0.2,1) infinite;
-    }
-    @@keyframes nubi-ping {
-        0%   { transform: scale(1); opacity: 0.6; }
-        75%, 100% { transform: scale(2.2); opacity: 0; }
     }
 
     /* ── Responsive ── */
     @@media (max-width: 480px) {
-        #nubi-modal {
+        #leo-modal {
             right: 8px !important;
             left: 8px !important;
             width: auto !important;
             bottom: 145px !important;
         }
-        #nubi-btn {
+        #leo-btn {
             right: 8px !important;
             width: 90px !important;
             height: 108px !important;
         }
-        #nubi-btn .nubi-robot-img {
+        #leo-btn .leo-robot-img {
             width: 90px !important;
             height: 100px !important;
         }
