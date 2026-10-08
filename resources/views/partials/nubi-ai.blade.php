@@ -2,10 +2,10 @@
     Nubi AI Chat Widget
     - Klik robot  → buka/tutup chat (popup)
     - Tahan + drag → pindah posisi robot
-    - Ctrl+Shift+D → sembunyikan/tampilkan robot
+    - Ctrl+Shift+D → sembunyikan/tampilkan
+    - ESC         → tutup chat
 --}}
 
-{{-- Widget wrapper — Alpine scope --}}
 <div id="nubi-ai-widget"
      data-chat-url="{{ route('nubi-ai.chat') }}"
      data-user-photo="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff&size=32' }}"
@@ -13,7 +13,7 @@
      x-data="nubiAI()"
      x-init="init()">
 
-    {{-- ── Backdrop Overlay (blur + dim) ── --}}
+    {{-- ── Backdrop overlay ── --}}
     <div x-show="open && !hidden"
          x-cloak
          x-on:click="closeChat()"
@@ -24,10 +24,9 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          style="position:fixed; inset:0; z-index:9989; background:rgba(0,0,0,0.25); backdrop-filter:blur(2px);"
-         aria-hidden="true">
-    </div>
+         aria-hidden="true"></div>
 
-    {{-- ── Chat Popup (centered, fixed) ── --}}
+    {{-- ── Chat Popup ── --}}
     <div id="nubi-modal"
          x-show="open && !hidden"
          x-cloak
@@ -40,13 +39,13 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
          x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-         style="position:fixed; z-index:9990; bottom:100px; right:24px; width:360px; max-height:calc(100vh - 120px); transform-origin:bottom right;"
+         style="position:fixed; z-index:9990; bottom:148px; right:24px; width:360px; max-height:calc(100vh - 168px); transform-origin:bottom right;"
          class="bg-white dark:bg-navy-900 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.35)] border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
 
         {{-- Header --}}
         <div class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-navy-800 to-navy-900 flex-shrink-0">
             <div class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif" class="w-8 h-8 object-contain rounded-full">
+                <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-8 h-8 object-contain">
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold text-white leading-tight">Nubi AI</p>
@@ -72,7 +71,7 @@
             <template x-if="messages.length === 0">
                 <div class="flex items-start gap-2.5">
                     <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif" class="w-6 h-6 object-contain rounded-full">
+                        <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-6 h-6 object-contain">
                     </div>
                     <div class="bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]">
                         <p class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
@@ -88,14 +87,14 @@
                 <div :class="msg.role === 'user' ? 'flex items-end justify-end gap-2' : 'flex items-start gap-2.5'">
                     <template x-if="msg.role === 'assistant'">
                         <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif" class="w-6 h-6 object-contain rounded-full">
+                            <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-6 h-6 object-contain">
                         </div>
                     </template>
                     <div :class="msg.role === 'user'
                             ? 'bg-navy-800 text-white rounded-2xl rounded-br-sm px-3.5 py-2.5 max-w-[85%]'
-                                : (msg.failed
-                                    ? 'bg-red-50 dark:bg-red-900/20 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]'
-                                    : 'bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]')">
+                            : (msg.failed
+                                ? 'bg-red-50 dark:bg-red-900/20 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]'
+                                : 'bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]')">
                         <p class="text-xs leading-relaxed"
                            :class="msg.role === 'user' ? 'text-white' : 'text-slate-700 dark:text-slate-200'"
                            x-html="fmt(msg.content)"></p>
@@ -112,7 +111,7 @@
             <template x-if="typing">
                 <div class="flex items-start gap-2.5">
                     <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif" class="w-6 h-6 object-contain rounded-full">
+                        <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-6 h-6 object-contain">
                     </div>
                     <div class="bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-4 py-3">
                         <div class="flex gap-1.5 items-center">
@@ -157,26 +156,34 @@
         </div>
     </div>
 
-    {{-- ── Robot Button (draggable, posisi fixed) ── --}}
+    {{-- ── Robot Button (draggable, berdiri di layar) ── --}}
     <button id="nubi-btn"
-         type="button"
-         x-show="!hidden"
-         x-cloak
-         aria-label="Buka percakapan Nubi AI"
-         aria-controls="nubi-modal"
-         aria-keyshortcuts="Control+Shift+D"
-         :aria-expanded="open"
-         style="position:fixed; bottom:24px; right:24px; z-index:9991; width:80px; height:80px; padding:0; border:0; background:transparent; touch-action:none; user-select:none; cursor:pointer;">
-        <span x-show="!open"
-              class="absolute inset-0 rounded-full bg-navy-800/10 animate-ping pointer-events-none"
-              style="animation-duration:3s;"></span>
+            type="button"
+            x-show="!hidden"
+            x-cloak
+            aria-label="Buka percakapan Nubi AI"
+            aria-controls="nubi-modal"
+            aria-keyshortcuts="Control+Shift+D"
+            :aria-expanded="open"
+            style="position:fixed; bottom:0; right:32px; z-index:9991; width:110px; height:130px; padding:0; border:0; background:transparent; touch-action:none; user-select:none; cursor:pointer; display:flex; align-items:flex-end; justify-content:center;">
+
+        {{-- Ground shadow --}}
+        <span class="nubi-shadow" aria-hidden="true"></span>
+
+        {{-- Online ping dot --}}
+        <span x-show="!open" class="nubi-ping-dot" aria-hidden="true">
+            <span class="nubi-ping-ring"></span>
+        </span>
+
+        {{-- Robot image --}}
         <img id="nubi-img"
-             src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif"
+             src="{{ asset('mascot/mascot-ai.png') }}"
              alt="Nubi AI"
-             class="w-20 h-20 object-contain drop-shadow-lg select-none"
              draggable="false"
-             style="transition:transform 0.15s ease;">
+             class="nubi-robot-img select-none"
+             style="width:110px; height:120px; object-fit:contain; object-position:bottom;">
     </button>
+
 </div>
 
 <script>
@@ -192,44 +199,32 @@ function nubiAI() {
         userName:  '',
 
         init() {
-            // ── Ambil config dari data-* ──
             const w = document.getElementById('nubi-ai-widget');
             this.chatUrl   = w?.dataset.chatUrl   ?? '';
             this.userPhoto = w?.dataset.userPhoto ?? '';
-            this.userName  = w?.dataset.userName ?? '';
+            this.userName  = w?.dataset.userName  ?? '';
 
-            // ── Restore chat history ──
+            // Restore chat history
             try {
-                const s = sessionStorage.getItem('nubi_chat');
-                const saved = s ? JSON.parse(s) : [];
+                const saved = JSON.parse(sessionStorage.getItem('nubi_chat') ?? '[]');
                 if (Array.isArray(saved)) {
-                    this.messages = saved.filter(message =>
-                        message
-                        && ['user', 'assistant'].includes(message.role)
-                        && typeof message.content === 'string'
-                    ).map(message => ({
-                        role: message.role,
-                        content: message.content,
-                        failed: message.failed === true,
-                    })).slice(-30);
+                    this.messages = saved
+                        .filter(m => m && ['user','assistant'].includes(m.role) && typeof m.content === 'string')
+                        .map(m => ({ role: m.role, content: m.content, failed: m.failed === true }))
+                        .slice(-30);
                 }
-            } catch (_) {}
+            } catch(_) {}
 
-            // ── Setup drag & click di robot button ──
             this._initDrag();
 
-            // ── Keyboard shortcuts ──
+            // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                // ESC → tutup chat
                 if (e.key === 'Escape' && this.open) {
                     e.preventDefault();
                     this.closeChat();
                     return;
                 }
-
-                // Ctrl+Shift+D → sembunyikan/tampilkan robot
-                if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey
-                    && (e.key === 'D' || e.key === 'd')) {
+                if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey && (e.key === 'D' || e.key === 'd')) {
                     e.preventDefault();
                     e.stopPropagation();
                     this._toggleHidden();
@@ -239,124 +234,82 @@ function nubiAI() {
 
         _toggleHidden() {
             this.hidden = !this.hidden;
-            if (this.hidden && this.open) {
-                this.open = false;
-            }
+            if (this.hidden && this.open) this.open = false;
         },
 
         _initDrag() {
             const btn = document.getElementById('nubi-btn');
-            const img = document.getElementById('nubi-img');
-            if (!btn || !img) return;
+            if (!btn) return;
 
-            // ── Restore posisi tersimpan ──
+            // Restore saved position
             try {
                 const p = JSON.parse(localStorage.getItem('nubi_pos') ?? 'null');
                 if (p && typeof p.right === 'number' && typeof p.bottom === 'number') {
-                    // Simpan dalam right/bottom agar aman di berbagai layar
-                    const bW = 80, bH = 80;
-                    const right  = Math.max(8, Math.min(window.innerWidth  - bW - 8, p.right));
-                    const bottom = Math.max(8, Math.min(window.innerHeight - bH - 8, p.bottom));
-                    btn.style.right  = right  + 'px';
-                    btn.style.bottom = bottom + 'px';
+                    const bW = 110, bH = 130;
+                    btn.style.right  = Math.max(0, Math.min(window.innerWidth  - bW, p.right))  + 'px';
+                    btn.style.bottom = Math.max(0, Math.min(window.innerHeight - bH, p.bottom)) + 'px';
                     btn.style.left   = 'auto';
                     btn.style.top    = 'auto';
                 }
-            } catch (_) {}
+            } catch(_) {}
 
-            let activePointer = null;
-            let dragging      = false;
-            let didDrag       = false;
-            let startMX = 0, startMY = 0;
-            let startBL = 0, startBT = 0;
+            let activePointer = null, dragging = false, didDrag = false;
+            let startMX = 0, startMY = 0, startBL = 0, startBT = 0;
 
-            // ── Pointer down: rekam start ──
             btn.addEventListener('pointerdown', (e) => {
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 activePointer = e.pointerId;
-                dragging  = false;
-                didDrag   = false;
-                startMX   = e.clientX;
-                startMY   = e.clientY;
+                dragging = didDrag = false;
+                startMX = e.clientX; startMY = e.clientY;
                 btn.setPointerCapture(e.pointerId);
-
-                // Konversi ke left/top untuk drag yang smooth
-                const r  = btn.getBoundingClientRect();
-                startBL  = r.left;
-                startBT  = r.top;
-                btn.style.left   = startBL + 'px';
-                btn.style.top    = startBT + 'px';
-                btn.style.right  = 'auto';
-                btn.style.bottom = 'auto';
-
+                const r = btn.getBoundingClientRect();
+                startBL = r.left; startBT = r.top;
+                btn.style.left = startBL + 'px'; btn.style.top = startBT + 'px';
+                btn.style.right = 'auto'; btn.style.bottom = 'auto';
                 btn.style.cursor = 'grab';
             });
 
-            // ── Pointer move: drag setelah melewati threshold 8px ──
             btn.addEventListener('pointermove', (e) => {
                 if (e.pointerId !== activePointer) return;
-
-                const dx = e.clientX - startMX;
-                const dy = e.clientY - startMY;
-
+                const dx = e.clientX - startMX, dy = e.clientY - startMY;
                 if (!dragging) {
                     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-                    dragging               = true;
-                    didDrag                = true;
-                    img.style.transform    = 'scale(0.92)';
+                    dragging = didDrag = true;
+                    btn.classList.add('is-dragging');
                     document.body.style.cursor = 'grabbing';
-                    btn.style.cursor           = 'grabbing';
+                    btn.style.cursor = 'grabbing';
                 }
-
-                const bW = btn.offsetWidth  || 80;
-                const bH = btn.offsetHeight || 80;
-                let newL = Math.max(8, Math.min(window.innerWidth  - bW - 8, startBL + dx));
-                let newT = Math.max(8, Math.min(window.innerHeight - bH - 8, startBT + dy));
-
-                btn.style.left = newL + 'px';
-                btn.style.top  = newT + 'px';
+                const bW = 110, bH = 130;
+                btn.style.left = Math.max(0, Math.min(window.innerWidth  - bW, startBL + dx)) + 'px';
+                btn.style.top  = Math.max(0, Math.min(window.innerHeight - bH, startBT + dy)) + 'px';
             });
 
-            // ── Pointer up / cancel: selesai drag ──
             const finishDrag = (e) => {
                 if (e.pointerId !== activePointer) return;
                 activePointer = null;
-
                 document.body.style.cursor = '';
-                img.style.transform        = '';
-
+                btn.classList.remove('is-dragging');
+                btn.style.cursor = 'pointer';
                 if (dragging) {
                     dragging = false;
-                    btn.style.cursor = 'pointer';
-
-                    // Simpan posisi sebagai right/bottom (lebih stabil)
-                    const bW     = btn.offsetWidth  || 80;
-                    const bH     = btn.offsetHeight || 80;
-                    const curL   = parseFloat(btn.style.left) || 0;
-                    const curT   = parseFloat(btn.style.top)  || 0;
-                    const right  = window.innerWidth  - curL - bW;
-                    const bottom = window.innerHeight - curT - bH;
+                    const curL = parseFloat(btn.style.left) || 0;
+                    const curT = parseFloat(btn.style.top)  || 0;
                     try {
-                        localStorage.setItem('nubi_pos', JSON.stringify({ right, bottom }));
-                    } catch (_) {}
-                } else {
-                    btn.style.cursor = 'pointer';
+                        localStorage.setItem('nubi_pos', JSON.stringify({
+                            right:  window.innerWidth  - curL - 110,
+                            bottom: window.innerHeight - curT - 130,
+                        }));
+                    } catch(_) {}
                 }
             };
             btn.addEventListener('pointerup', finishDrag);
             btn.addEventListener('pointercancel', finishDrag);
 
-            // ── Click: toggle chat — hanya kalau BUKAN hasil drag ──
+            // Click — only if no drag
             btn.addEventListener('click', (e) => {
-                if (didDrag) {
-                    // Drag baru saja selesai → batalkan click ini
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    didDrag = false;
-                    return;
-                }
+                if (didDrag) { e.preventDefault(); e.stopImmediatePropagation(); didDrag = false; return; }
                 this.toggleChat();
-            }, true); // capture phase agar bisa stopImmediatePropagation lebih awal
+            }, true);
         },
 
         toggleChat() {
@@ -379,10 +332,12 @@ function nubiAI() {
         async send() {
             const msg = this.input.trim();
             if (!msg || this.typing) return;
+
             const history = this.messages
-                .filter(message => ['user', 'assistant'].includes(message.role) && !message.failed)
+                .filter(m => ['user','assistant'].includes(m.role) && !m.failed)
                 .slice(-10)
                 .map(({ role, content }) => ({ role, content }));
+
             this.input = '';
             if (this.$refs.inp) this.$refs.inp.style.height = 'auto';
 
@@ -397,19 +352,18 @@ function nubiAI() {
                     throw new Error('Nubi AI belum siap. Muat ulang halaman dan coba lagi.');
                 }
 
-                const res  = await fetch(this.chatUrl, {
+                const res = await fetch(this.chatUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({
-                        message: msg,
-                        history,
-                    }),
+                    body: JSON.stringify({ message: msg, history }),
                 });
+
                 const data = await res.json().catch(() => ({}));
+
                 if (!res.ok) {
                     throw new Error(data.error || (res.status === 419
                         ? 'Sesi kamu sudah berakhir. Muat ulang halaman lalu coba lagi.'
@@ -419,10 +373,8 @@ function nubiAI() {
                     throw new Error(data.error || 'Nubi AI mengirim jawaban kosong. Silakan coba lagi.');
                 }
 
-                this.messages.push({
-                    role: 'assistant',
-                    content: data.reply,
-                });
+                this.messages.push({ role: 'assistant', content: data.reply });
+
             } catch (error) {
                 this.messages.push({
                     role: 'assistant',
@@ -448,7 +400,7 @@ function nubiAI() {
         },
 
         _save() {
-            try { sessionStorage.setItem('nubi_chat', JSON.stringify(this.messages.slice(-30))); } catch (_) {}
+            try { sessionStorage.setItem('nubi_chat', JSON.stringify(this.messages.slice(-30))); } catch(_) {}
         },
 
         fmt(text) {
@@ -464,10 +416,13 @@ function nubiAI() {
 </script>
 
 <style>
+    /* ── Scrollbar ── */
     #nubi-messages::-webkit-scrollbar { width: 4px; }
     #nubi-messages::-webkit-scrollbar-track { background: transparent; }
     #nubi-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
     .dark #nubi-messages::-webkit-scrollbar-thumb { background: #334155; }
+
+    /* ── Chip buttons ── */
     .nubi-chip {
         font-size: 11px; padding: 3px 10px; border-radius: 9999px;
         background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569;
@@ -476,18 +431,99 @@ function nubiAI() {
     .nubi-chip:hover { background: #e2e8f0; }
     .dark .nubi-chip { background: #1e293b; border-color: #334155; color: #94a3b8; }
     .dark .nubi-chip:hover { background: #334155; }
+
+    /* ── Focus ── */
     #nubi-ai-widget button:focus-visible,
     #nubi-ai-widget textarea:focus-visible {
         outline: 2px solid #0f172a;
         outline-offset: 2px;
-        box-shadow: 0 0 0 5px #fff;
     }
-    @@media (max-width: 440px) {
+
+    /* ── Robot idle float ── */
+    .nubi-robot-img {
+        filter: drop-shadow(0 10px 20px rgba(15,23,42,0.2));
+        transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s ease;
+        animation: nubi-float 3.5s ease-in-out infinite;
+    }
+    @@keyframes nubi-float {
+        0%, 100% { transform: translateY(0px); }
+        50%       { transform: translateY(-8px); }
+    }
+
+    /* ── Hover / active ── */
+    #nubi-btn:hover .nubi-robot-img {
+        animation: none;
+        transform: translateY(-10px) scale(1.05);
+        filter: drop-shadow(0 14px 28px rgba(15,23,42,0.28));
+    }
+    #nubi-btn:active .nubi-robot-img {
+        animation: none;
+        transform: scale(0.95) !important;
+    }
+    #nubi-btn.is-dragging .nubi-robot-img {
+        animation: none !important;
+        transform: scale(0.92) rotate(3deg) !important;
+        filter: drop-shadow(0 6px 12px rgba(15,23,42,0.3)) !important;
+    }
+
+    /* ── Ground shadow ── */
+    .nubi-shadow {
+        position: absolute;
+        bottom: 2px; left: 50%;
+        transform: translateX(-50%);
+        width: 64px; height: 10px;
+        background: rgba(0,0,0,0.12);
+        border-radius: 50%;
+        filter: blur(5px);
+        pointer-events: none;
+        animation: nubi-shadow-pulse 3.5s ease-in-out infinite;
+    }
+    @@keyframes nubi-shadow-pulse {
+        0%, 100% { width: 64px; opacity: 0.6; }
+        50%       { width: 44px; opacity: 0.3; }
+    }
+    #nubi-btn.is-dragging .nubi-shadow { animation: none; width: 50px; opacity: 0.4; }
+
+    /* ── Online ping dot ── */
+    .nubi-ping-dot {
+        position: absolute;
+        top: 14px; right: 8px;
+        width: 12px; height: 12px;
+        background: #34d399;
+        border: 2px solid white;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1;
+    }
+    .nubi-ping-ring {
+        position: absolute;
+        inset: -2px;
+        border-radius: 50%;
+        background: #34d399;
+        opacity: 0.6;
+        animation: nubi-ping 2s cubic-bezier(0,0,0.2,1) infinite;
+    }
+    @@keyframes nubi-ping {
+        0%   { transform: scale(1); opacity: 0.6; }
+        75%, 100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    /* ── Responsive ── */
+    @@media (max-width: 480px) {
         #nubi-modal {
             right: 8px !important;
             left: 8px !important;
             width: auto !important;
-            bottom: 110px !important;
+            bottom: 145px !important;
+        }
+        #nubi-btn {
+            right: 8px !important;
+            width: 90px !important;
+            height: 108px !important;
+        }
+        #nubi-btn .nubi-robot-img {
+            width: 90px !important;
+            height: 100px !important;
         }
     }
 </style>
