@@ -55,13 +55,21 @@
                     <span class="text-[10px] text-slate-300">Asisten Aplikasi ICB CT</span>
                 </div>
             </div>
+            {{-- Tombol clear chat — hanya muncul kalau ada pesan --}}
+            <button x-show="messages.length > 0"
+                    x-on:click="clearChat()"
+                    type="button"
+                    title="Hapus sesi chat"
+                    aria-label="Hapus sesi chat"
+                    class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-500/70 flex items-center justify-center transition-colors flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
             <button x-on:click="closeChat()"
                     type="button"
                     aria-label="Tutup percakapan"
                     class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-        </div>
+            </button>        </div>
 
         {{-- Messages --}}
         <div id="leo-messages"
@@ -200,7 +208,7 @@
 <button id="leo-show-btn"
         title="Tampilkan Leo AI"
         style="display:none; position:fixed; bottom:0; right:32px; z-index:99998; width:80px; height:80px; border:none; background:transparent; cursor:pointer; padding:0; touch-action:none; user-select:none;">
-    <img src="{{ asset('mascot/floating-leo.jpg') }}"
+    <img src="{{ asset('mascot/floating-leo.png') }}"
          alt="Tampilkan Leo AI"
          draggable="false"
          style="width:80px; height:80px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(15,23,42,0.25)); pointer-events:none; transition:transform 0.2s ease;">
@@ -338,6 +346,15 @@ function leoAI() {
             this.$nextTick(() => {
                 if (!this.hidden) document.getElementById('leo-btn')?.focus();
             });
+        },
+
+        clearChat() {
+            this.messages = [];
+            this.input    = '';
+            this.typing   = false;
+            if (this.$refs.inp) this.$refs.inp.style.height = 'auto';
+            try { sessionStorage.removeItem('leo_chat'); } catch(_) {}
+            this.$nextTick(() => this._scrollBottom());
         },
 
         async send() {
@@ -590,32 +607,32 @@ document.addEventListener('keydown', (e) => {
 
     /* ── Robot — diam, no float animation ── */
     .leo-robot-img {
-        filter: drop-shadow(0 10px 20px rgba(15,23,42,0.2));
+        filter: drop-shadow(0 4px 6px rgba(15,23,42,0.06));
         transition: transform 0.2s ease, filter 0.2s ease;
     }
 
     /* ── Hover / active ── */
     #leo-btn:hover .leo-robot-img {
         transform: scale(1.05);
-        filter: drop-shadow(0 14px 28px rgba(15,23,42,0.28));
+        filter: drop-shadow(0 6px 10px rgba(15,23,42,0.1));
     }
     #leo-btn:active .leo-robot-img {
         transform: scale(0.95);
     }
     #leo-btn.is-dragging .leo-robot-img {
         transform: scale(0.92) rotate(3deg) !important;
-        filter: drop-shadow(0 6px 12px rgba(15,23,42,0.3)) !important;
+        filter: drop-shadow(0 3px 6px rgba(15,23,42,0.1)) !important;
     }
 
-    /* ── Ground shadow ── */
+    /* ── Ground shadow — sangat tipis ── */
     .leo-shadow {
         position: absolute;
         bottom: 2px; left: 50%;
         transform: translateX(-50%);
-        width: 64px; height: 10px;
-        background: rgba(0,0,0,0.12);
+        width: 60px; height: 6px;
+        background: rgba(0,0,0,0.06);
         border-radius: 50%;
-        filter: blur(5px);
+        filter: blur(4px);
         pointer-events: none;
     }
 
