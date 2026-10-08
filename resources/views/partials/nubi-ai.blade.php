@@ -1,8 +1,8 @@
 {{--
     Nubi AI Chat Widget
-    - Klik robot  → buka/tutup chat
-    - Tahan + drag → pindah posisi
-    - Ctrl+Shift+D → sembunyikan/tampilkan
+    - Klik robot  → buka/tutup chat (popup)
+    - Tahan + drag → pindah posisi robot
+    - Ctrl+Shift+D → sembunyikan/tampilkan robot
 --}}
 
 {{-- Widget wrapper — Alpine scope --}}
@@ -13,7 +13,21 @@
      x-data="nubiAI()"
      x-init="init()">
 
-    {{-- ── Chat Modal (posisi fixed, dihitung JS) ── --}}
+    {{-- ── Backdrop Overlay (blur + dim) ── --}}
+    <div x-show="open && !hidden"
+         x-cloak
+         x-on:click="closeChat()"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         style="position:fixed; inset:0; z-index:9989; background:rgba(0,0,0,0.25); backdrop-filter:blur(2px);"
+         aria-hidden="true">
+    </div>
+
+    {{-- ── Chat Popup (centered, fixed) ── --}}
     <div id="nubi-modal"
          x-show="open && !hidden"
          x-cloak
@@ -21,18 +35,18 @@
          aria-modal="true"
          aria-label="Percakapan dengan Nubi AI"
          x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
          x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         style="position:fixed; z-index:9991; width:360px; max-height:calc(100vh - 16px); max-height:calc(100dvh - 16px); transform-origin:bottom right;"
-         class="bg-white dark:bg-navy-900 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.25)] border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+         x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+         style="position:fixed; z-index:9990; bottom:100px; right:24px; width:360px; max-height:calc(100vh - 120px); transform-origin:bottom right;"
+         class="bg-white dark:bg-navy-900 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.35)] border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
 
         {{-- Header --}}
         <div class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-navy-800 to-navy-900 flex-shrink-0">
             <div class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <img src="{{ asset('images/Nubi-AI.gif') }}" class="w-8 h-8 object-contain rounded-full">
+                <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif" class="w-8 h-8 object-contain rounded-full">
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold text-white leading-tight">Nubi AI</p>
@@ -52,13 +66,13 @@
         {{-- Messages --}}
         <div id="nubi-messages"
              x-ref="messages"
-             style="flex:1; overflow-y:auto; padding:16px; min-height:0; max-height:310px; scroll-behavior:smooth;"
+             style="flex:1; overflow-y:auto; padding:16px; min-height:0; max-height:340px; scroll-behavior:smooth;"
              class="space-y-3">
 
             <template x-if="messages.length === 0">
                 <div class="flex items-start gap-2.5">
                     <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="{{ asset('images/Nubi-AI.gif') }}" class="w-6 h-6 object-contain rounded-full">
+                        <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif" class="w-6 h-6 object-contain rounded-full">
                     </div>
                     <div class="bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]">
                         <p class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
@@ -74,7 +88,7 @@
                 <div :class="msg.role === 'user' ? 'flex items-end justify-end gap-2' : 'flex items-start gap-2.5'">
                     <template x-if="msg.role === 'assistant'">
                         <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            <img src="{{ asset('images/Nubi-AI.gif') }}" class="w-6 h-6 object-contain rounded-full">
+                            <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif" class="w-6 h-6 object-contain rounded-full">
                         </div>
                     </template>
                     <div :class="msg.role === 'user'
@@ -98,7 +112,7 @@
             <template x-if="typing">
                 <div class="flex items-start gap-2.5">
                     <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="{{ asset('images/Nubi-AI.gif') }}" class="w-6 h-6 object-contain rounded-full">
+                        <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif" class="w-6 h-6 object-contain rounded-full">
                     </div>
                     <div class="bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-4 py-3">
                         <div class="flex gap-1.5 items-center">
@@ -143,20 +157,21 @@
         </div>
     </div>
 
-    {{-- ── Robot Button (posisi fixed, diatur JS) ── --}}
+    {{-- ── Robot Button (draggable, posisi fixed) ── --}}
     <button id="nubi-btn"
          type="button"
          x-show="!hidden"
+         x-cloak
          aria-label="Buka percakapan Nubi AI"
          aria-controls="nubi-modal"
          aria-keyshortcuts="Control+Shift+D"
          :aria-expanded="open"
-         style="position:fixed; bottom:24px; right:24px; z-index:9990; width:80px; height:80px; cursor:pointer; padding:0; border:0; background:transparent; touch-action:none; user-select:none;">
+         style="position:fixed; bottom:24px; right:24px; z-index:9991; width:80px; height:80px; padding:0; border:0; background:transparent; touch-action:none; user-select:none; cursor:pointer;">
         <span x-show="!open"
               class="absolute inset-0 rounded-full bg-navy-800/10 animate-ping pointer-events-none"
               style="animation-duration:3s;"></span>
         <img id="nubi-img"
-             src="{{ asset('images/Nubi-AI.gif') }}"
+             src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/robot_mascot_animation_v2/robot_mascot_blink_loop.gif"
              alt="Nubi AI"
              class="w-20 h-20 object-contain drop-shadow-lg select-none"
              draggable="false"
@@ -203,23 +218,30 @@ function nubiAI() {
             // ── Setup drag & click di robot button ──
             this._initDrag();
 
-            // ── Ctrl+Shift+D: sembunyikan/tampilkan ──
+            // ── Keyboard shortcuts ──
             document.addEventListener('keydown', (e) => {
+                // ESC → tutup chat
                 if (e.key === 'Escape' && this.open) {
                     e.preventDefault();
                     this.closeChat();
                     return;
                 }
 
-                if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey && e.key.toLowerCase() === 'd') {
+                // Ctrl+Shift+D → sembunyikan/tampilkan robot
+                if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey
+                    && (e.key === 'D' || e.key === 'd')) {
                     e.preventDefault();
-                    this.hidden = !this.hidden;
-                    if (this.hidden) this.closeChat();
+                    e.stopPropagation();
+                    this._toggleHidden();
                 }
             });
-            window.addEventListener('resize', () => {
-                if (this.open) this.$nextTick(() => this._posModal());
-            });
+        },
+
+        _toggleHidden() {
+            this.hidden = !this.hidden;
+            if (this.hidden && this.open) {
+                this.open = false;
+            }
         },
 
         _initDrag() {
@@ -230,33 +252,25 @@ function nubiAI() {
             // ── Restore posisi tersimpan ──
             try {
                 const p = JSON.parse(localStorage.getItem('nubi_pos') ?? 'null');
-                if (p && typeof p.left === 'number' && typeof p.top === 'number') {
+                if (p && typeof p.right === 'number' && typeof p.bottom === 'number') {
+                    // Simpan dalam right/bottom agar aman di berbagai layar
                     const bW = 80, bH = 80;
-                    const left = Math.max(8, Math.min(window.innerWidth  - bW - 8, p.left));
-                    const top  = Math.max(8, Math.min(window.innerHeight - bH - 8, p.top));
-                    btn.style.left   = left + 'px';
-                    btn.style.top    = top  + 'px';
-                    btn.style.right  = 'auto';
-                    btn.style.bottom = 'auto';
+                    const right  = Math.max(8, Math.min(window.innerWidth  - bW - 8, p.right));
+                    const bottom = Math.max(8, Math.min(window.innerHeight - bH - 8, p.bottom));
+                    btn.style.right  = right  + 'px';
+                    btn.style.bottom = bottom + 'px';
+                    btn.style.left   = 'auto';
+                    btn.style.top    = 'auto';
                 }
             } catch (_) {}
 
             let activePointer = null;
-            let dragging   = false;
-            let didDrag    = false;
+            let dragging      = false;
+            let didDrag       = false;
             let startMX = 0, startMY = 0;
             let startBL = 0, startBT = 0;
 
-            // ── click: toggle chat (hanya kalau tidak drag) ──
-            btn.addEventListener('click', (e) => {
-                if (didDrag) {
-                    didDrag = false; // reset untuk gesture berikutnya
-                    return;
-                }
-                this.toggleChat();
-            });
-
-            // ── Pointer events support mouse, pen, and touch ──
+            // ── Pointer down: rekam start ──
             btn.addEventListener('pointerdown', (e) => {
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 activePointer = e.pointerId;
@@ -266,21 +280,19 @@ function nubiAI() {
                 startMY   = e.clientY;
                 btn.setPointerCapture(e.pointerId);
 
-                // Posisi btn saat ini dalam koordinat left/top
+                // Konversi ke left/top untuk drag yang smooth
                 const r  = btn.getBoundingClientRect();
                 startBL  = r.left;
                 startBT  = r.top;
-
-                // Pastikan btn pakai left/top (bukan right/bottom)
                 btn.style.left   = startBL + 'px';
                 btn.style.top    = startBT + 'px';
                 btn.style.right  = 'auto';
                 btn.style.bottom = 'auto';
 
-                // Cursor: grab (tanda siap drag)
                 btn.style.cursor = 'grab';
             });
 
+            // ── Pointer move: drag setelah melewati threshold 8px ──
             btn.addEventListener('pointermove', (e) => {
                 if (e.pointerId !== activePointer) return;
 
@@ -288,17 +300,14 @@ function nubiAI() {
                 const dy = e.clientY - startMY;
 
                 if (!dragging) {
-                    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-                    // Threshold terlewati → mulai drag
+                    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
                     dragging               = true;
                     didDrag                = true;
                     img.style.transform    = 'scale(0.92)';
-                    // Cursor: grabbing di seluruh halaman
                     document.body.style.cursor = 'grabbing';
                     btn.style.cursor           = 'grabbing';
                 }
 
-                // Hitung posisi baru
                 const bW = btn.offsetWidth  || 80;
                 const bH = btn.offsetHeight || 80;
                 let newL = Math.max(8, Math.min(window.innerWidth  - bW - 8, startBL + dx));
@@ -306,40 +315,54 @@ function nubiAI() {
 
                 btn.style.left = newL + 'px';
                 btn.style.top  = newT + 'px';
-
-                // Reposisi modal kalau sedang terbuka
-                if (this.open) this._posModal();
             });
 
+            // ── Pointer up / cancel: selesai drag ──
             const finishDrag = (e) => {
                 if (e.pointerId !== activePointer) return;
                 activePointer = null;
-                // Reset cursor & transform
+
                 document.body.style.cursor = '';
-                btn.style.cursor           = 'pointer';
                 img.style.transform        = '';
 
                 if (dragging) {
                     dragging = false;
-                    // Simpan posisi
+                    btn.style.cursor = 'pointer';
+
+                    // Simpan posisi sebagai right/bottom (lebih stabil)
+                    const bW     = btn.offsetWidth  || 80;
+                    const bH     = btn.offsetHeight || 80;
+                    const curL   = parseFloat(btn.style.left) || 0;
+                    const curT   = parseFloat(btn.style.top)  || 0;
+                    const right  = window.innerWidth  - curL - bW;
+                    const bottom = window.innerHeight - curT - bH;
                     try {
-                        localStorage.setItem('nubi_pos', JSON.stringify({
-                            left: parseFloat(btn.style.left) || 0,
-                            top:  parseFloat(btn.style.top)  || 0,
-                        }));
+                        localStorage.setItem('nubi_pos', JSON.stringify({ right, bottom }));
                     } catch (_) {}
+                } else {
+                    btn.style.cursor = 'pointer';
                 }
-                // Klik ditangani oleh 'click' event di atas, bukan di sini
             };
             btn.addEventListener('pointerup', finishDrag);
             btn.addEventListener('pointercancel', finishDrag);
+
+            // ── Click: toggle chat — hanya kalau BUKAN hasil drag ──
+            btn.addEventListener('click', (e) => {
+                if (didDrag) {
+                    // Drag baru saja selesai → batalkan click ini
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    didDrag = false;
+                    return;
+                }
+                this.toggleChat();
+            }, true); // capture phase agar bisa stopImmediatePropagation lebih awal
         },
 
         toggleChat() {
             this.open = !this.open;
             if (this.open) {
                 this.$nextTick(() => {
-                    this._posModal();
                     this._scrollBottom();
                     if (this.$refs.inp) this.$refs.inp.focus();
                 });
@@ -351,38 +374,6 @@ function nubiAI() {
             this.$nextTick(() => {
                 if (!this.hidden) document.getElementById('nubi-btn')?.focus();
             });
-        },
-
-        // Hitung posisi modal agar tidak keluar viewport
-        _posModal() {
-            const btn   = document.getElementById('nubi-btn');
-            const modal = document.getElementById('nubi-modal');
-            if (!btn || !modal) return;
-
-            const br  = btn.getBoundingClientRect();
-            const vW  = window.innerWidth;
-            const vH  = window.innerHeight;
-            const gap = 10;
-            const pad = 8;
-            const mW  = Math.min(360, vW - pad * 2);
-            modal.style.width = mW + 'px';
-            const mH  = modal.getBoundingClientRect().height || Math.min(520, vH - pad * 2);
-
-            // Horizontal: rata kanan dengan robot, geser kalau kepotong
-            let left = br.right - mW;
-            if (left < pad)          left = pad;
-            if (left + mW > vW - pad) left = vW - mW - pad;
-
-            // Vertikal: tampil di atas robot
-            let top = br.top - mH - gap;
-            if (top < pad) {
-                // Tidak muat di atas → tampil di bawah
-                top = br.bottom + gap;
-            }
-            if (top + mH > vH - pad) top = Math.max(pad, vH - mH - pad);
-
-            modal.style.left = left + 'px';
-            modal.style.top  = top  + 'px';
         },
 
         async send() {
@@ -491,7 +482,12 @@ function nubiAI() {
         outline-offset: 2px;
         box-shadow: 0 0 0 5px #fff;
     }
-    @@media (max-width: 400px) {
-        #nubi-modal { width: calc(100vw - 24px) !important; }
+    @@media (max-width: 440px) {
+        #nubi-modal {
+            right: 8px !important;
+            left: 8px !important;
+            width: auto !important;
+            bottom: 110px !important;
+        }
     }
 </style>
