@@ -15,7 +15,6 @@ class LeoAiController extends Controller
 {
     /**
      * Ambil data real-time dari database untuk dijadikan konteks AI.
-     * Ini supaya AI bisa jawab "berapa guru hadir hari ini?" dll.
      */
     private function getRealtimeContext(): string
     {
@@ -24,7 +23,6 @@ class LeoAiController extends Controller
             $todayStr = $today->translatedFormat('l, d F Y');
             $now = Carbon::now()->format('H:i');
 
-            // ── Statistik Kehadiran Harian ──
             $totalGuruAktif = User::where('role', 'guru')->where('is_active', true)->count();
 
             $hadirCount = Attendance::whereDate('date', $today)
@@ -57,7 +55,6 @@ class LeoAiController extends Controller
 
             $belumPresensiCount = max(0, $totalGuruAktif - $hadirCount - $alphaCount - $izinCount - $sakitCount);
 
-            // ── Presensi Kelas Hari Ini ──
             $sedangMengajar = ClassAttendance::whereDate('date', $today)
                 ->whereNotNull('check_in_time')
                 ->whereNull('check_out_time')
@@ -70,7 +67,6 @@ class LeoAiController extends Controller
 
             $totalSesiKelas = ClassAttendance::whereDate('date', $today)->count();
 
-            // ── Izin/Sakit Pending ──
             $pendingLeaveCount = LeaveRequest::where('status', 'pending')->count();
             $pendingLeaves = LeaveRequest::with('user')
                 ->where('status', 'pending')
@@ -81,7 +77,6 @@ class LeoAiController extends Controller
                 ->map(fn($leave) => "- {$leave->user->name} ({$leave->type_text}, mulai {$leave->start_date->format('d/m/Y')})")
                 ->join("\n");
 
-            // ── 5 Guru Terakhir yang Hadir ──
             $recentAttendances = Attendance::with('user')
                 ->whereDate('date', $today)
                 ->whereHas('user')
@@ -92,7 +87,6 @@ class LeoAiController extends Controller
                 ->map(fn($a) => "- {$a->user->name} ({$a->status}, masuk {$a->check_in->format('H:i')})")
                 ->join("\n");
 
-            // ── Guru yang Belum Presensi (maks 10) ──
             $sudahPresensiIds = Attendance::whereDate('date', $today)->pluck('user_id');
             $belumPresensiList = User::where('role', 'guru')
                 ->where('is_active', true)
@@ -106,11 +100,9 @@ class LeoAiController extends Controller
                 ? "\n(dan " . ($belumPresensiCount - 10) . " guru lainnya)"
                 : "";
 
-            // ── Total Guru Keseluruhan ──
             $totalGuruAll = User::where('role', 'guru')->count();
             $totalGuruTidakAktif = User::where('role', 'guru')->where('is_active', false)->count();
 
-            // ── Statistik Izin Bulan Ini ──
             $izinBulanIni = LeaveRequest::whereMonth('start_date', $today->month)
                 ->whereYear('start_date', $today->year)
                 ->where('status', 'approved')
@@ -278,7 +270,6 @@ PROMPT;
      */
     public function chat(Request $request)
     {
-        // Hanya role tertentu yang boleh akses
         $user = auth()->user();
         $allowedRoles = ['admin', 'operator', 'guru_piket', 'developer'];
         if (! $user || ! in_array($user->role, $allowedRoles, true)) {
@@ -303,14 +294,12 @@ PROMPT;
             ], 500);
         }
 
-        // Bangun history (maks 10 pesan terakhir)
         $history = collect($request->input('history', []))
             ->takeLast(10)
             ->map(fn($h) => ['role' => $h['role'], 'content' => $h['content']])
             ->values()
             ->toArray();
 
-        // Ambil konteks data real-time dan gabungkan ke system prompt
         $realtimeData     = $this->getRealtimeContext();
         $fullSystemPrompt = $this->systemPrompt() . "\n\n" . $realtimeData;
 
@@ -333,21 +322,17 @@ PROMPT;
 
             if ($response->failed()) {
                 $responseBody = $response->json() ?? [];
-                $apiError     = data_get($responseBody, 'error.message')
-                             ?? data_get($responseBody, 'message')
-                             ?? 'Unknown API error';
 
                 Log::warning('Leo AI API error', [
-                    'status'   => $response->status(),
-                    'body'     => $responseBody,
+                    'status'         => $response->status(),
+                    'body'           => $responseBody,
                     'api_key_prefix' => substr($apiKey, 0, 8) . '...',
                 ]);
 
-                // Pesan error yang lebih spesifik berdasarkan HTTP status
                 $userMessage = match ($response->status()) {
-                    401 => 'Leo AI: API key tidak valid. Hubungi administrator.',
-                    402 => 'Leo AI: Kuota API habis. Hubungi administrator.',
-                    429 => 'Leo AI sedang sibuk. Tunggu sebentar lalu coba lagi.',
+                    401     => 'Leo AI: API key tidak valid. Hubungi administrator.',
+                    402     => 'Leo AI: Kuota API habis. Hubungi administrator.',
+                    429     => 'Leo AI sedang sibuk. Tunggu sebentar lalu coba lagi.',
                     default => 'Leo AI sedang tidak tersedia. Silakan coba lagi.',
                 };
 
@@ -377,4 +362,3 @@ PROMPT;
         }
     }
 }
-
