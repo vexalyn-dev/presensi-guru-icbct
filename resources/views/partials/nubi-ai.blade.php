@@ -46,7 +46,7 @@
         {{-- Header --}}
         <div class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-navy-800 to-navy-900 flex-shrink-0">
             <div class="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-8 h-8 object-contain">
+                <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/lion_mascot_animation/lion_mascot_blink_loop.gif" class="w-8 h-8 object-contain">
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold text-white leading-tight">Leo AI</p>
@@ -72,7 +72,7 @@
             <template x-if="messages.length === 0">
                 <div class="flex items-start gap-2.5">
                     <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-6 h-6 object-contain">
+                        <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/lion_mascot_animation/lion_mascot_blink_loop.gif" class="w-6 h-6 object-contain">
                     </div>
                     <div class="bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%]">
                         <p class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
@@ -88,7 +88,7 @@
                 <div :class="msg.role === 'user' ? 'flex items-end justify-end gap-2' : 'flex items-start gap-2.5'">
                     <template x-if="msg.role === 'assistant'">
                         <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-6 h-6 object-contain">
+                            <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/lion_mascot_animation/lion_mascot_blink_loop.gif" class="w-6 h-6 object-contain">
                         </div>
                     </template>
                     <div :class="msg.role === 'user'
@@ -112,7 +112,7 @@
             <template x-if="typing">
                 <div class="flex items-start gap-2.5">
                     <div class="w-7 h-7 rounded-full bg-navy-100 dark:bg-navy-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="{{ asset('mascot/mascot-ai.png') }}" class="w-6 h-6 object-contain">
+                        <img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/lion_mascot_animation/lion_mascot_blink_loop.gif" class="w-6 h-6 object-contain">
                     </div>
                     <div class="bg-slate-100 dark:bg-navy-800 rounded-2xl rounded-tl-sm px-4 py-3">
                         <div class="flex gap-1.5 items-center">
@@ -173,7 +173,7 @@
 
         {{-- Robot image --}}
         <img id="leo-img"
-             src="{{ asset('mascot/mascot-ai.png') }}"
+             src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/lion_mascot_animation/lion_mascot_blink_loop.gif"
              alt="Leo AI"
              draggable="false"
              class="leo-robot-img select-none"
@@ -198,13 +198,12 @@
 
 {{-- ── Tombol tampilkan kembali (saat robot hidden) ── --}}
 <button id="leo-show-btn"
-        onclick="leoShowWidget()"
         title="Tampilkan Leo AI"
-        style="display:none; position:fixed; bottom:0; right:32px; z-index:99998; width:80px; height:80px; border:none; background:transparent; cursor:pointer; padding:0;"
-        class="hover:scale-110 transition-transform">
+        style="display:none; position:fixed; bottom:0; right:32px; z-index:99998; width:80px; height:80px; border:none; background:transparent; cursor:pointer; padding:0; touch-action:none; user-select:none;">
     <img src="{{ asset('mascot/floating-leo.jpg') }}"
          alt="Tampilkan Leo AI"
-         style="width:80px; height:80px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(15,23,42,0.25));">
+         draggable="false"
+         style="width:80px; height:80px; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(15,23,42,0.25)); pointer-events:none; transition:transform 0.2s ease;">
 </button>
 
 <script>
@@ -457,7 +456,10 @@ function leoHideWidget() {
         if (modal) modal.style.display = 'none';
     }
     const showBtn = document.getElementById('leo-show-btn');
-    if (showBtn) showBtn.style.display = 'flex';
+    if (showBtn) {
+        showBtn.style.display = 'block';
+        _leoInitShowBtnDrag(showBtn);
+    }
 }
 
 function leoShowWidget() {
@@ -471,6 +473,82 @@ function leoShowWidget() {
     }
     const showBtn = document.getElementById('leo-show-btn');
     if (showBtn) showBtn.style.display = 'none';
+}
+
+// Drag untuk floating show button
+function _leoInitShowBtnDrag(btn) {
+    if (btn._leoDragInit) return; // init sekali saja
+    btn._leoDragInit = true;
+
+    const img = btn.querySelector('img');
+    let activePointer = null, dragging = false, didDrag = false;
+    let startMX = 0, startMY = 0, startBL = 0, startBT = 0;
+
+    btn.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        activePointer = e.pointerId;
+        dragging = didDrag = false;
+        startMX = e.clientX; startMY = e.clientY;
+        btn.setPointerCapture(e.pointerId);
+        const r = btn.getBoundingClientRect();
+        startBL = r.left; startBT = r.top;
+        btn.style.left = startBL + 'px'; btn.style.top = startBT + 'px';
+        btn.style.right = 'auto'; btn.style.bottom = 'auto';
+        btn.style.cursor = 'grab';
+    });
+
+    btn.addEventListener('pointermove', (e) => {
+        if (e.pointerId !== activePointer) return;
+        const dx = e.clientX - startMX, dy = e.clientY - startMY;
+        if (!dragging) {
+            if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+            dragging = didDrag = true;
+            document.body.style.cursor = 'grabbing';
+            btn.style.cursor = 'grabbing';
+            if (img) img.style.transform = 'scale(0.92) rotate(3deg)';
+        }
+        const bW = 80, bH = 80;
+        btn.style.left = Math.max(0, Math.min(window.innerWidth  - bW, startBL + dx)) + 'px';
+        btn.style.top  = Math.max(0, Math.min(window.innerHeight - bH, startBT + dy)) + 'px';
+    });
+
+    const finish = (e) => {
+        if (e.pointerId !== activePointer) return;
+        activePointer = null;
+        document.body.style.cursor = '';
+        btn.style.cursor = 'pointer';
+        if (img) img.style.transform = '';
+        if (dragging) {
+            dragging = false;
+            try {
+                localStorage.setItem('leo_show_pos', JSON.stringify({
+                    right:  window.innerWidth  - (parseFloat(btn.style.left) || 0) - 80,
+                    bottom: window.innerHeight - (parseFloat(btn.style.top)  || 0) - 80,
+                }));
+            } catch(_) {}
+        }
+    };
+    btn.addEventListener('pointerup', finish);
+    btn.addEventListener('pointercancel', finish);
+
+    // Click — hanya kalau bukan drag
+    btn.addEventListener('click', (e) => {
+        if (didDrag) { e.preventDefault(); e.stopImmediatePropagation(); didDrag = false; return; }
+        leoShowWidget();
+    }, true);
+
+    // Restore posisi tersimpan
+    try {
+        const p = JSON.parse(localStorage.getItem('leo_show_pos') ?? 'null');
+        if (p && typeof p.right === 'number' && typeof p.bottom === 'number') {
+            const right  = Math.max(0, Math.min(window.innerWidth  - 80, p.right));
+            const bottom = Math.max(0, Math.min(window.innerHeight - 80, p.bottom));
+            btn.style.right  = right  + 'px';
+            btn.style.bottom = bottom + 'px';
+            btn.style.left   = 'auto';
+            btn.style.top    = 'auto';
+        }
+    } catch(_) {}
 }
 
 // Tutup context menu saat klik di luar atau ESC

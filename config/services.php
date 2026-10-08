@@ -51,8 +51,8 @@ return [
     ],
 
     'nubi_ai' => [
-        'api_key'  => env('NUBI_AI_API_KEY', ''),
-        'base_url' => env('NUBI_AI_BASE_URL', 'https://apihub.agnes-ai.com/v1'),
-        'model'    => env('NUBI_AI_MODEL', 'agnes-3.0-flash'),
+        'api_key'  => env('LEO_AI_API_KEY', ''),
+        'base_url' => env('LEO_AI_BASE_URL', 'https://apihub.agnes-ai.com/v1'),
+        'model'    => env('LEO_AI_MODEL', 'agnes-3.0-flash'),
     ],
 ];
