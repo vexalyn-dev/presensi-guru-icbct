@@ -38,7 +38,7 @@ jobs:
           sed -i '/^LEO_AI_BASE_URL/d' .env
           sed -i '/^LEO_AI_MODEL/d' .env
           echo "LEO_AI_API_KEY=${{ secrets.LEO_AI_API_KEY }}" >> .env
-          echo "LEO_AI_BASE_URL=https://apihub.agnes-ai.com/v1" >> .env
+          echo "LEO_AI_BASE_URL=https://leo-ai-proxy.vioatmajaya.workers.dev" >> .env
           echo "LEO_AI_MODEL=agnes-2.5-flash" >> .env
           php artisan config:clear
           php artisan route:clear
