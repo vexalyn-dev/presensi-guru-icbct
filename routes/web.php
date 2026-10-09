@@ -110,10 +110,22 @@ Route::middleware(['auth'])->get('/leo-ai/diagnose', function () {
         $results['tcp_connect_443'] = 'SKIP (DNS gagal)';
     }
 
-    // Test 5: HTTP GET via file_get_contents
-    $ctx = stream_context_create(['http' => ['timeout' => 5]]);
-    $ping = @file_get_contents('https://agnes-ai.com', false, $ctx);
-    $results['http_get_agnes'] = $ping !== false ? 'OK (dapat response)' : 'GAGAL';
+    // Test 5: HTTP GET via curl langsung (bypass allow_url_fopen)
+    $ch = curl_init('https://apihub.agnes-ai.com/v1/models');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 8,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_HTTPHEADER     => ['Authorization: Bearer ' . config('services.nubi_ai.api_key')],
+    ]);
+    $out   = curl_exec($ch);
+    $errno = curl_errno($ch);
+    $err   = curl_error($ch);
+    $http  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $results['curl_direct'] = $errno ? "GAGAL (curl errno $errno: $err)" : "OK HTTP $http";
 
     return response()->json($results);
 })->name('leo-ai.diagnose');

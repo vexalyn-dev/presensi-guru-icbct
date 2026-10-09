@@ -188,6 +188,14 @@ PROMPT;
             $response = Http::withToken($apiKey)
                 ->timeout(15)
                 ->connectTimeout(8)
+                ->withOptions([
+                    'verify' => false,
+                    'curl'   => [
+                        CURLOPT_SSL_VERIFYPEER => false,
+                        CURLOPT_SSL_VERIFYHOST => false,
+                        CURLOPT_FOLLOWLOCATION => true,
+                    ],
+                ])
                 ->post("{$baseUrl}/chat/completions", [
                     'model'      => $model,
                     'messages'   => [['role' => 'user', 'content' => 'ping']],
@@ -257,6 +265,15 @@ PROMPT;
             $response = Http::withToken($apiKey)
                 ->timeout(30)
                 ->connectTimeout(10)
+                ->withOptions([
+                    'verify'  => false,   // disable SSL verify (shared hosting sering strict)
+                    'curl'    => [
+                        CURLOPT_SSL_VERIFYPEER => false,
+                        CURLOPT_SSL_VERIFYHOST => false,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_MAXREDIRS      => 3,
+                    ],
+                ])
                 ->post("{$baseUrl}/chat/completions", [
                     'model'       => $model,
                     'messages'    => $messages,
