@@ -80,7 +80,41 @@ Route::middleware(['auth'])->get('/leo-ai/clear-cache', function () {
     ]);
 })->name('leo-ai.clear-cache');
 
-// Diagnosa koneksi outbound (khusus developer)
+// Debug endpoint sementara — hapus setelah fix
+Route::middleware(['auth'])->get('/leo-ai/debug-chat', function () {
+    $user = auth()->user();
+    if (! $user || $user->role !== 'developer') abort(403);
+
+    $apiKey      = config('services.nubi_ai.api_key');
+    $baseUrl     = rtrim(config('services.nubi_ai.base_url', ''), '/');
+    $model       = config('services.nubi_ai.model', '');
+    $isProxy     = str_contains($baseUrl, 'workers.dev');
+    $chatEndpoint = $isProxy ? $baseUrl : "{$baseUrl}/chat/completions";
+
+    try {
+        $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+            ->timeout(30)
+            ->withOptions(['verify' => false, 'curl' => [CURLOPT_SSL_VERIFYPEER => false, CURLOPT_SSL_VERIFYHOST => false]])
+            ->post($chatEndpoint, [
+                'model'    => $model,
+                'messages' => [
+                    ['role' => 'system', 'content' => 'Kamu adalah Leo AI.'],
+                    ['role' => 'user',   'content' => 'Halo, apa kabar?'],
+                ],
+            ]);
+
+        return response()->json([
+            'endpoint'    => $chatEndpoint,
+            'is_proxy'    => $isProxy,
+            'http_status' => $response->status(),
+            'body'        => $response->json(),
+            'content'     => data_get($response->json(), 'choices.0.message.content'),
+            'reasoning'   => data_get($response->json(), 'choices.0.message.reasoning_content'),
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json(['error' => $e->getMessage(), 'endpoint' => $chatEndpoint]);
+    }
+});
 Route::middleware(['auth'])->get('/leo-ai/diagnose', function () {
     $user = auth()->user();
     if (! $user || $user->role !== 'developer') abort(403);
