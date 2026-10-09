@@ -65,6 +65,21 @@ Route::middleware(['auth'])->post('/leo-ai/chat', [\App\Http\Controllers\LeoAiCo
 Route::middleware(['auth'])->get('/leo-ai/test', [\App\Http\Controllers\LeoAiController::class, 'testConnection'])
     ->name('nubi-ai.test');
 
+// Clear cache via browser (khusus developer, temporary helper)
+Route::middleware(['auth'])->get('/leo-ai/clear-cache', function () {
+    $user = auth()->user();
+    if (! $user || $user->role !== 'developer') abort(403);
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    return response()->json([
+        'status'  => 'OK',
+        'message' => 'Config, cache, dan view cache sudah di-clear.',
+        'model'   => config('services.nubi_ai.model'),
+        'api_key' => ! empty(config('services.nubi_ai.api_key')) ? 'SET (' . substr(config('services.nubi_ai.api_key'), 0, 8) . '...)' : 'KOSONG',
+    ]);
+})->name('leo-ai.clear-cache');
+
 // Landing page
 Route::get('/', function () {
     if (Auth::check()) {
