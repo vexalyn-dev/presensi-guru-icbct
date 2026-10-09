@@ -175,6 +175,9 @@ class SupportController extends Controller
         // Kirim notifikasi konfirmasi ke user yang lapor (semua jenis laporan)
         $this->notifyUser($ticket);
 
+        // Kirim notifikasi WhatsApp ke developer/admin (semua jalur AJAX & non-AJAX)
+        $this->notifyFonnte($ticket);
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success'      => true,
@@ -197,9 +200,6 @@ class SupportController extends Controller
                 'redirect'     => $this->supportRoute('history'),
             ]);
         }
-
-        // Fallback non-AJAX: Kirim notifikasi WhatsApp via Fonnte
-        $this->notifyFonnte($ticket);
 
         $links = [];
         if (isset($result) && !empty($result['issue_url']))             $links[] = 'GitHub: ' . $result['issue_url'];

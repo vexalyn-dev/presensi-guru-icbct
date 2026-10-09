@@ -43,6 +43,7 @@ return [
 
     'whatsapp' => [
         'support_number' => env('SUPPORT_WA_NUMBER', '6281234567890'),
+        'dev_number'     => env('DEV_WA_NUMBER', env('SUPPORT_WA_NUMBER', '6281234567890')),
     ],
 
     'fonnte' => [

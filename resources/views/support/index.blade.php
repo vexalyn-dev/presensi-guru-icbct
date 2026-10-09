@@ -7,12 +7,6 @@
 @endphp
 
 @section('content')
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-@php
-    $appSettings = \App\Models\Setting::first();
-    $logoUrl = ($appSettings && $appSettings->app_logo) ? asset('storage/' . $appSettings->app_logo) : '';
-@endphp
 <script>
 /* @ts-nocheck */
     // Alpine.data components — defined before Alpine initialises
@@ -75,7 +69,6 @@
             };
         });
     });
-</script>
 </script>
 <div class="space-y-6 fade-in">
 
@@ -192,7 +185,26 @@
                                 </template>
                                 <template x-if="selected">
                                     <span class="flex items-center gap-2.5">
-                                        <span class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" :class="opts.find(o=>o.value===selected)?.bg"></span>
+                                        <span class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" :class="opts.find(o=>o.value===selected)?.bg">
+                                            <svg class="w-3.5 h-3.5" :class="opts.find(o=>o.value===selected)?.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                {{-- circle-check --}}
+                                                <template x-if="opts.find(o=>o.value===selected)?.icon === 'circle-check'">
+                                                    <g><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></g>
+                                                </template>
+                                                {{-- alert-circle --}}
+                                                <template x-if="opts.find(o=>o.value===selected)?.icon === 'alert-circle'">
+                                                    <g><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></g>
+                                                </template>
+                                                {{-- alert-triangle --}}
+                                                <template x-if="opts.find(o=>o.value===selected)?.icon === 'alert-triangle'">
+                                                    <g><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></g>
+                                                </template>
+                                                {{-- flame --}}
+                                                <template x-if="opts.find(o=>o.value===selected)?.icon === 'flame'">
+                                                    <g><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></g>
+                                                </template>
+                                            </svg>
+                                        </span>
                                         <span class="font-semibold text-navy-800 dark:text-white" x-text="opts.find(o=>o.value===selected)?.label"></span>
                                     </span>
                                 </template>
@@ -506,6 +518,7 @@
 
 
 <script>
+/* @ts-nocheck */
 var typeConfig = {
     bug:         { title: 'Laporkan Bug',          icon: 'bug' },
     feature:     { title: 'Request Fitur',          icon: 'lightbulb' },
@@ -613,283 +626,6 @@ function handleSubmit() {
         console.error(err);
         hideSupportOverlay();
         form.submit();
-    });
-}
-
-
-// ── SUPPORT SUBMIT OVERLAY
-function toggleDropdown(menuId) {
-    var menu    = document.getElementById(menuId);
-    var isOpen  = !menu.classList.contains('hidden');
-    // Tutup semua dropdown dulu
-    document.querySelectorAll('[id$="-menu"]').forEach(function(m) {
-        m.classList.add('hidden');
-        var chevronId = m.id.replace('-menu', '-chevron');
-        var ch = document.getElementById(chevronId);
-        if (ch) ch.style.transform = 'rotate(0deg)';
-    });
-    if (!isOpen) {
-        // Portal: pindah ke body agar tidak terpotong overflow
-        var btnId = 'btn-' + menuId;
-        var btn = document.getElementById(btnId);
-        if (btn) {
-            if (menu.parentElement !== document.body) {
-                document.body.appendChild(menu);
-            }
-            // Pakai requestAnimationFrame supaya browser sempat render posisi button
-            requestAnimationFrame(function() {
-                var rect = btn.getBoundingClientRect();
-                menu.style.position  = 'fixed';
-                menu.style.top       = (rect.bottom + 4) + 'px';
-                menu.style.left      = rect.left + 'px';
-                menu.style.width     = rect.width + 'px';
-                menu.style.zIndex    = '9999';
-                menu.classList.remove('hidden');
-                if (window.lucide) lucide.createIcons();
-            });
-        } else {
-            menu.classList.remove('hidden');
-        }
-        var chevronId = menuId.replace('-menu', '-chevron');
-        var ch = document.getElementById(chevronId);
-        if (ch) ch.style.transform = 'rotate(180deg)';
-    }
-}
-
-// Tutup dropdown saat klik di luar
-document.addEventListener('click', function(e) {
-    var openMenus = document.querySelectorAll('[id$="-menu"]:not(.hidden)');
-    openMenus.forEach(function(menu) {
-        var btnId = 'btn-' + menu.id;
-        var btn   = document.getElementById(btnId);
-        if (btn && !btn.contains(e.target) && !menu.contains(e.target)) {
-            menu.classList.add('hidden');
-            menu.style.pointerEvents = 'none';
-            var chevronId = menu.id.replace('-menu', '-chevron');
-            var ch = document.getElementById(chevronId);
-            if (ch) ch.style.transform = 'rotate(0deg)';
-        }
-    });
-});
-
-function selectOption(key, value, label) {
-    document.getElementById(key + '-input').value = value;
-    var lbl = document.getElementById(key + '-label');
-    if (lbl) { lbl.textContent = label; lbl.classList.remove('text-slate-400','dark:text-slate-400'); lbl.classList.add('text-navy-800','dark:text-white','font-medium'); }
-    document.getElementById(key + '-menu').classList.add('hidden');
-    var chevronId = key + '-chevron';
-    var ch = document.getElementById(chevronId);
-    if (ch) ch.style.transform = 'rotate(0deg)';
-}
-
-
-function setLabelWithIcon(labelId, menuId, bg, iconName, iconColor, text) {
-    var lbl = document.getElementById(labelId);
-    if (!lbl) return;
-    lbl.innerHTML = '<div class="w-6 h-6 rounded-lg ' + bg + ' flex items-center justify-center flex-shrink-0"><i data-lucide="' + iconName + '" class="w-3.5 h-3.5 ' + iconColor + '"></i></div><span class="font-semibold text-navy-800 dark:text-white">' + text + '</span>';
-    document.getElementById(menuId).classList.add('hidden');
-    var chId = menuId.replace('-menu', '-chevron');
-    var ch = document.getElementById(chId);
-    if (ch) ch.style.transform = 'rotate(0deg)';
-    if (window.lucide) lucide.createIcons();
-}
-
-function selectPriority(val, label, bg, color, icon) {
-    document.getElementById('priority-input').value = val;
-    setLabelWithIcon('priority-label', 'priority-menu', bg, icon, color, label);
-}
-
-function selectCategory(val, icon, bg, color) {
-    document.getElementById('category-input').value = val;
-    setLabelWithIcon('category-label', 'category-menu', bg, icon, color, val);
-}
-
-function selectImpact(val, icon, bg, color) {
-    document.getElementById('impact-input').value = val;
-    setLabelWithIcon('impact-label', 'impact-menu', bg, icon, color, val);
-}
-
-function selectMaintType(val, icon, bg, color) {
-    document.getElementById('maintenance-type-input').value = val;
-
-    // Update label
-    var lbl = document.getElementById('maint-type-label');
-    if (lbl) {
-        lbl.innerHTML =
-            '<div class="w-6 h-6 rounded-lg ' + bg + ' flex items-center justify-center flex-shrink-0">' +
-            '<i data-lucide="' + icon + '" class="w-3.5 h-3.5 ' + color + '"></i></div>' +
-            '<span class="font-semibold text-navy-800 dark:text-white">' + val + '</span>';
-    }
-
-    // Tutup dropdown
-    closeMaintDropdown();
-    if (window.lucide) lucide.createIcons();
-}
-
-function openMaintDropdown() {
-    var menu = document.getElementById('maint-menu');
-    var btn  = document.getElementById('btn-maint-menu');
-    var chevron = document.getElementById('maint-chevron');
-
-    if (!menu || !btn) return;
-
-    var isOpen = !menu.classList.contains('hidden');
-
-    // Tutup semua dropdown lain dulu
-    document.querySelectorAll('[id$="-menu"]').forEach(function(m) {
-        if (m.id !== 'maint-menu') {
-            m.classList.add('hidden');
-        }
-    });
-
-    if (isOpen) {
-        closeMaintDropdown();
-        return;
-    }
-
-    // Posisikan menu tepat di bawah button
-    var rect = btn.getBoundingClientRect();
-    menu.style.top   = (rect.bottom + window.scrollY + 4) + 'px';
-    menu.style.left  = rect.left + 'px';
-    menu.style.width = rect.width + 'px';
-    menu.style.position = 'fixed';
-    menu.style.top   = (rect.bottom + 4) + 'px';
-
-    menu.classList.remove('hidden');
-    if (chevron) chevron.style.transform = 'rotate(180deg)';
-    if (window.lucide) lucide.createIcons();
-}
-
-function closeMaintDropdown() {
-    var menu    = document.getElementById('maint-menu');
-    var chevron = document.getElementById('maint-chevron');
-    if (menu) menu.classList.add('hidden');
-    if (chevron) chevron.style.transform = 'rotate(0deg)';
-}
-
-// Tutup maint dropdown saat klik di luar
-document.addEventListener('click', function(e) {
-    var btn  = document.getElementById('btn-maint-menu');
-    var menu = document.getElementById('maint-menu');
-    if (menu && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
-        closeMaintDropdown();
-    }
-});
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('[id$="-dropdown"]') && !e.target.closest('[id$="-menu"]')) {
-        document.querySelectorAll('[id$="-menu"]').forEach(function(m) {
-            m.classList.add('hidden');
-        });
-        document.querySelectorAll('[id$="-chevron"]').forEach(function(c) {
-            c.style.transform = 'rotate(0deg)';
-        });
-    }
-});
-document.addEventListener('DOMContentLoaded', function() {
-    var ua = navigator.userAgent;
-    var browser = 'Unknown';
-    if (/Edg\//.test(ua)) browser = 'Microsoft Edge';
-    else if (/Chrome\//.test(ua)) browser = 'Google Chrome';
-    else if (/Firefox\//.test(ua)) browser = 'Mozilla Firefox';
-    else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) browser = 'Safari';
-
-    var os = 'Unknown';
-    if (/Windows/.test(ua)) os = 'Windows';
-    else if (/Macintosh/.test(ua)) os = 'macOS';
-    else if (/Android/.test(ua)) os = 'Android';
-    else if (/iPhone|iPad/.test(ua)) os = 'iOS';
-    else if (/Linux/.test(ua)) os = 'Linux';
-
-    var device = /Mobile|Android|iPhone/.test(ua) ? 'Mobile' : /Tablet|iPad/.test(ua) ? 'Tablet' : 'Desktop';
-    var res    = window.screen.width + 'x' + window.screen.height;
-
-    document.getElementById('meta_browser').value    = browser;
-    document.getElementById('meta_os').value         = os;
-    document.getElementById('meta_device').value     = device;
-    document.getElementById('meta_resolution').value = window.screen.width + 'x' + window.screen.height;
-    document.getElementById('meta_timezone').value   = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    document.getElementById('meta_language').value   = navigator.language;
-    document.getElementById('meta_url').value        = window.location.href;
-    document.getElementById('meta_user_agent').value = ua;
-
-    document.getElementById('show-browser').textContent = browser;
-    document.getElementById('show-os').textContent      = os;
-    document.getElementById('show-device').textContent  = device;
-    var showRes = document.getElementById('show-res');
-    if (showRes) showRes.textContent = window.screen.width + 'x' + window.screen.height;
-
-    setType('bug');
-    if (window.lucide) lucide.createIcons();
-});
-
-// ── SUPPORT SUBMIT OVERLAY
-var _overlayRedirectUrl = null;
-
-function showSupportOverlay(state, msg, redirectUrl) {
-    var ov    = document.getElementById('support-ov');
-    var ring  = document.getElementById('sov-ring');
-    var dots  = document.getElementById('sov-dots');
-    var iconS = document.getElementById('sov-icon-success');
-    var iconE = document.getElementById('sov-icon-error');
-    var lbl   = document.getElementById('sov-label');
-    var sub   = document.getElementById('sov-sublabel');
-
-    // Tampilkan dulu sebelum animasi
-    ov.style.display = 'flex';
-    requestAnimationFrame(function() {
-        ov.classList.add('sov-show');
-    });
-    ring.style.display  = '';
-    dots.style.display  = '';
-    iconS.style.display = 'none';
-    iconE.style.display = 'none';
-
-    if (state === 'loading') {
-        lbl.textContent = 'Mengirim laporan...';
-        sub.textContent = 'Mohon tunggu sebentar';
-    } else if (state === 'success') {
-        _overlayRedirectUrl = redirectUrl || null;
-        ring.style.display  = 'none';
-        dots.style.display  = 'none';
-        iconS.style.display = 'flex';
-        lbl.textContent = 'Laporan Terkirim!';
-        sub.textContent = 'Tunggu sebentar...';
-        if (window.lucide) lucide.createIcons();
-        // Setelah 1 detik: sembunyikan overlay, langsung tampilkan modal thanks
-        setTimeout(function() {
-            ov.classList.remove('sov-show');
-            // Tunggu transition selesai baru tampilkan modal
-            setTimeout(function() {
-                showThanksModal(_overlayRedirectUrl);
-            }, 280);
-        }, 1000);
-    } else if (state === 'error') {
-        ring.style.display  = 'none';
-        dots.style.display  = 'none';
-        iconE.style.display = 'flex';
-        lbl.textContent = 'Gagal Terkirim';
-        sub.textContent = msg || 'Silakan coba lagi';
-        setTimeout(hideSupportOverlay, 2500);
-    }
-
-    ov.classList.add('sov-show');
-}
-
-function hideSupportOverlay() {
-    var ov = document.getElementById('support-ov');
-    ov.classList.remove('sov-show');
-    // Benar-benar sembunyikan setelah transisi selesai
-    setTimeout(function() {
-        ov.style.display = 'none';
-    }, 280);
-}
-
-// Fix dropdown portal cleanup — hapus semua menu yang tertinggal di body
-function cleanupPortaledMenus() {
-    document.querySelectorAll('[id$="-menu"]').forEach(function(menu) {
-        if (menu.parentElement === document.body) {
-            menu.classList.add('hidden');
-        }
     });
 }
 
