@@ -80,6 +80,44 @@ Route::middleware(['auth'])->get('/leo-ai/clear-cache', function () {
     ]);
 })->name('leo-ai.clear-cache');
 
+// Diagnosa koneksi outbound (khusus developer)
+Route::middleware(['auth'])->get('/leo-ai/diagnose', function () {
+    $user = auth()->user();
+    if (! $user || $user->role !== 'developer') abort(403);
+
+    $results = [];
+
+    // Test 1: curl_init tersedia?
+    $results['curl_available'] = function_exists('curl_init');
+
+    // Test 2: allow_url_fopen?
+    $results['allow_url_fopen'] = ini_get('allow_url_fopen') ? true : false;
+
+    // Test 3: DNS resolve apihub.agnes-ai.com
+    $ip = @gethostbyname('apihub.agnes-ai.com');
+    $results['dns_resolve'] = ($ip !== 'apihub.agnes-ai.com') ? "OK ($ip)" : 'GAGAL - tidak bisa resolve DNS';
+
+    // Test 4: TCP connect ke port 443
+    if ($ip !== 'apihub.agnes-ai.com') {
+        $socket = @fsockopen('ssl://apihub.agnes-ai.com', 443, $errno, $errstr, 5);
+        if ($socket) {
+            fclose($socket);
+            $results['tcp_connect_443'] = 'OK';
+        } else {
+            $results['tcp_connect_443'] = "GAGAL - $errno: $errstr";
+        }
+    } else {
+        $results['tcp_connect_443'] = 'SKIP (DNS gagal)';
+    }
+
+    // Test 5: HTTP GET via file_get_contents
+    $ctx = stream_context_create(['http' => ['timeout' => 5]]);
+    $ping = @file_get_contents('https://agnes-ai.com', false, $ctx);
+    $results['http_get_agnes'] = $ping !== false ? 'OK (dapat response)' : 'GAGAL';
+
+    return response()->json($results);
+})->name('leo-ai.diagnose');
+
 // Landing page
 Route::get('/', function () {
     if (Auth::check()) {
