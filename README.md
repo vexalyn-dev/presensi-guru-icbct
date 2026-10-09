@@ -154,71 +154,6 @@
 - [x] Loading states & skeleton
 - [x] Modal animasi premium (spring cubic-bezier)
 
-### 🤖 Leo AI — Asisten Cerdas
-
-- [x] Floating chat widget di semua halaman admin, operator, guru piket & developer
-- [x] Terhubung ke **Agnes AI API** (OpenAI-compatible)
-- [x] Jawab pertanyaan seputar penggunaan aplikasi
-- [x] Konteks data **real-time** dari database:
-  - Statistik kehadiran guru hari ini (hadir, terlambat, alpha, izin, sakit)
-  - Daftar guru yang belum presensi
-  - Pengajuan izin/sakit yang pending
-  - Sesi kelas yang sedang berjalan
-- [x] Quick suggestions saat chat pertama kali dibuka
-- [x] Riwayat percakapan tersimpan di sessionStorage
-- [x] Typing indicator animasi
-- [x] Klik kanan robot → context menu → sembunyikan/tampilkan
-- [x] Dibuat oleh **Vexalyn Dev**, dijaga aksesnya hanya untuk role yang berwenang
-
----
-
-## 🤖 Leo AI
-
-<div align="center">
-
-<img src="https://static.teamily.ai/sites/a9e19282-dc31-4d2f-aea8-ddf296a2b893/documents/lion_mascot_animation/lion_mascot_blink_loop.gif" alt="Leo AI — Asisten Cerdas ICB CT" width="120" />
-
-### Leo AI — Asisten Cerdas Presensi Guru ICB CT
-
-> *Dibuat oleh **Vexalyn Dev** · Powered by **Agnes AI***
-
-</div>
-
-Leo AI adalah asisten virtual berbasis kecerdasan buatan yang terintegrasi langsung di dalam aplikasi. Dirancang untuk membantu operator, admin, dan guru piket agar tidak perlu buka manual atau tanya-tanya lagi.
-
-**Apa yang bisa ditanyain ke Leo AI?**
-
-| Pertanyaan | Contoh |
-| ----------- | ------- |
-| 📊 Data kehadiran real-time | *"Berapa guru yang hadir hari ini?"* |
-| ⏳ Guru belum presensi | *"Siapa aja yang belum absen?"* |
-| 📝 Status izin | *"Ada berapa pengajuan izin yang pending?"* |
-| <img src="public/images/logo.png" height="16" style="vertical-align:middle;"> Kelas aktif | *"Berapa sesi kelas yang sedang berlangsung?"* |
-| 📖 Panduan fitur | *"Bagaimana cara export laporan presensi?"* |
-| ⚙️ Cara penggunaan | *"Bagaimana cara menambah data guru baru?"* |
-
-**Cara kerja:**
-
-Setiap kali pertanyaan dikirim, Leo AI secara otomatis mengambil data terkini dari database (kehadiran, izin, kelas) dan menggabungkannya sebagai konteks ke model AI. Jadi jawabannya selalu up-to-date.
-
-**Akses:**
-
-| Role | Akses Leo AI |
-| ------ | -------------- |
-| Admin | ✅ |
-| Operator | ✅ |
-| Guru Piket | ✅ |
-| Developer | ✅ |
-| Guru | ❌ (tidak tersedia) |
-
-**Konfigurasi di `.env`:**
-
-```env
-LEO_AI_API_KEY=your-agnes-ai-key
-LEO_AI_BASE_URL=https://apihub.agnes-ai.com/v1
-LEO_AI_MODEL=agnes-3.0-flash
-```
-
 ---
 
 ## 📸 Screenshots
@@ -241,7 +176,6 @@ Tampilan lengkap semua halaman ada di **[`docs/`](docs/README.md)**.
 | **QR Code** | jsQR | 1.4.0 |
 | **Icons** | Lucide Icons | Latest |
 | **Charts** | Chart.js | 4.x |
-| **AI Assistant** | Agnes AI API | — |
 | **Issue Tracking** | GitHub Issues + ClickUp | — |
 
 </div>
@@ -747,7 +681,6 @@ Lihat [LICENSE](LICENSE) untuk teks lengkapnya.
 - [Leaflet.js](https://leafletjs.com/)
 - [Chart.js](https://www.chartjs.org/)
 - [PhpSpreadsheet](https://phpspreadsheet.readthedocs.io/)
-- [Agnes AI](https://agnes-ai.com/) — AI backend untuk Leo AI
 - [ClickUp API](https://clickup.com/api)
 
 ---

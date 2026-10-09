@@ -2679,9 +2679,6 @@ textarea.input { resize: vertical; min-height: 85px; }
 </script>
 @yield('scripts')
 
-    {{-- ── LEO AI CHAT WIDGET ── --}}
-    @if(Auth::check() && Auth::user()->isDeveloper())
-        @include('partials.leo-ai')
-    @endif
+    {{-- Leo AI widget dinonaktifkan sementara --}}
 </body>
 </html>

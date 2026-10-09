@@ -523,10 +523,7 @@
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
 
     {{-- ── NUBI AI CHAT WIDGET ── --}}
-    {{-- Tampil untuk Guru Piket --}}
-    @if(Auth::check() && Auth::user()->isGuruPiket())
-        @include('partials.leo-ai')
-    @endif
+    {{-- Leo AI widget dinonaktifkan sementara --}}
 
     @stack('scripts')
 

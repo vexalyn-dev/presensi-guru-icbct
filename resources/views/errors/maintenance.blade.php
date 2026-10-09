@@ -149,7 +149,7 @@
 
         <!-- Footer -->
         <p class="text-[11px] text-gray-300 mt-8 fade-up" style="animation-delay:.6s">
-            &copy; {{ date('Y') }} SMK ICB Cinta Teknika &mdash; Sistem Presensi Guru
+            &copy; {{ date('Y') }} SMK ICB Cinta Teknika &mdash; Developed By Vexalyn Dev
         </p>
     </div>
 

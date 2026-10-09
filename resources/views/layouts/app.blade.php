@@ -888,10 +888,7 @@
     <script src="{{ asset('js/notifications.js') }}?v={{ filemtime(public_path('js/notifications.js')) }}"></script>
 
     {{-- ── NUBI AI CHAT WIDGET ── --}}
-    {{-- Tampil untuk Admin, Operator, dan Developer --}}
-    @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isDeveloper()))
-        @include('partials.leo-ai')
-    @endif
+    {{-- Leo AI widget dinonaktifkan sementara --}}
 
     {{-- ── LOGOUT LOADING OVERLAY ── --}}
     <div id="logout-overlay"
