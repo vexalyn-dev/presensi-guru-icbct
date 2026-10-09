@@ -117,8 +117,7 @@ Route::middleware(['auth'])->group(function () {
         return view('download-apk');
     })->name('download-apk');
 
-    // Upload generated ticket card image
-    Route::post('/support/upload-card/{ticket}', [SupportController::class, 'uploadCard'])->name('support.upload-card');
+
 });
 
 // Admin Routes
@@ -473,7 +472,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/optimize',                  [DeveloperController::class, 'optimize'])        ->name('optimize');
         Route::post('/updates',                  [DeveloperController::class, 'storeUpdate'])     ->name('updates.store');
         Route::delete('/updates/{id}',           [DeveloperController::class, 'deleteUpdate'])    ->name('updates.delete');
-        Route::get('/card-preview/{ticketId?}',  [DeveloperController::class, 'cardPreview'])     ->name('card-preview');
         Route::post('/toggle-debug',             [DeveloperController::class, 'toggleDebug'])       ->name('toggle-debug');
         Route::get('/run-seeder',                [DeveloperController::class, 'runSeederPanel'])    ->name('run-seeder');
         Route::get('/clear-routes',              [DeveloperController::class, 'clearRoutes'])       ->name('clear-routes');

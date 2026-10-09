@@ -10,7 +10,7 @@ class SupportTicket extends Model
     protected $fillable = [
         'user_id', 'ticket_id', 'type', 'title', 'description',
         'category', 'priority', 'status', 'metadata', 'attachments',
-        'extra_fields', 'github_issue_url', 'clickup_task_url', 'card_image_path',
+        'extra_fields', 'github_issue_url', 'clickup_task_url',
     ];
 
     protected $casts = [
@@ -84,9 +84,4 @@ class SupportTicket extends Model
         return self::priorityLabels()[$this->priority]['label'] ?? ucfirst($this->priority);
     }
 
-    public function getCardImageUrlAttribute(): ?string
-    {
-        if (!$this->card_image_path) return null;
-        return asset('storage/' . $this->card_image_path);
-    }
 }

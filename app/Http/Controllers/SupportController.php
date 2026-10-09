@@ -6,7 +6,6 @@ use App\Models\SupportTicket;
 use App\Models\User;
 use App\Services\GitHubService;
 use App\Services\ClickUpService;
-use App\Services\HelpdeskCardGenerator;
 use App\Services\FonnteService;
 use App\Helpers\NotificationHelper;
 use Illuminate\Http\Request;
@@ -199,7 +198,7 @@ class SupportController extends Controller
             ]);
         }
 
-        // Fallback non-AJAX: Kirim notifikasi WhatsApp via Fonnte langsung (text/GD fallback)
+        // Fallback non-AJAX: Kirim notifikasi WhatsApp via Fonnte
         $this->notifyFonnte($ticket);
 
         $links = [];
@@ -212,35 +211,8 @@ class SupportController extends Controller
         return redirect()->to($this->supportRoute('history'))->with('success', $successMsg);
     }
 
-    /** Upload generated ticket card image from frontend & trigger Fonnte notification */
-    public function uploadCard(Request $request, SupportTicket $ticket)
-    {
-        $cardPath = null;
-        if ($request->hasFile('card_image')) {
-            try {
-                $file = $request->file('card_image');
-                $filename = 'helpdesk-T' . $ticket->id . '-' . time() . '.png';
-                $path = $file->storeAs('helpdesk', $filename, 'public');
-                if ($path) {
-                    $cardPath = $path;
-                    $ticket->update(['card_image_path' => $cardPath]);
-                }
-            } catch (\Throwable $e) {
-                Log::error('uploadCard failed to save image', ['reason' => $e->getMessage()]);
-            }
-        }
-
-        // Kirim ke WhatsApp Fonnte (baik dengan gambar baru, atau fallback teks)
-        $this->notifyFonnte($ticket, $cardPath);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Notifikasi WhatsApp berhasil dikirim!',
-        ]);
-    }
-
-    /** Kirim notifikasi Fonnte ke admin (Gambar Kartu & Lampiran) */
-    private function notifyFonnte(SupportTicket $ticket, ?string $cardPath = null)
+    /** Kirim notifikasi Fonnte ke admin */
+    private function notifyFonnte(SupportTicket $ticket)
     {
         try {
             $rawPhone   = config('services.whatsapp.dev_number', env('DEV_WA_NUMBER', env('SUPPORT_WA_NUMBER', '')));
@@ -276,13 +248,13 @@ class SupportController extends Controller
                     };
 
                     $greetings = [
-                        "Pak, ada laporan baru yang masuk barusan.",
-                        "Pak, ada tiket baru nih — bisa dicek kalau sempat.",
-                        "Ada laporan masuk, Pak. Detail-nya di bawah ya.",
-                        "Pak, sistem nangkep laporan baru. Ini ringkasannya.",
-                        "Laporan baru sudah masuk, Pak. Berikut infonya.",
-                        "Pak, baru saja ada yang submit laporan. Ini detailnya.",
-                        "Sebentar ganggu, Pak — ada tiket baru yang perlu dicek.",
+                        "Tuan, ada laporan baru yang masuk barusan.",
+                        "Tuan, ada tiket baru nih — bisa dicek kalau sempat.",
+                        "Ada laporan masuk, Tuan. Detail-nya di bawah ya.",
+                        "Tuan, sistem nangkep laporan baru. Ini ringkasannya.",
+                        "Laporan baru sudah masuk, Tuan. Berikut infonya.",
+                        "Tuan, baru saja ada yang submit laporan. Ini detailnya.",
+                        "Sebentar ganggu, Tuan — ada tiket baru yang perlu dicek.",
                     ];
                     $greeting = $greetings[array_rand($greetings)];
 

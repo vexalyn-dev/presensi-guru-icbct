@@ -598,42 +598,6 @@ class DeveloperController extends Controller
         );
     }
 
-    // ─────────────────────────────────────────────
-    // CARD PREVIEW (support)
-    // ─────────────────────────────────────────────
-
-    public function cardPreview(string $secret, ?int $ticketId = null)
-    {
-        if (!$this->verifySecret($secret)) abort(404);
-
-        if (ob_get_length()) ob_clean();
-
-        try {
-            $ticket = $ticketId
-                ? \App\Models\SupportTicket::with('user')->find($ticketId)
-                : \App\Models\SupportTicket::with('user')->latest()->first();
-
-            if (!$ticket) {
-                $ticket = new \App\Models\SupportTicket([
-                    'ticket_id'   => 'HD-PREVIEW-001',
-                    'type'        => 'question',
-                    'title'       => 'Tidak bisa melakukan presensi',
-                    'description' => 'QR Code kelas tidak terbaca.',
-                    'priority'    => 'critical',
-                    'status'      => 'new',
-                ]);
-                $ticket->id = 0;
-                $ticket->setRelation('user', new User(['name' => 'Vexalyn Dev', 'role' => 'guru']));
-                $ticket->created_at = now();
-            }
-
-            return view('developer.helpdesk-card', compact('ticket'));
-        } catch (\Throwable $e) {
-            return response()->json(['error' => 'Gagal generate card.'], 500);
-        }
-    }
-
-    // ─────────────────────────────────────────────
     // PRIVATE HELPER
     // ─────────────────────────────────────────────
 
