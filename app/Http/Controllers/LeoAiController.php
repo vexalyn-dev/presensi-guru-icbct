@@ -242,7 +242,12 @@ PROMPT;
 
         $apiKey  = config('services.nubi_ai.api_key');
         $baseUrl = rtrim(config('services.nubi_ai.base_url', 'https://apihub.agnes-ai.com/v1'), '/');
-        $model   = config('services.nubi_ai.model', 'agnes-3.0-flash');
+        $model   = config('services.nubi_ai.model', 'agnes-2.5-flash');
+
+        // Worker proxy ada di root, Agnes AI langsung butuh /chat/completions
+        $chatEndpoint = str_contains($baseUrl, 'workers.dev')
+            ? $baseUrl
+            : "{$baseUrl}/chat/completions";
 
         if (empty($apiKey)) {
             Log::error('Leo AI: API key kosong. Set LEO_AI_API_KEY di .env dan jalankan config:clear.');
@@ -266,15 +271,15 @@ PROMPT;
                 ->timeout(30)
                 ->connectTimeout(10)
                 ->withOptions([
-                    'verify'  => false,   // disable SSL verify (shared hosting sering strict)
-                    'curl'    => [
+                    'verify' => false,
+                    'curl'   => [
                         CURLOPT_SSL_VERIFYPEER => false,
                         CURLOPT_SSL_VERIFYHOST => false,
                         CURLOPT_FOLLOWLOCATION => true,
                         CURLOPT_MAXREDIRS      => 3,
                     ],
                 ])
-                ->post("{$baseUrl}/chat/completions", [
+                ->post($chatEndpoint, [
                     'model'       => $model,
                     'messages'    => $messages,
                     'max_tokens'  => 700,
@@ -298,13 +303,21 @@ PROMPT;
                 return response()->json(['error' => $msg], 503);
             }
 
-            $reply = data_get($response->json(), 'choices.0.message.content');
+            $body  = $response->json();
+            $reply = data_get($body, 'choices.0.message.content', '');
+
+            // agnes-2.5-flash kadang kirim reasoning_content tanpa text content
+            // fallback ke reasoning_content kalau content kosong
             if (! is_string($reply) || trim($reply) === '') {
-                Log::warning('Leo AI: invalid response', ['body' => $response->json()]);
-                return response()->json(['error' => 'Leo AI mengirim jawaban yang tidak valid. Silakan coba lagi.'], 503);
+                $reply = data_get($body, 'choices.0.message.reasoning_content', '');
             }
 
-            return response()->json(['reply' => $reply]);
+            if (! is_string($reply) || trim($reply) === '') {
+                Log::warning('Leo AI: empty response', ['body' => $body]);
+                return response()->json(['error' => 'Leo AI tidak memberikan jawaban. Silakan coba lagi.'], 503);
+            }
+
+            return response()->json(['reply' => trim($reply)]);
 
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             Log::error('Leo AI connection failed', ['error' => $e->getMessage()]);
