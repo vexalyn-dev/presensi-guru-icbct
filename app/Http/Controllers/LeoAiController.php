@@ -197,9 +197,8 @@ PROMPT;
                     ],
                 ])
                 ->post("{$baseUrl}/chat/completions", [
-                    'model'      => $model,
-                    'messages'   => [['role' => 'user', 'content' => 'ping']],
-                    'max_tokens' => 10,
+                    'model'    => $model,
+                    'messages' => [['role' => 'user', 'content' => 'Balas hanya dengan kata "OK"']],
                 ]);
 
             $result['http_status'] = $response->status();
@@ -280,10 +279,8 @@ PROMPT;
                     ],
                 ])
                 ->post($chatEndpoint, [
-                    'model'       => $model,
-                    'messages'    => $messages,
-                    'max_tokens'  => 700,
-                    'temperature' => 0.5,
+                    'model'    => $model,
+                    'messages' => $messages,
                 ]);
 
             if ($response->failed()) {
