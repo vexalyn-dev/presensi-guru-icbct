@@ -249,51 +249,97 @@ class SupportController extends Controller
             if ($adminPhone) {
                 $fonnte = new FonnteService();
 
-                // Priority emoji + warna (sesuai UI)
-                $prioEmoji = match($ticket->priority) {
-                    'critical' => '🔥',
-                    'high'     => '⚠️',
-                    'medium'   => '⏰',
-                    default    => '✅',
-                };
+                // ── Pesan casual/gaul untuk bug, feature, maintenance ──
+                if (in_array($ticket->type, ['bug', 'feature', 'maintenance'])) {
+                    $userName = $ticket->user?->name ?? 'Seseorang';
+                    $roleMap  = [
+                        'admin'      => 'Admin',
+                        'operator'   => 'Operator',
+                        'guru_piket' => 'Guru Piket',
+                        'guru'       => 'Guru',
+                        'developer'  => 'Developer',
+                    ];
+                    $userRole = $roleMap[$ticket->user?->role ?? ''] ?? 'User';
 
-                // Format pesan caption
-                $caption  = "*✦ VEXALYN*\n";
-                $caption .= "*SUPPORT CENTER*\n\n";
-                $caption .= "*🎫 NEW SUPPORT TICKET*\n";
-                $caption .= "*`#{$ticket->ticket_id}`*\n\n";
-                $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                $caption .= "*📝 SUBJECT* : *{$ticket->title}*\n\n";
-                $caption .= "*⚠️ PRIORITY* : {$prioEmoji} *" . strtoupper(SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? $ticket->priority) . "*\n\n";
-                $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                $caption .= "*📄 REPORT DETAILS*\n\n";
-                $caption .= $ticket->description . "\n\n";
-                $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                    $prioEmoji = match($ticket->priority) {
+                        'critical' => '🔥',
+                        'high'     => '⚠️',
+                        'medium'   => '🟡',
+                        default    => '🟢',
+                    };
 
-                // Attachment section
-                if (!empty($ticket->attachments)) {
-                    $caption .= "*📎 ATTACHMENT*\n\n";
-                    foreach ($ticket->attachments as $attachment) {
-                        if (!empty($attachment['url'])) {
-                            $caption .= "🔗 *{$attachment['url']}*\n\n";
-                        }
-                    }
-                    $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                }
+                    $typeText = match($ticket->type) {
+                        'bug'         => '🐞 *laporan bug*',
+                        'feature'     => '💡 *request fitur*',
+                        'maintenance' => '🔧 *permohonan maintenance*',
+                        default       => 'laporan',
+                    };
 
-                // Kirim gambar + caption
-                if (!empty($ticket->attachments)) {
-                    foreach ($ticket->attachments as $attachment) {
-                        if (!empty($attachment['url'])) {
-                            $fonnte->sendImage($adminPhone, $attachment['url'], $caption);
-                            break;
-                        }
-                    }
+                    $greetings = [
+                        "Pak, ada laporan baru yang masuk barusan.",
+                        "Pak, ada tiket baru nih — bisa dicek kalau sempat.",
+                        "Ada laporan masuk, Pak. Detail-nya di bawah ya.",
+                        "Pak, sistem nangkep laporan baru. Ini ringkasannya.",
+                        "Laporan baru sudah masuk, Pak. Berikut infonya.",
+                        "Pak, baru saja ada yang submit laporan. Ini detailnya.",
+                        "Sebentar ganggu, Pak — ada tiket baru yang perlu dicek.",
+                    ];
+                    $greeting = $greetings[array_rand($greetings)];
+
+                    $msg  = "{$greeting}\n\n";
+                    $msg .= "*{$userName}* ({$userRole}) baru aja ngirim {$typeText}.\n\n";
+                    $msg .= "*📌 {$ticket->title}*\n";
+                    $msg .= "{$prioEmoji} Prioritas: *" . strtoupper(SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? $ticket->priority) . "*\n";
+                    $msg .= "🎫 ID: `{$ticket->ticket_id}`\n\n";
+                    $msg .= "_\"{$ticket->description}\"_\n\n";
+                    $msg .= "~ *Vexalyn Dev* 🛠️";
+
+                    $fonnte->sendText($adminPhone, $msg);
+
                 } else {
-                    $fonnte->sendText($adminPhone, $caption);
+                    // ── Tipe question: format formal seperti sebelumnya ──
+                    $prioEmoji = match($ticket->priority) {
+                        'critical' => '🔥',
+                        'high'     => '⚠️',
+                        'medium'   => '⏰',
+                        default    => '✅',
+                    };
+
+                    $caption  = "*✦ VEXALYN*\n";
+                    $caption .= "*SUPPORT CENTER*\n\n";
+                    $caption .= "*🎫 NEW SUPPORT TICKET*\n";
+                    $caption .= "*`#{$ticket->ticket_id}`*\n\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                    $caption .= "*📝 SUBJECT* : *{$ticket->title}*\n\n";
+                    $caption .= "*⚠️ PRIORITY* : {$prioEmoji} *" . strtoupper(SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? $ticket->priority) . "*\n\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                    $caption .= "*📄 REPORT DETAILS*\n\n";
+                    $caption .= $ticket->description . "\n\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+
+                    if (!empty($ticket->attachments)) {
+                        $caption .= "*📎 ATTACHMENT*\n\n";
+                        foreach ($ticket->attachments as $attachment) {
+                            if (!empty($attachment['url'])) {
+                                $caption .= "🔗 *{$attachment['url']}*\n\n";
+                            }
+                        }
+                        $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                    }
+
+                    if (!empty($ticket->attachments)) {
+                        foreach ($ticket->attachments as $attachment) {
+                            if (!empty($attachment['url'])) {
+                                $fonnte->sendImage($adminPhone, $attachment['url'], $caption);
+                                break;
+                            }
+                        }
+                    } else {
+                        $fonnte->sendText($adminPhone, $caption);
+                    }
                 }
 
-                // 2. Kirim notifikasi konfirmasi ke user yang lapor (jika ada nomor HP dan bukan nomor dev)
+                // ── Notif konfirmasi ke user yang lapor ──
                 $userPhone = $ticket->user?->phone;
                 if ($userPhone && $userPhone !== $rawPhone) {
                     $userPhoneFormatted = preg_replace('/[^0-9]/', '', (string)$userPhone);
@@ -302,7 +348,6 @@ class SupportController extends Controller
                         $userCaption .= "_Laporan kamu sudah berhasil diterima. Saya akan segera mengecek dan menindak lanjutinya._\n\n";
                         $userCaption .= "*Setiap laporan yang masuk sangat membantu saya untuk terus memperbaiki dan mengembangkan Presensi Guru ICB CT. ✦*\n\n";
                         $userCaption .= "_~ Vexalyn Support_";
-
                         $fonnte->sendText($userPhoneFormatted, $userCaption);
                     }
                 }
