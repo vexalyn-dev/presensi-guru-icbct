@@ -61,14 +61,13 @@ Route::post('/webhooks/github', [\App\Http\Controllers\GitHubWebhookController::
 Route::middleware(['auth'])->post('/leo-ai/chat', [\App\Http\Controllers\LeoAiController::class, 'chat'])
     ->name('nubi-ai.chat');
 
-// Leo AI — Test koneksi API (khusus developer)
 Route::middleware(['auth'])->get('/leo-ai/test', [\App\Http\Controllers\LeoAiController::class, 'testConnection'])
     ->name('nubi-ai.test');
 
 // Clear cache via browser (khusus developer, temporary helper)
 Route::middleware(['auth'])->get('/leo-ai/clear-cache', function () {
     $user = auth()->user();
-    if (! $user || $user->role !== 'developer') abort(403);
+    if (! $user || $user->role !== 'developer') abort(403, 'Hanya developer yang bisa mengakses halaman ini.');
     \Illuminate\Support\Facades\Artisan::call('config:clear');
     \Illuminate\Support\Facades\Artisan::call('cache:clear');
     \Illuminate\Support\Facades\Artisan::call('view:clear');
@@ -83,7 +82,7 @@ Route::middleware(['auth'])->get('/leo-ai/clear-cache', function () {
 // Debug endpoint sementara — hapus setelah fix
 Route::middleware(['auth'])->get('/leo-ai/debug-chat', function () {
     $user = auth()->user();
-    if (! $user || $user->role !== 'developer') abort(403);
+    if (! $user || $user->role !== 'developer') abort(403, 'Hanya developer yang bisa mengakses halaman ini.');
 
     $apiKey      = config('services.nubi_ai.api_key');
     $baseUrl     = rtrim(config('services.nubi_ai.base_url', ''), '/');
@@ -117,7 +116,7 @@ Route::middleware(['auth'])->get('/leo-ai/debug-chat', function () {
 });
 Route::middleware(['auth'])->get('/leo-ai/diagnose', function () {
     $user = auth()->user();
-    if (! $user || $user->role !== 'developer') abort(403);
+    if (! $user || $user->role !== 'developer') abort(403, 'Hanya developer yang bisa mengakses halaman ini.');
 
     $results = [];
 

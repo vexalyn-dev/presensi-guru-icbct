@@ -300,7 +300,16 @@ PROMPT;
                 return response()->json(['error' => $msg], 503);
             }
 
-            $body  = $response->json();
+            $body  = $response->json() ?? json_decode($response->body(), true) ?? [];
+
+            // Log untuk debug — hapus setelah Leo AI stabil
+            Log::info('Leo AI raw response', [
+                'status'       => $response->status(),
+                'content_type' => $response->header('Content-Type'),
+                'body_snippet' => substr($response->body(), 0, 300),
+                'body_parsed'  => $body,
+            ]);
+
             $reply = data_get($body, 'choices.0.message.content', '');
 
             // agnes-2.5-flash kadang kirim reasoning_content tanpa text content

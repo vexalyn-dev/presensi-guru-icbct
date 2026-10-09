@@ -23,7 +23,7 @@ class DeveloperController extends Controller
         // Harus login + role developer + secret key cocok
         $user = auth()->user();
         if (!$user || !$user->isDeveloper()) {
-            abort(403);
+            abort(403, 'Hanya developer yang bisa mengakses halaman ini.');
         }
         $key = config('app.developer_secret_key', '');
         return $key !== '' && hash_equals($key, $secret);

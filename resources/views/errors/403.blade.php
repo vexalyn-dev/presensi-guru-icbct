@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 — Halaman Tidak Ditemukan</title>
+    <title>403 — Akses Ditolak</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,11 +15,11 @@
         * { font-family: 'Inter', sans-serif; }
         body { background: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.12; animation: blobFloat 8s ease-in-out infinite; }
-        .blob-1 { width: 400px; height: 400px; background: #1e3a5f; top: -100px; left: -100px; }
-        .blob-2 { width: 300px; height: 300px; background: #facc15; bottom: -80px; right: -80px; animation-delay: 3s; }
-        .blob-3 { width: 200px; height: 200px; background: #1e3a5f; bottom: 100px; left: 100px; animation-delay: 5s; }
+        .blob-1 { width: 400px; height: 400px; background: #dc2626; top: -100px; left: -100px; }
+        .blob-2 { width: 300px; height: 300px; background: #1e3a5f; bottom: -80px; right: -80px; animation-delay: 3s; }
+        .blob-3 { width: 200px; height: 200px; background: #dc2626; bottom: 100px; left: 100px; animation-delay: 5s; }
         @keyframes blobFloat { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(20px,-20px) scale(1.05)} 66%{transform:translate(-15px,10px) scale(0.95)} }
-        .num-404 { animation: numPop 0.7s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .num-anim { animation: numPop 0.7s cubic-bezier(0.34,1.56,0.64,1) both; }
         @keyframes numPop { 0%{opacity:0;transform:scale(0.5) translateY(30px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
         .illus-wrap { animation: illustFloat 4s ease-in-out infinite; }
         @keyframes illustFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
@@ -41,21 +41,22 @@
     <div class="relative z-10 text-center px-6 max-w-lg w-full">
 
         <div class="illus-wrap mb-6 fade-up" style="animation-delay:.1s">
-            <img src="{{ asset('mascot/404 not found.png') }}"
-                 alt="404 Not Found"
+            <img src="{{ asset('mascot/akses di tolak 403.png') }}"
+                 alt="Akses Ditolak"
                  class="w-64 h-auto mx-auto object-contain drop-shadow-lg select-none">
         </div>
 
-        <div class="num-404 mb-2" style="animation-delay:.15s">
-            <span class="text-8xl font-black text-navy-800 leading-none tracking-tighter select-none">404</span>
+        <div class="num-anim mb-2" style="animation-delay:.15s">
+            <span class="text-8xl font-black text-red-600 leading-none tracking-tighter select-none">403</span>
         </div>
 
         <h1 class="text-2xl font-bold text-navy-800 mb-3 fade-up" style="animation-delay:.25s">
-            Waduh, nyasar nih! 😅
+            Akses Ditolak! 🚫
         </h1>
 
         <p class="text-slate-500 text-base leading-relaxed mb-8 fade-up" style="animation-delay:.35s">
-            Halaman yang kamu cari kayaknya udah pindah, dihapus,<br>atau emang gak pernah ada.
+            Kamu tidak punya izin untuk mengakses halaman ini.<br>
+            Hubungi administrator jika kamu merasa ini kesalahan.
         </p>
 
         <div class="flex flex-col sm:flex-row gap-3 justify-center fade-up" style="animation-delay:.45s">

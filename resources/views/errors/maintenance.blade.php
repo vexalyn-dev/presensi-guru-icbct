@@ -87,65 +87,9 @@
 
         <!-- Illustration -->
         <div class="illus-float mb-6 fade-up" style="animation-delay:.1s">
-            <svg viewBox="0 0 280 200" class="w-64 sm:w-72 h-auto mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Ground shadow -->
-                <ellipse cx="140" cy="193" rx="70" ry="7" fill="#1e3a5f" opacity="0.07"/>
-
-                <!-- Server rack -->
-                <rect x="68" y="130" width="144" height="58" rx="10" fill="#f1f5f9"/>
-                <rect x="78" y="140" width="124" height="10" rx="4" fill="#e2e8f0"/>
-                <rect x="78" y="155" width="124" height="10" rx="4" fill="#e2e8f0"/>
-                <rect x="78" y="170" width="124" height="10" rx="4" fill="#e2e8f0"/>
-                <!-- LEDs -->
-                <circle cx="188" cy="145" r="3" fill="#22c55e"/>
-                <circle cx="180" cy="145" r="3" fill="#facc15"/>
-                <circle cx="172" cy="145" r="3" fill="#ef4444"/>
-                <circle cx="188" cy="160" r="3" fill="#facc15"/>
-                <circle cx="180" cy="160" r="3" fill="#22c55e"/>
-                <circle cx="188" cy="175" r="3" fill="#ef4444"/>
-                <!-- USB slots -->
-                <rect x="88" y="142" width="26" height="6" rx="2" fill="#cbd5e1"/>
-                <rect x="88" y="157" width="26" height="6" rx="2" fill="#cbd5e1"/>
-
-                <!-- Large gear -->
-                <g transform="translate(108,72)">
-                    <g class="gear-spin-slow">
-                        <circle cx="0" cy="0" r="26" fill="#1e3a5f" opacity="0.92"/>
-                        <circle cx="0" cy="0" r="12" fill="white"/>
-                        <circle cx="0" cy="0" r="5" fill="#1e3a5f"/>
-                        <rect x="-5" y="-33" width="10" height="14" rx="3" fill="#1e3a5f" transform="rotate(0)"/>
-                        <rect x="-5" y="-33" width="10" height="14" rx="3" fill="#1e3a5f" transform="rotate(45)"/>
-                        <rect x="-5" y="-33" width="10" height="14" rx="3" fill="#1e3a5f" transform="rotate(90)"/>
-                        <rect x="-5" y="-33" width="10" height="14" rx="3" fill="#1e3a5f" transform="rotate(135)"/>
-                        <rect x="-5" y="-33" width="10" height="14" rx="3" fill="#1e3a5f" transform="rotate(180)"/>
-                        <rect x="-5" y="-33" width="10" height="14" rx="3" fill="#1e3a5f" transform="rotate(225)"/>
-                        <rect x="-5" y="-33" width="10" height="14" rx="3" fill="#1e3a5f" transform="rotate(270)"/>
-                        <rect x="-5" y="-33" width="10" height="14" rx="3" fill="#1e3a5f" transform="rotate(315)"/>
-                    </g>
-                </g>
-
-                <!-- Small gear -->
-                <g transform="translate(162,58)">
-                    <g class="gear-spin-fast">
-                        <circle cx="0" cy="0" r="16" fill="#facc15" opacity="0.95"/>
-                        <circle cx="0" cy="0" r="7" fill="white"/>
-                        <circle cx="0" cy="0" r="3" fill="#facc15"/>
-                        <rect x="-4" y="-21" width="8" height="11" rx="2" fill="#facc15" transform="rotate(0)"/>
-                        <rect x="-4" y="-21" width="8" height="11" rx="2" fill="#facc15" transform="rotate(60)"/>
-                        <rect x="-4" y="-21" width="8" height="11" rx="2" fill="#facc15" transform="rotate(120)"/>
-                        <rect x="-4" y="-21" width="8" height="11" rx="2" fill="#facc15" transform="rotate(180)"/>
-                        <rect x="-4" y="-21" width="8" height="11" rx="2" fill="#facc15" transform="rotate(240)"/>
-                        <rect x="-4" y="-21" width="8" height="11" rx="2" fill="#facc15" transform="rotate(300)"/>
-                    </g>
-                </g>
-
-                <!-- Wrench -->
-                <g transform="translate(55,95) rotate(-35)">
-                    <rect x="-4" y="-35" width="8" height="48" rx="4" fill="#64748b"/>
-                    <ellipse cx="0" cy="-35" rx="11" ry="7" fill="#64748b"/>
-                    <ellipse cx="0" cy="-35" rx="5" ry="3" fill="white"/>
-                </g>
-            </svg>
+            <img src="/mascot/maintenance.png"
+                 alt="Maintenance"
+                 class="w-64 sm:w-72 h-auto mx-auto object-contain drop-shadow-lg select-none">
         </div>
 
         <!-- Title -->
