@@ -23,28 +23,23 @@
 
         html, body {
             min-height: 100vh;
-            background: linear-gradient(145deg, #EFF6FF 0%, #DBEAFE 50%, #EFF6FF 100%);
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Blue blobs — match mascot background */
+        /* Subtle orange blobs */
         .blob-navy {
             position: fixed;
             border-radius: 50%;
-            filter: blur(130px);
-            opacity: 0.25;
+            filter: blur(120px);
+            opacity: 0.07;
             animation: blobPulse 10s ease-in-out infinite;
         }
-        .blob-1 { width: 500px; height: 500px; top: -180px; left: -180px; background: #93C5FD; animation-delay: 0s; }
-        .blob-2 { width: 350px; height: 350px; bottom: -120px; right: -100px; background: #BFDBFE; animation-delay: 5s; }
+        .blob-1 { width: 500px; height: 500px; top: -180px; left: -180px; background: #FB923C; animation-delay: 0s; }
+        .blob-2 { width: 350px; height: 350px; bottom: -120px; right: -100px; background: #F97316; animation-delay: 5s; }
         @keyframes blobPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
-
-        /* Gear spin */
-        .gear-spin-slow { animation: spin 10s linear infinite; transform-box: fill-box; transform-origin: center; }
-        .gear-spin-fast { animation: spin 5s linear infinite reverse; transform-box: fill-box; transform-origin: center; }
-        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 
         /* Illustration float */
         .illus-float { animation: float 3.5s ease-in-out infinite; }
@@ -54,38 +49,37 @@
         .fade-up { opacity: 0; animation: fadeUp 0.65s ease-out forwards; }
         @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
 
-        <!-- Progress bar track juga update -->
+        /* Progress bar — shimmer indeterminate */
         .progress-track {
             position: relative;
             width: 100%;
             height: 8px;
-            background: #BFDBFE;
+            background: #FED7AA;
             border-radius: 9999px;
             overflow: hidden;
         }
         .progress-fill {
             position: absolute;
-            inset: 0;
+            top: 0; bottom: 0;
+            width: 40%;
             background: linear-gradient(90deg, #F97316, #FB923C, #FDBA74);
             border-radius: 9999px;
             animation: indeterminate 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-            transform-origin: left center;
         }
         .progress-glow {
             position: absolute;
             top: 0; bottom: 0;
-            width: 40%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+            width: 30%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
             border-radius: 9999px;
             animation: shimmer 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
         }
         @keyframes indeterminate {
-            0%   { left: -35%; right: 100%; }
-            50%  { left: 25%; right: 10%; }
-            100% { left: 100%; right: -35%; }
+            0%   { left: -40%; }
+            100% { left: 110%; }
         }
         @keyframes shimmer {
-            0%   { left: -50%; }
+            0%   { left: -40%; }
             100% { left: 110%; }
         }
 
@@ -99,14 +93,14 @@
     <div class="blob-navy blob-1"></div>
     <div class="blob-navy blob-2"></div>
 
-    <!-- Main content — full width, centered, padded -->
+    <!-- Main content -->
     <div class="relative z-10 w-full max-w-md mx-auto px-6 py-12 text-center">
 
-        <!-- Badge — smaller, not too high -->
+        <!-- Badge -->
         <div class="flex justify-center mb-6 fade-up" style="animation-delay:.05s">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-50 border border-blue-200 rounded-full">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-orange-50 border border-orange-200 rounded-full">
                 <span class="pulse-dot w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
-                <span class="text-blue-700 text-xs font-bold uppercase tracking-wider">Sistem Dalam Pemeliharaan</span>
+                <span class="text-orange-700 text-xs font-bold uppercase tracking-wider">Sistem Dalam Pemeliharaan</span>
             </div>
         </div>
 
@@ -127,7 +121,7 @@
             {{ $message ?? 'Kami sedang melakukan pemeliharaan untuk meningkatkan kualitas layanan. Mohon bersabar dan coba beberapa saat lagi.' }}
         </p>
 
-        <!-- Progress bar — gold solid -->
+        <!-- Progress bar -->
         <div class="mb-8 fade-up" style="animation-delay:.38s">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status Pemeliharaan</span>
@@ -141,23 +135,23 @@
 
         <!-- Info cards -->
         <div class="grid grid-cols-3 gap-3 mb-8 fade-up" style="animation-delay:.46s">
-            <div class="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl p-3 shadow-sm">
+            <div class="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
                 <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-2">
                     <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 </div>
                 <p class="text-xs font-semibold text-gray-700">Data Aman</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Tidak ada data yang hilang</p>
             </div>
-            <div class="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl p-3 shadow-sm">
+            <div class="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
                 <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-2">
                     <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <p class="text-xs font-semibold text-gray-700">Segera Selesai</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Estimasi waktu singkat</p>
             </div>
-            <div class="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl p-3 shadow-sm">
-                <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <div class="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
+                <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <p class="text-xs font-semibold text-gray-700">Lebih Cepat</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Setelah maintenance</p>
@@ -167,9 +161,9 @@
         <!-- Countdown -->
         <div class="fade-up" style="animation-delay:.54s">
             <p class="text-xs text-gray-400 mb-2">Halaman diperbarui otomatis dalam</p>
-            <div class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-sm">
-                <span class="text-2xl font-black text-blue-800 tabular-nums" id="countdown">60</span>
-                <span class="text-sm text-blue-400 font-medium">detik</span>
+            <div class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm">
+                <span class="text-2xl font-black text-gray-800 tabular-nums" id="countdown">60</span>
+                <span class="text-sm text-gray-400 font-medium">detik</span>
             </div>
         </div>
 
