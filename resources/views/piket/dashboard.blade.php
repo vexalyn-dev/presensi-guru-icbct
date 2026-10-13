@@ -228,7 +228,7 @@
 {{-- Welcome Modal Piket --}}
 <div id="piket-welcome-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;">
     <div id="piket-welcome-box" style="background:#fff;border-radius:24px;padding:32px 28px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 56px rgba(15,23,42,0.2);transform:translateY(20px) scale(0.97);opacity:0;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);">
-        <img src="{{ asset('mascot/banner_welcome.png') }}" alt="Selamat Bertugas" style="max-width:100%;width:260px;height:auto;border-radius:12px;margin:0 auto 16px;display:block;">
+        <img src="{{ asset('mascot/banner welcome.png') }}" alt="Selamat Bertugas" style="max-width:100%;width:260px;height:auto;border-radius:12px;margin:0 auto 16px;display:block;">
         <h2 style="font-size:1.3rem;font-weight:800;color:#0F172A;margin:0 0 6px;letter-spacing:-0.3px;">Selamat Bertugas!</h2>
         <p style="font-size:0.9rem;font-weight:600;color:#0F172A;margin:0 0 16px;">Halo, {{ auth()->user()->name }} 👋</p>
         <p style="font-size:0.83rem;color:#64748B;line-height:1.5;margin:0 0 16px;">Selamat datang di portal Guru Piket.<br>Tugasmu hari ini:</p>

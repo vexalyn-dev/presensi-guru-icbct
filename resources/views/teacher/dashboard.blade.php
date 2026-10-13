@@ -688,7 +688,7 @@
 {{-- Welcome Modal --}}
 <div id="welcome-modal-overlay" style="display:none;">
     <div id="welcome-modal-box">
-        <img src="{{ asset('mascot/banner_welcome.png') }}" alt="Selamat Datang" class="mx-auto mb-4" style="max-width:100%;width:260px;height:auto;border-radius:12px;">
+        <img src="{{ asset('mascot/banner welcome.png') }}" alt="Selamat Datang" class="mx-auto mb-4" style="max-width:100%;width:260px;height:auto;border-radius:12px;">
         <p class="text-sm text-slate-600 dark:text-slate-300 mb-1 font-semibold">
             Halo, {{ auth()->user()->name }}
         </p>
