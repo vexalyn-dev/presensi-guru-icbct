@@ -23,22 +23,22 @@
 
         html, body {
             min-height: 100vh;
-            background: #ffffff;
+            background: linear-gradient(145deg, #EFF6FF 0%, #DBEAFE 50%, #EFF6FF 100%);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Warm orange blobs — match mascot palette */
+        /* Blue blobs — match mascot background */
         .blob-navy {
             position: fixed;
             border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.10;
+            filter: blur(130px);
+            opacity: 0.25;
             animation: blobPulse 10s ease-in-out infinite;
         }
-        .blob-1 { width: 500px; height: 500px; top: -180px; left: -180px; background: #FB923C; animation-delay: 0s; }
-        .blob-2 { width: 350px; height: 350px; bottom: -120px; right: -100px; background: #F97316; animation-delay: 5s; }
+        .blob-1 { width: 500px; height: 500px; top: -180px; left: -180px; background: #93C5FD; animation-delay: 0s; }
+        .blob-2 { width: 350px; height: 350px; bottom: -120px; right: -100px; background: #BFDBFE; animation-delay: 5s; }
         @keyframes blobPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
 
         /* Gear spin */
@@ -54,12 +54,12 @@
         .fade-up { opacity: 0; animation: fadeUp 0.65s ease-out forwards; }
         @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
 
-        /* Progress bar — shimmer indeterminate */
+        <!-- Progress bar track juga update -->
         .progress-track {
             position: relative;
             width: 100%;
             height: 8px;
-            background: #FED7AA;
+            background: #BFDBFE;
             border-radius: 9999px;
             overflow: hidden;
         }
@@ -104,9 +104,9 @@
 
         <!-- Badge — smaller, not too high -->
         <div class="flex justify-center mb-6 fade-up" style="animation-delay:.05s">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-orange-50 border border-orange-200 rounded-full">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-50 border border-blue-200 rounded-full">
                 <span class="pulse-dot w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
-                <span class="text-orange-700 text-xs font-bold uppercase tracking-wider">Sistem Dalam Pemeliharaan</span>
+                <span class="text-blue-700 text-xs font-bold uppercase tracking-wider">Sistem Dalam Pemeliharaan</span>
             </div>
         </div>
 
@@ -141,23 +141,23 @@
 
         <!-- Info cards -->
         <div class="grid grid-cols-3 gap-3 mb-8 fade-up" style="animation-delay:.46s">
-            <div class="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
+            <div class="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl p-3 shadow-sm">
                 <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-2">
                     <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 </div>
                 <p class="text-xs font-semibold text-gray-700">Data Aman</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Tidak ada data yang hilang</p>
             </div>
-            <div class="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
+            <div class="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl p-3 shadow-sm">
                 <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-2">
                     <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <p class="text-xs font-semibold text-gray-700">Segera Selesai</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Estimasi waktu singkat</p>
             </div>
-            <div class="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
-                <div class="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <div class="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl p-3 shadow-sm">
+                <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
                 <p class="text-xs font-semibold text-gray-700">Lebih Cepat</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Setelah maintenance</p>
@@ -167,9 +167,9 @@
         <!-- Countdown -->
         <div class="fade-up" style="animation-delay:.54s">
             <p class="text-xs text-gray-400 mb-2">Halaman diperbarui otomatis dalam</p>
-            <div class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm">
-                <span class="text-2xl font-black text-gray-800 tabular-nums" id="countdown">60</span>
-                <span class="text-sm text-gray-400 font-medium">detik</span>
+            <div class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-sm">
+                <span class="text-2xl font-black text-blue-800 tabular-nums" id="countdown">60</span>
+                <span class="text-sm text-blue-400 font-medium">detik</span>
             </div>
         </div>
 
