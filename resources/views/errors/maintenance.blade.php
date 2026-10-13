@@ -29,17 +29,16 @@
             justify-content: center;
         }
 
-        /* Subtle navy blob only — no yellow */
+        /* Warm orange blobs — match mascot palette */
         .blob-navy {
             position: fixed;
             border-radius: 50%;
             filter: blur(120px);
-            opacity: 0.06;
-            background: #1e3a5f;
+            opacity: 0.10;
             animation: blobPulse 10s ease-in-out infinite;
         }
-        .blob-1 { width: 500px; height: 500px; top: -180px; left: -180px; animation-delay: 0s; }
-        .blob-2 { width: 350px; height: 350px; bottom: -120px; right: -100px; animation-delay: 5s; }
+        .blob-1 { width: 500px; height: 500px; top: -180px; left: -180px; background: #FB923C; animation-delay: 0s; }
+        .blob-2 { width: 350px; height: 350px; bottom: -120px; right: -100px; background: #F97316; animation-delay: 5s; }
         @keyframes blobPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
 
         /* Gear spin */
@@ -55,14 +54,40 @@
         .fade-up { opacity: 0; animation: fadeUp 0.65s ease-out forwards; }
         @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
 
-        /* Progress bar — gold */
-        .progress-anim {
-            height: 100%;
-            background: #facc15;
+        /* Progress bar — shimmer indeterminate */
+        .progress-track {
+            position: relative;
+            width: 100%;
+            height: 8px;
+            background: #FED7AA;
             border-radius: 9999px;
-            animation: progAnim 2.8s ease-in-out infinite;
+            overflow: hidden;
         }
-        @keyframes progAnim { 0%{width:8%} 50%{width:82%} 85%{width:92%} 100%{width:8%} }
+        .progress-fill {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, #F97316, #FB923C, #FDBA74);
+            border-radius: 9999px;
+            animation: indeterminate 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+            transform-origin: left center;
+        }
+        .progress-glow {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 40%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+            border-radius: 9999px;
+            animation: shimmer 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+        }
+        @keyframes indeterminate {
+            0%   { left: -35%; right: 100%; }
+            50%  { left: 25%; right: 10%; }
+            100% { left: 100%; right: -35%; }
+        }
+        @keyframes shimmer {
+            0%   { left: -50%; }
+            100% { left: 110%; }
+        }
 
         /* Pulse dot */
         .pulse-dot { animation: pulseDot 2s ease-in-out infinite; }
@@ -79,9 +104,9 @@
 
         <!-- Badge — smaller, not too high -->
         <div class="flex justify-center mb-6 fade-up" style="animation-delay:.05s">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-50 border border-amber-200 rounded-full">
-                <span class="pulse-dot w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
-                <span class="text-amber-700 text-xs font-bold uppercase tracking-wider">Sistem Dalam Pemeliharaan</span>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-orange-50 border border-orange-200 rounded-full">
+                <span class="pulse-dot w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
+                <span class="text-orange-700 text-xs font-bold uppercase tracking-wider">Sistem Dalam Pemeliharaan</span>
             </div>
         </div>
 
@@ -106,25 +131,26 @@
         <div class="mb-8 fade-up" style="animation-delay:.38s">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status Pemeliharaan</span>
-                <span class="text-xs font-bold text-amber-500">Sedang Berjalan...</span>
+                <span class="text-xs font-bold text-orange-500">Sedang Berjalan...</span>
             </div>
-            <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div class="progress-anim"></div>
+            <div class="progress-track">
+                <div class="progress-fill"></div>
+                <div class="progress-glow"></div>
             </div>
         </div>
 
         <!-- Info cards -->
         <div class="grid grid-cols-3 gap-3 mb-8 fade-up" style="animation-delay:.46s">
             <div class="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
-                <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 </div>
                 <p class="text-xs font-semibold text-gray-700">Data Aman</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Tidak ada data yang hilang</p>
             </div>
             <div class="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
-                <div class="w-8 h-8 bg-amber-50 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <p class="text-xs font-semibold text-gray-700">Segera Selesai</p>
                 <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Estimasi waktu singkat</p>

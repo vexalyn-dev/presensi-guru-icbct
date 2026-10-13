@@ -688,12 +688,7 @@
 {{-- Welcome Modal --}}
 <div id="welcome-modal-overlay" style="display:none;">
     <div id="welcome-modal-box">
-        <div class="w-16 h-16 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span class="text-3xl">👋</span>
-        </div>
-        <h2 class="text-xl sm:text-2xl font-extrabold text-navy-800 dark:text-white mb-2">
-            Selamat Datang!
-        </h2>
+        <img src="{{ asset('mascot/banner_welcome.png') }}" alt="Selamat Datang" class="mx-auto mb-4" style="max-width:100%;width:260px;height:auto;border-radius:12px;">
         <p class="text-sm text-slate-600 dark:text-slate-300 mb-1 font-semibold">
             Halo, {{ auth()->user()->name }}
         </p>

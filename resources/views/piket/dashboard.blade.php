@@ -228,11 +228,7 @@
 {{-- Welcome Modal Piket --}}
 <div id="piket-welcome-overlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;">
     <div id="piket-welcome-box" style="background:#fff;border-radius:24px;padding:32px 28px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 56px rgba(15,23,42,0.2);transform:translateY(20px) scale(0.97);opacity:0;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);">
-        <div style="width:64px;height:64px;background:linear-gradient(135deg,#0F172A,#1E293B);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 20px rgba(15,23,42,0.2);">
-            <svg width="28" height="28" fill="none" stroke="#FACC15" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-            </svg>
-        </div>
+        <img src="{{ asset('mascot/banner_welcome.png') }}" alt="Selamat Bertugas" style="max-width:100%;width:260px;height:auto;border-radius:12px;margin:0 auto 16px;display:block;">
         <h2 style="font-size:1.3rem;font-weight:800;color:#0F172A;margin:0 0 6px;letter-spacing:-0.3px;">Selamat Bertugas!</h2>
         <p style="font-size:0.9rem;font-weight:600;color:#0F172A;margin:0 0 16px;">Halo, {{ auth()->user()->name }} 👋</p>
         <p style="font-size:0.83rem;color:#64748B;line-height:1.5;margin:0 0 16px;">Selamat datang di portal Guru Piket.<br>Tugasmu hari ini:</p>
