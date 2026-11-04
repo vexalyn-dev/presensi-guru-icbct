@@ -16,17 +16,18 @@
 $uuid = $id ?? 'cal_' . uniqid();
 $hasXModel = $xModel !== null;
 $defaultValue = $value ?? ($hasXModel ? '' : null);
+$initValueJs = $defaultValue ? json_encode($defaultValue) : 'null';
 ?>
 
 <div x-data="customDatePicker({
     name: '{{ $name }}',
     id: '{{ $uuid }}',
-    initialValue: {{ $defaultValue ? "'$defaultValue'" : 'null' },
+    initialValue: {!! $initValueJs !!},
     placeholder: '{{ $placeholder }}',
     required: {{ $required ? 'true' : 'false' }},
     disabled: {{ $disabled ? 'true' : 'false' }},
-    min: {{ $min ? "'$min'" : 'null' }},
-    max: {{ $max ? "'$max'" : 'null' }},
+    min: {!! $min ? json_encode($min) : 'null' !!},
+    max: {!! $max ? json_encode($max) : 'null' !!},
     hasXModel: {{ $hasXModel ? 'true' : 'false' }},
     xModelKey: '{{ $xModel }}',
 })"
