@@ -157,7 +157,7 @@
             <div class="p-5 border-b border-slate-200 dark:border-slate-700">
                 <div class="flex items-center gap-3">
                     @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
-                    @if($appSettings->app_logo)
+                    @if($appSettings->app_logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($appSettings->app_logo))
                         <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo" class="w-10 h-10 object-contain">
                     @else
                         <div class="w-10 h-10 bg-gradient-to-br from-navy-800 to-navy-900 rounded-lg flex items-center justify-center">

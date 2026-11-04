@@ -283,7 +283,7 @@
     <meta name="theme-color" content="#0f172a">
     <!-- Favicon Dynamic dari AppSetting (fallback) -->
     @php $appSettings = \App\Models\AppSetting::getInstance(); @endphp
-    @if($appSettings && $appSettings->app_favicon)
+    @if($appSettings && $appSettings->app_favicon && \Illuminate\Support\Facades\Storage::disk('public')->exists($appSettings->app_favicon))
         <link rel="icon" type="image/png" href="{{ asset('storage/' . $appSettings->app_favicon) }}?v={{ time() }}">
     @endif
 </head>
@@ -346,7 +346,7 @@
 
         <!-- Logo -->
         <div class="flex items-center gap-3 h-16 px-5 border-b border-slate-200 dark:border-slate-800">
-            @if($appSettings->app_logo)
+            @if($appSettings->app_logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($appSettings->app_logo))
                 <img src="{{ asset('storage/' . $appSettings->app_logo) }}" class="w-9 h-9 object-contain">
             @else
                 <div class="w-9 h-9 bg-gradient-to-br from-gold-400 to-gold-500 rounded-lg flex items-center justify-center shadow-lg shadow-gold-400/30 hover-glow">
