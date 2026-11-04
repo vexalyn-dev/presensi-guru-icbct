@@ -238,16 +238,14 @@
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                                 Tanggal Mulai <span class="text-red-500">*</span>
                             </label>
-                            <div class="relative group">
-                                <i data-lucide="calendar" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
-                                <input type="date" 
-                                       name="start_date" 
-                                       value="{{ old('start_date', now()->format('Y-m-d')) }}" 
-                                       required 
-                                       x-model="startDate"
-                                       @change="validateDates"
-                                       class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
-                            </div>
+                            <x-custom-date-picker
+                                name="start_date"
+                                :value="old('start_date', now()->format('Y-m-d'))"
+                                required
+                                placeholder="Pilih tanggal mulai"
+                                x-model="startDate"
+                                @change="validateDates"
+                            />
                             @error('start_date')
                                 <p class="mt-2 text-xs text-red-500 flex items-center gap-1">
                                     <i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}
@@ -258,17 +256,15 @@
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                                 Tanggal Selesai <span class="text-red-500">*</span>
                             </label>
-                            <div class="relative group">
-                                <i data-lucide="calendar" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
-                                <input type="date" 
-                                       name="end_date" 
-                                       value="{{ old('end_date', now()->format('Y-m-d')) }}" 
-                                       required 
-                                       x-model="endDate"
-                                       @change="validateDates"
-                                       :min="startDate"
-                                       class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
-                            </div>
+                            <x-custom-date-picker
+                                name="end_date"
+                                :value="old('end_date', now()->format('Y-m-d'))"
+                                required
+                                :min="$startDate ?? null"
+                                placeholder="Pilih tanggal selesai"
+                                x-model="endDate"
+                                @change="validateDates"
+                            />
                             @error('end_date')
                                 <p class="mt-2 text-xs text-red-500 flex items-center gap-1">
                                     <i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}

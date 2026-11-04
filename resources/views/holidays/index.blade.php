@@ -335,11 +335,12 @@
             
             <div>
                 <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Tanggal</label>
-                <div class="relative">
-                    <i data-lucide="calendar" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                    <input type="date" name="date" required
-                           class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all">
-                </div>
+                <x-custom-date-picker
+                    name="date"
+                    value="{{ old('date', now()->format('Y-m-d')) }}"
+                    required
+                    placeholder="Pilih tanggal"
+                />
             </div>
 
             <div>

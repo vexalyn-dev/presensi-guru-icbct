@@ -143,11 +143,12 @@
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                         Tanggal <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative group">
-                        <i data-lucide="calendar" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-navy-600 dark:group-focus-within:text-gold-400 transition-colors"></i>
-                        <input type="date" name="date" required value="{{ old('date', now()->format('Y-m-d')) }}"
-                               class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600">
-                    </div>
+                    <x-custom-date-picker
+                        name="date"
+                        :value="old('date', now()->format('Y-m-d'))"
+                        required
+                        placeholder="Pilih tanggal"
+                    />
                     @error('date')
                     <p class="mt-2 text-xs text-red-500 flex items-center gap-1">
                         <i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}

@@ -640,6 +640,7 @@ class ClassAttendanceController extends Controller
     private function sharedSpaceSheetPayload(Classroom $classroom, User $user, string $mode): array
     {
         $assignedClassrooms = $classroom->sharedRoomClasses()
+            ->select('classrooms.*')
             ->where('is_active', true)
             ->orderBy('level')
             ->orderBy('name')
