@@ -12,25 +12,25 @@
     'xModel' => null,
 ])
 
-<?php
-$uuid = $id ?? 'cal_' . uniqid();
-$hasXModel = $xModel !== null;
-$defaultValue = $value ?? ($hasXModel ? '' : null);
-$initValueJs = $defaultValue ? json_encode($defaultValue) : 'null';
-?>
+@php
+    $uuid = $id ?? 'cal_' . uniqid();
+    $hasXModel = $xModel !== null;
+    $defaultValue = $value ?? ($hasXModel ? '' : null);
+    $pickerConfig = [
+        'name' => $name,
+        'id' => $uuid,
+        'initialValue' => $defaultValue,
+        'placeholder' => $placeholder,
+        'required' => (bool) $required,
+        'disabled' => (bool) $disabled,
+        'min' => $min,
+        'max' => $max,
+        'hasXModel' => $hasXModel,
+        'xModelKey' => $xModel,
+    ];
+@endphp
 
-<div x-data="customDatePicker({
-    name: '{{ $name }}',
-    id: '{{ $uuid }}',
-    initialValue: {!! $initValueJs !!},
-    placeholder: '{{ $placeholder }}',
-    required: {{ $required ? 'true' : 'false' }},
-    disabled: {{ $disabled ? 'true' : 'false' }},
-    min: {!! $min ? json_encode($min) : 'null' !!},
-    max: {!! $max ? json_encode($max) : 'null' !!},
-    hasXModel: {{ $hasXModel ? 'true' : 'false' }},
-    xModelKey: '{{ $xModel }}',
-})"
+<div x-data='customDatePicker(@json($pickerConfig))'
      x-init="init()"
      @click.outside="open = false"
      class="relative inline-block w-full"
