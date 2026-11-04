@@ -10,16 +10,23 @@ class FixSessionCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $sessionDir = storage_path('framework/sessions');
-        @mkdir($sessionDir, 0777, true);
-        @chmod($sessionDir, 0777);
+        // Pastikan semua folder storage/cache ada
+        $dirs = [
+            storage_path('framework/views'),
+            storage_path('framework/cache'),
+            storage_path('framework/sessions'),
+            storage_path('logs'),
+        ];
+        foreach ($dirs as $dir) {
+            @mkdir($dir, 0777, true);
+            @chmod($dir, 0777);
+        }
 
-        // Deteksi HTTPS lewat header proxy cPanel/Laravel
+        // Deteksi HTTPS
         $isSecure = $request->secure()
             || $request->header('X-Forwarded-Proto') === 'https'
             || $request->header('X-Forwarded-Ssl') === 'on';
 
-        // Set secure cookie agar session tetap jalan di HTTPS
         if ($isSecure) {
             config(['session.secure' => true]);
         }
