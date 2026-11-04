@@ -10,25 +10,19 @@ class FixSessionCookie
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Pastikan semua folder storage/cache ada
-        $dirs = [
-            storage_path('framework/views'),
+        // Buat folder wajib yang mungkin belum ada di shared hosting
+        $folders = [
             storage_path('framework/cache'),
+            storage_path('framework/views'),
             storage_path('framework/sessions'),
             storage_path('logs'),
+            storage_path('app'),
         ];
-        foreach ($dirs as $dir) {
-            @mkdir($dir, 0777, true);
-            @chmod($dir, 0777);
-        }
-
-        // Deteksi HTTPS
-        $isSecure = $request->secure()
-            || $request->header('X-Forwarded-Proto') === 'https'
-            || $request->header('X-Forwarded-Ssl') === 'on';
-
-        if ($isSecure) {
-            config(['session.secure' => true]);
+        foreach ($folders as $folder) {
+            if (!is_dir($folder)) {
+                @mkdir($folder, 0777, true);
+            }
+            @chmod($folder, 0777);
         }
 
         return $next($request);
