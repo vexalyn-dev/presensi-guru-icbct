@@ -14,7 +14,8 @@
 
 @php
     $uuid = $id ?? 'cal_' . uniqid();
-    $hasXModel = $xModel !== null;
+    $xModelKey = $xModel ?? $attributes->get('x-model');
+    $hasXModel = $xModelKey !== null;
     $defaultValue = $value ?? ($hasXModel ? '' : null);
     $pickerConfig = [
         'name' => $name,
@@ -26,30 +27,28 @@
         'min' => $min,
         'max' => $max,
         'hasXModel' => $hasXModel,
-        'xModelKey' => $xModel,
+        'xModelKey' => $xModelKey,
     ];
 @endphp
 
 <div x-data="customDatePicker(@json($pickerConfig))"
      x-init="init()"
      @click.outside="open = false"
+     @keydown.escape.window="open = false"
      class="relative inline-block w-full"
-     {{ $attributes->merge(['class' => '']) }}>
+     {{ $attributes->except('x-model')->merge(['class' => '']) }}>
 
     <!-- Trigger Input -->
     <div class="relative" :class="disabled ? 'pointer-events-none opacity-60' : ''">
         <button type="button"
-                tabindex="-1"
-                class="absolute inset-0 w-full h-full opacity-0 cursor-text"
-                @click="$el.closest('.relative').querySelector('div.flex').click()"></button>
-
-        <div class="flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all duration-200"
+             :disabled="disabled"
+             class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-800 dark:focus-visible:ring-gold-400"
              :class="open
                  ? 'border-navy-800 dark:border-gold-400 shadow-lg shadow-navy-900/10 dark:shadow-gold-400/10'
                  : selectedDate
                      ? 'border-navy-800/20 dark:border-slate-600'
                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-500'"
-             @click="!disabled && (open = !open)">
+             @click="open = !open">
 
             @if ($icon)
             <svg class="w-4 h-4 text-slate-400 flex-shrink-0 transition-colors duration-200"
@@ -68,7 +67,7 @@
                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
             </svg>
-        </div>
+        </button>
 
         <!-- Hidden Input -->
         <input type="hidden"
@@ -76,7 +75,7 @@
                :id="id"
                :value="selectedDate"
                :required="required"
-               x-model.trim="{{ $hasXModel ? $xModel : 'selectedDate' }}"/>
+               x-model.trim="{{ $hasXModel ? $xModelKey : 'selectedDate' }}"/>
     </div>
 
     <!-- Calendar Popup -->
@@ -138,18 +137,20 @@
                                             ? 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/60'
                                             : 'text-slate-300 dark:text-slate-600'
                             ]"
-                            x-text="day.label"></template>
+                            x-text="day.label"></button>
+                </template>
             </div>
 
             <!-- Footer -->
             <div class="flex items-center justify-between px-4 pb-4">
                 <button type="button"
                         @click="selectToday()"
+                        :disabled="!todaySelectable"
                         class="text-[11px] font-bold text-navy-800 dark:text-gold-400 hover:text-navy-900 dark:hover:text-gold-500 transition-colors px-3 py-1.5 rounded-lg hover:bg-navy-800/5 dark:hover:bg-gold-400/10">
                     Hari Ini
                 </button>
                 <button type="button"
-                        x-show="selectedDate"
+                        x-show="selectedDate && !required"
                         @click="clearDate()"
                         class="text-[11px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50">
                     Hapus
