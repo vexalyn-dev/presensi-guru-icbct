@@ -25,8 +25,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Fix session cookie — SEBELUM StartSession agar config override efektif
         $middleware->prependToGroup('web', \App\Http\Middleware\FixSessionCookie::class);
-        // Ganti VerifyCsrfToken framework dengan custom yang skip untuk developer
-        $middleware->replaceInGroup('web', \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, \App\Http\Middleware\VerifyCsrfToken::class);
 
         $middleware->appendToGroup('web', \App\Http\Middleware\EnforceSessionTimeout::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\CheckMaintenanceMode::class);
