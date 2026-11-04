@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Classroom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,7 +27,9 @@ class ClassroomController extends Controller
 
     public function create()
     {
-        return view('classrooms.create');
+        $regularClasses = $this->regularClasses();
+
+        return view('classrooms.create', compact('regularClasses'));
     }
 
     public function store(Request $request)
@@ -40,6 +43,17 @@ class ClassroomController extends Controller
             'code'          => 'required|string|max:100|unique:classrooms,code',
             'description'   => 'nullable|string|max:500',
             'is_active'     => 'nullable|boolean',
+            'classroom_ids'   => 'required_if:type,shared|array|min:1',
+            'classroom_ids.*' => [
+                'integer',
+                Rule::exists('classrooms', 'id')->where(function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('is_shared', false)->orWhereNull('is_shared');
+                    })->where(function ($q) {
+                        $q->where('type', 'regular')->orWhereNull('type');
+                    });
+                }),
+            ],
         ]);
 
         $classroom = Classroom::create([
@@ -55,6 +69,10 @@ class ClassroomController extends Controller
             'is_active'     => $request->has('is_active') ? 1 : 0,
         ]);
 
+        if ($classroom->is_shared) {
+            $classroom->sharedRoomClasses()->sync($validated['classroom_ids'] ?? []);
+        }
+
         // Generate QR Code image - gunakan JSON format dengan token untuk keamanan
         $qrData = $classroom->qr_data; // {"type":"classroom","classroom_id":...,"token":...}
         $qrPath = $this->generateQRCode($qrData, $classroom->code);
@@ -66,7 +84,15 @@ class ClassroomController extends Controller
 
     public function edit(Classroom $classroom)
     {
-        return view('classrooms.edit', compact('classroom'));
+        $classroom->load('sharedRoomClasses');
+        $regularClasses = $this->regularClasses();
+        $selectedClassroomIds = collect(old('classroom_ids', $classroom->sharedRoomClasses->pluck('id')->all()))
+            ->map(fn ($id) => (int) $id)
+            ->intersect($regularClasses->pluck('id'))
+            ->values()
+            ->all();
+
+        return view('classrooms.edit', compact('classroom', 'regularClasses', 'selectedClassroomIds'));
     }
 
     public function update(Request $request, Classroom $classroom)
@@ -80,6 +106,17 @@ class ClassroomController extends Controller
             'code'          => 'required|string|max:100|unique:classrooms,code,' . $classroom->id,
             'description'   => 'nullable|string|max:500',
             'is_active'     => 'nullable|boolean',
+            'classroom_ids'   => 'required_if:type,shared|array|min:1',
+            'classroom_ids.*' => [
+                'integer',
+                Rule::exists('classrooms', 'id')->where(function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('is_shared', false)->orWhereNull('is_shared');
+                    })->where(function ($q) {
+                        $q->where('type', 'regular')->orWhereNull('type');
+                    });
+                }),
+            ],
         ]);
 
         $classroom->update([
@@ -94,6 +131,12 @@ class ClassroomController extends Controller
             'description'   => $validated['description'] ?? null,
             'is_active'     => $request->has('is_active') ? 1 : 0,
         ]);
+
+        if ($classroom->is_shared) {
+            $classroom->sharedRoomClasses()->sync($validated['classroom_ids'] ?? []);
+        } else {
+            $classroom->sharedRoomClasses()->detach();
+        }
 
         // Regenerate QR Code - gunakan JSON format dengan token untuk keamanan
         $qrData = $classroom->qr_data; // {"type":"classroom","classroom_id":...,"token":...}
@@ -156,6 +199,22 @@ class ClassroomController extends Controller
         }
 
         return back()->with('success', "QR Code {$count} kelas berhasil diperbarui ke format baru.");
+    }
+
+    /**
+     * Kelas reguler yang bisa dihubungkan ke ruangan bersama.
+     */
+    private function regularClasses()
+    {
+        return Classroom::where(function ($q) {
+                $q->where('is_shared', false)->orWhereNull('is_shared');
+            })
+            ->where(function ($q) {
+                $q->where('type', 'regular')->orWhereNull('type');
+            })
+            ->orderBy('level')
+            ->orderBy('name')
+            ->get();
     }
 
     /**

@@ -53,6 +53,32 @@ class Classroom extends Model
     }
 
     /**
+     * Kelas reguler yang menggunakan ruangan bersama ini.
+     */
+    public function sharedRoomClasses()
+    {
+        return $this->belongsToMany(
+            Classroom::class,
+            'shared_room_classrooms',
+            'shared_classroom_id',
+            'classroom_id'
+        )->withTimestamps();
+    }
+
+    /**
+     * Ruangan bersama tempat kelas reguler ini bisa digunakan.
+     */
+    public function sharedRooms()
+    {
+        return $this->belongsToMany(
+            Classroom::class,
+            'shared_room_classrooms',
+            'classroom_id',
+            'shared_classroom_id'
+        )->withTimestamps();
+    }
+
+    /**
      * Generate data untuk QR Code
      */
     public function getQrDataAttribute()

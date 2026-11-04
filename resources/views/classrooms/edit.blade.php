@@ -280,6 +280,8 @@
                                        class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono font-bold text-navy-800 dark:text-gold-400 cursor-not-allowed">
                                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Kode digenerate otomatis dari nama ruangan</p>
                             </div>
+
+                            @include('classrooms.partials.shared-class-select')
                         </div>
                     </template>
 
@@ -358,12 +360,16 @@
     <script>
         function classroomForm() {
             return {
-                classType: '{{ old('type', $classroom->type) }}',
+                classType: '{{ old('type', $classroom->type ?? ($classroom->is_shared ? 'shared' : 'regular')) }}',
                 className: '{{ old('name', $classroom->name) }}',
                 major: '{{ old('major', $classroom->major) }}',
                 level: '{{ old('level', $classroom->level) }}',
                 locationType: '{{ old('location_type', $classroom->location_type) }}',
-                
+                regularClasses: @json($regularClasses->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'code' => $c->code])->values()),
+                selectedClassroomIds: @json($selectedClassroomIds),
+                classSearch: '',
+                classDropdownOpen: false,
+
                 init() {
                     window.addEventListener('update-select-level', (e) => {
                         this.level = e.detail;
@@ -394,6 +400,33 @@
                         return base;
                     }
                     return 'Akan digenerate otomatis...';
+                },
+
+                get selectedClassrooms() {
+                    return this.selectedClassroomIds
+                        .map(id => this.regularClasses.find(c => c.id == id))
+                        .filter(Boolean);
+                },
+
+                get filteredClasses() {
+                    const q = this.classSearch.trim().toLowerCase();
+                    if (!q) return this.regularClasses;
+                    return this.regularClasses.filter(c =>
+                        (c.name || '').toLowerCase().includes(q) ||
+                        (c.code || '').toLowerCase().includes(q)
+                    );
+                },
+
+                toggleClassroom(id) {
+                    if (this.selectedClassroomIds.includes(id)) {
+                        this.selectedClassroomIds = this.selectedClassroomIds.filter(x => x != id);
+                    } else {
+                        this.selectedClassroomIds = [...this.selectedClassroomIds, id];
+                    }
+                },
+
+                removeClassroom(id) {
+                    this.selectedClassroomIds = this.selectedClassroomIds.filter(x => x != id);
                 }
             };
         }

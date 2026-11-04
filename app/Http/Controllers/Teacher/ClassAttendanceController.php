@@ -397,44 +397,11 @@ class ClassAttendanceController extends Controller
     // ──────────────────────────────────────────────────────────────────────────
     public function sharedSpaceData(Request $request)
     {
-        $user        = auth()->user();
         $classroomId = $request->input('classroom_id');
         $mode        = $request->input('mode', 'in');
-        $classroom   = \App\Models\Classroom::findOrFail($classroomId);
+        $classroom   = Classroom::findOrFail($classroomId);
 
-        // Reuse handleSharedSpacePrompt logic
-        $allClasses = \App\Models\Classroom::where('is_active', true)
-            ->where(function ($q) {
-                $q->where('is_shared', false)->orWhereNull('is_shared');
-            })
-            ->orderBy('name')->get();
-
-        $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
-
-        $today          = now()->toDateString();
-        $activeSessions = \App\Models\ClassAttendance::where('user_id', $user->id)
-            ->whereDate('date', $today)
-            ->whereNotNull('check_in_time')
-            ->whereNull('check_out_time')
-            ->where('classroom_id', $classroomId)
-            ->with(['selectedClassroom', 'subject'])
-            ->get()
-            ->map(fn ($a) => [
-                'id'                    => $a->id,
-                'classroom_id'          => $a->classroom_id,
-                'selected_classroom_id' => $a->selected_classroom_id,
-                'classroom_name'        => $a->selectedClassroom?->name ?? '-',
-                'subject_name'          => $a->subject?->name ?? '-',
-                'period'                => $a->period,
-                'check_in_time'         => $a->check_in_time?->format('H:i'),
-                'duration_minutes'      => $a->check_in_time ? (int) $a->check_in_time->diffInMinutes(now()) : 0,
-            ])->values();
-
-        return response()->json([
-            'classes'         => $allClasses->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'code' => $c->code])->values(),
-            'subjects'        => $subjects->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])->values(),
-            'active_sessions' => $activeSessions,
-        ]);
+        return response()->json($this->sharedSpaceSheetPayload($classroom, auth()->user(), $mode));
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -538,16 +505,35 @@ class ClassAttendanceController extends Controller
             return response()->json(['success' => false, 'message' => 'Ruangan bersama tidak valid.'], 422);
         }
 
+        $assignedIds = $classroom->sharedRoomClasses()->pluck('id')->all();
+
         if ($mode === 'out') {
             return $this->handleSharedSpaceCheckOut($classroom, $user, $now, $today, $request);
+        }
+
+        if (empty($assignedIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ruangan ini belum dihubungkan ke kelas. Hubungi admin untuk mengaturnya di Data Kelas.',
+            ], 422);
         }
 
         // Mode IN: support multi-kelas
         $classroomIds = $request->input('selected_classroom_ids')
             ?? [$request->input('selected_classroom_id')];
 
+        $invalidIds = array_diff($classroomIds, $assignedIds);
+        if (!empty($invalidIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kelas yang dipilih tidak terhubung dengan ruangan bersama ini.',
+            ], 422);
+        }
+
         if (count($classroomIds) === 1) {
             // Single kelas — flow lama
+            $request->merge(['selected_classroom_id' => $classroomIds[0]]);
+
             return $this->handleSharedSpaceCheckIn($classroom, $user, $now, $today, $request);
         }
 
@@ -640,32 +626,48 @@ class ClassAttendanceController extends Controller
     }
 
     /**
-     * Return shared space room list + subjects untuk guru pilih.
-     * Subjects: SEMUA mapel aktif (bukan hanya yang ada di jadwal guru),
-     * sesuai spesifikasi ON-DEMAND — guru bebas pilih mapel apapun.
+     * Return payload bottom sheet ruangan bersama.
      */
     private function handleSharedSpacePrompt(Classroom $classroom, User $user, string $mode)
     {
-        // Semua kelas reguler aktif
-        $allClasses = Classroom::where('is_active', true)
-            ->where(function ($q) {
-                $q->where('is_shared', false)->orWhereNull('is_shared');
-            })
-            ->where(function ($q) {
-                $q->where('type', 'regular')->orWhereNull('type');
-            })
+        return response()->json($this->sharedSpaceSheetPayload($classroom, $user, $mode));
+    }
+
+    /**
+     * Payload bottom sheet ruangan bersama:
+     * kelas yang terhubung, jadwal guru hari ini, mapel, dan sesi aktif.
+     */
+    private function sharedSpaceSheetPayload(Classroom $classroom, User $user, string $mode): array
+    {
+        $assignedClassrooms = $classroom->sharedRoomClasses()
+            ->where('is_active', true)
             ->orderBy('level')
             ->orderBy('name')
             ->get();
 
-        // Semua mata pelajaran aktif — ON-DEMAND, tidak terikat jadwal guru
-        $subjects = Subject::where('is_active', true)
-            ->orderBy('name')
-            ->get();
+        $assignedIds = $assignedClassrooms->pluck('id')->all();
 
-        // Untuk mode OUT: cari sesi yang sedang berlangsung (in tapi belum out)
-        // agar guru tidak perlu isi ulang dari awal
-        $activeSessions = [];
+        $schedules = collect();
+        if ($mode === 'in' && !empty($assignedIds)) {
+            $schedules = TeachingSchedule::where('user_id', $user->id)
+                ->whereIn('classroom_id', $assignedIds)
+                ->where('day_of_week', now()->dayOfWeek)
+                ->where('is_active', true)
+                ->with('subject')
+                ->orderBy('period')
+                ->get()
+                ->map(fn ($s) => [
+                    'classroom_id' => $s->classroom_id,
+                    'subject_id'   => $s->subject_id,
+                    'subject_name' => $s->subject?->name ?? '-',
+                    'period'       => $s->period,
+                    'start'        => $s->start_time ? Carbon::parse($s->start_time)->format('H:i') : null,
+                    'end'          => $s->end_time ? Carbon::parse($s->end_time)->format('H:i') : null,
+                ])
+                ->values();
+        }
+
+        $activeSessions = collect();
         if ($mode === 'out') {
             $activeSessions = ClassAttendance::where('user_id', $user->id)
                 ->where('classroom_id', $classroom->id)
@@ -691,30 +693,31 @@ class ClassAttendanceController extends Controller
                         'duration_minutes' => $duration,
                     ];
                 })
-                ->values()
-                ->toArray();
+                ->values();
         }
 
-        return response()->json([
-            'success'          => true,
-            'is_shared_space'  => true,
-            'classroom'        => [
+        $needsConfiguration = $assignedClassrooms->isEmpty();
+
+        return [
+            'success'             => true,
+            'is_shared_space'     => true,
+            'classroom'           => [
                 'id'   => $classroom->id,
                 'name' => $classroom->name,
                 'code' => $classroom->code,
             ],
-            'all_classes'      => $allClasses->map(fn ($c) => [
+            'classes'             => $assignedClassrooms->map(fn ($c) => [
                 'id'   => $c->id,
                 'name' => $c->name,
                 'code' => $c->code,
             ])->values(),
-            'subjects'         => $subjects->map(fn ($s) => [
-                'id'   => $s->id,
-                'name' => $s->name,
-            ])->values(),
-            'active_sessions'  => $activeSessions,   // untuk mode out: langsung pilih sesi
-            'message'          => $mode === 'in' ? 'Pilih kelas yang sedang diajar' : 'Pilih sesi yang ingin diselesaikan',
-        ]);
+            'schedules'           => $schedules,
+            'active_sessions'     => $activeSessions,
+            'needs_configuration' => $needsConfiguration,
+            'message'             => $needsConfiguration
+                ? 'Ruangan ini belum dihubungkan ke kelas. Hubungi admin.'
+                : ($mode === 'in' ? 'Pilih kelas yang sedang diajar' : 'Pilih sesi yang ingin diselesaikan'),
+        ];
     }
 
     /**
@@ -730,6 +733,13 @@ class ClassAttendanceController extends Controller
 
         $selectedClassroom = Classroom::find($request->selected_classroom_id);
         $subject           = Subject::find($request->subject_id);
+
+        if (!$classroom->sharedRoomClasses()->whereKey($selectedClassroom->id)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kelas ini tidak terhubung dengan ruangan bersama ini.',
+            ], 422);
+        }
 
         // Validasi: guru harus punya jadwal mengajar untuk kombinasi kelas+mapel+jam hari ini
         $todayDoW = $now->dayOfWeek;

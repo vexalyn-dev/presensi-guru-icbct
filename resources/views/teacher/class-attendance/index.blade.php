@@ -541,6 +541,34 @@
                             <template x-if="showSharedSpaceSheet && mode === 'in'">
                                 <div class="space-y-6">
 
+                                    <div x-show="!sharedSpaceLoading && !sharedSpaceNeedsConfig"
+                                         class="flex items-start gap-2.5 p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20">
+                                        <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+                                        </svg>
+                                        <p class="text-[11px] leading-relaxed text-blue-700 dark:text-blue-300">
+                                            Pilih kelas yang Anda ajar. Mapel dan jam hanya menampilkan jadwal mengajar Anda hari ini.
+                                        </p>
+                                    </div>
+
+                                    <template x-if="!sharedSpaceLoading && sharedSpaceNeedsConfig">
+                                        <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                            <div class="flex items-start gap-2.5">
+                                                <svg class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+                                                </svg>
+                                                <div class="min-w-0">
+                                                    <p class="text-sm font-bold text-amber-800 dark:text-amber-300">Ruangan belum diatur</p>
+                                                    <p class="text-[11px] leading-relaxed text-amber-700 dark:text-amber-400 mt-1">
+                                                        Ruangan ini belum dihubungkan ke kelas mana pun. Hubungi admin untuk mengaturnya di menu Data Kelas.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <div x-show="!sharedSpaceNeedsConfig" class="space-y-6">
+
                                     <!-- KELAS -->
                                     <div class="space-y-2.5">
                                         <div class="flex items-center justify-between gap-2">
@@ -681,12 +709,17 @@
                                                        x-model="ssMapelSearch"
                                                        autocomplete="off"
                                                        spellcheck="false"
-                                                       @focus="ssMapelOpen = true"
-                                                       @click.stop="ssMapelOpen = true"
+                                                       :disabled="sharedSpaceSelectedClasses.length === 0 || sharedSpaceSubjectOptions.length === 0"
+                                                       @focus="ssMapelOpen = sharedSpaceSelectedClasses.length > 0 && sharedSpaceSubjectOptions.length > 0"
+                                                       @click.stop="ssMapelOpen = sharedSpaceSelectedClasses.length > 0 && sharedSpaceSubjectOptions.length > 0"
                                                        @keydown.escape.stop="ssMapelOpen = false; ssMapelSearch = ''"
-                                                       :placeholder="sharedSpaceSelectedSubject ? (sharedSpaceSubjects.find(s => s.id == sharedSpaceSelectedSubject)?.name || 'Dipilih') : 'Cari mata pelajaran...'"
+                                                       :placeholder="sharedSpaceSelectedClasses.length === 0
+                                                           ? 'Pilih kelas terlebih dahulu'
+                                                           : (sharedSpaceNoSchedule
+                                                               ? 'Tidak ada jadwal mengajar hari ini'
+                                                               : (sharedSpaceSelectedSubject ? (sharedSpaceSubjectOptions.find(s => s.id == sharedSpaceSelectedSubject)?.name || 'Dipilih') : 'Cari mata pelajaran...'))"
                                                        aria-label="Cari mata pelajaran"
-                                                       class="flex-1 min-w-0 text-base font-medium bg-transparent border-0 p-0 focus:outline-none focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500">
+                                                       class="flex-1 min-w-0 text-base font-medium bg-transparent border-0 p-0 focus:outline-none focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-60">
                                                 <button x-show="sharedSpaceSelectedSubject" type="button"
                                                         @click.stop="sharedSpaceSelectedSubject = ''; ssMapelSearch = ''"
                                                         aria-label="Hapus mata pelajaran"
@@ -713,7 +746,7 @@
                                                  x-transition:leave-end="opacity-0"
                                                  class="mt-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-xl shadow-slate-900/5">
                                                 <div class="max-h-56 overflow-y-auto overscroll-contain py-1">
-                                                    <template x-for="sub in sharedSpaceSubjects.filter(s => !ssMapelSearch || s.name.toLowerCase().includes(ssMapelSearch.toLowerCase()))" :key="sub.id">
+                                                    <template x-for="sub in sharedSpaceSubjectOptions.filter(s => !ssMapelSearch || s.name.toLowerCase().includes(ssMapelSearch.toLowerCase()))" :key="sub.id">
                                                         <button type="button"
                                                                 @click.stop="sharedSpaceSelectedSubject = sub.id; ssMapelOpen = false; ssMapelSearch = ''"
                                                                 class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
@@ -746,9 +779,13 @@
                                                         <p class="text-xs text-slate-400">Memuat data mapel...</p>
                                                     </div>
 
-                                                    <p x-show="!sharedSpaceLoading && sharedSpaceSubjects.length === 0"
-                                                       class="text-center text-xs text-slate-400 py-6">Tidak ada mata pelajaran</p>
-                                                    <p x-show="!sharedSpaceLoading && sharedSpaceSubjects.length > 0 && !sharedSpaceSubjects.filter(s => !ssMapelSearch || s.name.toLowerCase().includes(ssMapelSearch.toLowerCase())).length"
+                                                    <p x-show="!sharedSpaceLoading && sharedSpaceSelectedClasses.length === 0"
+                                                       class="text-center text-xs text-slate-400 py-6">Pilih kelas terlebih dahulu</p>
+                                                    <p x-show="!sharedSpaceLoading && sharedSpaceSelectedClasses.length > 0 && sharedSpaceNoSchedule"
+                                                       class="text-center text-xs text-slate-400 py-6">Tidak ada jadwal mengajar untuk kelas ini hari ini</p>
+                                                    <p x-show="!sharedSpaceLoading && sharedSpaceSelectedClasses.length > 0 && !sharedSpaceNoSchedule && sharedSpaceSubjectOptions.length === 0"
+                                                       class="text-center text-xs text-slate-400 py-6">Tidak ada mata pelajaran untuk jadwal ini</p>
+                                                    <p x-show="!sharedSpaceLoading && sharedSpaceSubjectOptions.length > 0 && !sharedSpaceSubjectOptions.filter(s => !ssMapelSearch || s.name.toLowerCase().includes(ssMapelSearch.toLowerCase())).length"
                                                        class="text-center text-xs text-slate-400 py-6">Tidak ditemukan</p>
                                                 </div>
                                             </div>
@@ -770,16 +807,33 @@
                                         </div>
                                         <div class="grid grid-cols-4 gap-2">
                                             <template x-for="j in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="j">
-                                                <button type="button" @click="sharedSpacePeriod = j"
-                                                        class="h-14 flex flex-col items-center justify-center rounded-2xl font-bold transition-all duration-150 active:scale-95 touch-manipulation select-none"
+                                                <button type="button"
+                                                        @click="sharedSpaceAvailablePeriods.includes(j) && (sharedSpacePeriod = j)"
+                                                        :disabled="!sharedSpaceAvailablePeriods.includes(j)"
+                                                        class="h-14 flex flex-col items-center justify-center rounded-2xl font-bold transition-all duration-150 active:scale-95 touch-manipulation select-none disabled:cursor-not-allowed disabled:active:scale-100"
                                                         :class="sharedSpacePeriod == j
                                                             ? 'bg-gradient-to-br from-navy-800 to-navy-950 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-lg shadow-navy-900/25 dark:shadow-gold-400/20 scale-[1.03]'
-                                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'">
+                                                            : (sharedSpaceAvailablePeriods.includes(j)
+                                                                ? 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                                                : 'bg-slate-100/70 dark:bg-slate-800/40 text-slate-300 dark:text-slate-600 border-2 border-dashed border-slate-200 dark:border-slate-700')">
                                                     <span class="text-[15px] font-extrabold leading-none tabular-nums" x-text="j"></span>
                                                     <span class="text-[9px] leading-none mt-0.5 opacity-50 font-bold">JP</span>
                                                 </button>
                                             </template>
                                         </div>
+
+                                        <p x-show="sharedSpaceSelectedClasses.length === 0"
+                                           class="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                                            Pilih kelas untuk melihat jam yang tersedia.
+                                        </p>
+                                        <p x-show="sharedSpaceSelectedClasses.length > 0 && sharedSpaceNoSchedule"
+                                           class="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                                            Tidak ada jadwal mengajar Anda untuk kelas ini hari ini.
+                                        </p>
+                                        <p x-show="sharedSpaceSelectedClasses.length > 0 && !sharedSpaceNoSchedule"
+                                           class="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                                            Hanya jam yang sesuai jadwal Anda hari ini yang bisa dipilih.
+                                        </p>
                                     </div>
 
                                     <!-- Info multi-kelas -->
@@ -799,6 +853,7 @@
                                             </div>
                                         </div>
                                     </template>
+                                    </div>
                                 </div>
                             </template>
 
@@ -1159,7 +1214,8 @@
                 sharedSpaceLocation: '',
                 sharedSpaceLocationId: '',
                 sharedSpaceClasses: [],
-                sharedSpaceSubjects: [],
+                sharedSpaceSchedules: [],
+                sharedSpaceNeedsConfig: false,
                 sharedSpaceActiveSessions: [],
                 sharedSpaceSelectedClasses: [],   // array untuk multi-kelas
                 sharedSpaceSelectedSubject: '',
@@ -1171,6 +1227,15 @@
                 ssKelasSearch: '',
                 ssMapelOpen: false,
                 ssMapelSearch: '',
+
+                init() {
+                    this.$watch('sharedSpaceSelectedClasses', () => this.syncSharedSpaceSelection());
+                    this.$watch('sharedSpaceSelectedSubject', () => {
+                        if (this.sharedSpacePeriod && !this.sharedSpaceAvailablePeriods.includes(Number(this.sharedSpacePeriod))) {
+                            this.sharedSpacePeriod = '';
+                        }
+                    });
+                },
 
                 startScanner() {
                     startQrVideo(this);
@@ -1407,7 +1472,8 @@
                     this.sharedSpaceLoading         = true;
                     this.sharedSpaceError           = '';
                     this.sharedSpaceClasses         = [];
-                    this.sharedSpaceSubjects        = [];
+                    this.sharedSpaceSchedules       = [];
+                    this.sharedSpaceNeedsConfig     = false;
                     this.sharedSpaceActiveSessions  = [];
                     this.ssKelasOpen   = false;
                     this.ssKelasSearch = '';
@@ -1440,9 +1506,10 @@
                     })
                     .then(data => {
                         if (fetchId !== this._sharedSpaceFetchId) return;
-                        this.sharedSpaceClasses        = data.classes         || [];
-                        this.sharedSpaceSubjects       = data.subjects        || [];
-                        this.sharedSpaceActiveSessions = data.active_sessions || [];
+                        this.sharedSpaceClasses        = data.classes             || [];
+                        this.sharedSpaceSchedules      = data.schedules           || [];
+                        this.sharedSpaceNeedsConfig    = !!data.needs_configuration;
+                        this.sharedSpaceActiveSessions = data.active_sessions     || [];
                     })
                     .catch(() => {
                         if (fetchId !== this._sharedSpaceFetchId) return;
@@ -1460,6 +1527,69 @@
                     this.sharedSpaceSelectedClasses = [...this.sharedSpaceSelectedClasses, id];
                     this.ssKelasSearch = '';
                     this.ssKelasOpen = this.sharedSpaceSelectedClasses.length < 3;
+                },
+
+                // Pasangan mapel+jam yang dimiliki SEMUA kelas terpilih hari ini.
+                get sharedSpaceCommonSchedulePairs() {
+                    const selected = this.sharedSpaceSelectedClasses;
+                    if (!selected.length) return [];
+
+                    const byClass = selected.map(cid => {
+                        const set = new Set();
+                        for (const s of this.sharedSpaceSchedules) {
+                            if (s.classroom_id == cid && s.subject_id && s.period) {
+                                set.add(`${s.subject_id}|${s.period}`);
+                            }
+                        }
+                        return set;
+                    });
+
+                    const [first, ...rest] = byClass;
+                    return [...first]
+                        .filter(pair => rest.every(set => set.has(pair)))
+                        .map(pair => {
+                            const [subject_id, period] = pair.split('|').map(Number);
+                            return { subject_id, period };
+                        });
+                },
+
+                get sharedSpaceSubjectOptions() {
+                    let pairs = this.sharedSpaceCommonSchedulePairs;
+                    if (this.sharedSpacePeriod) {
+                        pairs = pairs.filter(p => p.period == this.sharedSpacePeriod);
+                    }
+
+                    const seen = new Set();
+                    const out = [];
+                    for (const p of pairs) {
+                        if (seen.has(p.subject_id)) continue;
+                        seen.add(p.subject_id);
+                        const schedule = this.sharedSpaceSchedules.find(s => s.subject_id == p.subject_id);
+                        out.push({ id: p.subject_id, name: schedule?.subject_name || 'Mapel' });
+                    }
+                    return out;
+                },
+
+                get sharedSpaceAvailablePeriods() {
+                    let pairs = this.sharedSpaceCommonSchedulePairs;
+                    if (this.sharedSpaceSelectedSubject) {
+                        pairs = pairs.filter(p => p.subject_id == this.sharedSpaceSelectedSubject);
+                    }
+                    return [...new Set(pairs.map(p => p.period))].sort((a, b) => a - b);
+                },
+
+                get sharedSpaceNoSchedule() {
+                    return this.sharedSpaceSelectedClasses.length > 0 && this.sharedSpaceCommonSchedulePairs.length === 0;
+                },
+
+                syncSharedSpaceSelection() {
+                    if (this.sharedSpaceSelectedSubject && !this.sharedSpaceSubjectOptions.some(s => s.id == this.sharedSpaceSelectedSubject)) {
+                        this.sharedSpaceSelectedSubject = '';
+                        this.ssMapelSearch = '';
+                    }
+                    if (this.sharedSpacePeriod && !this.sharedSpaceAvailablePeriods.includes(Number(this.sharedSpacePeriod))) {
+                        this.sharedSpacePeriod = '';
+                    }
                 },
 
                 // Drag handle: tarik ke atas = full screen, tarik ke bawah = tutup
