@@ -16,6 +16,7 @@ $displayValue = $value ? date('d F Y', strtotime($value)) : '';
 ?>
 
 <div class="relative w-full" {{ $attributes->merge(['class' => $class]) }}>
+    <!-- Hidden native input -->
     <input type="date"
            id="{{ $uuid }}"
            name="{{ $name }}"
@@ -24,20 +25,23 @@ $displayValue = $value ? date('d F Y', strtotime($value)) : '';
            max="{{ $max }}"
            {{ $required ? 'required' : '' }}
            {{ $disabled ? 'disabled' : '' }}
-           onchange="var d=this.value?new Date(this.value+'T00:00:00'):null;
-                    var m=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-                    var l=document.getElementById('lbl_{{ $uuid }}');
-                    if(d){l.textContent=d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();this.style.color='{{ auth()->check() && auth()->user()->isDarkMode() ? '#f8fafc' : '#0f172a' }}';}
-                    else{l.textContent='{{ $placeholder }}';this.style.color='#94a3b8';}"
            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
            style="cursor:pointer;"
+           onchange="var el=this,lbl=document.getElementById('lbl_{{ $uuid }}');
+                   if(el.value){
+                       var d=new Date(el.value+'T00:00:00');
+                       var m=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                       lbl.textContent=d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();
+                       lbl.style.color=getComputedStyle(document.documentElement).getPropertyValue('--tw-text-slate-900')||'#0f172a';
+                   } else {
+                       lbl.textContent='{{ $placeholder }}';
+                       lbl.style.color='#94a3b8';
+                   }"
     />
 
+    <!-- Visible trigger -->
     <div class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 bg-white dark:bg-slate-800
-                {{ $value
-                    ? 'border-slate-200 dark:border-slate-700'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-                }}
+                {{ $value ? 'border-slate-200 dark:border-slate-700' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600' }}
                 {{ $disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' }}"
          onclick="document.getElementById('{{ $uuid }}').showPicker()"
          {{ $disabled ? 'style="pointer-events:none"' : '' }}>
@@ -48,7 +52,7 @@ $displayValue = $value ? date('d F Y', strtotime($value)) : '';
 
         <span id="lbl_{{ $uuid }}"
               class="flex-1 text-sm font-medium select-none"
-              style="color: {{ $value ? (auth()->check() && auth()->user()->isDarkMode() ? '#f8fafc' : '#0f172a') : '#94a3b8' }};">
+              style="color: {{ $value ? '#0f172a' : '#94a3b8' }};">
             {{ $displayValue ?: $placeholder }}
         </span>
 
