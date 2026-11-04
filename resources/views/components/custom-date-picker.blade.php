@@ -31,7 +31,8 @@
     ];
 @endphp
 
-<div x-data="customDatePicker(@json($pickerConfig))"
+<div x-data="customDatePicker(JSON.parse($el.dataset.config))"
+     data-config="{{ json_encode($pickerConfig, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) }}"
      x-init="init()"
      @click.outside="open = false"
      @keydown.escape.window="open = false"
