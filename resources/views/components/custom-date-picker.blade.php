@@ -15,18 +15,24 @@
 <?php
 $uuid = $id ?? 'cal_' . uniqid();
 $hasXModel = $xModel !== null;
-$defaultValue = $value ?? ($hasXModel ? '' : null);
+if ($value !== null) {
+    $initVal = $value;
+} elseif ($hasXModel) {
+    $initVal = '';
+} else {
+    $initVal = null;
+}
 ?>
 
 <div x-data="customDatePicker({
     name: '{{ $name }}',
     id: '{{ $uuid }}',
-    initialValue: {{ $defaultValue ? "'$defaultValue'" : 'null' },
+    initialValue: {{ is_null($initVal) ? 'null' : "'" . addcslashes($initVal, "'") . "'" }},
     placeholder: '{{ $placeholder }}',
     required: {{ $required ? 'true' : 'false' }},
     disabled: {{ $disabled ? 'true' : 'false' }},
-    min: {{ $min ? "'$min'" : 'null' }},
-    max: {{ $max ? "'$max'" : 'null' }},
+    min: {{ is_null($min) ? 'null' : "'" . addcslashes($min, "'") . "'" }},
+    max: {{ is_null($max) ? 'null' : "'" . addcslashes($max, "'") . "'" }},
     hasXModel: {{ $hasXModel ? 'true' : 'false' }},
     xModelKey: '{{ $xModel }}',
 })"
@@ -186,7 +192,7 @@ function customDatePicker(config) {
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${dd}`;
+        return y + '-' + m + '-' + dd;
     }
 
     function generateDays() {
@@ -200,7 +206,7 @@ function customDatePicker(config) {
         for (let i = startDayOfWeek - 1; i >= 0; i--) {
             const day = prevMonthLastDay - i;
             const date = new Date(curYear, curMonth - 1, day);
-            days.push({ key: `prev_${day}`, label: day, date: formatDate(date), selectable: false, isToday: false, isSelected: false });
+            days.push({ key: 'prev_' + day, label: day, date: formatDate(date), selectable: false, isToday: false, isSelected: false });
         }
 
         for (let day = 1; day <= lastDay.getDate(); day++) {
@@ -212,13 +218,13 @@ function customDatePicker(config) {
             let selectable = true;
             if (minDate && date < minDate) selectable = false;
             if (maxDate && date > maxDate) selectable = false;
-            days.push({ key: `curr_${day}`, label: day, date: formatDate(date), selectable, isToday, isSelected });
+            days.push({ key: 'curr_' + day, label: day, date: formatDate(date), selectable: selectable, isToday: isToday, isSelected: isSelected });
         }
 
         const remaining = 42 - days.length;
         for (let day = 1; day <= remaining; day++) {
             const date = new Date(curYear, curMonth + 1, day);
-            days.push({ key: `next_${day}`, label: day, date: formatDate(date), selectable: false, isToday: false, isSelected: false });
+            days.push({ key: 'next_' + day, label: day, date: formatDate(date), selectable: false, isToday: false, isSelected: false });
         }
 
         return days;
@@ -228,25 +234,24 @@ function customDatePicker(config) {
         open: false,
         currentYear: curYear,
         currentMonth: curMonth,
-        monthNames,
-        weekDays,
+        monthNames: monthNames,
+        weekDays: weekDays,
         daysGrid: [],
         selectedDate: selDate ? formatDate(selDate) : '',
         displayValue: selDate
             ? selDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
             : '',
 
-        init() {
+        init: function () {
             this.daysGrid = generateDays();
 
-            // Sync with x-model if provided
             if (config.hasXModel && config.xModelKey) {
-                const el = document.querySelector(`[x-model="${config.xModelKey}"]`);
+                var el = document.querySelector('[x-model="' + config.xModelKey + '"]');
                 if (el) {
-                    const observer = new MutationObserver(() => {
-                        const val = el.getAttribute('value') || el.value;
+                    var observer = new MutationObserver(function () {
+                        var val = el.getAttribute('value') || el.value;
                         if (val && val !== this.selectedDate) {
-                            const d = new Date(val + 'T00:00:00');
+                            var d = new Date(val + 'T00:00:00');
                             if (!isNaN(d.getTime())) {
                                 selDate = d;
                                 this.selectedDate = val;
@@ -258,13 +263,13 @@ function customDatePicker(config) {
                                 this.daysGrid = generateDays();
                             }
                         }
-                    });
+                    }.bind(this));
                     observer.observe(el, { attributes: true, attributeFilter: ['value'] });
                 }
             }
         },
 
-        prevMonth() {
+        prevMonth: function () {
             curMonth--;
             if (curMonth < 0) { curMonth = 11; curYear--; }
             this.currentMonth = curMonth;
@@ -272,7 +277,7 @@ function customDatePicker(config) {
             this.daysGrid = generateDays();
         },
 
-        nextMonth() {
+        nextMonth: function () {
             curMonth++;
             if (curMonth > 11) { curMonth = 0; curYear++; }
             this.currentMonth = curMonth;
@@ -280,33 +285,33 @@ function customDatePicker(config) {
             this.daysGrid = generateDays();
         },
 
-        selectDate(dateStr) {
-            const d = new Date(dateStr + 'T00:00:00');
+        selectDate: function (dateStr) {
+            var d = new Date(dateStr + 'T00:00:00');
             selDate = d;
             this.selectedDate = dateStr;
             this.displayValue = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
             this.open = false;
 
             if (config.hasXModel && config.xModelKey) {
-                const el = document.querySelector(`[x-model="${config.xModelKey}"]`);
+                var el = document.querySelector('[x-model="' + config.xModelKey + '"]');
                 if (el) el.value = dateStr;
             }
 
             this.$dispatch('date-selected', { name: config.name, value: dateStr });
         },
 
-        selectToday() {
+        selectToday: function () {
             this.selectDate(formatDate(today));
         },
 
-        clearDate() {
+        clearDate: function () {
             selDate = null;
             this.selectedDate = '';
             this.displayValue = '';
             this.open = false;
 
             if (config.hasXModel && config.xModelKey) {
-                const el = document.querySelector(`[x-model="${config.xModelKey}"]`);
+                var el = document.querySelector('[x-model="' + config.xModelKey + '"]');
                 if (el) el.value = '';
             }
 
