@@ -551,29 +551,14 @@
                                                   x-text="sharedSpaceSelectedClasses.length + '/3 dipilih'"></span>
                                         </div>
 
-                                        <!-- Tag kelas terpilih -->
-                                        <div x-show="sharedSpaceSelectedClasses.length > 0" class="flex flex-wrap gap-2">
-                                            <template x-for="cid in sharedSpaceSelectedClasses" :key="cid">
-                                                <span class="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-xl bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 text-[11px] font-bold shadow-sm">
-                                                    <span x-text="sharedSpaceClasses.find(c => c.id == cid)?.name || cid"></span>
-                                                    <button type="button"
-                                                            @click.stop="sharedSpaceSelectedClasses = sharedSpaceSelectedClasses.filter(x => x != cid)"
-                                                            aria-label="Hapus kelas"
-                                                            class="w-4 h-4 rounded-full bg-white/20 dark:bg-navy-900/15 flex items-center justify-center hover:bg-white/40 dark:hover:bg-navy-900/30 transition-colors">
-                                                        <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                                                        </svg>
-                                                    </button>
-                                                </span>
-                                            </template>
-                                        </div>
-
                                         <!-- Search kelas -->
-                                        <div x-show="sharedSpaceSelectedClasses.length < 3" class="relative">
+                                        <div class="relative">
                                             <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border-2 transition-all duration-200"
                                                  :class="ssKelasOpen
                                                      ? 'border-navy-800 dark:border-gold-400 shadow-lg shadow-navy-900/5 dark:shadow-gold-400/10'
-                                                     : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'">
+                                                     : sharedSpaceSelectedClasses.length > 0
+                                                         ? 'border-navy-800/20 dark:border-slate-600'
+                                                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'">
                                                 <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200"
                                                      :class="sharedSpaceSelectedClasses.length > 0 ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-100 dark:bg-slate-700'">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
@@ -585,13 +570,24 @@
                                                        x-model="ssKelasSearch"
                                                        autocomplete="off"
                                                        spellcheck="false"
-                                                       @focus="ssKelasOpen = true"
-                                                       @click.stop
+                                                       :readonly="sharedSpaceSelectedClasses.length >= 3"
+                                                       @focus="ssKelasOpen = sharedSpaceSelectedClasses.length < 3"
+                                                       @click.stop="ssKelasOpen = sharedSpaceSelectedClasses.length < 3"
                                                        @keydown.escape.stop="ssKelasOpen = false; ssKelasSearch = ''"
-                                                       placeholder="Cari dan tambah kelas..."
+                                                       :placeholder="sharedSpaceSelectedClasses.length > 0
+                                                           ? sharedSpaceSelectedClasses.map(cid => sharedSpaceClasses.find(c => c.id == cid)?.name || cid).join(', ')
+                                                           : 'Cari dan tambah kelas...'"
                                                        aria-label="Cari kelas"
                                                        class="flex-1 min-w-0 text-base font-medium bg-transparent border-0 p-0 focus:outline-none focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500">
-                                                <svg x-show="!ssKelasOpen" class="w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <button x-show="sharedSpaceSelectedClasses.length > 0" type="button"
+                                                        @click.stop="sharedSpaceSelectedClasses = []; ssKelasSearch = ''"
+                                                        aria-label="Hapus semua kelas"
+                                                        class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center hover:bg-red-500 group transition-all flex-shrink-0">
+                                                    <svg class="w-3 h-3 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                                <svg x-show="!ssKelasOpen && sharedSpaceSelectedClasses.length < 3" class="w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
                                                 </svg>
                                                 <svg x-show="ssKelasOpen" class="w-4 h-4 text-navy-800 dark:text-gold-400 flex-shrink-0 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -615,7 +611,7 @@
                                                         (!ssKelasSearch || c.name.toLowerCase().includes(ssKelasSearch.toLowerCase()) || (c.code && c.code.toLowerCase().includes(ssKelasSearch.toLowerCase())))
                                                     )" :key="cls.id">
                                                         <button type="button"
-                                                                @click.stop="sharedSpaceSelectedClasses = [...sharedSpaceSelectedClasses, cls.id]; ssKelasSearch = ''; ssKelasOpen = sharedSpaceSelectedClasses.length < 3"
+                                                                @click.stop="addSharedSpaceClass(cls.id)"
                                                                 class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                                                             <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
                                                                 <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
@@ -658,7 +654,7 @@
                                             <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
                                             </svg>
-                                            Maksimal 3 kelas. Hapus salah satu untuk menambah.
+                                            Maksimal 3 kelas. Klik × untuk menghapus semua.
                                         </p>
                                     </div>
 
@@ -686,7 +682,7 @@
                                                        autocomplete="off"
                                                        spellcheck="false"
                                                        @focus="ssMapelOpen = true"
-                                                       @click.stop
+                                                       @click.stop="ssMapelOpen = true"
                                                        @keydown.escape.stop="ssMapelOpen = false; ssMapelSearch = ''"
                                                        :placeholder="sharedSpaceSelectedSubject ? (sharedSpaceSubjects.find(s => s.id == sharedSpaceSelectedSubject)?.name || 'Dipilih') : 'Cari mata pelajaran...'"
                                                        aria-label="Cari mata pelajaran"
@@ -1458,17 +1454,38 @@
                     });
                 },
 
+                addSharedSpaceClass(id) {
+                    if (this.sharedSpaceSelectedClasses.length >= 3) return;
+                    if (this.sharedSpaceSelectedClasses.includes(id)) return;
+                    this.sharedSpaceSelectedClasses = [...this.sharedSpaceSelectedClasses, id];
+                    this.ssKelasSearch = '';
+                    this.ssKelasOpen = this.sharedSpaceSelectedClasses.length < 3;
+                },
+
                 // Drag handle: tarik ke atas = full screen, tarik ke bawah = tutup
                 startSheetDrag(e) {
                     if (e.button !== undefined && e.button !== 0) return;
                     if (!this.sheetEntered) return;
+                    const sheetEl = this.$refs.ssSheet;
+                    if (!sheetEl) return;
 
-                    this.sheetDragging   = true;
-                    this._dragStartY     = e.clientY;
-                    this._dragStartHeight = this.$refs.ssSheet
-                        ? this.$refs.ssSheet.getBoundingClientRect().height
-                        : 0;
-                    this._dragMoved = false;
+                    this.sheetDragging    = true;
+                    this._dragStartY      = e.clientY;
+                    this._dragStartHeight = sheetEl.getBoundingClientRect().height;
+                    this._dragMoved       = false;
+
+                    sheetEl.classList.add('sheet-drag-none');
+
+                    let lastHeight = this._dragStartHeight;
+                    let lastY = 0;
+                    let raf = null;
+
+                    const apply = () => {
+                        raf = null;
+                        if (!this.sheetDragging) return;
+                        sheetEl.style.height = lastHeight + 'px';
+                        sheetEl.style.transform = `translateY(${lastY}px)`;
+                    };
 
                     const onMove = (ev) => {
                         if (!this.sheetDragging) return;
@@ -1476,50 +1493,75 @@
                         if (Math.abs(dy) > 6) this._dragMoved = true;
 
                         if (this.sheetExpanded) {
-                            this.sheetDragHeight = null;
-                            this.sheetDragY = Math.max(0, dy);
+                            lastHeight = this._dragStartHeight;
+                            lastY = Math.max(0, dy);
                         } else if (dy < 0) {
-                            const maxH = Math.max(window.innerHeight, this._dragStartHeight);
-                            this.sheetDragHeight = Math.min(maxH, this._dragStartHeight - dy);
-                            this.sheetDragY = 0;
+                            const viewportH = window.visualViewport?.height || window.innerHeight;
+                            const maxH = Math.max(viewportH, this._dragStartHeight);
+                            lastHeight = Math.min(maxH, this._dragStartHeight - dy);
+                            lastY = 0;
                         } else {
-                            this.sheetDragHeight = null;
-                            this.sheetDragY = dy;
+                            lastHeight = this._dragStartHeight;
+                            lastY = dy;
                         }
 
+                        if (!raf) raf = requestAnimationFrame(apply);
                         if (ev.cancelable) ev.preventDefault();
                     };
 
-                    const onEnd = () => {
+                    const cleanup = () => {
                         window.removeEventListener('pointermove', onMove);
                         window.removeEventListener('pointerup', onEnd);
                         window.removeEventListener('pointercancel', onEnd);
-                        if (!this.sheetDragging) return;
+                        if (raf) { cancelAnimationFrame(raf); raf = null; }
+                        this._dragCleanup = null;
+                    };
+
+                    const onEnd = () => {
+                        if (!this.sheetDragging) { cleanup(); return; }
+                        if (raf) { cancelAnimationFrame(raf); raf = null; }
+                        apply();
 
                         const moved     = this._dragMoved;
-                        const dy        = this.sheetDragY;
-                        const dh        = this.sheetDragHeight;
+                        const dy        = lastY;
+                        const dh        = lastHeight;
                         const wasExpand = this.sheetExpanded;
 
-                        this.sheetDragging   = false;
-                        this.sheetDragY      = 0;
-                        this.sheetDragHeight = null;
-                        this._dragMoved      = false;
+                        this.sheetDragging = false;
+                        this._dragMoved    = false;
+                        cleanup();
 
                         if (moved) {
                             this._suppressHandleClick = true;
                             setTimeout(() => { this._suppressHandleClick = false; }, 350);
                         }
 
-                        if (dh !== null) {
-                            this.sheetExpanded = dh > this._dragStartHeight + 60;
+                        const settle = (nextExpanded) => {
+                            this.sheetExpanded = nextExpanded;
+                            sheetEl.classList.remove('sheet-drag-none');
+                            sheetEl.style.height = nextExpanded ? '100dvh' : '88dvh';
+                            sheetEl.style.transform = 'translateY(0px)';
+                            sheetEl.style.borderRadius = nextExpanded ? '0px' : '28px 28px 0 0';
+                        };
+
+                        if (wasExpand) {
+                            if (dy > 120) {
+                                sheetEl.classList.remove('sheet-drag-none');
+                                this.closeSharedSpaceSheet();
+                            } else {
+                                settle(dy <= 60);
+                            }
+                        } else if (dh > this._dragStartHeight + 60) {
+                            settle(true);
                         } else if (dy > 120) {
+                            sheetEl.classList.remove('sheet-drag-none');
                             this.closeSharedSpaceSheet();
-                        } else if (wasExpand && dy > 60) {
-                            this.sheetExpanded = false;
+                        } else {
+                            settle(false);
                         }
                     };
 
+                    this._dragCleanup = cleanup;
                     window.addEventListener('pointermove', onMove, { passive: false });
                     window.addEventListener('pointerup', onEnd);
                     window.addEventListener('pointercancel', onEnd);
@@ -1537,6 +1579,9 @@
                 closeSharedSpaceSheet(fromSubmit = false) {
                     if (this._sheetClosing) return;
                     this._sheetClosing = true;
+
+                    if (this._dragCleanup) this._dragCleanup();
+                    if (this.$refs.ssSheet) this.$refs.ssSheet.classList.remove('sheet-drag-none');
 
                     this.sheetEntered    = false;
                     this.sheetDragging   = false;
