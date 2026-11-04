@@ -30,7 +30,7 @@
     ];
 @endphp
 
-<div x-data='customDatePicker(@json($pickerConfig))'
+<div x-data="customDatePicker(@json($pickerConfig))"
      x-init="init()"
      @click.outside="open = false"
      class="relative inline-block w-full"
@@ -158,4 +158,3 @@
         </div>
     </template>
 </div>
-

@@ -1,5 +1,5 @@
 /**
- * Custom Date Picker — Alpine.js component
+ * Custom Date Picker — Alpine.js component (global, CSP-safe)
  * Renders a modern, navy/gold themed calendar popup
  */
 window.customDatePicker = function (config) {
@@ -44,7 +44,7 @@ window.customDatePicker = function (config) {
             const day = prevMonthLastDay - i;
             const date = new Date(curYear, curMonth - 1, day);
             days.push({
-                key: `prev_${day}`,
+                key: 'prev_' + day,
                 label: day,
                 date: formatDate(date),
                 selectable: false,
@@ -62,14 +62,13 @@ window.customDatePicker = function (config) {
             let selectable = true;
             if (minDate && date < minDate) selectable = false;
             if (maxDate && date > maxDate) selectable = false;
-
             days.push({
-                key: `curr_${day}`,
+                key: 'curr_' + day,
                 label: day,
                 date: formatDate(date),
-                selectable,
-                isToday,
-                isSelected,
+                selectable: selectable,
+                isToday: isToday,
+                isSelected: isSelected,
             });
         }
 
@@ -77,7 +76,7 @@ window.customDatePicker = function (config) {
         for (let day = 1; day <= remaining; day++) {
             const date = new Date(curYear, curMonth + 1, day);
             days.push({
-                key: `next_${day}`,
+                key: 'next_' + day,
                 label: day,
                 date: formatDate(date),
                 selectable: false,
@@ -102,34 +101,34 @@ window.customDatePicker = function (config) {
         open: false,
         currentYear: curYear,
         currentMonth: curMonth,
-        monthNames,
-        weekDays,
+        monthNames: monthNames,
+        weekDays: weekDays,
         daysGrid: [],
         selectedDate: selDate ? formatDate(selDate) : '',
         displayValue: selDate
             ? selDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
             : '',
 
-        init() {
+        init: function () {
             this.daysGrid = generateDays();
+            var self = this;
 
-            // Sync with x-model if provided
-            if (config.hasXModel && config.xModelKey) {
-                const el = document.querySelector(`[x-model="${config.xModelKey}"]`);
+            if (this.hasXModel && this.xModelKey) {
+                var el = document.querySelector('[x-model="' + this.xModelKey + '"]');
                 if (el) {
-                    const observer = new MutationObserver(() => {
-                        const val = el.getAttribute('value') || el.value;
-                        if (val && val !== this.selectedDate) {
-                            const d = new Date(val + 'T00:00:00');
+                    var observer = new MutationObserver(function () {
+                        var val = el.getAttribute('value') || el.value;
+                        if (val && val !== self.selectedDate) {
+                            var d = new Date(val + 'T00:00:00');
                             if (!isNaN(d.getTime())) {
                                 selDate = d;
-                                this.selectedDate = val;
-                                this.displayValue = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                                self.selectedDate = val;
+                                self.displayValue = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
                                 curYear = d.getFullYear();
                                 curMonth = d.getMonth();
-                                this.currentYear = curYear;
-                                this.currentMonth = curMonth;
-                                this.daysGrid = generateDays();
+                                self.currentYear = curYear;
+                                self.currentMonth = curMonth;
+                                self.daysGrid = generateDays();
                             }
                         }
                     });
@@ -138,7 +137,7 @@ window.customDatePicker = function (config) {
             }
         },
 
-        prevMonth() {
+        prevMonth: function () {
             curMonth--;
             if (curMonth < 0) { curMonth = 11; curYear--; }
             this.currentMonth = curMonth;
@@ -146,7 +145,7 @@ window.customDatePicker = function (config) {
             this.daysGrid = generateDays();
         },
 
-        nextMonth() {
+        nextMonth: function () {
             curMonth++;
             if (curMonth > 11) { curMonth = 0; curYear++; }
             this.currentMonth = curMonth;
@@ -154,37 +153,37 @@ window.customDatePicker = function (config) {
             this.daysGrid = generateDays();
         },
 
-        selectDate(dateStr) {
-            const d = new Date(dateStr + 'T00:00:00');
+        selectDate: function (dateStr) {
+            var d = new Date(dateStr + 'T00:00:00');
             selDate = d;
             this.selectedDate = dateStr;
             this.displayValue = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
             this.open = false;
 
-            if (config.hasXModel && config.xModelKey) {
-                const el = document.querySelector(`[x-model="${config.xModelKey}"]`);
+            if (this.hasXModel && this.xModelKey) {
+                var el = document.querySelector('[x-model="' + this.xModelKey + '"]');
                 if (el) el.value = dateStr;
             }
 
-            this.$dispatch('date-selected', { name: config.name, value: dateStr });
+            this.$dispatch('date-selected', { name: this.name, value: dateStr });
         },
 
-        selectToday() {
+        selectToday: function () {
             this.selectDate(formatDate(today));
         },
 
-        clearDate() {
+        clearDate: function () {
             selDate = null;
             this.selectedDate = '';
             this.displayValue = '';
             this.open = false;
 
-            if (config.hasXModel && config.xModelKey) {
-                const el = document.querySelector(`[x-model="${config.xModelKey}"]`);
+            if (this.hasXModel && this.xModelKey) {
+                var el = document.querySelector('[x-model="' + this.xModelKey + '"]');
                 if (el) el.value = '';
             }
 
-            this.$dispatch('date-selected', { name: config.name, value: '' });
+            this.$dispatch('date-selected', { name: this.name, value: '' });
         },
     };
 };
