@@ -428,463 +428,527 @@
             </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════════════════
         <!-- ══════════════════════════════════════════════════════
-             SHARED SPACE — FULL-PAGE OVERLAY v4
-             - fixed inset-0 + translate-y slide-up animation
-             - Custom searchable dropdown (zero native select bug)
-             - Multi-kelas: pilih 1-3 kelas sekaligus (tag-based)
-             - Semua icon inline SVG
+             SHARED SPACE — BOTTOM SHEET
+             - Slide up dari bawah, drag ke atas untuk full screen
+             - Tap backdrop / swipe down untuk menutup
         ══════════════════════════════════════════════════════ -->
         <div x-show="showSharedSpaceSheet" x-cloak
-             class="fixed inset-0 z-[999] bg-slate-50 dark:bg-slate-950 flex flex-col overflow-hidden"
-             x-transition:enter="transition ease-[cubic-bezier(.32,.72,0,1)] duration-400"
-             x-transition:enter-start="translate-y-full"
-             x-transition:enter-end="translate-y-0"
-             x-transition:leave="transition ease-[cubic-bezier(.32,.72,0,1)] duration-300"
-             x-transition:leave-start="translate-y-0"
-             x-transition:leave-end="translate-y-full"
+             class="fixed inset-0 z-[999] !m-0 overflow-hidden"
+             :class="sheetEntered ? '' : 'pointer-events-none'"
+             role="dialog" aria-modal="true" aria-labelledby="shared-sheet-title"
              @keydown.escape.window="showSharedSpaceSheet && closeSharedSpaceSheet()">
 
-            <!-- ─── Sticky Header ─── -->
-            <div class="flex-shrink-0 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800"
-                 style="padding-top: env(safe-area-inset-top, 0px);">
+            <!-- Backdrop -->
+            <div x-show="showSharedSpaceSheet"
+                 @click="closeSharedSpaceSheet()"
+                 class="absolute inset-0 bg-slate-950/55 backdrop-blur-[3px]"
+                 :style="`opacity: ${sheetEntered ? 1 : 0}; transition: opacity .3s ease;`"></div>
 
-                <!-- Top bar -->
-                <div class="flex items-center gap-3 px-4 py-3.5 max-w-lg mx-auto w-full">
-                    <button type="button" @click="closeSharedSpaceSheet()"
-                            class="w-9 h-9 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-90 transition-all flex-shrink-0">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
-                        </svg>
-                    </button>
-                    <div class="flex-1 min-w-0">
-                        <h2 class="text-[15px] font-bold text-slate-900 dark:text-white leading-tight"
-                            x-text="showSharedSpaceSheet ? (mode === 'in' ? 'Presensi Masuk' : 'Presensi Keluar') : ''"></h2>
-                        <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5"
-                           x-text="sharedSpaceLocation || 'Ruangan Bersama'"></p>
+            <!-- Sheet -->
+            <div class="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none">
+                <div x-ref="ssSheet"
+                     class="pointer-events-auto w-full max-w-lg flex flex-col overflow-hidden bg-white dark:bg-slate-900 rounded-t-[28px] will-change-transform"
+                     :class="sheetDragging ? 'sheet-drag-none' : ''"
+                     :style="{
+                         height: sheetDragHeight !== null ? sheetDragHeight + 'px' : (sheetExpanded ? '100dvh' : '88dvh'),
+                         transform: sheetEntered ? `translateY(${sheetDragY}px)` : 'translateY(100%)',
+                         borderRadius: sheetExpanded ? '0px' : '28px 28px 0 0',
+                     }"
+                     style="box-shadow: 0 -24px 70px -24px rgba(2,6,23,.55); transition: transform .4s cubic-bezier(.32,.72,0,1), height .4s cubic-bezier(.32,.72,0,1), border-radius .3s ease;">
+
+                    <!-- Drag handle -->
+                    <div class="flex-shrink-0 flex justify-center items-center min-h-[32px] pb-1 cursor-grab active:cursor-grabbing select-none"
+                         @pointerdown="startSheetDrag($event)"
+                         @click="toggleSheetExpanded()"
+                         title="Geser ke atas untuk layar penuh"
+                         style="padding-top: max(0.625rem, env(safe-area-inset-top, 0px)); touch-action: none;">
+                        <div class="w-11 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></div>
                     </div>
-                    <!-- Mode pill -->
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-[11px] font-bold flex-shrink-0"
-                          :class="showSharedSpaceSheet && mode === 'in'
-                              ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                              : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'">
-                        <span class="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0"
-                              :class="showSharedSpaceSheet && mode === 'in' ? 'bg-emerald-500' : 'bg-red-500'"></span>
-                        <span x-text="showSharedSpaceSheet ? (mode === 'in' ? 'Masuk' : 'Keluar') : ''"></span>
-                    </span>
-                    <button type="button" @click="closeSharedSpaceSheet()"
-                            class="w-9 h-9 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white active:scale-90 transition-all flex-shrink-0">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
 
-                <!-- Step indicator — mode IN only -->
-                <div x-show="showSharedSpaceSheet && mode === 'in'" class="px-4 pb-3.5 max-w-lg mx-auto w-full">
-                    <div class="flex items-center gap-1.5">
-                        <template x-for="(step, si) in [
-                            {l:'Kelas', d: sharedSpaceSelectedClasses && sharedSpaceSelectedClasses.length > 0},
-                            {l:'Mapel', d: !!sharedSpaceSelectedSubject},
-                            {l:'Jam',   d: !!sharedSpacePeriod}
-                        ]" :key="si">
-                            <div class="flex items-center gap-1.5" :class="si < 2 ? 'flex-1' : ''">
-                                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0 transition-all duration-200"
-                                     :class="step.d ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'">
-                                    <svg x-show="step.d" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
-                                    </svg>
-                                    <span x-show="!step.d" x-text="si + 1"></span>
-                                </div>
-                                <span class="text-[10px] font-semibold transition-colors"
-                                      :class="step.d ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400'"
-                                      x-text="step.l"></span>
-                                <div x-show="si < 2" class="flex-1 h-px rounded-full transition-colors"
-                                     :class="step.d ? 'bg-navy-800/25 dark:bg-gold-400/25' : 'bg-slate-200 dark:bg-slate-700'"></div>
+                    <!-- Header -->
+                    <div class="flex-shrink-0 px-5 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-950 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-navy-900/20 dark:shadow-gold-400/20">
+                                <svg class="w-5 h-5 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5zM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5z"/>
+                                </svg>
                             </div>
+                            <div class="flex-1 min-w-0">
+                                <h2 id="shared-sheet-title" class="text-[17px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight truncate"
+                                    x-text="mode === 'in' ? 'Presensi Masuk' : 'Presensi Keluar'"></h2>
+                                <p class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                    <svg class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
+                                    </svg>
+                                    <span class="truncate" x-text="sharedSpaceLocation || 'Ruangan Bersama'"></span>
+                                </p>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold flex-shrink-0"
+                                  :class="mode === 'in'
+                                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                      : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'">
+                                <span class="w-1.5 h-1.5 rounded-full animate-pulse"
+                                      :class="mode === 'in' ? 'bg-emerald-500' : 'bg-red-500'"></span>
+                                <span x-text="mode === 'in' ? 'Masuk' : 'Keluar'"></span>
+                            </span>
+                            <button type="button" @click="closeSharedSpaceSheet()"
+                                    aria-label="Tutup"
+                                    class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-90 transition-all flex-shrink-0">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Step indicator -->
+                        <div x-show="mode === 'in'" class="mt-4">
+                            <div class="flex items-center gap-1.5">
+                                <template x-for="(step, si) in [
+                                    { l: 'Kelas', d: sharedSpaceSelectedClasses.length > 0 },
+                                    { l: 'Mapel', d: !!sharedSpaceSelectedSubject },
+                                    { l: 'Jam', d: !!sharedSpacePeriod }
+                                ]" :key="si">
+                                    <div class="flex items-center gap-1.5" :class="si < 2 ? 'flex-1' : ''">
+                                        <div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0 transition-all duration-200"
+                                             :class="step.d
+                                                 ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900'
+                                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'">
+                                            <svg x-show="step.d" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                            </svg>
+                                            <span x-show="!step.d" x-text="si + 1"></span>
+                                        </div>
+                                        <span class="text-[10px] font-bold transition-colors"
+                                              :class="step.d ? 'text-navy-800 dark:text-gold-400' : 'text-slate-400 dark:text-slate-500'"
+                                              x-text="step.l"></span>
+                                        <div x-show="si < 2" class="flex-1 h-px rounded-full transition-colors"
+                                             :class="step.d ? 'bg-navy-800/25 dark:bg-gold-400/25' : 'bg-slate-200 dark:bg-slate-700'"></div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-slate-50 dark:bg-slate-950/50">
+                        <div class="px-5 py-5 space-y-6">
+
+                            <!-- ═══ MODE IN ═══ -->
+                            <template x-if="showSharedSpaceSheet && mode === 'in'">
+                                <div class="space-y-6">
+
+                                    <!-- KELAS -->
+                                    <div class="space-y-2.5">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <label class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                                                Kelas <span class="text-rose-500">*</span>
+                                            </label>
+                                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 tabular-nums"
+                                                  x-text="sharedSpaceSelectedClasses.length + '/3 dipilih'"></span>
+                                        </div>
+
+                                        <!-- Tag kelas terpilih -->
+                                        <div x-show="sharedSpaceSelectedClasses.length > 0" class="flex flex-wrap gap-2">
+                                            <template x-for="cid in sharedSpaceSelectedClasses" :key="cid">
+                                                <span class="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-xl bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 text-[11px] font-bold shadow-sm">
+                                                    <span x-text="sharedSpaceClasses.find(c => c.id == cid)?.name || cid"></span>
+                                                    <button type="button"
+                                                            @click.stop="sharedSpaceSelectedClasses = sharedSpaceSelectedClasses.filter(x => x != cid)"
+                                                            aria-label="Hapus kelas"
+                                                            class="w-4 h-4 rounded-full bg-white/20 dark:bg-navy-900/15 flex items-center justify-center hover:bg-white/40 dark:hover:bg-navy-900/30 transition-colors">
+                                                        <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                                                        </svg>
+                                                    </button>
+                                                </span>
+                                            </template>
+                                        </div>
+
+                                        <!-- Search kelas -->
+                                        <div x-show="sharedSpaceSelectedClasses.length < 3" class="relative">
+                                            <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border-2 transition-all duration-200"
+                                                 :class="ssKelasOpen
+                                                     ? 'border-navy-800 dark:border-gold-400 shadow-lg shadow-navy-900/5 dark:shadow-gold-400/10'
+                                                     : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'">
+                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200"
+                                                     :class="sharedSpaceSelectedClasses.length > 0 ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-100 dark:bg-slate-700'">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
+                                                         :class="sharedSpaceSelectedClasses.length > 0 ? 'text-white dark:text-navy-900' : 'text-slate-400'">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
+                                                    </svg>
+                                                </div>
+                                                <input type="text"
+                                                       x-model="ssKelasSearch"
+                                                       autocomplete="off"
+                                                       spellcheck="false"
+                                                       @focus="ssKelasOpen = true"
+                                                       @click.stop
+                                                       @keydown.escape.stop="ssKelasOpen = false; ssKelasSearch = ''"
+                                                       placeholder="Cari dan tambah kelas..."
+                                                       aria-label="Cari kelas"
+                                                       class="flex-1 min-w-0 text-base font-medium bg-transparent border-0 p-0 focus:outline-none focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500">
+                                                <svg x-show="!ssKelasOpen" class="w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                                                </svg>
+                                                <svg x-show="ssKelasOpen" class="w-4 h-4 text-navy-800 dark:text-gold-400 flex-shrink-0 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/>
+                                                </svg>
+                                            </div>
+
+                                            <!-- Dropdown list (inline agar tidak terpotong) -->
+                                            <div x-show="ssKelasOpen"
+                                                 @click.outside="ssKelasOpen = false; ssKelasSearch = ''"
+                                                 x-transition:enter="transition ease-out duration-150"
+                                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                                 x-transition:leave="transition ease-in duration-100"
+                                                 x-transition:leave-start="opacity-100"
+                                                 x-transition:leave-end="opacity-0"
+                                                 class="mt-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-xl shadow-slate-900/5">
+                                                <div class="max-h-52 overflow-y-auto overscroll-contain py-1">
+                                                    <template x-for="cls in sharedSpaceClasses.filter(c =>
+                                                        !sharedSpaceSelectedClasses.includes(c.id) &&
+                                                        (!ssKelasSearch || c.name.toLowerCase().includes(ssKelasSearch.toLowerCase()) || (c.code && c.code.toLowerCase().includes(ssKelasSearch.toLowerCase())))
+                                                    )" :key="cls.id">
+                                                        <button type="button"
+                                                                @click.stop="sharedSpaceSelectedClasses = [...sharedSpaceSelectedClasses, cls.id]; ssKelasSearch = ''; ssKelasOpen = sharedSpaceSelectedClasses.length < 3"
+                                                                class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                                            <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                                                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
+                                                                </svg>
+                                                            </div>
+                                                            <div class="flex-1 min-w-0">
+                                                                <span class="font-semibold text-sm text-slate-800 dark:text-white truncate block" x-text="cls.name"></span>
+                                                                <span x-show="cls.code" class="text-[10px] text-slate-400 font-mono" x-text="cls.code"></span>
+                                                            </div>
+                                                            <svg class="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                                                            </svg>
+                                                        </button>
+                                                    </template>
+
+                                                    <!-- Loading -->
+                                                    <div x-show="sharedSpaceLoading" class="flex items-center justify-center gap-2 py-6">
+                                                        <svg class="w-4 h-4 text-slate-300 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                        </svg>
+                                                        <p class="text-xs text-slate-400">Memuat data kelas...</p>
+                                                    </div>
+
+                                                    <!-- Empty / not found -->
+                                                    <p x-show="!sharedSpaceLoading && sharedSpaceClasses.length === 0"
+                                                       class="text-center text-xs text-slate-400 py-6">Tidak ada kelas tersedia</p>
+                                                    <p x-show="!sharedSpaceLoading && sharedSpaceClasses.length > 0 && sharedSpaceClasses.filter(c => !sharedSpaceSelectedClasses.includes(c.id) && (!ssKelasSearch || c.name.toLowerCase().includes(ssKelasSearch.toLowerCase()) || (c.code && c.code.toLowerCase().includes(ssKelasSearch.toLowerCase())))).length === 0"
+                                                       class="text-center text-xs text-slate-400 py-6">
+                                                        <span x-show="ssKelasSearch">Tidak ditemukan</span>
+                                                        <span x-show="!ssKelasSearch">Semua kelas sudah dipilih</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p x-show="sharedSpaceSelectedClasses.length >= 3"
+                                           class="text-[11px] font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+                                            </svg>
+                                            Maksimal 3 kelas. Hapus salah satu untuk menambah.
+                                        </p>
+                                    </div>
+
+                                    <!-- MATA PELAJARAN -->
+                                    <div class="space-y-2.5">
+                                        <label class="block text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                                            Mata Pelajaran <span class="text-rose-500">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border-2 transition-all duration-200"
+                                                 :class="ssMapelOpen
+                                                     ? 'border-navy-800 dark:border-gold-400 shadow-lg shadow-navy-900/5 dark:shadow-gold-400/10'
+                                                     : sharedSpaceSelectedSubject
+                                                         ? 'border-navy-800/20 dark:border-slate-600'
+                                                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'">
+                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200"
+                                                     :class="sharedSpaceSelectedSubject ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-100 dark:bg-slate-700'">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
+                                                         :class="sharedSpaceSelectedSubject ? 'text-white dark:text-navy-900' : 'text-slate-400'">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+                                                    </svg>
+                                                </div>
+                                                <input type="text"
+                                                       x-model="ssMapelSearch"
+                                                       autocomplete="off"
+                                                       spellcheck="false"
+                                                       @focus="ssMapelOpen = true"
+                                                       @click.stop
+                                                       @keydown.escape.stop="ssMapelOpen = false; ssMapelSearch = ''"
+                                                       :placeholder="sharedSpaceSelectedSubject ? (sharedSpaceSubjects.find(s => s.id == sharedSpaceSelectedSubject)?.name || 'Dipilih') : 'Cari mata pelajaran...'"
+                                                       aria-label="Cari mata pelajaran"
+                                                       class="flex-1 min-w-0 text-base font-medium bg-transparent border-0 p-0 focus:outline-none focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500">
+                                                <button x-show="sharedSpaceSelectedSubject" type="button"
+                                                        @click.stop="sharedSpaceSelectedSubject = ''; ssMapelSearch = ''"
+                                                        aria-label="Hapus mata pelajaran"
+                                                        class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center hover:bg-red-500 group transition-all flex-shrink-0">
+                                                    <svg class="w-3 h-3 text-slate-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                                <svg :class="ssMapelOpen ? 'rotate-180 text-navy-800 dark:text-gold-400' : 'text-slate-400'"
+                                                     class="w-4 h-4 flex-shrink-0 pointer-events-none transition-transform duration-200"
+                                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                                                </svg>
+                                            </div>
+
+                                            <!-- Dropdown mapel -->
+                                            <div x-show="ssMapelOpen"
+                                                 @click.outside="ssMapelOpen = false; ssMapelSearch = ''"
+                                                 x-transition:enter="transition ease-out duration-150"
+                                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                                 x-transition:leave="transition ease-in duration-100"
+                                                 x-transition:leave-start="opacity-100"
+                                                 x-transition:leave-end="opacity-0"
+                                                 class="mt-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-xl shadow-slate-900/5">
+                                                <div class="max-h-56 overflow-y-auto overscroll-contain py-1">
+                                                    <template x-for="sub in sharedSpaceSubjects.filter(s => !ssMapelSearch || s.name.toLowerCase().includes(ssMapelSearch.toLowerCase()))" :key="sub.id">
+                                                        <button type="button"
+                                                                @click.stop="sharedSpaceSelectedSubject = sub.id; ssMapelOpen = false; ssMapelSearch = ''"
+                                                                class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
+                                                                :class="sharedSpaceSelectedSubject == sub.id
+                                                                    ? 'bg-slate-50 dark:bg-slate-700/50'
+                                                                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                                                            <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                                                                 :class="sharedSpaceSelectedSubject == sub.id ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-100 dark:bg-slate-700'">
+                                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
+                                                                     :class="sharedSpaceSelectedSubject == sub.id ? 'text-white dark:text-navy-900' : 'text-slate-400'">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+                                                                </svg>
+                                                            </div>
+                                                            <span class="flex-1 truncate text-sm font-medium"
+                                                                  :class="sharedSpaceSelectedSubject == sub.id ? 'text-navy-800 dark:text-gold-400 font-bold' : 'text-slate-700 dark:text-slate-200'"
+                                                                  x-text="sub.name"></span>
+                                                            <svg x-show="sharedSpaceSelectedSubject == sub.id"
+                                                                 class="w-4 h-4 text-navy-800 dark:text-gold-400 flex-shrink-0"
+                                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                                            </svg>
+                                                        </button>
+                                                    </template>
+
+                                                    <div x-show="sharedSpaceLoading" class="flex items-center justify-center gap-2 py-6">
+                                                        <svg class="w-4 h-4 text-slate-300 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                        </svg>
+                                                        <p class="text-xs text-slate-400">Memuat data mapel...</p>
+                                                    </div>
+
+                                                    <p x-show="!sharedSpaceLoading && sharedSpaceSubjects.length === 0"
+                                                       class="text-center text-xs text-slate-400 py-6">Tidak ada mata pelajaran</p>
+                                                    <p x-show="!sharedSpaceLoading && sharedSpaceSubjects.length > 0 && !sharedSpaceSubjects.filter(s => !ssMapelSearch || s.name.toLowerCase().includes(ssMapelSearch.toLowerCase())).length"
+                                                       class="text-center text-xs text-slate-400 py-6">Tidak ditemukan</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- JAM KE- -->
+                                    <div class="space-y-2.5">
+                                        <div class="flex items-center gap-2">
+                                            <label class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                                                Jam Ke- <span class="text-rose-500">*</span>
+                                            </label>
+                                            <span x-show="sharedSpacePeriod"
+                                                  x-transition:enter="transition ease-out duration-150"
+                                                  x-transition:enter-start="opacity-0 scale-90"
+                                                  x-transition:enter-end="opacity-100 scale-100"
+                                                  class="px-2 py-0.5 rounded-lg bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 font-black text-[10px] tabular-nums"
+                                                  x-text="'JP ' + sharedSpacePeriod"></span>
+                                        </div>
+                                        <div class="grid grid-cols-4 gap-2">
+                                            <template x-for="j in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="j">
+                                                <button type="button" @click="sharedSpacePeriod = j"
+                                                        class="h-14 flex flex-col items-center justify-center rounded-2xl font-bold transition-all duration-150 active:scale-95 touch-manipulation select-none"
+                                                        :class="sharedSpacePeriod == j
+                                                            ? 'bg-gradient-to-br from-navy-800 to-navy-950 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-lg shadow-navy-900/25 dark:shadow-gold-400/20 scale-[1.03]'
+                                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'">
+                                                    <span class="text-[15px] font-extrabold leading-none tabular-nums" x-text="j"></span>
+                                                    <span class="text-[9px] leading-none mt-0.5 opacity-50 font-bold">JP</span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Info multi-kelas -->
+                                    <template x-if="sharedSpaceSelectedClasses.length > 1">
+                                        <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20">
+                                            <div class="flex items-start gap-2.5">
+                                                <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+                                                </svg>
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-bold text-blue-700 dark:text-blue-300"
+                                                       x-text="sharedSpaceSelectedClasses.length + ' kelas akan dicatat sekaligus'"></p>
+                                                    <p class="text-[11px] leading-relaxed text-blue-600/80 dark:text-blue-400/80 mt-0.5">
+                                                        Presensi disimpan terpisah untuk setiap kelas dengan mapel dan jam yang sama.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- ═══ MODE OUT ═══ -->
+                            <template x-if="showSharedSpaceSheet && mode === 'out'">
+                                <div class="space-y-3">
+                                    <div x-show="sharedSpaceLoading" class="flex items-center justify-center gap-2 py-10">
+                                        <svg class="w-5 h-5 text-slate-300 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                        </svg>
+                                        <p class="text-xs text-slate-400">Memuat sesi aktif...</p>
+                                    </div>
+
+                                    <template x-if="!sharedSpaceLoading && sharedSpaceActiveSessions.length > 0">
+                                        <div class="space-y-3">
+                                            <p class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                                                Pilih sesi yang ingin diselesaikan
+                                            </p>
+                                            <template x-for="session in sharedSpaceActiveSessions" :key="session.id">
+                                                <button type="button" @click="sharedSpaceSelectedSession = session.id"
+                                                        class="w-full text-left transition-all duration-200 rounded-2xl border-2 active:scale-[.98]"
+                                                        :class="sharedSpaceSelectedSession == session.id
+                                                            ? 'border-navy-800 dark:border-gold-400 bg-white dark:bg-slate-800 shadow-lg shadow-navy-900/5 dark:shadow-gold-400/10'
+                                                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'">
+                                                    <div class="flex items-center gap-3 p-4">
+                                                        <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0 transition-all duration-200"
+                                                             :class="sharedSpaceSelectedSession == session.id
+                                                                 ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900'
+                                                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'"
+                                                             x-text="session.classroom_name ? session.classroom_name.slice(0,3).toUpperCase() : '?'"></div>
+                                                        <div class="flex-1 min-w-0">
+                                                            <p class="text-sm font-bold truncate transition-colors"
+                                                               :class="sharedSpaceSelectedSession == session.id ? 'text-navy-800 dark:text-gold-400' : 'text-slate-900 dark:text-white'"
+                                                               x-text="session.classroom_name"></p>
+                                                            <p class="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5"
+                                                               x-text="(session.subject_name || '-') + ' · Jam ke-' + session.period"></p>
+                                                            <div class="flex items-center gap-2 mt-1.5">
+                                                                <span class="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                                                    </svg>
+                                                                    <span x-text="'Masuk ' + session.check_in_time"></span>
+                                                                </span>
+                                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg"
+                                                                      :class="session.duration_minutes >= 30
+                                                                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                                                                          : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400'"
+                                                                      x-text="session.duration_minutes + ' mnt'"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200"
+                                                             :class="sharedSpaceSelectedSession == session.id
+                                                                 ? 'border-navy-800 dark:border-gold-400 bg-navy-800 dark:bg-gold-400'
+                                                                 : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'">
+                                                            <svg x-show="sharedSpaceSelectedSession == session.id"
+                                                                 class="w-2.5 h-2.5 text-white dark:text-navy-900"
+                                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!sharedSpaceLoading && sharedSpaceActiveSessions.length === 0">
+                                        <div class="text-center py-14">
+                                            <div class="w-16 h-16 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                                <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z"/>
+                                                </svg>
+                                            </div>
+                                            <p class="text-sm font-bold text-slate-700 dark:text-slate-300">Tidak Ada Sesi Aktif</p>
+                                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Lakukan scan masuk terlebih dahulu</p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <div class="h-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="flex-shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 px-5 pt-3.5"
+                         style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));">
+
+                        <!-- Error inline -->
+                        <div x-show="sharedSpaceError" x-cloak
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-1"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             class="mb-3 flex items-start gap-2.5 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                            <svg class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+                            </svg>
+                            <p class="text-[11px] font-semibold leading-snug text-red-700 dark:text-red-400" x-text="sharedSpaceError"></p>
+                        </div>
+
+                        <!-- Tombol IN -->
+                        <template x-if="showSharedSpaceSheet && mode === 'in'">
+                            <button type="button"
+                                    @click="submitSharedSpaceAttendance()"
+                                    :disabled="sharedSpaceSelectedClasses.length === 0 || !sharedSpaceSelectedSubject || !sharedSpacePeriod || sharedSpaceSubmitting"
+                                    class="w-full py-4 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2.5 transition-all duration-200 select-none"
+                                    :class="(sharedSpaceSelectedClasses.length === 0 || !sharedSpaceSelectedSubject || !sharedSpacePeriod || sharedSpaceSubmitting)
+                                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                                        : 'bg-gradient-to-br from-navy-800 to-navy-950 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-xl shadow-navy-900/20 dark:shadow-gold-400/20 hover:shadow-2xl hover:-translate-y-0.5 active:scale-[.98] active:translate-y-0'">
+                                <svg x-show="sharedSpaceSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <svg x-show="!sharedSpaceSubmitting" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
+                                </svg>
+                                <span x-text="sharedSpaceSubmitting
+                                    ? 'Menyimpan...'
+                                    : (sharedSpaceSelectedClasses.length === 0 || !sharedSpaceSelectedSubject || !sharedSpacePeriod
+                                        ? 'Lengkapi form terlebih dahulu'
+                                        : (sharedSpaceSelectedClasses.length > 1
+                                            ? 'Simpan Presensi ' + sharedSpaceSelectedClasses.length + ' Kelas'
+                                            : 'Simpan Presensi Masuk'))"></span>
+                            </button>
+                        </template>
+
+                        <!-- Tombol OUT -->
+                        <template x-if="showSharedSpaceSheet && mode === 'out'">
+                            <button type="button"
+                                    @click="submitSharedSpaceCheckOut()"
+                                    :disabled="!sharedSpaceSelectedSession || sharedSpaceSubmitting"
+                                    class="w-full py-4 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2.5 transition-all duration-200 select-none"
+                                    :class="(!sharedSpaceSelectedSession || sharedSpaceSubmitting)
+                                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                                        : 'bg-gradient-to-br from-navy-800 to-navy-950 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-xl shadow-navy-900/20 dark:shadow-gold-400/20 hover:shadow-2xl hover:-translate-y-0.5 active:scale-[.98] active:translate-y-0'">
+                                <svg x-show="sharedSpaceSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <svg x-show="!sharedSpaceSubmitting" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+                                </svg>
+                                <span x-text="sharedSpaceSubmitting ? 'Menyimpan...' : 'Selesaikan Sesi Ini'"></span>
+                            </button>
                         </template>
                     </div>
                 </div>
-            </div>
-
-            <!-- ─── Scrollable Body ─── -->
-            <div class="flex-1 overflow-y-auto overscroll-contain">
-                <div class="max-w-lg mx-auto w-full px-4 py-5 space-y-5">
-
-                    <!-- ═══ MODE IN ═══ -->
-                    <template x-if="showSharedSpaceSheet && mode === 'in'">
-                        <div class="space-y-5">
-
-                            <!-- ── KELAS (multi-select tag-based) ── -->
-                            <div>
-                                <label class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                    Kelas
-                                    <span class="text-red-500 font-normal">*</span>
-                                    <span class="font-normal text-slate-300 dark:text-slate-600 tracking-normal normal-case">Pilih hingga 3</span>
-                                    <span x-show="sharedSpaceSelectedClasses.length > 0"
-                                          class="ml-auto px-2 py-0.5 rounded-lg bg-navy-100 dark:bg-navy-900/40 text-navy-800 dark:text-gold-400 font-black text-[10px] normal-case tracking-normal"
-                                          x-text="sharedSpaceSelectedClasses.length + ' dipilih'"></span>
-                                </label>
-
-                                <!-- Tags kelas terpilih -->
-                                <div x-show="sharedSpaceSelectedClasses.length > 0" class="flex flex-wrap gap-2 mb-2">
-                                    <template x-for="cid in sharedSpaceSelectedClasses" :key="cid">
-                                        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl text-[11px] font-bold">
-                                            <span x-text="sharedSpaceClasses.find(c => c.id == cid)?.name || cid"></span>
-                                            <button type="button"
-                                                    @click.stop="sharedSpaceSelectedClasses = sharedSpaceSelectedClasses.filter(x => x != cid)"
-                                                    class="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/40 transition-colors ml-0.5">
-                                                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </template>
-                                </div>
-
-                                <!-- Dropdown search kelas -->
-                                <div x-show="sharedSpaceSelectedClasses.length < 3">
-                                    <div class="relative">
-                                        <!-- Search input -->
-                                        <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 bg-white dark:bg-slate-800 transition-all duration-200"
-                                             :class="ssKelasOpen
-                                                 ? 'border-navy-800 dark:border-gold-400 shadow-lg shadow-navy-800/8'
-                                                 : 'border-slate-200 dark:border-slate-700'">
-                                            <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200"
-                                                 :class="sharedSpaceSelectedClasses.length > 0 ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-100 dark:bg-slate-700'">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
-                                                     :class="sharedSpaceSelectedClasses.length > 0 ? 'text-white dark:text-navy-900' : 'text-slate-400'">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
-                                                </svg>
-                                            </div>
-                                            <input type="text"
-                                                   x-model="ssKelasSearch"
-                                                   @focus="ssKelasOpen = true"
-                                                   @click.stop
-                                                   @keydown.escape.stop="ssKelasOpen = false; ssKelasSearch = ''"
-                                                   placeholder="Cari dan tambah kelas..."
-                                                   class="flex-1 text-sm font-medium bg-transparent border-0 focus:outline-none text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500">
-                                            <svg x-show="!ssKelasOpen" class="w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
-                                            </svg>
-                                            <svg x-show="ssKelasOpen" class="w-4 h-4 text-navy-800 dark:text-gold-400 flex-shrink-0 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/>
-                                            </svg>
-                                        </div>
-
-                                        <!-- Dropdown list -->
-                                        <div x-show="ssKelasOpen"
-                                             @click.outside="ssKelasOpen = false; ssKelasSearch = ''"
-                                             x-transition:enter="transition ease-out duration-150"
-                                             x-transition:enter-start="opacity-0 -translate-y-1"
-                                             x-transition:enter-end="opacity-100 translate-y-0"
-                                             x-transition:leave="transition ease-in duration-100"
-                                             x-transition:leave-start="opacity-100"
-                                             x-transition:leave-end="opacity-0"
-                                             class="absolute left-0 right-0 top-full mt-2 z-30 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-                                             style="box-shadow: 0 20px 60px rgba(0,0,0,.12), 0 4px 16px rgba(0,0,0,.06);">
-                                            <div class="max-h-52 overflow-y-auto overscroll-contain py-1">
-                                                <template x-for="cls in sharedSpaceClasses.filter(c =>
-                                                    !sharedSpaceSelectedClasses.includes(c.id) &&
-                                                    (!ssKelasSearch || c.name.toLowerCase().includes(ssKelasSearch.toLowerCase()) || (c.code && c.code.toLowerCase().includes(ssKelasSearch.toLowerCase())))
-                                                )" :key="cls.id">
-                                                    <button type="button"
-                                                            @click.stop="sharedSpaceSelectedClasses = [...sharedSpaceSelectedClasses, cls.id]; ssKelasSearch = ''; ssKelasOpen = sharedSpaceSelectedClasses.length < 3"
-                                                            class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                                        <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
-                                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
-                                                            </svg>
-                                                        </div>
-                                                        <div class="flex-1 min-w-0">
-                                                            <span class="font-semibold text-slate-800 dark:text-white truncate block" x-text="cls.name"></span>
-                                                            <span x-show="cls.code" class="text-[10px] text-slate-400 font-mono" x-text="cls.code"></span>
-                                                        </div>
-                                                        <svg class="w-4 h-4 text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-                                                        </svg>
-                                                    </button>
-                                                </template>
-                                                <!-- Empty state -->
-                                                <div x-show="sharedSpaceClasses.length === 0" class="text-center py-8">
-                                                    <svg class="w-5 h-5 text-slate-300 mx-auto mb-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                                    </svg>
-                                                    <p class="text-xs text-slate-400">Memuat data kelas...</p>
-                                                </div>
-                                                <p x-show="sharedSpaceClasses.length > 0 && sharedSpaceClasses.filter(c => !sharedSpaceSelectedClasses.includes(c.id) && (!ssKelasSearch || c.name.toLowerCase().includes(ssKelasSearch.toLowerCase()))).length === 0"
-                                                   class="text-center text-xs text-slate-400 py-6">
-                                                    <span x-show="ssKelasSearch">Tidak ditemukan</span>
-                                                    <span x-show="!ssKelasSearch">Semua kelas sudah dipilih</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Max reached notice -->
-                                <p x-show="sharedSpaceSelectedClasses.length >= 3"
-                                   class="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1.5 pl-1">
-                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
-                                    </svg>
-                                    Maksimal 3 kelas. Hapus salah satu untuk menambah.
-                                </p>
-                            </div>
-
-                            <!-- ── MATA PELAJARAN ── -->
-                            <div>
-                                <label class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                                    Mata Pelajaran <span class="text-red-500 font-normal">*</span>
-                                </label>
-                                <div class="relative">
-                                    <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 bg-white dark:bg-slate-800 transition-all duration-200"
-                                         :class="ssMapelOpen
-                                             ? 'border-navy-800 dark:border-gold-400 shadow-lg shadow-navy-800/8'
-                                             : sharedSpaceSelectedSubject
-                                                 ? 'border-navy-800/25 dark:border-navy-600'
-                                                 : 'border-slate-200 dark:border-slate-700'">
-                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200"
-                                             :class="sharedSpaceSelectedSubject ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-100 dark:bg-slate-700'">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
-                                                 :class="sharedSpaceSelectedSubject ? 'text-white dark:text-navy-900' : 'text-slate-400'">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
-                                            </svg>
-                                        </div>
-                                        <input type="text"
-                                               x-model="ssMapelSearch"
-                                               @focus="ssMapelOpen = true"
-                                               @click.stop
-                                               @keydown.escape.stop="ssMapelOpen = false; ssMapelSearch = ''"
-                                               :placeholder="sharedSpaceSelectedSubject ? (sharedSpaceSubjects.find(s => s.id == sharedSpaceSelectedSubject)?.name || 'Dipilih') : 'Cari mata pelajaran...'"
-                                               class="flex-1 text-sm font-medium bg-transparent border-0 focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                                               :class="sharedSpaceSelectedSubject && !ssMapelSearch ? 'text-slate-800 dark:text-white' : 'text-slate-400'">
-                                        <button x-show="sharedSpaceSelectedSubject" type="button"
-                                                @click.stop="sharedSpaceSelectedSubject = ''; ssMapelSearch = ''"
-                                                class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center hover:bg-red-500 group transition-all flex-shrink-0">
-                                            <svg class="w-3 h-3 text-slate-400 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                                            </svg>
-                                        </button>
-                                        <svg :class="ssMapelOpen ? 'rotate-180 text-navy-800 dark:text-gold-400' : 'text-slate-400'"
-                                             class="w-4 h-4 flex-shrink-0 pointer-events-none transition-transform duration-200"
-                                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
-                                        </svg>
-                                    </div>
-
-                                    <!-- Dropdown Mapel -->
-                                    <div x-show="ssMapelOpen"
-                                         @click.outside="ssMapelOpen = false; ssMapelSearch = ''"
-                                         x-transition:enter="transition ease-out duration-150"
-                                         x-transition:enter-start="opacity-0 -translate-y-1"
-                                         x-transition:enter-end="opacity-100 translate-y-0"
-                                         x-transition:leave="transition ease-in duration-100"
-                                         x-transition:leave-start="opacity-100"
-                                         x-transition:leave-end="opacity-0"
-                                         class="absolute left-0 right-0 top-full mt-2 z-30 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-                                         style="box-shadow: 0 20px 60px rgba(0,0,0,.12), 0 4px 16px rgba(0,0,0,.06);">
-                                        <div class="max-h-56 overflow-y-auto overscroll-contain py-1">
-                                            <template x-for="sub in sharedSpaceSubjects.filter(s => !ssMapelSearch || s.name.toLowerCase().includes(ssMapelSearch.toLowerCase()))" :key="sub.id">
-                                                <button type="button"
-                                                        @click.stop="sharedSpaceSelectedSubject = sub.id; ssMapelOpen = false; ssMapelSearch = ''"
-                                                        class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors"
-                                                        :class="sharedSpaceSelectedSubject == sub.id
-                                                            ? 'bg-navy-50 dark:bg-navy-900/30 text-navy-800 dark:text-gold-400'
-                                                            : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-200'">
-                                                    <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                                                         :class="sharedSpaceSelectedSubject == sub.id ? 'bg-navy-800 dark:bg-gold-400' : 'bg-slate-100 dark:bg-slate-700'">
-                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
-                                                             :class="sharedSpaceSelectedSubject == sub.id ? 'text-white dark:text-navy-900' : 'text-slate-400'">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
-                                                        </svg>
-                                                    </div>
-                                                    <span class="flex-1 truncate font-medium" x-text="sub.name"></span>
-                                                    <svg x-show="sharedSpaceSelectedSubject == sub.id"
-                                                         class="w-4 h-4 text-navy-800 dark:text-gold-400 flex-shrink-0"
-                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
-                                                    </svg>
-                                                </button>
-                                            </template>
-                                            <div x-show="sharedSpaceSubjects.length === 0" class="text-center py-8">
-                                                <svg class="w-5 h-5 text-slate-300 mx-auto mb-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                                </svg>
-                                                <p class="text-xs text-slate-400">Memuat data mapel...</p>
-                                            </div>
-                                            <p x-show="sharedSpaceSubjects.length > 0 && !sharedSpaceSubjects.filter(s => !ssMapelSearch || s.name.toLowerCase().includes(ssMapelSearch.toLowerCase())).length"
-                                               class="text-center text-xs text-slate-400 py-6">Tidak ditemukan</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- ── JAM KE- ── -->
-                            <div>
-                                <label class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                    Jam Ke-
-                                    <span class="text-red-500 font-normal">*</span>
-                                    <span x-show="sharedSpacePeriod"
-                                          x-transition:enter="transition ease-out duration-150"
-                                          x-transition:enter-start="opacity-0 scale-90"
-                                          x-transition:enter-end="opacity-100 scale-100"
-                                          class="px-2 py-0.5 rounded-lg bg-navy-100 dark:bg-navy-900/40 text-navy-800 dark:text-gold-400 font-black text-[10px] normal-case tracking-normal"
-                                          x-text="'JP ' + sharedSpacePeriod"></span>
-                                </label>
-                                <div class="grid grid-cols-4 gap-2">
-                                    <template x-for="j in [1,2,3,4,5,6,7,8,9,10,11,12]" :key="j">
-                                        <button type="button" @click="sharedSpacePeriod = j"
-                                                class="h-14 flex flex-col items-center justify-center rounded-2xl font-bold text-sm transition-all duration-150 active:scale-95 touch-manipulation select-none"
-                                                :class="sharedSpacePeriod == j
-                                                    ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 shadow-lg shadow-navy-800/25 dark:shadow-gold-400/20 scale-[1.04]'
-                                                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-navy-300 dark:hover:border-navy-600 hover:bg-navy-50/30 dark:hover:bg-slate-750'">
-                                            <span class="text-[15px] font-extrabold leading-none" x-text="j"></span>
-                                            <span class="text-[9px] leading-none mt-0.5 opacity-50 font-medium">JP</span>
-                                        </button>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- Summary kelas terpilih -->
-                            <template x-if="sharedSpaceSelectedClasses.length > 1">
-                                <div class="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
-                                    <div class="flex items-start gap-3">
-                                        <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
-                                        </svg>
-                                        <div>
-                                            <p class="text-xs font-bold text-blue-700 dark:text-blue-300 mb-1"
-                                               x-text="sharedSpaceSelectedClasses.length + ' kelas akan dicatat sekaligus'"></p>
-                                            <p class="text-[11px] text-blue-600/80 dark:text-blue-400/80">
-                                                Sistem akan menyimpan presensi terpisah untuk setiap kelas dengan mapel dan jam yang sama.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    <!-- ═══ MODE OUT ═══ -->
-                    <template x-if="showSharedSpaceSheet && mode === 'out'">
-                        <div class="space-y-3">
-                            <template x-if="sharedSpaceActiveSessions.length > 0">
-                                <div class="space-y-3">
-                                    <p class="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                        Pilih sesi yang ingin diselesaikan
-                                    </p>
-                                    <template x-for="session in sharedSpaceActiveSessions" :key="session.id">
-                                        <button type="button" @click="sharedSpaceSelectedSession = session.id"
-                                                class="w-full text-left transition-all duration-200 rounded-2xl border-2 active:scale-[.98]"
-                                                :class="sharedSpaceSelectedSession == session.id
-                                                    ? 'border-navy-800 dark:border-gold-400 bg-navy-50 dark:bg-navy-900/20 shadow-md shadow-navy-800/8'
-                                                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'">
-                                            <div class="flex items-center gap-3 p-4">
-                                                <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0 transition-all duration-200"
-                                                     :class="sharedSpaceSelectedSession == session.id ? 'bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'"
-                                                     x-text="session.classroom_name ? session.classroom_name.slice(0,3).toUpperCase() : '?'"></div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-sm font-bold truncate transition-colors"
-                                                       :class="sharedSpaceSelectedSession == session.id ? 'text-navy-800 dark:text-gold-400' : 'text-slate-800 dark:text-white'"
-                                                       x-text="session.classroom_name"></p>
-                                                    <p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5"
-                                                       x-text="session.subject_name + ' · Jam ke-' + session.period"></p>
-                                                    <div class="flex items-center gap-2 mt-1.5">
-                                                        <span class="text-[10px] text-slate-400 flex items-center gap-1">
-                                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                                            </svg>
-                                                            <span x-text="'Masuk ' + session.check_in_time"></span>
-                                                        </span>
-                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg"
-                                                              :class="session.duration_minutes >= 30 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'"
-                                                              x-text="session.duration_minutes + ' mnt'"></span>
-                                                    </div>
-                                                </div>
-                                                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200"
-                                                     :class="sharedSpaceSelectedSession == session.id ? 'border-navy-800 dark:border-gold-400 bg-navy-800 dark:bg-gold-400' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'">
-                                                    <svg x-show="sharedSpaceSelectedSession == session.id"
-                                                         class="w-2.5 h-2.5 text-white dark:text-navy-900"
-                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </template>
-                                </div>
-                            </template>
-                            <template x-if="sharedSpaceActiveSessions.length === 0">
-                                <div class="text-center py-16">
-                                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                                        <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z"/>
-                                        </svg>
-                                    </div>
-                                    <p class="text-sm font-bold text-slate-700 dark:text-slate-300">Tidak Ada Sesi Aktif</p>
-                                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Lakukan scan masuk terlebih dahulu</p>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    <!-- Spacer agar konten tidak tertutup tombol -->
-                    <div class="h-2"></div>
-                </div>
-            </div>
-
-            <!-- ─── Fixed Bottom Button ─── -->
-            <div class="flex-shrink-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-4 pt-3.5 pb-6 max-w-lg mx-auto w-full"
-                 style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));">
-
-                <!-- Tombol IN -->
-                <template x-if="showSharedSpaceSheet && mode === 'in'">
-                    <button type="button"
-                            @click="submitSharedSpaceAttendance()"
-                            :disabled="sharedSpaceSelectedClasses.length === 0 || !sharedSpaceSelectedSubject || !sharedSpacePeriod || sharedSpaceSubmitting"
-                            class="w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 select-none"
-                            :class="(sharedSpaceSelectedClasses.length === 0 || !sharedSpaceSelectedSubject || !sharedSpacePeriod || sharedSpaceSubmitting)
-                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
-                                : 'bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-xl shadow-navy-800/20 dark:shadow-gold-400/15 hover:shadow-2xl hover:-translate-y-0.5 active:scale-[.98] active:translate-y-0'">
-                        <svg x-show="sharedSpaceSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                        </svg>
-                        <svg x-show="!sharedSpaceSubmitting" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
-                        </svg>
-                        <span x-text="sharedSpaceSubmitting
-                            ? 'Menyimpan...'
-                            : (sharedSpaceSelectedClasses.length === 0 || !sharedSpaceSelectedSubject || !sharedSpacePeriod
-                                ? 'Lengkapi form terlebih dahulu'
-                                : (sharedSpaceSelectedClasses.length > 1
-                                    ? 'Simpan Presensi ' + sharedSpaceSelectedClasses.length + ' Kelas'
-                                    : 'Simpan Presensi Masuk'))"></span>
-                    </button>
-                </template>
-
-                <!-- Tombol OUT -->
-                <template x-if="showSharedSpaceSheet && mode === 'out'">
-                    <button type="button"
-                            @click="submitSharedSpaceCheckOut()"
-                            :disabled="!sharedSpaceSelectedSession || sharedSpaceSubmitting"
-                            class="w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 select-none"
-                            :class="(!sharedSpaceSelectedSession || sharedSpaceSubmitting)
-                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
-                                : 'bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 text-white dark:text-navy-900 shadow-xl shadow-navy-800/20 dark:shadow-gold-400/15 hover:shadow-2xl hover:-translate-y-0.5 active:scale-[.98] active:translate-y-0'">
-                        <svg x-show="sharedSpaceSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                        </svg>
-                        <svg x-show="!sharedSpaceSubmitting" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
-                        </svg>
-                        <span x-text="sharedSpaceSubmitting ? 'Menyimpan...' : 'Selesaikan Sesi Ini'"></span>
-                    </button>
-                </template>
             </div>
         </div>
 
@@ -892,7 +956,7 @@
         <div x-show="showClassSelection" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 !m-0 flex items-center justify-center bg-black/50 p-4">
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6"
                 @click.away="showClassSelection = false">
                 <div class="flex items-center justify-between mb-4">
@@ -1072,9 +1136,25 @@
                 gracePeriod: 0,
                 scanBeforeStart: 0,
 
-                // Shared space state
+                // Shared space bottom sheet state
                 showSharedSpaceSheet: false,
+                sheetEntered: false,
+                sheetExpanded: false,
+                sheetDragging: false,
+                sheetDragY: 0,
+                sheetDragHeight: null,
+                _sheetCloseTimer: null,
+                _sheetClosing: false,
+                _dragStartY: 0,
+                _dragStartHeight: 0,
+                _dragMoved: false,
+                _suppressHandleClick: false,
+                _sharedSpaceFetchId: 0,
+                _sharedSpaceSubmitId: 0,
+
                 sharedSpaceSubmitting: false,
+                sharedSpaceLoading: false,
+                sharedSpaceError: '',
                 sharedSpaceLocation: '',
                 sharedSpaceLocationId: '',
                 sharedSpaceClasses: [],
@@ -1084,65 +1164,12 @@
                 sharedSpaceSelectedSubject: '',
                 sharedSpacePeriod: '',
                 sharedSpaceSelectedSession: '',
+
                 // Dropdown search state
                 ssKelasOpen: false,
                 ssKelasSearch: '',
                 ssMapelOpen: false,
                 ssMapelSearch: '',
-                sharedSpaceLocation: '',
-                sharedSpaceLocationId: '',
-                sharedSpaceClasses: [],
-                sharedSpaceSubjects: [],
-                sharedSpaceActiveSessions: [],
-                sharedSpaceSelectedClass: '',
-                sharedSpaceSelectedSubject: '',
-                sharedSpacePeriod: '',
-                sharedSpaceSelectedSession: '',
-
-                // Dropdown open & search state
-                openKelas: false,
-                searchKelas: '',
-                openMapel: false,
-                searchMapel: '',
-                jamViewMode: 'grid',
-
-                init() {
-                    this.$watch('showSharedSpaceModal', (val) => {
-                        if (val) {
-                            document.body.style.overflow = 'hidden';
-                            setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
-                        } else {
-                            document.body.style.overflow = '';
-                            this.openKelas = false;
-                            this.openMapel = false;
-                            this.searchKelas = '';
-                            this.searchMapel = '';
-                        }
-                    });
-                    this.$watch('showSharedSpaceSheet', (val) => {
-                        if (val) {
-                            // Init drag handle
-                            this._initDragHandle();
-                        }
-                    });                    this.$watch('openKelas', (val) => {
-                        if (val) setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 30);
-                    });
-                    this.$watch('openMapel', (val) => {
-                        if (val) setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 30);
-                    });
-                },
-
-                closeSharedSpace() {
-                    this.showSharedSpaceModal = false;
-                    // Reset content styles immediately
-                    const content = document.getElementById('shared-space-content');
-                    if (content) {
-                        content.style.removeProperty('transform');
-                        content.style.removeProperty('opacity');
-                        content.style.removeProperty('overflow');
-                    }
-                    setTimeout(() => { document.body.style.overflow = ''; }, 250);
-                },
 
                 startScanner() {
                     startQrVideo(this);
@@ -1305,7 +1332,9 @@
                 // Submit presensi MASUK shared space — support multi-kelas
                 submitSharedSpaceAttendance() {
                     if (!this.sharedSpaceSelectedClasses.length || !this.sharedSpaceSelectedSubject || !this.sharedSpacePeriod) return;
+                    const submitId = ++this._sharedSpaceSubmitId;
                     this.sharedSpaceSubmitting = true;
+                    this.sharedSpaceError = '';
 
                     const payload = {
                         classroom_id: this.sharedSpaceLocationId,
@@ -1324,30 +1353,49 @@
 
                     this._post('{{ route("teacher.class-attendance.save-shared") }}', payload)
                     .then(({ status, data }) => {
+                        if (submitId !== this._sharedSpaceSubmitId) return;
                         this.sharedSpaceSubmitting = false;
-                        this.closeSharedSpaceSheet(true);
-                        setTimeout(() => { this.handleScanResponse(status, data); }, 400);
+                        if (data && data.success) {
+                            this.closeSharedSpaceSheet(true);
+                            setTimeout(() => { this.handleScanResponse(status, data); }, 380);
+                        } else {
+                            this.sharedSpaceError = (data && data.message) || 'Gagal menyimpan presensi. Coba lagi.';
+                        }
                     });
                 },
 
                 // Submit presensi KELUAR shared space
                 submitSharedSpaceCheckOut() {
                     if (!this.sharedSpaceSelectedSession) return;
+                    const submitId = ++this._sharedSpaceSubmitId;
                     this.sharedSpaceSubmitting = true;
+                    this.sharedSpaceError = '';
                     this._post('{{ route("teacher.class-attendance.save-shared") }}', {
                         classroom_id: this.sharedSpaceLocationId,
                         attendance_id: this.sharedSpaceSelectedSession,
                         mode: 'out',
                     })
                     .then(({ status, data }) => {
+                        if (submitId !== this._sharedSpaceSubmitId) return;
                         this.sharedSpaceSubmitting = false;
-                        this.closeSharedSpaceSheet(true);
-                        setTimeout(() => { this.handleScanResponse(status, data); }, 400);
+                        if (data && data.success) {
+                            this.closeSharedSpaceSheet(true);
+                            setTimeout(() => { this.handleScanResponse(status, data); }, 380);
+                        } else {
+                            this.sharedSpaceError = (data && data.message) || 'Gagal menyelesaikan sesi. Coba lagi.';
+                        }
                     });
                 },
 
-                // Open shared space overlay
+                // Open shared space bottom sheet
                 openSharedSpaceSheet(classroomId, locationName) {
+                    if (this._sheetCloseTimer) {
+                        clearTimeout(this._sheetCloseTimer);
+                        this._sheetCloseTimer = null;
+                    }
+                    this._sheetClosing = false;
+                    this._sharedSpaceSubmitId++;
+
                     this.sharedSpaceLocationId      = classroomId;
                     this.sharedSpaceLocation        = locationName;
                     this.sharedSpaceSelectedClasses = [];
@@ -1355,93 +1403,153 @@
                     this.sharedSpacePeriod          = '';
                     this.sharedSpaceSelectedSession = '';
                     this.sharedSpaceSubmitting      = false;
+                    this.sharedSpaceLoading         = true;
+                    this.sharedSpaceError           = '';
+                    this.sharedSpaceClasses         = [];
+                    this.sharedSpaceSubjects        = [];
+                    this.sharedSpaceActiveSessions  = [];
                     this.ssKelasOpen   = false;
                     this.ssKelasSearch = '';
                     this.ssMapelOpen   = false;
                     this.ssMapelSearch = '';
 
-                    // Fetch data — gunakan endpoint yang sudah ada di server
-                    fetch(`/teacher/class-attendance/shared-space/data?classroom_id=${classroomId}&mode=${this.mode}`, {
+                    this.sheetDragY      = 0;
+                    this.sheetDragHeight = null;
+                    this.sheetExpanded   = false;
+                    this.sheetDragging   = false;
+                    this.sheetEntered    = false;
+                    this.showSharedSpaceSheet = true;
+                    document.body.style.overflow = 'hidden';
+
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        if (this.showSharedSpaceSheet && !this._sheetClosing) {
+                            this.sheetEntered = true;
+                        }
+                    }));
+
+                    const fetchId = ++this._sharedSpaceFetchId;
+                    const url = `{{ route("teacher.class-attendance.shared-space.sessions", [], false) }}?classroom_id=${encodeURIComponent(classroomId)}&mode=${encodeURIComponent(this.mode)}`;
+
+                    fetch(url, {
                         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                     })
-                    .then(r => r.json())
+                    .then(r => {
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        return r.json();
+                    })
                     .then(data => {
+                        if (fetchId !== this._sharedSpaceFetchId) return;
                         this.sharedSpaceClasses        = data.classes         || [];
                         this.sharedSpaceSubjects       = data.subjects        || [];
                         this.sharedSpaceActiveSessions = data.active_sessions || [];
                     })
                     .catch(() => {
-                        // Fallback: coba endpoint lama
-                        fetch(`/teacher/class-attendance/shared-space?classroom_id=${classroomId}&mode=${this.mode}`, {
-                            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                        })
-                        .then(r => r.json())
-                        .then(data => {
-                            this.sharedSpaceClasses        = data.all_classes     || data.classes    || [];
-                            this.sharedSpaceSubjects       = data.subjects        || [];
-                            this.sharedSpaceActiveSessions = data.active_sessions || [];
-                        })
-                        .catch(() => {});
+                        if (fetchId !== this._sharedSpaceFetchId) return;
+                        this.sharedSpaceError = 'Gagal memuat data ruangan. Periksa koneksi lalu coba lagi.';
+                    })
+                    .finally(() => {
+                        if (fetchId !== this._sharedSpaceFetchId) return;
+                        this.sharedSpaceLoading = false;
                     });
-
-                    this.showSharedSpaceSheet = true;
-                    document.body.style.overflow = 'hidden';
                 },
 
-                // Drag handle for bottom sheet
-                _initDragHandle() {
-                    setTimeout(() => {
-                        const sheet   = document.getElementById('shared-space-sheet');
-                        const handle  = document.getElementById('sheet-drag-handle');
-                        if (!sheet || !handle) return;
+                // Drag handle: tarik ke atas = full screen, tarik ke bawah = tutup
+                startSheetDrag(e) {
+                    if (e.button !== undefined && e.button !== 0) return;
+                    if (!this.sheetEntered) return;
 
-                        let startY = 0, startH = 0, dragging = false;
+                    this.sheetDragging   = true;
+                    this._dragStartY     = e.clientY;
+                    this._dragStartHeight = this.$refs.ssSheet
+                        ? this.$refs.ssSheet.getBoundingClientRect().height
+                        : 0;
+                    this._dragMoved = false;
 
-                        const onStart = (e) => {
-                            dragging = true;
-                            startY   = (e.touches ? e.touches[0].clientY : e.clientY);
-                            startH   = sheet.getBoundingClientRect().height;
-                            sheet.style.transition = 'none';
-                        };
-                        const onMove = (e) => {
-                            if (!dragging) return;
-                            const dy      = startY - (e.touches ? e.touches[0].clientY : e.clientY);
-                            const newH    = Math.min(window.innerHeight, Math.max(300, startH + dy));
-                            sheet.style.height = newH + 'px';
-                        };
-                        const onEnd = (e) => {
-                            if (!dragging) return;
-                            dragging = false;
-                            sheet.style.transition = '';
-                            const h = sheet.getBoundingClientRect().height;
-                            if (h < 200) {
-                                this.closeSharedSpaceSheet();
-                            } else if (h > window.innerHeight * 0.75) {
-                                sheet.style.height = '100dvh';
-                                sheet.style.borderRadius = '0';
-                            } else {
-                                sheet.style.height = '';
-                                sheet.style.borderRadius = '';
-                            }
-                        };
+                    const onMove = (ev) => {
+                        if (!this.sheetDragging) return;
+                        const dy = ev.clientY - this._dragStartY;
+                        if (Math.abs(dy) > 6) this._dragMoved = true;
 
-                        handle.addEventListener('touchstart', onStart, { passive: true });
-                        document.addEventListener('touchmove', onMove,  { passive: true });
-                        document.addEventListener('touchend',  onEnd);
-                        handle.addEventListener('mousedown', onStart);
-                        document.addEventListener('mousemove', onMove);
-                        document.addEventListener('mouseup',  onEnd);
-                    }, 100);
+                        if (this.sheetExpanded) {
+                            this.sheetDragHeight = null;
+                            this.sheetDragY = Math.max(0, dy);
+                        } else if (dy < 0) {
+                            const maxH = Math.max(window.innerHeight, this._dragStartHeight);
+                            this.sheetDragHeight = Math.min(maxH, this._dragStartHeight - dy);
+                            this.sheetDragY = 0;
+                        } else {
+                            this.sheetDragHeight = null;
+                            this.sheetDragY = dy;
+                        }
+
+                        if (ev.cancelable) ev.preventDefault();
+                    };
+
+                    const onEnd = () => {
+                        window.removeEventListener('pointermove', onMove);
+                        window.removeEventListener('pointerup', onEnd);
+                        window.removeEventListener('pointercancel', onEnd);
+                        if (!this.sheetDragging) return;
+
+                        const moved     = this._dragMoved;
+                        const dy        = this.sheetDragY;
+                        const dh        = this.sheetDragHeight;
+                        const wasExpand = this.sheetExpanded;
+
+                        this.sheetDragging   = false;
+                        this.sheetDragY      = 0;
+                        this.sheetDragHeight = null;
+                        this._dragMoved      = false;
+
+                        if (moved) {
+                            this._suppressHandleClick = true;
+                            setTimeout(() => { this._suppressHandleClick = false; }, 350);
+                        }
+
+                        if (dh !== null) {
+                            this.sheetExpanded = dh > this._dragStartHeight + 60;
+                        } else if (dy > 120) {
+                            this.closeSharedSpaceSheet();
+                        } else if (wasExpand && dy > 60) {
+                            this.sheetExpanded = false;
+                        }
+                    };
+
+                    window.addEventListener('pointermove', onMove, { passive: false });
+                    window.addEventListener('pointerup', onEnd);
+                    window.addEventListener('pointercancel', onEnd);
+                },
+
+                toggleSheetExpanded() {
+                    if (!this.sheetEntered) return;
+                    if (this._suppressHandleClick) {
+                        this._suppressHandleClick = false;
+                        return;
+                    }
+                    this.sheetExpanded = !this.sheetExpanded;
                 },
 
                 closeSharedSpaceSheet(fromSubmit = false) {
-                    this.showSharedSpaceSheet = false;
-                    this.ssKelasOpen = false;
-                    this.ssMapelOpen = false;
-                    this.ssKelasSearch = '';
-                    this.ssMapelSearch = '';
-                    if (!fromSubmit) document.body.style.overflow = '';
-                    else setTimeout(() => { document.body.style.overflow = ''; }, 350);
+                    if (this._sheetClosing) return;
+                    this._sheetClosing = true;
+
+                    this.sheetEntered    = false;
+                    this.sheetDragging   = false;
+                    this.sheetDragY      = 0;
+                    this.sheetDragHeight = null;
+                    this.ssKelasOpen     = false;
+                    this.ssMapelOpen     = false;
+                    this.ssKelasSearch   = '';
+                    this.ssMapelSearch   = '';
+
+                    if (this._sheetCloseTimer) clearTimeout(this._sheetCloseTimer);
+                    this._sheetCloseTimer = setTimeout(() => {
+                        this.showSharedSpaceSheet = false;
+                        this.sheetExpanded = false;
+                        this._sheetClosing = false;
+                        this._sheetCloseTimer = null;
+                        document.body.style.overflow = '';
+                    }, 380);
                 },
 
                 // Batch scan prevention error handler
@@ -1677,17 +1785,19 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(8px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
             }
         }
 
         [x-cloak] {
             display: none !important;
+        }
+
+        .sheet-drag-none {
+            transition: none !important;
         }
 
     </style>

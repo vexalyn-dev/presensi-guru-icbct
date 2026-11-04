@@ -417,16 +417,17 @@ class ClassAttendanceController extends Controller
             ->whereNotNull('check_in_time')
             ->whereNull('check_out_time')
             ->where('classroom_id', $classroomId)
-            ->with(['classroom', 'subject'])
+            ->with(['selectedClassroom', 'subject'])
             ->get()
             ->map(fn ($a) => [
-                'id'              => $a->id,
-                'classroom_id'    => $a->classroom_id,
-                'classroom_name'  => $a->classroom?->name ?? '-',
-                'subject_name'    => $a->subject?->name ?? '-',
-                'period'          => $a->period,
-                'check_in_time'   => $a->check_in_time?->format('H:i'),
-                'duration_minutes'=> $a->check_in_time ? (int) $a->check_in_time->diffInMinutes(now()) : 0,
+                'id'                    => $a->id,
+                'classroom_id'          => $a->classroom_id,
+                'selected_classroom_id' => $a->selected_classroom_id,
+                'classroom_name'        => $a->selectedClassroom?->name ?? '-',
+                'subject_name'          => $a->subject?->name ?? '-',
+                'period'                => $a->period,
+                'check_in_time'         => $a->check_in_time?->format('H:i'),
+                'duration_minutes'      => $a->check_in_time ? (int) $a->check_in_time->diffInMinutes(now()) : 0,
             ])->values();
 
         return response()->json([
@@ -556,9 +557,8 @@ class ClassAttendanceController extends Controller
         $allFail  = true;
 
         foreach ($classroomIds as $cid) {
-            $cloned = $request->merge(['selected_classroom_id' => $cid]);
-            $foundClassroom = Classroom::find($cid);
-            $resp   = $this->handleSharedSpaceCheckIn($foundClassroom ?? $classroom, $user, $now, $today, $request);
+            $request->merge(['selected_classroom_id' => $cid]);
+            $resp   = $this->handleSharedSpaceCheckIn($classroom, $user, $now, $today, $request);
             $body   = json_decode($resp->getContent(), true);
             $ok     = $body['success'] ?? false;
             if ($ok) $anyOk  = true;
