@@ -432,7 +432,9 @@
              SHARED SPACE — BOTTOM SHEET
              - Slide up dari bawah, drag ke atas untuk full screen
              - Tap backdrop / swipe down untuk menutup
+             - Teleport ke body supaya bebas dari overflow/padding layout
         ══════════════════════════════════════════════════════ -->
+        <template x-teleport="body">
         <div x-show="showSharedSpaceSheet" x-cloak
              class="fixed inset-0 z-[999] !m-0 overflow-hidden"
              :class="sheetEntered ? '' : 'pointer-events-none'"
@@ -448,8 +450,8 @@
             <!-- Sheet -->
             <div class="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none">
                 <div x-ref="ssSheet"
-                     class="pointer-events-auto w-full max-w-lg flex flex-col overflow-hidden bg-white dark:bg-slate-900 rounded-t-[28px] will-change-transform"
-                     :class="sheetDragging ? 'sheet-drag-none' : ''"
+                     class="pointer-events-auto w-full flex flex-col overflow-hidden bg-white dark:bg-slate-900 rounded-t-[28px] will-change-transform"
+                     :class="[sheetDragging ? 'sheet-drag-none' : '', sheetExpanded ? 'max-w-none sm:max-w-2xl' : 'max-w-lg']"
                      :style="{
                          height: sheetDragHeight !== null ? sheetDragHeight + 'px' : (sheetExpanded ? '100dvh' : '88dvh'),
                          transform: sheetEntered ? `translateY(${sheetDragY}px)` : 'translateY(100%)',
@@ -462,20 +464,20 @@
                          @pointerdown="startSheetDrag($event)"
                          @click="toggleSheetExpanded()"
                          title="Geser ke atas untuk layar penuh"
-                         style="padding-top: max(0.625rem, env(safe-area-inset-top, 0px)); touch-action: none;">
+                         :style="`padding-top: ${sheetExpanded ? 'max(0.625rem, env(safe-area-inset-top, 0px))' : '0.625rem'}; touch-action: none;`">
                         <div class="w-11 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></div>
                     </div>
 
                     <!-- Header -->
-                    <div class="flex-shrink-0 px-5 pb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-950 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-navy-900/20 dark:shadow-gold-400/20">
-                                <svg class="w-5 h-5 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <div class="flex-shrink-0 px-4 sm:px-5 pb-4">
+                        <div class="flex items-center gap-2.5 sm:gap-3">
+                            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-950 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-navy-900/20 dark:shadow-gold-400/20">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5zM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5z"/>
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <h2 id="shared-sheet-title" class="text-[17px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight truncate"
+                                <h2 id="shared-sheet-title" class="text-base sm:text-[17px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight truncate"
                                     x-text="mode === 'in' ? 'Presensi Masuk' : 'Presensi Keluar'"></h2>
                                 <p class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
                                     <svg class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -485,7 +487,7 @@
                                     <span class="truncate" x-text="sharedSpaceLocation || 'Ruangan Bersama'"></span>
                                 </p>
                             </div>
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold flex-shrink-0"
+                            <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold flex-shrink-0"
                                   :class="mode === 'in'
                                       ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
                                       : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'">
@@ -495,7 +497,7 @@
                             </span>
                             <button type="button" @click="closeSharedSpaceSheet()"
                                     aria-label="Tutup"
-                                    class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-90 transition-all flex-shrink-0">
+                                    class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-90 transition-all flex-shrink-0">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
                                 </svg>
@@ -533,7 +535,7 @@
 
                     <!-- Body -->
                     <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-slate-50 dark:bg-slate-950/50">
-                        <div class="px-5 py-5 space-y-6">
+                        <div class="px-4 sm:px-5 py-5 space-y-6">
 
                             <!-- ═══ MODE IN ═══ -->
                             <template x-if="showSharedSpaceSheet && mode === 'in'">
@@ -887,7 +889,7 @@
                     </div>
 
                     <!-- Footer -->
-                    <div class="flex-shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 px-5 pt-3.5"
+                    <div class="flex-shrink-0 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 px-4 sm:px-5 pt-3.5"
                          style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));">
 
                         <!-- Error inline -->
@@ -951,8 +953,10 @@
                 </div>
             </div>
         </div>
+        </template>
 
         <!-- Dynamic Class Selection Modal -->
+        <template x-teleport="body">
         <div x-show="showClassSelection" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
@@ -998,6 +1002,7 @@
                 </div>
             </div>
         </div>
+        </template>
     </div>
 
     <!-- jsQR Library -->
