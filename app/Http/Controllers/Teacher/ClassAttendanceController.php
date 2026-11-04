@@ -505,7 +505,7 @@ class ClassAttendanceController extends Controller
             return response()->json(['success' => false, 'message' => 'Ruangan bersama tidak valid.'], 422);
         }
 
-        $assignedIds = $classroom->sharedRoomClasses()->pluck('id')->all();
+        $assignedIds = $classroom->sharedRoomClasses()->pluck('classrooms.id')->all();
 
         if ($mode === 'out') {
             return $this->handleSharedSpaceCheckOut($classroom, $user, $now, $today, $request);
@@ -640,7 +640,6 @@ class ClassAttendanceController extends Controller
     private function sharedSpaceSheetPayload(Classroom $classroom, User $user, string $mode): array
     {
         $assignedClassrooms = $classroom->sharedRoomClasses()
-            ->select('classrooms.*')
             ->where('is_active', true)
             ->orderBy('level')
             ->orderBy('name')
@@ -735,7 +734,7 @@ class ClassAttendanceController extends Controller
         $selectedClassroom = Classroom::find($request->selected_classroom_id);
         $subject           = Subject::find($request->subject_id);
 
-        if (!$classroom->sharedRoomClasses()->whereKey($selectedClassroom->id)->exists()) {
+        if (!$classroom->sharedRoomClasses()->where('classrooms.id', $selectedClassroom->id)->exists()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Kelas ini tidak terhubung dengan ruangan bersama ini.',

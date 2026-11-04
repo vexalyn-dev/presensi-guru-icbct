@@ -62,7 +62,7 @@ class Classroom extends Model
             'shared_room_classrooms',
             'shared_classroom_id',
             'classroom_id'
-        )->withTimestamps();
+        )->withTimestamps()->select('classrooms.*');
     }
 
     /**
