@@ -90,6 +90,15 @@ window.customDatePicker = function (config) {
     }
 
     return {
+        name: config.name || 'date',
+        id: config.id || 'date',
+        placeholder: config.placeholder || 'Pilih tanggal',
+        required: !!config.required,
+        disabled: !!config.disabled,
+        min: config.min || null,
+        max: config.max || null,
+        hasXModel: !!config.hasXModel,
+        xModelKey: config.xModelKey || null,
         open: false,
         currentYear: curYear,
         currentMonth: curMonth,
