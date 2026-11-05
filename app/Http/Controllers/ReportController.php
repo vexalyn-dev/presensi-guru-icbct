@@ -12,6 +12,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -26,19 +27,7 @@ class ReportController extends Controller
         $viewMode   = $request->input('view_mode', 'weekly');
         $reportType = $request->input('report_type', 'daily');
         $search     = $request->input('search', '');
-        
-        if ($viewMode === 'daily') {
-            $startDate = $request->input('start_date', Carbon::today()->toDateString());
-            $endDate   = $startDate;
-        } elseif ($viewMode === 'weekly') {
-            $baseDate  = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
-            $startDate = $baseDate->copy()->startOfWeek()->toDateString();
-            $endDate   = $baseDate->copy()->endOfWeek()->toDateString();
-        } else {
-            $baseDate  = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
-            $startDate = $baseDate->copy()->startOfMonth()->toDateString();
-            $endDate   = $baseDate->copy()->endOfMonth()->toDateString();
-        }
+        [$startDate, $endDate] = $this->resolveDateRange($request, $viewMode);
 
         $calculated = $this->calculateReportData($startDate, $endDate, $reportType, $search);
         $reportData  = $calculated['reportData'];
@@ -55,6 +44,8 @@ class ReportController extends Controller
                 'stats'         => $totalStats,
                 'totalPresensi'  => $totalPresensi,
                 'kehadiranRate' => $kehadiranRate,
+                'startDate'     => $startDate,
+                'endDate'       => $endDate,
             ]);
         }
 
@@ -69,19 +60,7 @@ class ReportController extends Controller
         $reportType = $request->input('report_type', 'daily');
         $viewMode   = $request->input('view_mode', 'weekly');
         $search     = $request->input('search', '');
-        
-        if ($viewMode === 'daily') {
-            $startDate = $request->input('start_date', Carbon::today()->toDateString());
-            $endDate   = $startDate;
-        } elseif ($viewMode === 'weekly') {
-            $baseDate  = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
-            $startDate = $baseDate->copy()->startOfWeek()->toDateString();
-            $endDate   = $baseDate->copy()->endOfWeek()->toDateString();
-        } else {
-            $baseDate  = $request->input('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::now();
-            $startDate = $baseDate->copy()->startOfMonth()->toDateString();
-            $endDate   = $baseDate->copy()->endOfMonth()->toDateString();
-        }
+        [$startDate, $endDate] = $this->resolveDateRange($request, $viewMode);
 
         $calculated = $this->calculateReportData($startDate, $endDate, $reportType, $search);
         $reportData = $calculated['reportData'];
@@ -424,6 +403,40 @@ class ReportController extends Controller
             'Cache-Control'       => 'max-age=0, no-cache, no-store',
             'Pragma'              => 'no-cache',
         ]);
+    }
+
+    private function resolveDateRange(Request $request, string $viewMode): array
+    {
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+
+        $start = $validated['start_date'] ?? null;
+        $end = $validated['end_date'] ?? null;
+
+        if ($start && $end) {
+            if ($end < $start) {
+                throw ValidationException::withMessages([
+                    'end_date' => 'Tanggal akhir harus sama dengan atau setelah tanggal mulai.',
+                ]);
+            }
+
+            return [$start, $end];
+        }
+
+        if ($viewMode === 'daily') {
+            $startDate = $start ?: $end ?: Carbon::today()->toDateString();
+            return [$startDate, $startDate];
+        }
+
+        $baseDate = $start || $end
+            ? Carbon::parse($start ?: $end)
+            : Carbon::now();
+
+        return $viewMode === 'weekly'
+            ? [$baseDate->copy()->startOfWeek()->toDateString(), $baseDate->copy()->endOfWeek()->toDateString()]
+            : [$baseDate->copy()->startOfMonth()->toDateString(), $baseDate->copy()->endOfMonth()->toDateString()];
     }
 
     /**

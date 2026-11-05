@@ -14,7 +14,7 @@
             </div>
             <div>
                 <h1 class="text-2xl font-bold text-navy-800 dark:text-white">Laporan Presensi</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
+                <p id="report-period" class="text-sm text-slate-500 dark:text-slate-400">
                     {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
                 </p>
             </div>
@@ -125,6 +125,7 @@
                 </div>
             </div>
         </form>
+        <p id="report-filter-error" class="mt-2 text-sm text-red-600 dark:text-red-400" role="alert" hidden></p>
     </div>
 
     <!-- Statistics Cards -->
@@ -287,17 +288,29 @@
     window.fetchData = function() {
         const loadingOverlay = document.getElementById('loading-overlay');
         const tableContainer = document.getElementById('table-container');
-        
-        // Show loading
-        if (loadingOverlay) {
-            loadingOverlay.style.display = 'flex';
-        }
-        
         const reportType = document.getElementById('report-type')?.value || 'daily';
         const startDate = document.getElementById('start-date')?.value || '';
         const endDate = document.getElementById('end-date')?.value || '';
         const search = document.getElementById('search-input')?.value || '';
-        
+        const errorMessage = document.getElementById('report-filter-error');
+
+        if (startDate && endDate && startDate > endDate) {
+            if (errorMessage) {
+                errorMessage.textContent = 'Tanggal akhir harus sama dengan atau setelah tanggal mulai.';
+                errorMessage.hidden = false;
+            }
+            return;
+        }
+
+        if (errorMessage) {
+            errorMessage.hidden = true;
+            errorMessage.textContent = '';
+        }
+
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+        }
+
         const params = new URLSearchParams({
             report_type: reportType,
             start_date: startDate,
@@ -310,7 +323,12 @@
         fetch('{{ route("reports.index") }}?' + params.toString(), {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Laporan gagal dimuat. Periksa kembali tanggal yang dipilih.');
+            }
+            return res.json();
+        })
         .then(data => {
             if (data && data.html !== undefined) {
                 // Update table with loading overlay preserved
@@ -329,6 +347,15 @@
                     document.getElementById('stat-alpha').textContent = data.stats.alpha;
                 }
                 if (data.kehadiranRate !== undefined) document.getElementById('stat-rate').textContent = data.kehadiranRate + '% tingkat kehadiran';
+                if (data.startDate && data.endDate) {
+                    const formatDate = date => new Intl.DateTimeFormat('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }).format(new Date(`${date}T00:00:00`));
+                    document.getElementById('report-period').textContent =
+                        `${formatDate(data.startDate)} — ${formatDate(data.endDate)}`;
+                }
 
                 // Dynamic UI adjustments based on report type
                 const statsContainer = document.getElementById('stats-container');
@@ -360,6 +387,10 @@
         })
         .catch(error => {
             console.error('Fetch error:', error);
+            if (errorMessage) {
+                errorMessage.textContent = error.message;
+                errorMessage.hidden = false;
+            }
             // Hide loading on error
             if (loadingOverlay) {
                 loadingOverlay.style.display = 'none';
@@ -435,6 +466,24 @@
                 }, 500);
             });
         }
+
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const updateDateConstraints = () => {
+            if (startDateInput && endDateInput) {
+                endDateInput.min = startDateInput.value;
+                startDateInput.max = endDateInput.value;
+            }
+        };
+        [startDateInput, endDateInput].forEach(input => {
+            if (input) {
+                input.addEventListener('change', () => {
+                    updateDateConstraints();
+                    window.fetchData();
+                });
+            }
+        });
+        updateDateConstraints();
     });
 </script>
 
