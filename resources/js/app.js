@@ -6,6 +6,9 @@ window.Alpine = Alpine;
 
 Alpine.data('customDatePicker', (config) => ({
     open: false,
+    id: config.id,
+    name: config.name,
+    placeholder: config.placeholder,
     selectedDate: config.initialValue || '',
     disabled: config.disabled,
     required: config.required,
