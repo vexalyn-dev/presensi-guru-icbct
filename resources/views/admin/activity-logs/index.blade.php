@@ -89,19 +89,11 @@
 
             {{-- Tanggal --}}
             <div class="flex items-center gap-2 flex-wrap">
-                <x-custom-date-picker
-                    name="date_from"
-                    value="{{ request('date_from') }}"
-                    placeholder="Tanggal mulai"
-                    :class="request('date_from') ? 'border-navy-800/20 dark:border-slate-600' : ''"
-                />
+                <input type="date" name="date_from" value="{{ request('date_from') }}"
+                       class="w-full sm:w-auto px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                 <span class="text-slate-400 text-sm">s/d</span>
-                <x-custom-date-picker
-                    name="date_to"
-                    value="{{ request('date_to') }}"
-                    placeholder="Tanggal akhir"
-                    :class="request('date_to') ? 'border-navy-800/20 dark:border-slate-600' : ''"
-                />
+                <input type="date" name="date_to" value="{{ request('date_to') }}"
+                       class="w-full sm:w-auto px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
 
             <div class="flex items-center gap-2">
@@ -180,19 +172,11 @@
 
             {{-- Tanggal --}}
             <div class="flex items-center gap-2">
-                <x-custom-date-picker
-                    name="date_from"
-                    value="{{ request('date_from') }}"
-                    placeholder="Tanggal mulai"
-                    :class="request('date_from') ? 'border-navy-800/20 dark:border-slate-600' : ''"
-                />
+                <input type="date" name="date_from" value="{{ request('date_from') }}"
+                       class="w-full sm:w-auto px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                 <span class="text-slate-400 text-sm">s/d</span>
-                <x-custom-date-picker
-                    name="date_to"
-                    value="{{ request('date_to') }}"
-                    placeholder="Tanggal akhir"
-                    :class="request('date_to') ? 'border-navy-800/20 dark:border-slate-600' : ''"
-                />
+                <input type="date" name="date_to" value="{{ request('date_to') }}"
+                       class="w-full sm:w-auto px-3 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
 
             <button type="submit" class="px-5 py-2.5 bg-navy-800 dark:bg-gold-400 text-white dark:text-navy-900 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">

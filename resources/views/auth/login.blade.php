@@ -1182,7 +1182,7 @@
                 @endif
 
                 @if (session('success'))
-                    <div class="success-message">{{ session('success') }}</div>
+                    <div @if (session('success') === 'Anda berhasil logout.') id="logout-success-message" @endif class="success-message">{{ session('success') }}</div>
                 @endif
 
                 {{-- AJAX error box --}}
@@ -1655,6 +1655,17 @@
                 });
             });
         })();
+
+        var logoutSuccessMessage = document.getElementById('logout-success-message');
+        if (logoutSuccessMessage) {
+            setTimeout(function() {
+                logoutSuccessMessage.style.transition = 'opacity 0.2s ease';
+                logoutSuccessMessage.style.opacity = '0';
+                setTimeout(function() {
+                    logoutSuccessMessage.remove();
+                }, 200);
+            }, 1800);
+        }
     </script>
 </body>
 

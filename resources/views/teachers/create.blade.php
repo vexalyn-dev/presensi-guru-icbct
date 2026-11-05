@@ -200,11 +200,8 @@
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                                 Tanggal Bergabung
                             </label>
-                            <x-custom-date-picker
-                                name="join_date"
-                                :value="old('join_date')"
-                                placeholder="Pilih tanggal bergabung"
-                            />
+                            <input type="date" name="join_date" value="{{ old('join_date') }}"
+                                   class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                         </div>
                     </div>
                 </div>

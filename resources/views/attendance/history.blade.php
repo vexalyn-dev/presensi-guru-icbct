@@ -131,27 +131,17 @@
             <!-- Start Date -->
             <div>
                 <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Dari Tanggal</label>
-                <x-custom-date-picker
-                    name="start_date"
-                    :value="$filters['start_date'] ?? old('start_date')"
-                    placeholder="Pilih tanggal mulai"
-                    class="w-full"
-                    x-model="filters.start_date"
-                    @change="filterData"
-                />
+                <input type="date" name="start_date" value="{{ $filters['start_date'] ?? old('start_date') }}"
+                       x-model="filters.start_date" @change="filterData"
+                       class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
 
             <!-- End Date -->
             <div>
                 <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Sampai Tanggal</label>
-                <x-custom-date-picker
-                    name="end_date"
-                    :value="$filters['end_date'] ?? old('end_date')"
-                    placeholder="Pilih tanggal akhir"
-                    class="w-full"
-                    x-model="filters.end_date"
-                    @change="filterData"
-                />
+                <input type="date" name="end_date" value="{{ $filters['end_date'] ?? old('end_date') }}"
+                       x-model="filters.end_date" @change="filterData"
+                       class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
 
             <!-- Teacher Dropdown (Modern) -->

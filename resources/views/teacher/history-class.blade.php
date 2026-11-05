@@ -35,20 +35,14 @@
             
             <div>
                 <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Tanggal Mulai</label>
-                <x-custom-date-picker
-                    name="start_date"
-                    :value="$startDate"
-                    placeholder="Pilih tanggal mulai"
-                />
+                <input type="date" name="start_date" value="{{ $startDate }}"
+                       class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
 
             <div>
                 <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Tanggal Akhir</label>
-                <x-custom-date-picker
-                    name="end_date"
-                    :value="$endDate"
-                    placeholder="Pilih tanggal akhir"
-                />
+                <input type="date" name="end_date" value="{{ $endDate }}"
+                       class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
             </div>
 
             <div class="flex items-end">

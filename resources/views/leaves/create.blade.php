@@ -238,14 +238,9 @@
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                                 Tanggal Mulai <span class="text-red-500">*</span>
                             </label>
-                            <x-custom-date-picker
-                                name="start_date"
-                                :value="old('start_date', now()->format('Y-m-d'))"
-                                required
-                                placeholder="Pilih tanggal mulai"
-                                x-model="startDate"
-                                @change="validateDates"
-                            />
+                            <input type="date" name="start_date" value="{{ old('start_date', now()->format('Y-m-d')) }}"
+                                   required x-model="startDate" @change="validateDates"
+                                   class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                             @error('start_date')
                                 <p class="mt-2 text-xs text-red-500 flex items-center gap-1">
                                     <i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}
@@ -256,15 +251,9 @@
                             <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                                 Tanggal Selesai <span class="text-red-500">*</span>
                             </label>
-                            <x-custom-date-picker
-                                name="end_date"
-                                :value="old('end_date', now()->format('Y-m-d'))"
-                                required
-                                :min="$startDate ?? null"
-                                placeholder="Pilih tanggal selesai"
-                                x-model="endDate"
-                                @change="validateDates"
-                            />
+                            <input type="date" name="end_date" value="{{ old('end_date', now()->format('Y-m-d')) }}"
+                                   required :min="startDate" x-model="endDate" @change="validateDates"
+                                   class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500">
                             @error('end_date')
                                 <p class="mt-2 text-xs text-red-500 flex items-center gap-1">
                                     <i data-lucide="alert-circle" class="w-3 h-3"></i>{{ $message }}
