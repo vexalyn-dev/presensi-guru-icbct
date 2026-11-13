@@ -134,4 +134,14 @@ return [
     'developer_secret_key' => env('DEVELOPER_SECRET_KEY', ''),
     'deploy_secret_key'    => env('DEPLOY_SECRET_KEY', ''),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Device Scan Key
+    |--------------------------------------------------------------------------
+    | API key untuk alat scan QR fisik (barcode gun, ESP32, dsb.).
+    | Isi di .env: DEVICE_SCAN_KEY=kunci-rahasia-alat-scan
+    | Alat mengirim key ini via header: X-Device-Key: {value}
+    */
+    'device_scan_key' => env('DEVICE_SCAN_KEY', ''),
+
 ];

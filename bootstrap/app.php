@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'session.timeout'       => \App\Http\Middleware\EnforceSessionTimeout::class,
             'maintenance.check'     => \App\Http\Middleware\CheckMaintenanceMode::class,
             'csp'                   => \App\Http\Middleware\ContentSecurityPolicy::class,
+            'device.scan'           => \App\Http\Middleware\DeviceScanMiddleware::class,
         ]);
 
         // Fix session cookie — SEBELUM StartSession agar config override efektif

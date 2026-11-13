@@ -57,6 +57,21 @@ Route::post('/webhooks/github', [\App\Http\Controllers\GitHubWebhookController::
     ->name('webhooks.github')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
+// ============================================================
+// Kiosk Presensi — halaman publik untuk barcode gun 2D
+// Tidak memerlukan login apapun.
+// Buka di browser komputer yang terhubung barcode gun:
+//   GET  /scan-kiosk       → halaman scan fullscreen
+//   POST /scan-kiosk/store → proses presensi
+// ============================================================
+Route::get('/scan-kiosk', [\App\Http\Controllers\KioskAttendanceController::class, 'index'])
+    ->name('kiosk.scan')
+    ->middleware(['throttle:60,1']);
+
+Route::post('/scan-kiosk/store', [\App\Http\Controllers\KioskAttendanceController::class, 'store'])
+    ->name('kiosk.attendance.store')
+    ->middleware(['throttle:120,1']);
+
 // Landing page
 Route::get('/', function () {
     if (Auth::check()) {
