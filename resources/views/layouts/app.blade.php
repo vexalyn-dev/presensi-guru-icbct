@@ -13,25 +13,37 @@
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <link rel="canonical" href="{{ url()->current() }}">
 
+    @php
+        $ogTitle       = trim(\Illuminate\Support\Facades\View::yieldContent('og-title'))
+                      ?: trim(\Illuminate\Support\Facades\View::yieldContent('page-title'))
+                      ?: 'Dashboard';
+        $ogTitle      .= ' — Presensi Guru ICB CT | SMK Cinta Teknika';
+        $ogDesc        = trim(\Illuminate\Support\Facades\View::yieldContent('og-description'))
+                      ?: trim(\Illuminate\Support\Facades\View::yieldContent('meta-description'))
+                      ?: 'Sistem Presensi Digital Guru ICB CT — SMK Cinta Teknika. Absensi harian & kelas via QR Code, validasi GPS, monitoring real-time.';
+        $ogImage       = trim(\Illuminate\Support\Facades\View::yieldContent('og-image'))
+                      ?: asset('images/og-banner.png');
+    @endphp
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="@yield('og-title', '@yield('page-title', 'Dashboard') — Presensi Guru ICB CT | SMK Cinta Teknika')">
-    <meta property="og:description" content="@yield('og-description', '@yield('meta-description', 'Sistem Presensi Digital Guru ICB CT — SMK Cinta Teknika. Absensi harian & kelas via QR Code, validasi GPS, monitoring real-time.')')">
-    <meta property="og:image" content="@yield('og-image', asset('images/og-banner.png'))">
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDesc }}">
+    <meta property="og:image" content="{{ $ogImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="@yield('og-title', 'Presensi Guru ICB CT — SMK Cinta Teknika')">
+    <meta property="og:image:alt" content="{{ $ogTitle }}">
     <meta property="og:site_name" content="Presensi Guru ICB CT">
     <meta property="og:locale" content="id_ID">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ url()->current() }}">
-    <meta name="twitter:title" content="@yield('og-title', '@yield('page-title', 'Dashboard') — Presensi Guru ICB CT | SMK Cinta Teknika')">
-    <meta name="twitter:description" content="@yield('og-description', '@yield('meta-description', 'Sistem Presensi Digital Guru ICB CT — SMK Cinta Teknika. Absensi harian & kelas via QR Code, validasi GPS, monitoring real-time.')')">
-    <meta name="twitter:image" content="@yield('og-image', asset('images/og-banner.png'))">
-    <meta name="twitter:image:alt" content="@yield('og-title', 'Presensi Guru ICB CT — SMK Cinta Teknika')">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDesc }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+    <meta name="twitter:image:alt" content="{{ $ogTitle }}">
 
     <!-- JSON-LD Structured Data — Sekolah -->
     <script type="application/ld+json">
