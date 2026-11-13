@@ -298,11 +298,22 @@
             <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
                 <div class="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <!-- Hamburger Menu (Mobile Only) -->
+                        <!-- Hamburger Menu (Desktop/Tablet hanya — Mobile pakai bottom nav) -->
                         <button @click="sidebarOpen = true" 
-                                class="lg:hidden flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 flex-shrink-0">
+                                class="hidden lg:flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 flex-shrink-0">
                             <i data-lucide="menu" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                         </button>
+
+                        <!-- Logo mobile (hanya di mobile, ganti hamburger) -->
+                        <div class="flex lg:hidden items-center gap-2 flex-shrink-0">
+                            @if($appSettings->app_logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($appSettings->app_logo))
+                                <img src="{{ asset('storage/' . $appSettings->app_logo) }}" alt="Logo" class="w-7 h-7 object-contain">
+                            @else
+                                <div class="w-7 h-7 bg-gradient-to-br from-navy-800 to-navy-900 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="school" class="w-4 h-4 text-white"></i>
+                                </div>
+                            @endif
+                        </div>
                         
                         <div class="min-w-0">
                             <h2 class="text-base sm:text-lg font-bold text-navy-800 dark:text-white truncate">@yield('page-title', 'Dashboard')</h2>
@@ -536,6 +547,297 @@
         
         <!-- Mobile Overlay (tidak digunakan lagi karena sidebar hidden di mobile) -->
     </div>
+
+    {{-- ══════════════════════════════════════════
+         BOTTOM NAVIGATION — Mobile Only (lg:hidden)
+         5 tab: Home | Jadwal | Presensi | Riwayat | Lainnya
+    ══════════════════════════════════════════ --}}
+    <nav id="bottom-nav"
+         class="lg:hidden fixed bottom-0 inset-x-0 z-[90] bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-700/80 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] safe-area-bottom"
+         x-data="{ moreOpen: false }"
+         style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+
+        @php
+            $isHome       = request()->routeIs('teacher.dashboard');
+            $isJadwal     = request()->routeIs('teacher.schedule') || request()->routeIs('teacher.class-attendance');
+            $isPresensi   = request()->routeIs('teacher.attendance');
+            $isRiwayat    = request()->routeIs('teacher.history*');
+            $isOther      = request()->routeIs('teacher.leave*') || request()->routeIs('teacher.support*') || request()->routeIs('download-apk') || request()->routeIs('teacher.profile') || request()->routeIs('teacher.notifications*');
+        @endphp
+
+        <div class="flex items-stretch h-16">
+
+            {{-- Home --}}
+            <a href="{{ route('teacher.dashboard') }}"
+               class="bnav-item {{ $isHome ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
+                <div class="bnav-icon-wrap {{ $isHome ? 'bnav-icon-active' : '' }}">
+                    <svg class="w-5 h-5" fill="{{ $isHome ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isHome ? '0' : '2' }}">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <span class="bnav-label {{ $isHome ? 'bnav-label-active' : '' }}">Home</span>
+                @if($isHome)<span class="bnav-dot"></span>@endif
+            </a>
+
+            {{-- Jadwal --}}
+            <a href="{{ route('teacher.schedule') }}"
+               class="bnav-item {{ $isJadwal ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
+                <div class="bnav-icon-wrap {{ $isJadwal ? 'bnav-icon-active' : '' }}">
+                    <svg class="w-5 h-5" fill="{{ $isJadwal ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isJadwal ? '0' : '2' }}">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="16" y1="2" x2="16" y2="6" stroke-linecap="round"/>
+                        <line x1="8" y1="2" x2="8" y2="6" stroke-linecap="round"/>
+                        <line x1="3" y1="10" x2="21" y2="10" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <span class="bnav-label {{ $isJadwal ? 'bnav-label-active' : '' }}">Jadwal</span>
+                @if($isJadwal)<span class="bnav-dot"></span>@endif
+            </a>
+
+            {{-- Presensi — tombol tengah menonjol --}}
+            <a href="{{ route('teacher.attendance') }}"
+               class="bnav-item flex-1 flex flex-col items-center justify-center gap-0.5 relative -mt-4 transition-all duration-200 active:scale-95">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center shadow-lg shadow-navy-800/40 dark:shadow-gold-400/40 {{ $isPresensi ? 'ring-4 ring-navy-800/20 dark:ring-gold-400/20' : '' }} transition-all duration-200">
+                    <svg class="w-6 h-6 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0c-.693.04-1.344.436-1.736 1.039l-.821 1.316Z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/>
+                    </svg>
+                </div>
+                <span class="bnav-label {{ $isPresensi ? 'bnav-label-active' : '' }} mt-0.5">Presensi</span>
+            </a>
+
+            {{-- Riwayat --}}
+            <a href="{{ route('teacher.history') }}"
+               class="bnav-item {{ $isRiwayat ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
+                <div class="bnav-icon-wrap {{ $isRiwayat ? 'bnav-icon-active' : '' }}">
+                    <svg class="w-5 h-5" fill="{{ $isRiwayat ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isRiwayat ? '0' : '2' }}">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                </div>
+                <span class="bnav-label {{ $isRiwayat ? 'bnav-label-active' : '' }}">Riwayat</span>
+                @if($isRiwayat)<span class="bnav-dot"></span>@endif
+            </a>
+
+            {{-- Lainnya --}}
+            <button @click="moreOpen = true"
+                    class="bnav-item {{ $isOther ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
+                <div class="bnav-icon-wrap {{ $isOther ? 'bnav-icon-active' : '' }}">
+                    <svg class="w-5 h-5" fill="{{ $isOther ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isOther ? '0' : '2' }}">
+                        <circle cx="5" cy="12" r="1" stroke-linecap="round"/>
+                        <circle cx="12" cy="12" r="1" stroke-linecap="round"/>
+                        <circle cx="19" cy="12" r="1" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <span class="bnav-label {{ $isOther ? 'bnav-label-active' : '' }}">Lainnya</span>
+                @if($isOther)<span class="bnav-dot"></span>@endif
+            </button>
+        </div>
+
+        {{-- ── Modal "Lainnya" — slide up dari bawah ── --}}
+        <div x-show="moreOpen"
+             x-cloak
+             class="fixed inset-0 z-[200]"
+             @click.self="moreOpen = false">
+
+            {{-- Backdrop --}}
+            <div x-show="moreOpen"
+                 x-transition:enter="transition ease-out duration-250"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="moreOpen = false"
+                 class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+            {{-- Sheet --}}
+            <div x-show="moreOpen"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-full"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-full"
+                 class="absolute bottom-0 inset-x-0 bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl overflow-hidden"
+                 style="padding-bottom: env(safe-area-inset-bottom, 16px);">
+
+                {{-- Handle --}}
+                <div class="flex justify-center pt-3 pb-1">
+                    <div class="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                </div>
+
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+                    <h3 class="text-sm font-bold text-navy-800 dark:text-white">Menu Lainnya</h3>
+                    <button @click="moreOpen = false"
+                            class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- Profile strip --}}
+                <a href="{{ route('teacher.profile') }}" @click="moreOpen = false"
+                   class="flex items-center gap-3 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b border-slate-100 dark:border-slate-800">
+                    <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}"
+                         class="w-10 h-10 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0"
+                         onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-navy-800 dark:text-white truncate">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Lihat profil saya</p>
+                    </div>
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/>
+                    </svg>
+                </a>
+
+                {{-- Menu items --}}
+                <div class="px-4 py-3 grid grid-cols-3 gap-3">
+
+                    {{-- Presensi Kelas --}}
+                    <a href="{{ route('teacher.class-attendance') }}" @click="moreOpen = false"
+                       class="more-menu-item {{ request()->routeIs('teacher.class-attendance') ? 'more-menu-active' : '' }}">
+                        <div class="more-menu-icon bg-violet-100 dark:bg-violet-900/30">
+                            <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5zM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5z"/>
+                            </svg>
+                        </div>
+                        <span class="more-menu-label">Presensi Kelas</span>
+                    </a>
+
+                    {{-- Izin / Sakit --}}
+                    <a href="{{ route('teacher.leave') }}" @click="moreOpen = false"
+                       class="more-menu-item {{ request()->routeIs('teacher.leave*') ? 'more-menu-active' : '' }}">
+                        <div class="more-menu-icon bg-blue-100 dark:bg-blue-900/30">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
+                            </svg>
+                        </div>
+                        <span class="more-menu-label">Izin / Sakit</span>
+                    </a>
+
+                    {{-- Pusat Bantuan --}}
+                    <a href="{{ route('teacher.support') }}" @click="moreOpen = false"
+                       class="more-menu-item {{ request()->routeIs('teacher.support*') ? 'more-menu-active' : '' }}">
+                        <div class="more-menu-icon bg-green-100 dark:bg-green-900/30">
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/>
+                            </svg>
+                        </div>
+                        <span class="more-menu-label">Bantuan</span>
+                    </a>
+
+                    {{-- Notifikasi --}}
+                    <a href="{{ route('teacher.notifications') }}" @click="moreOpen = false"
+                       class="more-menu-item {{ request()->routeIs('teacher.notifications*') ? 'more-menu-active' : '' }}">
+                        <div class="more-menu-icon bg-amber-100 dark:bg-amber-900/30 relative">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+                            </svg>
+                            @if(auth()->user()->unreadCount() > 0)
+                            <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ auth()->user()->unreadCount() > 9 ? '9+' : auth()->user()->unreadCount() }}</span>
+                            @endif
+                        </div>
+                        <span class="more-menu-label">Notifikasi</span>
+                    </a>
+
+                    {{-- Download APK --}}
+                    <a href="{{ route('download-apk') }}" @click="moreOpen = false"
+                       class="more-menu-item {{ request()->routeIs('download-apk') ? 'more-menu-active' : '' }}">
+                        <div class="more-menu-icon bg-slate-100 dark:bg-slate-800">
+                            <svg class="w-5 h-5 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
+                            </svg>
+                        </div>
+                        <span class="more-menu-label">Download APK</span>
+                    </a>
+
+                    {{-- Logout --}}
+                    <button @click="moreOpen = false"
+                            onclick="document.getElementById('bnav-logout-form').submit()"
+                            class="more-menu-item">
+                        <div class="more-menu-icon bg-red-100 dark:bg-red-900/30">
+                            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+                            </svg>
+                        </div>
+                        <span class="more-menu-label text-red-600 dark:text-red-400">Logout</span>
+                    </button>
+                </div>
+
+                {{-- Hidden logout form --}}
+                <form id="bnav-logout-form" method="POST" action="{{ route('logout') }}" class="hidden">@csrf</form>
+            </div>
+        </div>
+    </nav>
+
+    <style>
+        /* ── Bottom Nav Base ── */
+        .bnav-item { color: #94a3b8; text-decoration: none; }
+        html.dark .bnav-item { color: #64748b; }
+        .bnav-active { color: #0f172a; }
+        html.dark .bnav-active { color: #facc15; }
+
+        .bnav-icon-wrap {
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            transition: background 0.2s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .bnav-icon-active {
+            background: rgba(15,23,42,0.08);
+            transform: scale(1.1);
+        }
+        html.dark .bnav-icon-active { background: rgba(250,204,21,0.15); }
+
+        .bnav-label {
+            font-size: 10px; font-weight: 500;
+            line-height: 1; color: inherit;
+        }
+        .bnav-label-active { font-weight: 700; }
+
+        /* Active indicator dot */
+        .bnav-dot {
+            position: absolute; bottom: 4px;
+            width: 4px; height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+        }
+
+        /* ── More Modal Menu Items ── */
+        .more-menu-item {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 6px;
+            padding: 10px 4px;
+            border-radius: 16px;
+            transition: background 0.15s ease, transform 0.15s ease;
+            cursor: pointer; text-decoration: none;
+            background: transparent; border: none;
+        }
+        .more-menu-item:active { transform: scale(0.94); }
+        .more-menu-item:hover { background: rgba(15,23,42,0.04); }
+        html.dark .more-menu-item:hover { background: rgba(255,255,255,0.05); }
+        .more-menu-active { background: rgba(15,23,42,0.06) !important; }
+        html.dark .more-menu-active { background: rgba(250,204,21,0.1) !important; }
+
+        .more-menu-icon {
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 14px; position: relative;
+            transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .more-menu-item:active .more-menu-icon { transform: scale(0.9); }
+        .more-menu-label {
+            font-size: 10px; font-weight: 600; color: #475569;
+            text-align: center; line-height: 1.2;
+        }
+        html.dark .more-menu-label { color: #94a3b8; }
+
+        /* Safe area for bottom nav */
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
 
     @php
         $autoLogoutVal = \App\Models\Setting::get('auto_logout', 'off');
