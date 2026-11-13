@@ -383,9 +383,24 @@
             </div>
         </div>
 
-        <!-- ══ FLOATING TOAST CONTAINER ══ -->
-        <div id="scan-toast-container"
-             class="fixed bottom-4 right-4 z-[9998] flex flex-col gap-2.5 items-end pointer-events-none w-80 max-w-[calc(100vw-2rem)]">
+        <!-- ══ INLINE RESULT CARD — muncul di bawah tombol Mulai Scan ══ -->
+        <div id="scan-inline-result" class="hidden">
+            <div id="scan-inline-inner" class="rounded-2xl border-2 p-4 transition-all duration-300 opacity-0 translate-y-1 border-green-500 bg-green-50 dark:bg-green-900/20">
+                <div class="flex items-start gap-3">
+                    <div id="scan-inline-icon" class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-500">
+                        <svg id="scan-inline-svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="scan-inline-title" class="text-sm font-bold leading-snug text-green-800 dark:text-green-300"></p>
+                        <div id="scan-inline-detail" class="mt-1 space-y-0.5 text-xs text-green-700 dark:text-green-400"></div>
+                    </div>
+                </div>
+                <div class="mt-3 h-1 rounded-full overflow-hidden bg-green-200 dark:bg-green-800">
+                    <div id="scan-inline-bar" class="h-full rounded-full bg-green-500" style="width:100%; transition: width 2s linear;"></div>
+                </div>
+            </div>
         </div>
 
         <!-- ══ SCAN LOADING OVERLAY — style sama seperti login ══ -->
@@ -1205,6 +1220,7 @@
 
                 // Scan loading overlay
                 scanLoading: false,
+                _inlineTimer: null,
 
                 // Dropdown search state
                 ssKelasOpen: false,
@@ -1849,54 +1865,57 @@
                     }
                 },
 
-                showFloatToast(message, type = 'success', detail = '', duration = 3000) {
-                    const container = document.getElementById('scan-toast-container');
-                    if (!container) return;
+                showFloatToast(message, type = 'success', detail = '', duration = 2000) {
+                    const wrap   = document.getElementById('scan-inline-result');
+                    const inner  = document.getElementById('scan-inline-inner');
+                    const icon   = document.getElementById('scan-inline-icon');
+                    const svg    = document.getElementById('scan-inline-svg');
+                    const title  = document.getElementById('scan-inline-title');
+                    const detEl  = document.getElementById('scan-inline-detail');
+                    const bar    = document.getElementById('scan-inline-bar');
+                    if (!wrap) return;
 
-                    const colorMap = {
-                        success: { border: 'border-green-500', bg: 'bg-green-50 dark:bg-green-900/30', icon: 'bg-green-500', text: 'text-green-800 dark:text-green-200', sub: 'text-green-700 dark:text-green-300' },
-                        error:   { border: 'border-red-500',   bg: 'bg-red-50 dark:bg-red-900/30',     icon: 'bg-red-500',   text: 'text-red-800 dark:text-red-200',   sub: 'text-red-700 dark:text-red-300' },
-                        warning: { border: 'border-yellow-500',bg: 'bg-yellow-50 dark:bg-yellow-900/30',icon:'bg-yellow-500',text:'text-yellow-800 dark:text-yellow-200', sub:'text-yellow-700 dark:text-yellow-300' },
+                    // Colour map
+                    const colors = {
+                        success: { border: 'border-green-500', bg: 'bg-green-50 dark:bg-green-900/20', icon: 'bg-green-500', text: 'text-green-800 dark:text-green-300', sub: 'text-green-700 dark:text-green-400', barBg: 'bg-green-200 dark:bg-green-800', barFg: 'bg-green-500' },
+                        error:   { border: 'border-red-500',   bg: 'bg-red-50 dark:bg-red-900/20',     icon: 'bg-red-500',   text: 'text-red-800 dark:text-red-300',   sub: 'text-red-700 dark:text-red-400',   barBg: 'bg-red-200 dark:bg-red-800',   barFg: 'bg-red-500'   },
+                        warning: { border: 'border-yellow-500',bg: 'bg-yellow-50 dark:bg-yellow-900/20',icon:'bg-yellow-500',text:'text-yellow-800 dark:text-yellow-300', sub:'text-yellow-700 dark:text-yellow-400', barBg:'bg-yellow-200 dark:bg-yellow-800', barFg:'bg-yellow-500' },
                     };
-                    const iconSvg = {
+                    const svgPaths = {
                         success: '<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>',
                         error:   '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>',
                         warning: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>',
                     };
-                    const c = colorMap[type] || colorMap.success;
+                    const c = colors[type] || colors.success;
 
-                    const toast = document.createElement('div');
-                    toast.className = `pointer-events-auto rounded-2xl border-2 ${c.border} ${c.bg} shadow-xl max-w-sm w-full transform transition-all duration-300 translate-x-full opacity-0`;
-                    toast.innerHTML = `
-                        <div class="flex items-start gap-3 p-4">
-                            <div class="w-9 h-9 rounded-full ${c.icon} flex items-center justify-center flex-shrink-0 shadow-sm">
-                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">${iconSvg[type]}</svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold leading-snug ${c.text}">${message}</p>
-                                ${detail ? `<p class="text-xs mt-1 leading-relaxed ${c.sub}">${detail}</p>` : ''}
-                            </div>
-                            <button onclick="this.closest('div[class*=rounded-2xl]').remove()" class="flex-shrink-0 ${c.text} opacity-50 hover:opacity-100 transition-opacity mt-0.5">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
-                            </button>
-                        </div>
-                        <div class="scan-toast-bar h-1 ${c.icon} rounded-b-2xl opacity-70 transition-all ease-linear" style="width:100%"></div>`;
+                    // Reset classes
+                    inner.className = `rounded-2xl border-2 p-4 transition-all duration-300 opacity-0 translate-y-1 ${c.border} ${c.bg}`;
+                    icon.className  = `w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${c.icon}`;
+                    svg.innerHTML   = svgPaths[type] || svgPaths.success;
+                    title.className = `text-sm font-bold leading-snug ${c.text}`;
+                    title.textContent = message;
+                    detEl.className = `mt-1 space-y-0.5 text-xs ${c.sub}`;
+                    detEl.innerHTML = detail || '';
+                    bar.className   = `h-full rounded-full ${c.barFg}`;
+                    bar.parentElement.className = `mt-3 h-1 rounded-full overflow-hidden ${c.barBg}`;
+                    bar.style.cssText = 'width:100%; transition:none;';
 
-                    container.appendChild(toast);
-
-                    // Slide in
+                    // Show
+                    wrap.classList.remove('hidden');
                     requestAnimationFrame(() => {
-                        toast.classList.remove('translate-x-full', 'opacity-0');
+                        inner.classList.remove('opacity-0', 'translate-y-1');
+                        // Start progress bar after a tick
+                        setTimeout(() => {
+                            bar.style.transition = `width ${duration}ms linear`;
+                            bar.style.width = '0%';
+                        }, 50);
                     });
 
-                    // Progress bar
-                    const bar = toast.querySelector('.scan-toast-bar');
-                    if (bar) setTimeout(() => { bar.style.transitionDuration = duration + 'ms'; bar.style.width = '0%'; }, 50);
-
-                    // Auto dismiss
-                    setTimeout(() => {
-                        toast.classList.add('translate-x-full', 'opacity-0');
-                        setTimeout(() => toast.remove(), 300);
+                    // Auto-dismiss
+                    if (this._inlineTimer) clearTimeout(this._inlineTimer);
+                    this._inlineTimer = setTimeout(() => {
+                        inner.classList.add('opacity-0', 'translate-y-1');
+                        setTimeout(() => { wrap.classList.add('hidden'); }, 300);
                     }, duration);
                 },
 
@@ -2002,9 +2021,6 @@
         @keyframes slSpinRev { to { transform: rotate(-360deg); } }
         @keyframes slBounce  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
-        /* ── Floating scan toast ── */
-        #scan-toast-container { pointer-events: none; }
-        #scan-toast-container > * { pointer-events: auto; }
         @keyframes qrLaser {
             0% {
                 top: 0;
