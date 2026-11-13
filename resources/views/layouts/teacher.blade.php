@@ -180,7 +180,7 @@
 
         <!-- Sidebar -->
         <aside id="sidebar" 
-               class="fixed inset-y-0 left-0 z-50 flex h-full min-h-screen w-64 flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-transform duration-300 ease-in-out lg:translate-x-0"
+               class="fixed inset-y-0 left-0 z-50 flex h-full min-h-screen w-64 flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0"
                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
             
             <!-- Logo -->
@@ -554,7 +554,31 @@
     ══════════════════════════════════════════ --}}
     <nav id="bottom-nav"
          class="lg:hidden fixed bottom-0 inset-x-0 z-[90] bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-700/80 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] safe-area-bottom"
-         x-data="{ moreOpen: false }"
+         x-data="{
+             moreOpen: false,
+             _dragStartY: 0,
+             _dragCurrentY: 0,
+             sheetTouchStart(e) {
+                 this._dragStartY = e.touches[0].clientY;
+                 this._dragCurrentY = 0;
+             },
+             sheetTouchMove(e) {
+                 const dy = e.touches[0].clientY - this._dragStartY;
+                 if (dy > 0) {
+                     this._dragCurrentY = dy;
+                     this.$refs.moreSheet.style.transform = 'translateY(' + dy + 'px)';
+                     this.$refs.moreSheet.style.transition = 'none';
+                 }
+             },
+             sheetTouchEnd(e) {
+                 this.$refs.moreSheet.style.transform = '';
+                 this.$refs.moreSheet.style.transition = '';
+                 if (this._dragCurrentY > 80) {
+                     this.moreOpen = false;
+                 }
+                 this._dragCurrentY = 0;
+             }
+         }"
          style="padding-bottom: env(safe-area-inset-bottom, 0px);">
 
         @php
@@ -568,7 +592,7 @@
         <div class="flex items-stretch h-16">
 
             {{-- Home --}}
-            <a href="{{ route('teacher.dashboard') }}"
+            <a href="{{ route('teacher.dashboard') }}" tabindex="-1"
                class="bnav-item {{ $isHome ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
                 <div class="bnav-icon-wrap {{ $isHome ? 'bnav-icon-active' : '' }}">
                     <svg class="w-5 h-5" fill="{{ $isHome ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isHome ? '0' : '2' }}">
@@ -581,7 +605,7 @@
             </a>
 
             {{-- Jadwal --}}
-            <a href="{{ route('teacher.schedule') }}"
+            <a href="{{ route('teacher.schedule') }}" tabindex="-1"
                class="bnav-item {{ $isJadwal ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
                 <div class="bnav-icon-wrap {{ $isJadwal ? 'bnav-icon-active' : '' }}">
                     <svg class="w-5 h-5" fill="{{ $isJadwal ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isJadwal ? '0' : '2' }}">
@@ -596,7 +620,7 @@
             </a>
 
             {{-- Presensi — tombol tengah menonjol --}}
-            <a href="{{ route('teacher.attendance') }}"
+            <a href="{{ route('teacher.attendance') }}" tabindex="-1"
                class="bnav-item flex-1 flex flex-col items-center justify-center gap-0.5 relative -mt-4 transition-all duration-200 active:scale-95">
                 <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center shadow-lg shadow-navy-800/40 dark:shadow-gold-400/40 {{ $isPresensi ? 'ring-4 ring-navy-800/20 dark:ring-gold-400/20' : '' }} transition-all duration-200">
                     <svg class="w-6 h-6 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -608,7 +632,7 @@
             </a>
 
             {{-- Riwayat --}}
-            <a href="{{ route('teacher.history') }}"
+            <a href="{{ route('teacher.history') }}" tabindex="-1"
                class="bnav-item {{ $isRiwayat ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
                 <div class="bnav-icon-wrap {{ $isRiwayat ? 'bnav-icon-active' : '' }}">
                     <svg class="w-5 h-5" fill="{{ $isRiwayat ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isRiwayat ? '0' : '2' }}">
@@ -620,7 +644,7 @@
             </a>
 
             {{-- Lainnya --}}
-            <button @click="moreOpen = true"
+            <button type="button" tabindex="-1" @click="moreOpen = true"
                     class="bnav-item {{ $isOther ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
                 <div class="bnav-icon-wrap {{ $isOther ? 'bnav-icon-active' : '' }}">
                     <svg class="w-5 h-5" fill="{{ $isOther ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isOther ? '0' : '2' }}">
@@ -659,23 +683,22 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 translate-y-full"
-                 class="absolute bottom-0 inset-x-0 bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl overflow-hidden"
-                 style="padding-bottom: env(safe-area-inset-bottom, 16px);">
+                 class="absolute bottom-0 inset-x-0 bg-white dark:bg-slate-900 rounded-t-[36px] shadow-2xl overflow-hidden select-none"
+                 style="padding-bottom: env(safe-area-inset-bottom, 16px);"
+                 x-ref="moreSheet"
+                 @touchstart.passive="sheetTouchStart($event)"
+                 @touchmove.passive="sheetTouchMove($event)"
+                 @touchend.passive="sheetTouchEnd($event)">
 
-                {{-- Handle --}}
-                <div class="flex justify-center pt-3 pb-1">
-                    <div class="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                {{-- Handle — klik atau drag ke bawah untuk tutup --}}
+                <div class="flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing"
+                     @click="moreOpen = false">
+                    <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
                 </div>
 
                 {{-- Header --}}
-                <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800">
-                    <h3 class="text-sm font-bold text-navy-800 dark:text-white">Menu Lainnya</h3>
-                    <button @click="moreOpen = false"
-                            class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
+                <div class="flex items-center px-5 py-2 pb-3">
+                    <h3 class="text-base font-bold text-navy-800 dark:text-white">Menu Lainnya</h3>
                 </div>
 
                 {{-- Profile strip --}}
@@ -755,7 +778,7 @@
                     </a>
 
                     {{-- Logout --}}
-                    <button @click="moreOpen = false"
+                    <button type="button" @click="moreOpen = false"
                             onclick="document.getElementById('bnav-logout-form').submit()"
                             class="more-menu-item">
                         <div class="more-menu-icon bg-red-100 dark:bg-red-900/30">
