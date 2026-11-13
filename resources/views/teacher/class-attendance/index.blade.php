@@ -268,56 +268,6 @@
             </div>
         </div>
 
-        <!-- Result Toast -->
-        <div x-show="showResult" x-transition class="card p-4 sm:p-6 border-2"
-            :class="resultSuccess ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20'">
-            <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                    :class="resultSuccess ? 'bg-green-500' : 'bg-red-500'">
-                    <svg x-show="resultSuccess" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                    </svg>
-                    <svg x-show="!resultSuccess" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-bold text-sm sm:text-base leading-snug"
-                        :class="resultSuccess ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'"
-                        x-text="resultMessage"></p>
-                    <div x-show="resultData" class="mt-2 space-y-1 text-xs"
-                        :class="resultSuccess ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'">
-                        <template x-if="resultData?.classroom">
-                            <p><strong>Kelas:</strong> <span x-text="resultData.classroom"></span></p>
-                        </template>
-                        <template x-if="resultData?.room">
-                            <p><strong>Lab/Ruangan:</strong> <span x-text="resultData.room"></span></p>
-                        </template>
-                        <template x-if="resultData?.subject">
-                            <p><strong>Mapel:</strong> <span x-text="resultData.subject"></span></p>
-                        </template>
-                        <template x-if="resultData?.duration">
-                            <p><strong>Durasi:</strong> <span x-text="resultData.duration"></span></p>
-                        </template>
-                        <template x-if="resultData?.status">
-                            <p><strong>Status:</strong> <span x-text="resultData.status"></span></p>
-                        </template>
-                        <template x-if="resultData?.debug?.message">
-                            <p><strong>Debug:</strong> <span x-text="resultData.debug.message"></span></p>
-                        </template>
-                        <template x-if="resultData?.debug?.distance">
-                            <p><strong>Jarak:</strong> <span x-text="resultData.debug.distance"></span></p>
-                        </template>
-                        <template x-if="resultData?.debug?.elapsed">
-                            <p><strong>Waktu berlalu:</strong> <span x-text="resultData.debug.elapsed"></span></p>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Jadwal Hari Ini (UPDATED LOGIC) -->
         <div class="card p-4 sm:p-6">
             <h3 class="text-base font-bold text-navy-800 dark:text-white mb-4">Jadwal Hari Ini</h3>
@@ -433,12 +383,42 @@
             </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════════════
-             SHARED SPACE — BOTTOM SHEET
-             - Slide up dari bawah, drag ke atas untuk full screen
-             - Tap backdrop / swipe down untuk menutup
-             - Teleport ke body supaya bebas dari overflow/padding layout
-        ══════════════════════════════════════════════════════ -->
+        <!-- ══ FLOATING TOAST CONTAINER ══ -->
+        <div id="scan-toast-container"
+             class="fixed bottom-4 right-4 z-[9998] flex flex-col gap-2.5 items-end pointer-events-none w-80 max-w-[calc(100vw-2rem)]">
+        </div>
+
+        <!-- ══ SCAN LOADING OVERLAY — style sama seperti login ══ -->
+        <div id="scan-loading-overlay"
+             style="display:none; position:fixed; inset:0; z-index:9999;
+                    background:rgba(10,15,30,0.80); backdrop-filter:blur(6px);
+                    -webkit-backdrop-filter:blur(6px);
+                    align-items:center; justify-content:center;
+                    opacity:0; pointer-events:none;
+                    transition:opacity 0.25s ease;">
+            <div style="background:#fff; border-radius:24px; padding:36px 40px 32px;
+                        width:240px; text-align:center;
+                        box-shadow:0 24px 56px rgba(0,0,0,0.35);">
+
+                <!-- Spinner -->
+                <div style="position:relative; width:72px; height:72px; margin:0 auto 20px;">
+                    <div class="sl-ring-outer"></div>
+                    <div class="sl-ring-inner"></div>
+                </div>
+
+                <!-- Dots -->
+                <div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:16px;">
+                    <span class="sl-dot"></span>
+                    <span class="sl-dot" style="animation-delay:0.15s"></span>
+                    <span class="sl-dot" style="animation-delay:0.3s"></span>
+                </div>
+
+                <p style="font-size:0.88rem; font-weight:700; color:#0F172A; margin-bottom:3px;">Memproses scan...</p>
+                <p style="font-size:0.75rem; color:#94A3B8;">Mohon tunggu sebentar</p>
+            </div>
+        </div>
+
+        <!-- ══ SHARED SPACE BOTTOM SHEET ══ -->
         <template x-teleport="body">
         <div x-show="showSharedSpaceSheet" x-cloak
              class="fixed inset-0 z-[999] !m-0 overflow-hidden"
@@ -1176,10 +1156,6 @@
             return {
                 mode: 'in',
                 scanning: false,
-                showResult: false,
-                resultSuccess: false,
-                resultMessage: '',
-                resultData: null,
 
                 showClassSelection: false,
                 selectedLocation: '',
@@ -1226,6 +1202,9 @@
                 sharedSpaceSelectedSubject: '',
                 sharedSpacePeriod: '',
                 sharedSpaceSelectedSession: '',
+
+                // Scan loading overlay
+                scanLoading: false,
 
                 // Dropdown search state
                 ssKelasOpen: false,
@@ -1347,6 +1326,7 @@
                 },
 
                 sendScan(qrData, latitude = null, longitude = null) {
+                    this.showScanLoading();
                     const payload = { qr_data: qrData, mode: this.mode };
                     if (latitude !== null && longitude !== null) {
                         payload.latitude = latitude;
@@ -1397,7 +1377,10 @@
                     }
 
                     this._post('{{ route("teacher.class-attendance.scan") }}', payload)
-                        .then(({ status, data }) => { this.handleScanResponse(status, data); });
+                        .then(({ status, data }) => {
+                            this.hideScanLoading();
+                            this.handleScanResponse(status, data);
+                        });
                 },
 
                 // Submit presensi MASUK shared space — support multi-kelas
@@ -1739,16 +1722,13 @@
 
                 // Batch scan prevention error handler
                 handleBatchScanError(status, data) {
-                    this.showResult  = true;
-                    this.resultSuccess = false;
-                    this.resultMessage = data.message || 'Tidak dapat memproses scan.';
-                    this.resultData  = data.data || null;
+                    this.hideScanLoading();
+                    const msg = data.message || 'Tidak dapat memproses scan.';
+                    this.showFloatToast(msg, 'warning', '', 6000);
 
                     if (data.error_type === 'too_early' && data.data?.minutes_wait > 0) {
                         this.startCountdown(data.data.minutes_wait * 60);
                     }
-
-                    setTimeout(() => { this.showResult = false; }, 6000);
                 },
 
                 // Countdown untuk "terlalu awal"
@@ -1834,19 +1814,90 @@
                 },
 
                 handleScanResponse(status, data) {
-                    this.showResult = true;
-                    this.resultSuccess = (status >= 200 && status < 300) && data?.success;
-                    this.resultMessage = data?.message || 'Terjadi kesalahan sistem';
-                    this.resultData = data?.data || data || null;
+                    this.hideScanLoading();
 
-                    if (this.resultSuccess) {
-                        // AJAX refresh jadwal, lalu sembunyikan toast setelah 2 detik
+                    const success = (status >= 200 && status < 300) && data?.success;
+                    const msg     = data?.message || 'Terjadi kesalahan sistem';
+                    const rData   = data?.data || data || null;
+
+                    if (success) {
+                        // Bangun pesan detail untuk toast
+                        let detail = '';
+                        if (rData?.classroom) detail += `<span class="font-medium">Kelas:</span> ${rData.classroom}`;
+                        if (rData?.room)      detail += `${detail ? ' &bull; ' : ''}<span class="font-medium">Lab:</span> ${rData.room}`;
+                        if (rData?.subject)   detail += `${detail ? ' &bull; ' : ''}<span class="font-medium">Mapel:</span> ${rData.subject}`;
+                        if (rData?.duration)  detail += `${detail ? '<br>' : ''}<span class="font-medium">Durasi:</span> ${rData.duration}`;
+                        this.showFloatToast(msg, 'success', detail, 3000);
                         setTimeout(() => this.refreshScheduleData(), 1500);
-                        setTimeout(() => { this.showResult = false; }, 2000);
                     } else {
-                        // Pesan error hilang setelah 4 detik
-                        setTimeout(() => { this.showResult = false; }, 4000);
+                        this.showFloatToast(msg, 'error', '', 4000);
                     }
+                },
+
+                showScanLoading() {
+                    this.scanLoading = true;
+                    const ov = document.getElementById('scan-loading-overlay');
+                    if (ov) { ov.style.display = 'flex'; requestAnimationFrame(() => ov.classList.add('show')); }
+                },
+
+                hideScanLoading() {
+                    this.scanLoading = false;
+                    const ov = document.getElementById('scan-loading-overlay');
+                    if (ov) {
+                        ov.classList.remove('show');
+                        setTimeout(() => { ov.style.display = 'none'; }, 280);
+                    }
+                },
+
+                showFloatToast(message, type = 'success', detail = '', duration = 3000) {
+                    const container = document.getElementById('scan-toast-container');
+                    if (!container) return;
+
+                    const colorMap = {
+                        success: { border: 'border-green-500', bg: 'bg-green-50 dark:bg-green-900/30', icon: 'bg-green-500', text: 'text-green-800 dark:text-green-200', sub: 'text-green-700 dark:text-green-300' },
+                        error:   { border: 'border-red-500',   bg: 'bg-red-50 dark:bg-red-900/30',     icon: 'bg-red-500',   text: 'text-red-800 dark:text-red-200',   sub: 'text-red-700 dark:text-red-300' },
+                        warning: { border: 'border-yellow-500',bg: 'bg-yellow-50 dark:bg-yellow-900/30',icon:'bg-yellow-500',text:'text-yellow-800 dark:text-yellow-200', sub:'text-yellow-700 dark:text-yellow-300' },
+                    };
+                    const iconSvg = {
+                        success: '<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>',
+                        error:   '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>',
+                        warning: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>',
+                    };
+                    const c = colorMap[type] || colorMap.success;
+
+                    const toast = document.createElement('div');
+                    toast.className = `pointer-events-auto rounded-2xl border-2 ${c.border} ${c.bg} shadow-xl max-w-sm w-full transform transition-all duration-300 translate-x-full opacity-0`;
+                    toast.innerHTML = `
+                        <div class="flex items-start gap-3 p-4">
+                            <div class="w-9 h-9 rounded-full ${c.icon} flex items-center justify-center flex-shrink-0 shadow-sm">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">${iconSvg[type]}</svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold leading-snug ${c.text}">${message}</p>
+                                ${detail ? `<p class="text-xs mt-1 leading-relaxed ${c.sub}">${detail}</p>` : ''}
+                            </div>
+                            <button onclick="this.closest('div[class*=rounded-2xl]').remove()" class="flex-shrink-0 ${c.text} opacity-50 hover:opacity-100 transition-opacity mt-0.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="scan-toast-bar h-1 ${c.icon} rounded-b-2xl opacity-70 transition-all ease-linear" style="width:100%"></div>`;
+
+                    container.appendChild(toast);
+
+                    // Slide in
+                    requestAnimationFrame(() => {
+                        toast.classList.remove('translate-x-full', 'opacity-0');
+                    });
+
+                    // Progress bar
+                    const bar = toast.querySelector('.scan-toast-bar');
+                    if (bar) setTimeout(() => { bar.style.transitionDuration = duration + 'ms'; bar.style.width = '0%'; }, 50);
+
+                    // Auto dismiss
+                    setTimeout(() => {
+                        toast.classList.add('translate-x-full', 'opacity-0');
+                        setTimeout(() => toast.remove(), 300);
+                    }, duration);
                 },
 
                 refreshScheduleData() {
@@ -1928,6 +1979,32 @@
             animation: smoothScanLaser 2.2s ease-in-out infinite;
         }
 
+        /* ── Scan loading overlay ── */
+        #scan-loading-overlay.show { opacity: 1 !important; pointer-events: all !important; }
+
+        .sl-ring-outer {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 4px solid #E2E8F0; border-top-color: #0F172A;
+            animation: slSpin 0.9s linear infinite;
+        }
+        .sl-ring-inner {
+            position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px;
+            border-radius: 50%;
+            border: 4px solid transparent; border-bottom-color: #FACC15;
+            animation: slSpinRev 0.7s linear infinite;
+        }
+        .sl-dot {
+            display: inline-block; width: 7px; height: 7px;
+            background: #0F172A; border-radius: 50%;
+            animation: slBounce 0.6s ease-in-out infinite;
+        }
+        @keyframes slSpin    { to { transform: rotate(360deg); } }
+        @keyframes slSpinRev { to { transform: rotate(-360deg); } }
+        @keyframes slBounce  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+        /* ── Floating scan toast ── */
+        #scan-toast-container { pointer-events: none; }
+        #scan-toast-container > * { pointer-events: auto; }
         @keyframes qrLaser {
             0% {
                 top: 0;
