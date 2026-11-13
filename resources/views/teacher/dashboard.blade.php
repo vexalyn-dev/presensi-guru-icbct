@@ -74,7 +74,7 @@
                 <div>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Hadir Bulan Ini</p>
                     <h3 class="text-xl sm:text-2xl font-bold text-navy-800 dark:text-white leading-tight" data-key="hadir">{{ $stats['hadir'] }}</h3>
-                    <p class="text-[9px] text-blue-500 leading-tight mt-0.5">Bulan ini</p>
+                    <p class="text-[9px] text-slate-400 leading-tight mt-0.5">Bulan ini</p>
                 </div>
             </div>
         </div>
