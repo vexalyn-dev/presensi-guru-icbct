@@ -208,17 +208,42 @@
             (notification.message.includes('disetujui') || notification.message.includes('ditolak'))) {
             return;
         }
+
+        const bgColor = notification.bg_color || 'bg-blue-100 text-blue-600';
+        // Determine border color from bg_color hint
+        let borderClass = 'border-blue-500 bg-blue-50';
+        let circleClass = 'bg-blue-500';
+        let textClass   = 'text-blue-800';
+        if (bgColor.includes('green')) {
+            borderClass = 'border-green-500 bg-green-50';
+            circleClass = 'bg-green-500';
+            textClass   = 'text-green-800';
+        } else if (bgColor.includes('red')) {
+            borderClass = 'border-red-500 bg-red-50';
+            circleClass = 'bg-red-500';
+            textClass   = 'text-red-800';
+        } else if (bgColor.includes('yellow') || bgColor.includes('amber')) {
+            borderClass = 'border-yellow-500 bg-yellow-50';
+            circleClass = 'bg-yellow-500';
+            textClass   = 'text-yellow-800';
+        }
+
         const toast = document.createElement('div');
-        toast.className = `fixed bottom-6 right-6 p-4 rounded-lg shadow-lg animate-bounce-in flex items-start gap-3 max-w-sm z-50 ${notification.bg_color || 'bg-blue-100 text-blue-600'} transition-all duration-300`;
+        toast.className = `fixed bottom-6 right-6 card p-4 border-2 ${borderClass} max-w-sm z-50 animate-bounce-in transition-all duration-300`;
         toast.innerHTML = `
-            <div class="flex-1">
-                <h3 class="font-semibold text-sm">${notification.title}</h3>
-                <p class="text-xs opacity-90 mt-1">${notification.message}</p>
-                <p class="text-xs opacity-75 mt-2">${notification.created_at}</p>
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full ${circleClass} flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="bell" class="w-5 h-5 text-white"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-sm ${textClass}">${notification.title}</h3>
+                    <p class="text-xs ${textClass} opacity-80 mt-1">${notification.message}</p>
+                    <p class="text-xs ${textClass} opacity-60 mt-1">${notification.created_at}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 ${textClass} opacity-60 hover:opacity-100 transition-opacity">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
-            <button onclick="this.parentElement.remove()" class="flex-shrink-0 opacity-50 hover:opacity-100">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
         `;
         document.body.appendChild(toast);
         initIcons();

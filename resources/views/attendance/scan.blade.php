@@ -1595,35 +1595,51 @@ CT.') @section('content')
     // Toast Notification Function
     function showToast(message, type = "success") {
         const container = document.getElementById("toast-container");
-        const toast = document.createElement("div");
 
         const icons = {
-            success: "check-circle",
-            error: "alert-circle",
+            success: "check",
+            error:   "x",
             warning: "alert-triangle",
-            info: "info",
+            info:    "info",
         };
 
-        const colors = {
-            success:
-                "from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-300",
-            error: "from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300",
-            warning:
-                "from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300",
-            info: "from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300",
+        const circleColors = {
+            success: "bg-green-500",
+            error:   "bg-red-500",
+            warning: "bg-yellow-500",
+            info:    "bg-blue-500",
         };
 
-        toast.className = `pointer-events-auto flex items-start gap-3 px-5 py-4 bg-gradient-to-r ${colors[type]} border rounded-2xl shadow-2xl backdrop-blur-sm transform transition-all duration-300 translate-x-full opacity-0 max-w-sm`;
+        const cardColors = {
+            success: "border-green-500 bg-green-50 dark:bg-green-900/20",
+            error:   "border-red-500 bg-red-50 dark:bg-red-900/20",
+            warning: "border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20",
+            info:    "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
+        };
+
+        const textColors = {
+            success: "text-green-800 dark:text-green-300",
+            error:   "text-red-800 dark:text-red-300",
+            warning: "text-yellow-800 dark:text-yellow-300",
+            info:    "text-blue-800 dark:text-blue-300",
+        };
+
+        const toast = document.createElement("div");
+        toast.className = `pointer-events-auto card p-4 border-2 ${cardColors[type]} max-w-sm transform transition-all duration-300 translate-x-full opacity-0`;
 
         toast.innerHTML = `
-                <i data-lucide="${icons[type]}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
-                <div class="flex-1">
-                    <p class="text-sm font-medium leading-relaxed">${message}</p>
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full ${circleColors[type]} flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="${icons[type]}" class="w-5 h-5 text-white"></i>
                 </div>
-                <button onclick="this.closest('.pointer-events-auto').remove()" class="flex-shrink-0 ml-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold leading-snug ${textColors[type]}">${message}</p>
+                </div>
+                <button onclick="this.closest('.card').remove()" class="flex-shrink-0 ${textColors[type]} opacity-60 hover:opacity-100 transition-opacity">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
-            `;
+            </div>
+        `;
 
         container.appendChild(toast);
 
