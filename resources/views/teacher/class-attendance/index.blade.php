@@ -329,6 +329,9 @@
                         $endTime = \Carbon\Carbon::parse($schedule->end_time);
                         $att = $schedule->classAttendances->first();
 
+                        $graceEnd = $endTime->copy()->addMinutes(3);
+                        $isEnded  = $now->greaterThan($graceEnd);
+
                         // Logika Status Badge — scan masuk = Berlangsung, scan keluar = Selesai
                         if ($att && $att->check_in_time && $att->check_out_time) {
                             $badgeText = 'Selesai';

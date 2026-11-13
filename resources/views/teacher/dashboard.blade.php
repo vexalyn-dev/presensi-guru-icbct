@@ -293,6 +293,7 @@
                         // ── Status: scan masuk = Berlangsung, scan keluar = Selesai ──
                         $isSelesai      = $att && $att->check_in_time && $att->check_out_time;
                         $isBerlangsung  = $att && $att->check_in_time && !$att->check_out_time;
+                        $nowTs          = \Carbon\Carbon::now();
 
                         if ($isSelesai) {
                             $badgeText = 'Selesai';
@@ -300,9 +301,12 @@
                         } elseif ($isBerlangsung) {
                             $badgeText = 'Berlangsung';
                             $theme     = 'blue';
-                        } else {
+                        } elseif ($nowTs->greaterThanOrEqualTo($startTime)) {
                             $badgeText = 'Belum Selesai';
                             $theme     = 'red';
+                        } else {
+                            $badgeText = 'Belum';
+                            $theme     = 'slate';
                         }
                     @endphp
 
@@ -338,7 +342,6 @@
                                         {{ $schedule->classroom->code
                                             ? strtoupper(str_replace('-', ' ', $schedule->classroom->code))
                                             : ($schedule->classroom->name ?? '-') }}
-                                    </p>
                                     </p>
                                     @if($schedule->room_id && $schedule->room)
                                         <p class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold truncate">

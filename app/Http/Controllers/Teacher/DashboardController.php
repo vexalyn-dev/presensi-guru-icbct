@@ -22,7 +22,7 @@ class DashboardController extends Controller
         $todaySchedules = TeachingSchedule::where('user_id', $user->id)
             ->where('day_of_week', $todayDayOfWeek)
             ->where('is_active', true)
-            ->with(['classroom', 'subject', 'classAttendances' => function ($query) use ($user, $today) {
+            ->with(['classroom', 'room', 'subject', 'classAttendances' => function ($query) use ($user, $today) {
                 $query->where('user_id', $user->id)
                       ->whereDate('date', $today);
             }])

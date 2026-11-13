@@ -74,7 +74,7 @@ class TeachingSchedule extends Model
     {
         $today = Carbon::now()->dayOfWeek;
 
-        return self::with(['classroom', 'subject'])
+        return self::with(['classroom', 'room', 'subject'])
             ->where('user_id', $userId)
             ->where('day_of_week', $today)
             ->where('is_active', true)
