@@ -1840,8 +1840,12 @@
                     this.resultData = data?.data || data || null;
 
                     if (this.resultSuccess) {
-                        // AJAX refresh instead of full page reload
+                        // AJAX refresh jadwal, lalu sembunyikan toast setelah 2 detik
                         setTimeout(() => this.refreshScheduleData(), 1500);
+                        setTimeout(() => { this.showResult = false; }, 2000);
+                    } else {
+                        // Pesan error hilang setelah 4 detik
+                        setTimeout(() => { this.showResult = false; }, 4000);
                     }
                 },
 
