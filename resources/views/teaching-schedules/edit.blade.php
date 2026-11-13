@@ -132,6 +132,7 @@
                                             <div class="schedule-card p-4 bg-green-50 dark:bg-green-900/10 rounded-xl border border-green-200 dark:border-green-800 transition-all block"
                                                 data-schedule-id="{{ $schedule->id }}" data-day="{{ $schedule->day_of_week }}"
                                                 data-classroom="{{ $schedule->classroom_id }}"
+                                                data-room="{{ $schedule->room_id ?? '' }}"
                                                 data-subject="{{ $schedule->subject_id ?? '' }}" data-period="{{ $schedule->period }}"
                                                 data-start="{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}"
                                                 data-end="{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}">
@@ -155,6 +156,12 @@
                                                                 <p
                                                                     class="schedule-view-classroom text-base font-bold text-navy-800 dark:text-white mb-1">
                                                                     {{ $schedule->classroom->code }}
+                                                                    @if($schedule->room_id && $schedule->room)
+                                                                        <span class="ml-2 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+                                                                            <i data-lucide="flask-conical" class="w-3 h-3 inline -mt-0.5"></i>
+                                                                            {{ $schedule->room->name }}
+                                                                        </span>
+                                                                    @endif
                                                                 </p>
                                                                 <p
                                                                     class="schedule-view-period-subject text-xs text-slate-500 dark:text-slate-400">
@@ -332,6 +339,95 @@
                                                                                                 stroke-linejoin="round">
                                                                                                 <polyline points="20 6 9 17 4 12">
                                                                                                 </polyline>
+                                                                                            </svg>
+                                                                                            <span x-text="opt.l" class="truncate"></span>
+                                                                                        </button>
+                                                                                    </li>
+                                                                                </template>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Lab / Ruangan Bersama (opsional) -->
+                                                                <div>
+                                                                    <label
+                                                                        class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                                                                        Lab / Ruangan
+                                                                        <span class="normal-case font-normal text-slate-400">(opsional)</span>
+                                                                    </label>
+                                                                    <div x-data="{
+                                                                                                                        open: false,
+                                                                                                                        value: '{{ $schedule->room_id ?? '' }}',
+                                                                                                                        label: '',
+                                                                                                                        options: [
+                                                                                                                            {v: '', l: 'Tidak ada / kelas biasa'},
+                                                                                                                            @foreach($sharedRooms as $sr)
+                                                                                                                                {v: '{{ $sr->id }}', l: '{{ addslashes($sr->name) }}'},
+                                                                                                                            @endforeach
+                                                                                                                        ],
+                                                                                                                        init() {
+                                                                                                                            this.$watch('value', val => {
+                                                                                                                                let selected = this.options.find(o => o.v == val);
+                                                                                                                                this.label = selected ? selected.l : 'Tidak ada / kelas biasa';
+                                                                                                                            });
+                                                                                                                            let selected = this.options.find(o => o.v == this.value);
+                                                                                                                            this.label = selected ? selected.l : 'Tidak ada / kelas biasa';
+                                                                                                                        },
+                                                                                                                        select(opt) {
+                                                                                                                            this.value = opt.v;
+                                                                                                                            this.open = false;
+                                                                                                                        }
+                                                                                                                    }"
+                                                                        class="relative group" @click.away="open = false">
+
+                                                                        <div
+                                                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
+                                                                            <i data-lucide="flask-conical"
+                                                                                class="w-4 h-4 text-slate-400 transition-colors"
+                                                                                :class="open ? 'text-navy-800 dark:text-gold-500' : 'group-focus-within:text-navy-800 dark:group-focus-within:text-gold-500'"></i>
+                                                                        </div>
+
+                                                                        <input type="hidden"
+                                                                            name="schedules[edit_{{ $schedule->id }}][room_id]"
+                                                                            x-model="value">
+
+                                                                        <button type="button" @click="open = !open"
+                                                                            class="w-full pl-10 pr-8 py-3 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 rounded-xl text-sm font-medium focus:outline-none transition-all text-left flex items-center justify-between"
+                                                                            :class="[open ? 'border-navy-800 dark:border-gold-500 text-navy-800 dark:text-gold-400 shadow-sm' : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200', value ? 'border-blue-300 dark:border-blue-700' : '']">
+                                                                            <span x-text="label" class="block truncate"
+                                                                                :class="value ? 'text-blue-700 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400'"></span>
+                                                                            <div
+                                                                                class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                                                <i data-lucide="chevron-down"
+                                                                                    class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                                                                                    :class="open ? 'rotate-180 text-navy-800 dark:text-gold-500' : ''"></i>
+                                                                            </div>
+                                                                        </button>
+
+                                                                        <div x-show="open" style="display: none;"
+                                                                            x-transition:enter="transition ease-out duration-200"
+                                                                            x-transition:enter-start="opacity-0 translate-y-2"
+                                                                            x-transition:enter-end="opacity-100 translate-y-0"
+                                                                            x-transition:leave="transition ease-in duration-150"
+                                                                            x-transition:leave-start="opacity-100 translate-y-0"
+                                                                            x-transition:leave-end="opacity-0 translate-y-2"
+                                                                            class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden">
+                                                                            <ul
+                                                                                class="max-h-60 overflow-y-auto p-1.5 space-y-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                                                                                <template x-for="opt in options" :key="opt.v">
+                                                                                    <li>
+                                                                                        <button type="button" @click="select(opt)"
+                                                                                            class="w-full text-left px-3 py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                                                                                            :class="value == opt.v ? 'bg-blue-50 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                                                                                            <svg class="w-4 h-4 flex-shrink-0"
+                                                                                                :class="value == opt.v ? 'opacity-100' : 'opacity-0'"
+                                                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                                                width="24" height="24" viewBox="0 0 24 24"
+                                                                                                fill="none" stroke="currentColor"
+                                                                                                stroke-width="2.5" stroke-linecap="round"
+                                                                                                stroke-linejoin="round">
+                                                                                                <polyline points="20 6 9 17 4 12"></polyline>
                                                                                             </svg>
                                                                                             <span x-text="opt.l" class="truncate"></span>
                                                                                         </button>
@@ -686,6 +782,7 @@
     <script>
         const classrooms = @json($classrooms);
         const subjects = @json($subjects);
+        const sharedRooms = @json($sharedRooms);
         let scheduleCount = 0;
 
         // View Schedule - toggle detail info panel
@@ -935,6 +1032,10 @@
                 { v: '', l: 'Pilih Mapel' },
                 ...subjects.map(s => ({ v: s.id.toString(), l: s.name }))
             ];
+            const sharedRoomOptions = [
+                { v: '', l: 'Tidak ada / kelas biasa' },
+                ...sharedRooms.map(r => ({ v: r.id.toString(), l: r.name }))
+            ];
 
             const div = document.createElement('div');
             div.className = 'schedule-row p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3';
@@ -1050,6 +1151,68 @@
                                                         <button type="button" @click="select(opt)" 
                                                                 class="w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2"
                                                                 :class="value == opt.v ? 'bg-navy-50 text-navy-800 dark:bg-navy-900/50 dark:text-gold-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
+                                                            <svg class="w-3.5 h-3.5 flex-shrink-0" :class="value == opt.v ? 'opacity-100' : 'opacity-0'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                            <span x-text="opt.l" class="truncate"></span>
+                                                        </button>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Lab / Ruangan Bersama (opsional) -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                                        Lab / Ruangan <span class="font-normal text-slate-400">(opsional)</span>
+                                    </label>
+                                    <div x-data="{ 
+                                            open: false, 
+                                            value: '', 
+                                            label: 'Tidak ada / kelas biasa',
+                                            options: ${JSON.stringify(sharedRoomOptions).replace(/"/g, '&quot;')},
+                                            init() {
+                                                this.$watch('value', val => {
+                                                    let selected = this.options.find(o => o.v == val);
+                                                    this.label = selected ? selected.l : 'Tidak ada / kelas biasa';
+                                                });
+                                            },
+                                            select(opt) { 
+                                                this.value = opt.v; 
+                                                this.open = false; 
+                                            }
+                                        }" 
+                                        class="relative group" @click.away="open = false">
+
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                                            <i data-lucide="flask-conical" class="w-4 h-4 text-slate-400 transition-colors" :class="open ? 'text-navy-800 dark:text-gold-500' : ''"></i>
+                                        </div>
+
+                                        <input type="hidden" name="schedules[new_${index}][room_id]" x-model="value">
+
+                                        <button type="button" @click="open = !open"
+                                                class="w-full pl-9 pr-8 py-2.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 rounded-lg text-sm font-medium focus:outline-none transition-all text-left flex items-center justify-between"
+                                                :class="[open ? 'border-navy-800 dark:border-gold-500 text-navy-800 dark:text-gold-400 shadow-sm' : 'border-slate-200 dark:border-slate-600', value ? 'border-blue-300 dark:border-blue-700' : '']">
+                                            <span x-text="label" class="block truncate" :class="value ? 'text-blue-700 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400'"></span>
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180 text-navy-800 dark:text-gold-500' : ''"></i>
+                                            </div>
+                                        </button>
+
+                                        <div x-show="open" style="display: none;"
+                                             x-transition:enter="transition ease-out duration-200"
+                                             x-transition:enter-start="opacity-0 translate-y-2"
+                                             x-transition:enter-end="opacity-100 translate-y-0"
+                                             x-transition:leave="transition ease-in duration-150"
+                                             x-transition:leave-start="opacity-100 translate-y-0"
+                                             x-transition:leave-end="opacity-0 translate-y-2"
+                                             class="absolute z-50 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden">
+                                            <ul class="max-h-60 overflow-y-auto p-1.5 space-y-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                                                <template x-for="opt in options" :key="opt.v">
+                                                    <li>
+                                                        <button type="button" @click="select(opt)" 
+                                                                class="w-full text-left px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2"
+                                                                :class="value == opt.v ? 'bg-blue-50 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'">
                                                             <svg class="w-3.5 h-3.5 flex-shrink-0" :class="value == opt.v ? 'opacity-100' : 'opacity-0'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                                             <span x-text="opt.l" class="truncate"></span>
                                                         </button>

@@ -10,6 +10,7 @@ class TeachingSchedule extends Model
     protected $fillable = [
         'user_id',
         'classroom_id',
+        'room_id',
         'subject_id',
         'day_of_week',
         'period',
@@ -34,6 +35,11 @@ class TeachingSchedule extends Model
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    public function room()
+    {
+        return $this->belongsTo(Classroom::class, 'room_id');
     }
 
     public function subject()

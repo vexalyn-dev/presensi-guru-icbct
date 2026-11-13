@@ -23,19 +23,36 @@ class TeachingScheduleController extends Controller
 
     public function edit(User $teacher)
     {
+        // Kelas reguler saja (untuk field "Kelas")
         $classrooms = Classroom::where('is_active', true)
+            ->where(function ($q) {
+                $q->where('type', 'regular')
+                  ->orWhere(function ($q2) {
+                      $q2->whereNull('type')->where('is_shared', false);
+                  });
+            })
             ->orderByRaw("CASE WHEN class_level = 'X' THEN 1 WHEN class_level = 'XI' THEN 2 WHEN class_level = 'XII' THEN 3 ELSE 4 END")
             ->orderBy('code')
             ->get();
+
+        // Ruangan bersama / lab / shared (untuk field "Lab/Ruangan")
+        $sharedRooms = Classroom::where('is_active', true)
+            ->where(function ($q) {
+                $q->where('type', 'shared')
+                  ->orWhere('is_shared', true);
+            })
+            ->orderBy('name')
+            ->get();
+
         $subjects = Subject::orderBy('name')->get();
 
         $schedules = TeachingSchedule::where('user_id', $teacher->id)
-            ->with(['classroom', 'subject'])
+            ->with(['classroom', 'room', 'subject'])
             ->orderBy('day_of_week')
             ->orderBy('period')
             ->get();
 
-        return view('teaching-schedules.edit', compact('teacher', 'classrooms', 'subjects', 'schedules'));
+        return view('teaching-schedules.edit', compact('teacher', 'classrooms', 'sharedRooms', 'subjects', 'schedules'));
     }
 
     public function update(Request $request, User $teacher)
@@ -58,6 +75,7 @@ class TeachingScheduleController extends Controller
             $validator = \Validator::make($schedule, [
                 'day_of_week' => 'required|integer|min:0|max:6',
                 'classroom_id' => 'required|exists:classrooms,id',
+                'room_id' => 'nullable|exists:classrooms,id',
                 'subject_id' => 'nullable|exists:subjects,id',
                 'period' => 'required|integer|min:1|max:15',
                 'start_time' => 'required|date_format:H:i',
@@ -102,6 +120,7 @@ class TeachingScheduleController extends Controller
                         ->update([
                             'day_of_week' => $schedule['day_of_week'],
                             'classroom_id' => $schedule['classroom_id'],
+                            'room_id'      => $schedule['room_id'] ?? null,
                             'subject_id' => $schedule['subject_id'] ?? null,
                             'period' => $schedule['period'],
                             'start_time' => $schedule['start_time'],
@@ -113,6 +132,7 @@ class TeachingScheduleController extends Controller
                         'user_id' => $teacher->id,
                         'day_of_week' => $schedule['day_of_week'],
                         'classroom_id' => $schedule['classroom_id'],
+                        'room_id'      => $schedule['room_id'] ?? null,
                         'subject_id' => $schedule['subject_id'] ?? null,
                         'period' => $schedule['period'],
                         'start_time' => $schedule['start_time'],
