@@ -101,6 +101,9 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-xs font-bold text-navy-800 dark:text-white truncate">{{ $schedule->classroom->code }}</p>
+                                            @if($schedule->room_id && $schedule->room)
+                                            <p class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold truncate">{{ $schedule->room->name }}</p>
+                                            @endif
                                             @if($schedule->subject?->name)
                                             <p class="text-[10px] text-slate-500 truncate">{{ $schedule->subject->name }}</p>
                                             @endif
@@ -207,7 +210,12 @@
                                 <span class="text-[9px] font-black text-white dark:text-navy-900">{{ $sch->period }}</span>
                             </div>
                             <span class="text-xs font-semibold text-navy-800 dark:text-white flex-shrink-0">{{ $dayNamesShort[$sch->day_of_week] }}</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400 truncate flex-1">{{ $sch->classroom->code }}</span>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-xs text-slate-500 dark:text-slate-400 truncate block">{{ $sch->classroom->code }}</span>
+                                @if($sch->room_id && $sch->room)
+                                <span class="text-[10px] text-blue-500 dark:text-blue-400 font-semibold truncate block">{{ $sch->room->name }}</span>
+                                @endif
+                            </div>
                             <span class="text-[10px] font-mono text-slate-400 flex-shrink-0">
                                 {{ \Carbon\Carbon::parse($sch->start_time)->format('H:i') }}
                             </span>
