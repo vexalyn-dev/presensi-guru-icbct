@@ -561,11 +561,12 @@
            ════════════════════════════════════════ */
         @media (max-width: 768px) {
 
-            /* ── Body & html: full viewport, no scroll bounce ── */
+            /* ── Body & html: scrollable ── */
             html, body {
                 min-height: 100%;
-                height: 100%;
-                overflow: hidden;
+                height: auto;
+                overflow-y: auto;
+                overflow-x: hidden;
                 background: #0A1628;
                 margin: 0; padding: 0;
             }
@@ -573,30 +574,27 @@
                 align-items: flex-start;
                 padding: 0;
                 justify-content: flex-start;
-                overflow: hidden;
             }
 
-            /* ── Auth container: true full-screen, no scroll ── */
+            /* ── Auth wrapper: full width, natural height ── */
             .auth-wrapper {
                 display: block;
                 width: 100%;
-                height: 100%;
+                min-height: 100vh;
             }
 
             .auth-container {
                 width: 100%;
                 max-width: 100%;
-                height: 100vh;
-                height: 100svh;
-                min-height: unset;
+                min-height: 100vh;
                 display: flex;
                 flex-direction: column;
                 border-radius: 0;
                 box-shadow: none;
                 border: none;
-                overflow: hidden;
                 background: transparent;
                 position: relative;
+                overflow: visible;
             }
 
             .auth-container::before,
@@ -608,25 +606,18 @@
 
             .mobile-credit {
                 display: flex !important;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
                 align-items: center;
                 justify-content: center;
                 gap: 0;
                 width: 100%;
-                padding: 10px 16px 20px;
+                padding: 20px 16px 32px;
                 font-size: 10px;
                 font-weight: 600;
                 letter-spacing: 0.08em;
                 text-transform: uppercase;
                 color: #94a3b8;
                 background: #FFFFFF;
-                z-index: 9999;
-                will-change: transform;
-                transform: translateZ(0);
-                -webkit-transform: translateZ(0);
+                z-index: 1;
             }
 
             .mobile-credit a {
@@ -722,8 +713,8 @@
                 margin-top: -16px;
                 box-shadow: 0 -4px 32px rgba(15,23,42,0.18);
                 z-index: 2;
-                overflow: hidden;
-                padding-bottom: 48px;
+                overflow: visible;
+                padding-bottom: 0;
             }
 
             .form-container {
@@ -1362,6 +1353,9 @@
             </div>
             {{-- END #registerForm --}}
 
+            {{-- Mobile credit — di dalam forms-container, paling bawah --}}
+            <div class="mobile-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
+
         </div>
         {{-- END .forms-container --}}
     </div>
@@ -1370,7 +1364,6 @@
         <div class="auth-credit">Developed By&nbsp;<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
     </div>
 </div>
-<div class="mobile-credit">Developed By<a href="https://vexalyndev.my.id" target="_blank" rel="noopener noreferrer">Vexalyn Dev</a></div>
 
     <script>
         function toggleAuth() {

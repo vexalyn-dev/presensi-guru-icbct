@@ -599,6 +599,7 @@
     ══════════════════════════════════════════ --}}
     <nav id="bottom-nav"
          class="lg:hidden fixed bottom-0 inset-x-0 z-[90] bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] safe-area-bottom"
+         style="padding-bottom: env(safe-area-inset-bottom, 0px); background-color: #ffffff;"
          x-data="{
              moreOpen: false,
              _dragStartY: 0,
@@ -623,8 +624,7 @@
                  }
                  this._dragCurrentY = 0;
              }
-         }"
-         style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+         }">
 
         @php
             $isHome       = request()->routeIs('teacher.dashboard');
@@ -634,13 +634,13 @@
             $isOther      = request()->routeIs('teacher.leave*') || request()->routeIs('teacher.support*') || request()->routeIs('download-apk') || request()->routeIs('teacher.profile') || request()->routeIs('teacher.notifications*') || request()->routeIs('teacher.class-attendance');
         @endphp
 
-        <div class="flex items-stretch h-16">
+        <div class="flex items-stretch h-20">
 
             {{-- Home --}}
             <a href="{{ route('teacher.dashboard') }}" tabindex="-1"
-               class="bnav-item {{ $isHome ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
+               class="bnav-item {{ $isHome ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-1 relative transition-all duration-200 active:scale-95">
                 <div class="bnav-icon-wrap {{ $isHome ? 'bnav-icon-active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isHome ? '2.5' : '2' }}">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isHome ? '2.5' : '2' }}">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                         <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"/>
                     </svg>
@@ -650,9 +650,9 @@
 
             {{-- Jadwal --}}
             <a href="{{ route('teacher.schedule') }}" tabindex="-1"
-               class="bnav-item {{ $isJadwal ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
+               class="bnav-item {{ $isJadwal ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-1 relative transition-all duration-200 active:scale-95">
                 <div class="bnav-icon-wrap {{ $isJadwal ? 'bnav-icon-active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isJadwal ? '2.5' : '2' }}">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isJadwal ? '2.5' : '2' }}">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <line x1="16" y1="2" x2="16" y2="6" stroke-linecap="round"/>
                         <line x1="8" y1="2" x2="8" y2="6" stroke-linecap="round"/>
@@ -664,9 +664,9 @@
 
             {{-- Presensi — tombol tengah menonjol --}}
             <a href="{{ route('teacher.attendance') }}" tabindex="-1"
-               class="bnav-item flex-1 flex flex-col items-center justify-center gap-0.5 relative -mt-4 transition-all duration-200 active:scale-95">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center shadow-lg shadow-navy-800/40 dark:shadow-gold-400/40 transition-all duration-200">
-                    <svg class="w-6 h-6 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+               class="bnav-item flex-1 flex flex-col items-center justify-center gap-1 relative -mt-5 transition-all duration-200 active:scale-95">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center shadow-lg shadow-navy-800/40 dark:shadow-gold-400/40 transition-all duration-200">
+                    <svg class="w-7 h-7 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0c-.693.04-1.344.436-1.736 1.039l-.821 1.316Z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/>
                     </svg>
@@ -676,9 +676,9 @@
 
             {{-- Riwayat --}}
             <a href="{{ route('teacher.history') }}" tabindex="-1"
-               class="bnav-item {{ $isRiwayat ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
+               class="bnav-item {{ $isRiwayat ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-1 relative transition-all duration-200 active:scale-95">
                 <div class="bnav-icon-wrap {{ $isRiwayat ? 'bnav-icon-active' : '' }}">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isRiwayat ? '2.5' : '2' }}">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ $isRiwayat ? '2.5' : '2' }}">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                     </svg>
                 </div>
@@ -687,12 +687,12 @@
 
             {{-- Lainnya --}}
             <button type="button" tabindex="-1" @click="moreOpen = true"
-                    class="bnav-item {{ $isOther ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-all duration-200 active:scale-95">
+                    class="bnav-item {{ $isOther ? 'bnav-active' : '' }} flex-1 flex flex-col items-center justify-center gap-1 relative transition-all duration-200 active:scale-95">
                 <div class="bnav-icon-wrap {{ $isOther ? 'bnav-icon-active' : '' }}">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <circle cx="5" cy="12" r="{{ $isOther ? '1.5' : '1' }}"/>
-                        <circle cx="12" cy="12" r="{{ $isOther ? '1.5' : '1' }}"/>
-                        <circle cx="19" cy="12" r="{{ $isOther ? '1.5' : '1' }}"/>
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="5" cy="12" r="{{ $isOther ? '2' : '1.5' }}"/>
+                        <circle cx="12" cy="12" r="{{ $isOther ? '2' : '1.5' }}"/>
+                        <circle cx="19" cy="12" r="{{ $isOther ? '2' : '1.5' }}"/>
                     </svg>
                 </div>
                 <span class="bnav-label {{ $isOther ? 'bnav-label-active' : '' }}">Lainnya</span>
@@ -830,7 +830,7 @@
         html.dark .bnav-active { color: #facc15; }
 
         .bnav-icon-wrap {
-            width: 36px; height: 36px;
+            width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
             transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
@@ -840,7 +840,7 @@
         }
 
         .bnav-label {
-            font-size: 10px; font-weight: 500;
+            font-size: 11px; font-weight: 500;
             line-height: 1; color: inherit;
         }
         .bnav-label-active { font-weight: 700; }
@@ -884,6 +884,11 @@
 
         /* Safe area for bottom nav */
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+        /* Pastikan background di bawah nav putih, bukan gelap */
+        @media (max-width: 1023px) {
+            html, body { background: #ffffff !important; }
+        }
     </style>
 
     @php
