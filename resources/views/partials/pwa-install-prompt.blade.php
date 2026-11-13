@@ -1,7 +1,7 @@
 {{-- PWA Install Prompt — White/Navy, compact for mobile --}}
 <div id="pwa-prompt" aria-label="Install aplikasi" role="dialog" style="
     position: fixed;
-    bottom: 100px;
+    bottom: 94px;
     right: 12px;
     z-index: 9000;
     width: 248px;

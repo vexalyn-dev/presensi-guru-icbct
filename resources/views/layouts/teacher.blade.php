@@ -634,7 +634,7 @@
             $isOther      = request()->routeIs('teacher.leave*') || request()->routeIs('teacher.support*') || request()->routeIs('download-apk') || request()->routeIs('teacher.profile') || request()->routeIs('teacher.notifications*') || request()->routeIs('teacher.class-attendance');
         @endphp
 
-        <div class="flex items-stretch h-20">
+        <div class="flex items-stretch h-[72px]">
 
             {{-- Home --}}
             <a href="{{ route('teacher.dashboard') }}" tabindex="-1"
@@ -664,9 +664,9 @@
 
             {{-- Presensi — tombol tengah menonjol --}}
             <a href="{{ route('teacher.attendance') }}" tabindex="-1"
-               class="bnav-item flex-1 flex flex-col items-center justify-center gap-1 relative -mt-5 transition-all duration-200 active:scale-95">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center shadow-lg shadow-navy-800/40 dark:shadow-gold-400/40 transition-all duration-200">
-                    <svg class="w-7 h-7 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+               class="bnav-item flex-1 flex flex-col items-center justify-center gap-1 relative -mt-4 transition-all duration-200 active:scale-95">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center shadow-lg shadow-navy-800/40 dark:shadow-gold-400/40 transition-all duration-200">
+                    <svg class="w-6 h-6 text-white dark:text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0c-.693.04-1.344.436-1.736 1.039l-.821 1.316Z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/>
                     </svg>
