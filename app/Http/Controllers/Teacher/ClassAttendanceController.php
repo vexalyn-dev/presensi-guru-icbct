@@ -30,7 +30,7 @@ class ClassAttendanceController extends Controller
         $schedules = TeachingSchedule::where('user_id', $user->id)
             ->where('day_of_week', $dayOfWeek)
             ->where('is_active', true)
-            ->with(['classroom', 'subject', 'classAttendances' => function ($q) use ($user, $today) {
+            ->with(['classroom', 'room', 'subject', 'classAttendances' => function ($q) use ($user, $today) {
                 $q->where('user_id', $user->id)
                   ->whereDate('date', $today);
             }])
@@ -63,7 +63,7 @@ class ClassAttendanceController extends Controller
         $schedules = TeachingSchedule::where('user_id', $user->id)
             ->where('day_of_week', $dayOfWeek)
             ->where('is_active', true)
-            ->with(['classroom', 'subject', 'classAttendances' => function ($q) use ($user, $today) {
+            ->with(['classroom', 'room', 'subject', 'classAttendances' => function ($q) use ($user, $today) {
                 $q->where('user_id', $user->id)
                   ->whereDate('date', $today);
             }])
@@ -84,16 +84,13 @@ class ClassAttendanceController extends Controller
             $att       = $schedule->classAttendances->first();
             $graceEnd  = $endTime->copy()->addMinutes(3);
 
-            if ($now->greaterThan($graceEnd)) {
-                $badge = 'Berakhir'; $theme = 'red';
+            // Scan masuk → Berlangsung (biru), scan keluar → Selesai (hijau)
+            if ($att && $att->check_in_time && $att->check_out_time) {
+                $badge = 'Selesai'; $theme = 'green';
             } elseif ($att && $att->check_in_time) {
-                if ($att->check_out_time) {
-                    $badge = 'Selesai'; $theme = 'green';
-                } elseif ($att->status === 'Terlambat') {
-                    $badge = 'Terlambat'; $theme = 'yellow';
-                } else {
-                    $badge = 'Hadir'; $theme = 'green';
-                }
+                $badge = 'Berlangsung'; $theme = 'blue';
+            } elseif ($now->greaterThan($graceEnd)) {
+                $badge = 'Berakhir'; $theme = 'red';
             } elseif ($now->greaterThanOrEqualTo($startTime)) {
                 $badge = 'Berlangsung'; $theme = 'blue';
             } else {
@@ -105,6 +102,7 @@ class ClassAttendanceController extends Controller
                 'classroom' => $schedule->classroom->code
                     ? strtoupper(str_replace('-', ' ', $schedule->classroom->code))
                     : ($schedule->classroom->name ?? '-'),
+                'room'      => $schedule->room ? $schedule->room->name : null,
                 'subject'   => $schedule->subject->name ?? '-',
                 'period'    => $schedule->period,
                 'start'     => $startTime->format('H:i'),
@@ -797,7 +795,7 @@ class ClassAttendanceController extends Controller
         NotificationHelper::send(
             $user,
             'class_attendance',
-            '✅ Presensi Kelas Masuk',
+            'Presensi Kelas Masuk',
             "Berhasil scan masuk di {$classroom->name} — Kelas: {$selectedClassroom->name}, Mapel: {$subject->name}, Jam ke-{$request->period} ({$now->format('H:i')} WIB)",
             route('teacher.class-attendance'),
             'log-in',
@@ -806,7 +804,7 @@ class ClassAttendanceController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "✅ Presensi masuk berhasil!\nLokasi: {$classroom->name}\nKelas: {$selectedClassroom->name}\nMapel: {$subject->name}\nJam ke-{$request->period} • {$now->format('H:i')} WIB",
+            'message' => "Presensi masuk berhasil! Lokasi: {$classroom->name} • Kelas: {$selectedClassroom->name} • Mapel: {$subject->name} • Jam ke-{$request->period} • {$now->format('H:i')} WIB",
             'data'    => [
                 'location'      => $classroom->name,
                 'classroom'     => $selectedClassroom->name,
@@ -885,7 +883,7 @@ class ClassAttendanceController extends Controller
         NotificationHelper::send(
             $user,
             'class_attendance',
-            '✅ Presensi Kelas Selesai',
+            'Presensi Kelas Selesai',
             "Berhasil scan keluar dari {$classroom->name} — Kelas: " . ($selectedClassroom?->name ?? '-') . ", Mapel: " . ($subject?->name ?? '-') . ". Durasi mengajar: {$duration} menit.",
             route('teacher.class-attendance'),
             'log-out',
@@ -894,7 +892,7 @@ class ClassAttendanceController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "✅ Scan keluar berhasil!\nDurasi mengajar: {$duration} menit",
+            'message' => "Scan keluar berhasil! Durasi mengajar: {$duration} menit",
             'data'    => [
                 'location'  => $classroom->name,
                 'classroom' => $selectedClassroom?->name ?? '-',
@@ -964,7 +962,7 @@ class ClassAttendanceController extends Controller
 
             return [
                 'success' => true,
-                'message' => "✅ Scan masuk berhasil di kelas {$scheduleClassroomName}",
+                'message' => "Scan masuk berhasil di kelas {$scheduleClassroomName}",
                 'data'    => [
                     'classroom'     => $scheduleClassroomName,
                     'subject'       => $schedule->subject->name ?? '-',
@@ -1042,7 +1040,7 @@ class ClassAttendanceController extends Controller
 
             return [
                 'success' => true,
-                'message' => "✅ Scan keluar berhasil untuk kelas {$scheduleClassroomName}!",
+                'message' => "Scan keluar berhasil untuk kelas {$scheduleClassroomName}!",
                 'data'    => [
                     'classroom' => $scheduleClassroomName,
                     'subject'   => $schedule->subject->name ?? '-',

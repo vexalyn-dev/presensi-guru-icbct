@@ -290,14 +290,16 @@
                         $startTime = \Carbon\Carbon::parse($schedule->start_time);
                         $endTime   = \Carbon\Carbon::parse($schedule->end_time);
 
-                        // ── Status: HANYA Selesai / Belum Selesai ──────────────────────
-                        // Selesai = sudah scan MASUK + scan KELUAR
-                        // Belum Selesai = semua kondisi lainnya
-                        $isSelesai = $att && $att->check_in_time && $att->check_out_time;
+                        // ── Status: scan masuk = Berlangsung, scan keluar = Selesai ──
+                        $isSelesai      = $att && $att->check_in_time && $att->check_out_time;
+                        $isBerlangsung  = $att && $att->check_in_time && !$att->check_out_time;
 
                         if ($isSelesai) {
                             $badgeText = 'Selesai';
                             $theme     = 'green';
+                        } elseif ($isBerlangsung) {
+                            $badgeText = 'Berlangsung';
+                            $theme     = 'blue';
                         } else {
                             $badgeText = 'Belum Selesai';
                             $theme     = 'red';
@@ -310,7 +312,7 @@
                         {{ $theme === 'yellow' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : '' }}
                         {{ $theme === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : '' }}
                         {{ $theme === 'slate' ? 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' : '' }}">
-                        
+
                         <div class="flex items-center justify-between gap-2">
                             <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                                 <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0
@@ -337,6 +339,12 @@
                                             ? strtoupper(str_replace('-', ' ', $schedule->classroom->code))
                                             : ($schedule->classroom->name ?? '-') }}
                                     </p>
+                                    </p>
+                                    @if($schedule->room_id && $schedule->room)
+                                        <p class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold truncate">
+                                            {{ $schedule->room->name }}
+                                        </p>
+                                    @endif
                                     <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
                                         {{ $schedule->subject->name ?? '-' }} • Jam ke-{{ $schedule->period }}
                                     </p>
@@ -785,3 +793,4 @@
     window.addEventListener('notifications:new', function() { refreshDashboard(); });
 })();
 </script>
+
