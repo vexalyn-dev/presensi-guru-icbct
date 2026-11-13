@@ -65,67 +65,37 @@ class HolidayController extends Controller
         try {
             $year = Carbon::now()->year;
 
-            // ── Strategi: coba 3 endpoint kemendesa.link secara berurutan ──
+            // ── API upset.dev/tanggalmerah ──
+            $res = Http::timeout(15)
+                ->withHeaders(['Accept' => 'application/json'])
+                ->get('https://upset.dev/api/holidays', [
+                    'year' => $year,
+                ]);
 
-            $holidays = null;
-            $errorMsg = '';
-
-            // 1. Coba endpoint per tahun (paling spesifik)
-            try {
-                $res = Http::timeout(15)
-                    ->withHeaders(['Accept' => 'application/json'])
-                    ->get("https://api.kemendesa.link/libur-nasional/api/holidays/{$year}.json");
-
-                if ($res->successful()) {
-                    $body = $res->json();
-                    // Format: { "data": [...] } atau langsung array
-                    if (isset($body['data']) && is_array($body['data'])) {
-                        $holidays = $body['data'];
-                    } elseif (is_array($body) && !empty($body)) {
-                        $holidays = $body;
-                    }
-                }
-            } catch (\Exception $e) {
-                $errorMsg .= 'yearly: ' . $e->getMessage() . '; ';
-            }
-
-            // 2. Fallback: endpoint latest
-            if (empty($holidays)) {
-                try {
-                    $res = Http::timeout(15)
-                        ->withHeaders(['Accept' => 'application/json'])
-                        ->get('https://api.kemendesa.link/libur-nasional/api/holidays/latest');
-
-                    if ($res->successful()) {
-                        $body = $res->json();
-                        if (isset($body['data']) && is_array($body['data'])) {
-                            $holidays = $body['data'];
-                        } elseif (is_array($body) && !empty($body)) {
-                            $holidays = $body;
-                        }
-                    }
-                } catch (\Exception $e) {
-                    $errorMsg .= 'latest: ' . $e->getMessage() . '; ';
-                }
-            }
-
-            if (empty($holidays)) {
-                \Log::warning('fetchNationalHolidays: semua endpoint gagal. ' . $errorMsg);
+            if (!$res->successful()) {
                 return back()->with('error', 'Gagal mengambil data libur dari API. Coba lagi nanti.');
+            }
+
+            $body     = $res->json();
+            // Response envelope: { "data": [...], ... }
+            $holidays = $body['data'] ?? (is_array($body) ? $body : []);
+
+            if (empty($holidays)) {
+                return back()->with('error', 'API tidak mengembalikan data hari libur untuk tahun ' . $year . '.');
             }
 
             $count = 0;
             foreach ($holidays as $holiday) {
                 try {
-                    // Normalisasi field — kemendesa.link bisa pakai 'date'/'tanggal' dan 'name'/'nama'/'holiday_name'
-                    $date = $holiday['date']         ?? $holiday['tanggal']      ?? null;
-                    $name = $holiday['name']         ?? $holiday['holiday_name'] ?? $holiday['nama'] ?? null;
+                    // Format upset.dev: { "date": "YYYY-MM-DD", "name": "...", "type": "holiday|leave" }
+                    $date = $holiday['date'] ?? null;
+                    $name = $holiday['name'] ?? null;
 
                     if (!$date || !$name) continue;
 
                     $parsedDate = Carbon::parse($date)->toDateString();
 
-                    // Validasi tahun — pastikan hanya tahun yang diminta
+                    // Pastikan hanya tahun yang diminta
                     if (Carbon::parse($parsedDate)->year !== $year) continue;
 
                     $exists = Holiday::where('date', $parsedDate)->where('type', 'national')->exists();
@@ -163,8 +133,8 @@ class HolidayController extends Controller
     }
 
     /**
-     * Cek apakah sebuah tanggal merupakan hari libur via API kemendesa.link
-     * Endpoint: GET /api/is-holiday?date=2026-08-17
+     * Cek apakah sebuah tanggal merupakan hari libur via API upset.dev/tanggalmerah
+     * Endpoint: GET /api/check?date=2026-08-17
      */
     public function checkIsHoliday(Request $request)
     {
@@ -184,19 +154,21 @@ class HolidayController extends Controller
                 ]);
             }
 
-            // Cek via API kemendesa.link
+            // Cek via API upset.dev — GET /api/check?date=YYYY-MM-DD
             $res = Http::timeout(10)
                 ->withHeaders(['Accept' => 'application/json'])
-                ->get('https://api.kemendesa.link/libur-nasional/api/is-holiday', [
+                ->get('https://upset.dev/api/check', [
                     'date' => $validated,
                 ]);
 
             if ($res->successful()) {
                 $body = $res->json();
+                // Response: { "is_off_day": true/false, "name": "...", ... }
+                $isOff = $body['is_off_day'] ?? false;
                 return response()->json([
-                    'is_holiday' => $body['is_holiday'] ?? false,
+                    'is_holiday' => $isOff,
                     'source'     => 'api',
-                    'name'       => $body['holiday_name'] ?? $body['name'] ?? null,
+                    'name'       => $body['name'] ?? null,
                     'date'       => $validated,
                 ]);
             }

@@ -32,7 +32,6 @@ use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardControll
 use App\Http\Controllers\Teacher\NotificationController as TeacherNotificationController;
 use App\Http\Controllers\Admin\LeaveApprovalController;
 use App\Http\Controllers\Admin\ManualClassAttendanceController;
-use App\Http\Controllers\Admin\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -210,7 +209,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/reports/attendance',        [\App\Http\Controllers\Reports\AttendanceReportController::class,  'index']) ->name('reports.attendance');
     Route::get('/reports/attendance/export', [\App\Http\Controllers\Reports\AttendanceReportController::class,  'export'])->name('reports.attendance.export');
-    Route::get('/reports/performance',       [\App\Http\Controllers\Reports\PerformanceReportController::class, 'index']) ->name('reports.performance');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -254,14 +252,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
     Route::post('/holidays/fetch-national', [HolidayController::class, 'fetchNationalHolidays'])->name('holidays.fetch-national');
     Route::get('/holidays/check-is-holiday', [HolidayController::class, 'checkIsHoliday'])->name('holidays.check-is-holiday');
-
-    // Activity Logs
-    Route::prefix('activity-logs')->name('activity-logs.')->group(function () {
-        Route::get('/', [ActivityLogController::class, 'index'])->name('index');
-        Route::get('/{log}', [ActivityLogController::class, 'show'])->name('show');
-        Route::post('/cleanup', [ActivityLogController::class, 'destroyOld'])->name('cleanup');
-        Route::get('/export/csv', [ActivityLogController::class, 'export'])->name('export');
-    });
 
     // Manual Class Attendance - dipindah ke grup admin dengan prefix
 });

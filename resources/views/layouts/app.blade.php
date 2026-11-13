@@ -516,24 +516,6 @@
                     <span>Laporan Presensi</span>
                 </a>
 
-                <a href="{{ route('reports.performance') }}"
-                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('reports.performance')
-                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30'
-                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="trending-up" class="w-4 h-4 sidebar-icon wiggle"></i>
-                    <span>Kinerja & Analitik</span>
-                </a>
-
-                <a href="{{ route('activity-logs.index') }}" 
-                   class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                          {{ request()->routeIs('activity-logs.*') 
-                              ? 'bg-navy-800 text-white shadow-lg shadow-navy-800/30' 
-                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="scroll-text" class="w-4 h-4 sidebar-icon bounce"></i>
-                    <span>Log Aktivitas</span>
-                </a>
-
                 <a href="{{ route('admin.support') }}" 
                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
                           {{ request()->routeIs('admin.support*') 

@@ -649,7 +649,7 @@
     }
     @media (max-width: 480px) {
         #teacher-loading-screen .ls-gif {
-            width: 90px;
+            width: 90px;hapus halaa
             height: 90px;
         }
     }
