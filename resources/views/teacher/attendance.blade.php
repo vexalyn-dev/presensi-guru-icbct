@@ -79,9 +79,9 @@
                              </h3>
                          </div>
 
-                         <div class="p-3 sm:p-4 rounded-2xl border-2 {{ $todayAttendance && $todayAttendance->check_out ? 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}" data-key="checkout_card">
+                         <div class="p-3 sm:p-4 rounded-2xl border-2 {{ $todayAttendance && $todayAttendance->check_out ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700' }}" data-key="checkout_card">
                              <div class="flex items-center gap-2 sm:gap-3 mb-2">
-                                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl {{ $todayAttendance && $todayAttendance->check_out ? 'bg-red-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center transition-colors flex-shrink-0" data-key="checkout_icon">
+                                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl {{ $todayAttendance && $todayAttendance->check_out ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600' }} flex items-center justify-center transition-colors flex-shrink-0" data-key="checkout_icon">
                                      <i data-lucide="log-out" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
                                  </div>
                                  <div>
@@ -93,7 +93,7 @@
                                      @endif
                                  </div>
                              </div>
-                             <h3 class="text-xl sm:text-2xl font-bold {{ $todayAttendance && $todayAttendance->check_out ? 'text-red-700 dark:text-red-400' : 'text-slate-400' }}" data-key="check_out_time">
+                             <h3 class="text-xl sm:text-2xl font-bold {{ $todayAttendance && $todayAttendance->check_out ? 'text-green-700 dark:text-green-400' : 'text-slate-400' }}" data-key="check_out_time">
                                  @if($todayAttendance && $todayAttendance->check_out)
                                      {{ \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i') }}
                                  @elseif($scheduleEnd)
@@ -514,7 +514,7 @@
             if (coEl && data.check_out) {
                 coEl.textContent = data.check_out;
                 coEl.classList.remove('text-slate-400');
-                coEl.classList.add('text-red-700', 'dark:text-red-400');
+                coEl.classList.add('text-green-700', 'dark:text-green-400');
             }
             var badgeEl = document.querySelector('[data-key="status_badge"]');
             if (badgeEl && data.status) {
@@ -537,7 +537,7 @@
             }
             var coCard = document.querySelector('[data-key="checkout_card"]');
             if (coCard && data.check_out) {
-                coCard.className = 'p-3 sm:p-4 rounded-2xl border-2 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800';
+                coCard.className = 'p-3 sm:p-4 rounded-2xl border-2 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800';
             }
             var ciIcon = document.querySelector('[data-key="checkin_icon"]');
             if (ciIcon && data.check_in) {
@@ -545,7 +545,7 @@
             }
             var coIcon = document.querySelector('[data-key="checkout_icon"]');
             if (coIcon && data.check_out) {
-                coIcon.className = 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-500 flex items-center justify-center transition-colors flex-shrink-0';
+                coIcon.className = 'w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-500 flex items-center justify-center transition-colors flex-shrink-0';
             }
         }
 
@@ -672,12 +672,18 @@
         var lastSubmitAt = 0;
         var DEBOUNCE_MS  = 2000; // cegah double scan dalam 2 detik
 
-        // Fokus ke input tersembunyi saat halaman dimuat
+        // Fokus ke input tersembunyi saat halaman dimuat — HANYA jika user tidak sedang fokus di field lain
         function refocus() {
-            setTimeout(function () { if (input) input.focus(); }, 100);
+            setTimeout(function () {
+                var active = document.activeElement;
+                var tag = active ? active.tagName.toUpperCase() : '';
+                // Jangan rebut fokus kalau user sedang di input/textarea/select/button nyata
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+                if (input) input.focus({ preventScroll: true });
+            }, 100);
         }
         refocus();
-        document.addEventListener('click', refocus);
+        // Hanya refocus saat visibility change (tab kembali ke foreground)
         document.addEventListener('visibilitychange', function () {
             if (!document.hidden) refocus();
         });

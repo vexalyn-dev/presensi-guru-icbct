@@ -646,7 +646,6 @@
                     </svg>
                 </div>
                 <span class="bnav-label {{ $isHome ? 'bnav-label-active' : '' }}">Home</span>
-                @if($isHome)<span class="bnav-dot"></span>@endif
             </a>
 
             {{-- Jadwal --}}
