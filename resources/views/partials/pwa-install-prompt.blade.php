@@ -128,7 +128,8 @@
 
 <script>
 (function () {
-    var STORAGE_KEY  = 'pwa_prompt_dismissed';
+    // Versi prompt — ubah angka ini untuk reset dismiss semua user
+    var STORAGE_KEY  = 'pwa_prompt_dismissed_v2';
     var DISMISS_DAYS = 3;
 
     var prompt     = document.getElementById('pwa-prompt');
@@ -137,6 +138,9 @@
     var iosHint    = document.getElementById('pwa-ios-hint');
 
     if (!prompt) return;
+
+    // Bersihkan key lama
+    try { localStorage.removeItem('pwa_prompt_dismissed'); } catch(e) {}
 
     // Jangan tampil kalau sudah dismiss baru-baru ini
     var dismissed = localStorage.getItem(STORAGE_KEY);

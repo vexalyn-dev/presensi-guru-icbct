@@ -526,7 +526,28 @@
         }
 
         /* Register Link Styling */
-        .mobile-credit { display: none; }
+        /* Mobile credit: tampil di mobile, sembunyi di desktop */
+        .mobile-credit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px 16px 32px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            background: #FFFFFF;
+        }
+        .mobile-credit a {
+            color: #94a3b8;
+            text-decoration: none;
+            margin-left: 4px;
+        }
+        @media (min-width: 769px) {
+            .mobile-credit { display: none; }
+        }
 
         .register-link {
             text-align: center;
@@ -602,28 +623,6 @@
 
             .auth-credit {
                 display: none !important;
-            }
-
-            .mobile-credit {
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-                gap: 0;
-                width: 100%;
-                padding: 20px 16px 32px;
-                font-size: 10px;
-                font-weight: 600;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                color: #94a3b8;
-                background: #FFFFFF;
-                z-index: 1;
-            }
-
-            .mobile-credit a {
-                color: #94a3b8;
-                text-decoration: none;
-                margin-left: 4px;
             }
 
             /* ── Sembunyikan panel desktop ── */
@@ -1668,6 +1667,8 @@
             }, 1800);
         }
     </script>
+
+    @include('partials.pwa-install-prompt')
 </body>
 
 </html>
