@@ -4,7 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('page-title', 'Dashboard') - {{ config('app.name', 'ICB CT') }}</title>
+    <title>@yield('page-title', 'Dashboard') — Presensi Guru ICB CT | SMK Cinta Teknika</title>
+
+    <!-- SEO Meta -->
+    <meta name="description" content="@yield('meta-description', 'Portal Guru Presensi Digital ICB CT — SMK Cinta Teknika. Kelola absensi harian & kelas via QR Code, jadwal mengajar, izin/sakit, dan riwayat kehadiran.')">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="@yield('og-title', '@yield('page-title', 'Portal Guru') — Presensi Guru ICB CT | SMK Cinta Teknika')">
+    <meta property="og:description" content="@yield('og-description', 'Portal Guru Presensi Digital ICB CT — SMK Cinta Teknika. Kelola absensi harian & kelas via QR Code, jadwal mengajar, izin/sakit, dan riwayat kehadiran.')">
+    <meta property="og:image" content="@yield('og-image', asset('images/og-banner.png'))">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="@yield('og-title', 'Presensi Guru ICB CT — SMK Cinta Teknika')">
+    <meta property="og:site_name" content="Presensi Guru ICB CT">
+    <meta property="og:locale" content="id_ID">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url()->current() }}">
+    <meta name="twitter:title" content="@yield('og-title', '@yield('page-title', 'Portal Guru') — Presensi Guru ICB CT | SMK Cinta Teknika')">
+    <meta name="twitter:description" content="@yield('og-description', 'Portal Guru Presensi Digital ICB CT — SMK Cinta Teknika. Kelola absensi harian & kelas via QR Code, jadwal mengajar, izin/sakit, dan riwayat kehadiran.')">
+    <meta name="twitter:image" content="@yield('og-image', asset('images/og-banner.png'))">
+    <meta name="twitter:image:alt" content="@yield('og-title', 'Presensi Guru ICB CT — SMK Cinta Teknika')">
+
+    <!-- Favicon Pack -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon/favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon/apple-touch-icon-180x180.png') }}">
+    <link rel="manifest" href="{{ asset('favicon/manifest.webmanifest') }}">
+    <meta name="theme-color" content="#0f172a">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@1.7.0/dist/umd/lucide.min.js" onload="if(window.lucide)lucide.createIcons()"></script>

@@ -7,12 +7,20 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title id="pageTitle">Login - {{ config('app.name', 'ICB CT') }}</title>
     <meta name="description" content="Login ke sistem presensi guru SMK ICB Cinta Teknika. Presensi harian dan kelas via QR Code dengan validasi GPS.">
-    <meta property="og:title" content="Login - ICB CT Presensi Guru">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="Login — Presensi Guru ICB CT | SMK Cinta Teknika">
     <meta property="og:description" content="Login ke sistem presensi guru SMK ICB Cinta Teknika. Presensi harian dan kelas via QR Code dengan validasi GPS.">
-    <meta property="og:image" content="{{ asset('images/logo.png') }}">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Login - ICB CT Presensi Guru">
-    <meta name="twitter:description" content="Login ke sistem presensi guru SMK ICB Cinta Teknika.">
+    <meta property="og:image" content="{{ asset('images/og-banner.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Presensi Guru ICB CT — SMK Cinta Teknika">
+    <meta property="og:site_name" content="Presensi Guru ICB CT">
+    <meta property="og:locale" content="id_ID">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Login — Presensi Guru ICB CT | SMK Cinta Teknika">
+    <meta name="twitter:description" content="Login ke sistem presensi guru SMK ICB Cinta Teknika. Presensi harian dan kelas via QR Code dengan validasi GPS.">
+    <meta name="twitter:image" content="{{ asset('images/og-banner.png') }}">
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}?v=2">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
