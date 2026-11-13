@@ -178,7 +178,7 @@
 
                                                         <!-- Edit Mode (Hidden by default) -->
                                                         <div class="schedule-edit hidden mt-0 pt-0 border-t-0">
-                                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                                                                 <!-- Hari -->
                                                                 <div>
                                                                     <label
@@ -525,45 +525,34 @@
                                                                 </div>
                                                             </div>
 
-                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                                                <!-- Jam Masuk & Pulang -->
-                                                                <div class="flex items-end gap-3">
-                                                                    <div class="flex-1">
-                                                                        <label
-                                                                            class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Jam
-                                                                            Masuk</label>
-                                                                        <div class="relative group">
-                                                                            <div
-                                                                                class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                                                                <i data-lucide="clock"
-                                                                                    class="w-4 h-4 text-slate-400 group-focus-within:text-navy-800 dark:group-focus-within:text-gold-500 transition-colors"></i>
-                                                                            </div>
-                                                                            <input type="time"
-                                                                                name="schedules[edit_{{ $schedule->id }}][start_time]"
-                                                                                required
-                                                                                value="{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}"
-                                                                                class="schedule-start w-full pl-10 pr-4 py-3 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800/20 dark:focus:ring-gold-500/20 focus:border-navy-800 dark:focus:border-gold-500 transition-all">
+                                                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3 items-end">
+                                                                <!-- Jam Masuk -->
+                                                                <div>
+                                                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Jam Masuk</label>
+                                                                    <div class="relative group">
+                                                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                                                            <i data-lucide="clock" class="w-4 h-4 text-slate-400 group-focus-within:text-navy-800 dark:group-focus-within:text-gold-500 transition-colors"></i>
                                                                         </div>
+                                                                        <input type="time"
+                                                                            name="schedules[edit_{{ $schedule->id }}][start_time]"
+                                                                            required
+                                                                            value="{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}"
+                                                                            class="schedule-start w-full pl-10 pr-3 py-3 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800/20 dark:focus:ring-gold-500/20 focus:border-navy-800 dark:focus:border-gold-500 transition-all">
                                                                     </div>
-                                                                    <div class="pb-3 text-slate-400">
-                                                                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                                                                    </div>
-                                                                    <div class="flex-1">
-                                                                        <label
-                                                                            class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Jam
-                                                                            Pulang</label>
-                                                                        <div class="relative group">
-                                                                            <div
-                                                                                class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                                                                <i data-lucide="clock"
-                                                                                    class="w-4 h-4 text-slate-400 group-focus-within:text-navy-800 dark:group-focus-within:text-gold-500 transition-colors"></i>
-                                                                            </div>
-                                                                            <input type="time"
-                                                                                name="schedules[edit_{{ $schedule->id }}][end_time]"
-                                                                                required
-                                                                                value="{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}"
-                                                                                class="schedule-end w-full pl-10 pr-4 py-3 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800/20 dark:focus:ring-gold-500/20 focus:border-navy-800 dark:focus:border-gold-500 transition-all">
+                                                                </div>
+
+                                                                <!-- Jam Pulang -->
+                                                                <div>
+                                                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Jam Pulang</label>
+                                                                    <div class="relative group">
+                                                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                                                            <i data-lucide="clock" class="w-4 h-4 text-slate-400 group-focus-within:text-navy-800 dark:group-focus-within:text-gold-500 transition-colors"></i>
                                                                         </div>
+                                                                        <input type="time"
+                                                                            name="schedules[edit_{{ $schedule->id }}][end_time]"
+                                                                            required
+                                                                            value="{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}"
+                                                                            class="schedule-end w-full pl-10 pr-3 py-3 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-mono font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-navy-800/20 dark:focus:ring-gold-500/20 focus:border-navy-800 dark:focus:border-gold-500 transition-all">
                                                                     </div>
                                                                 </div>
 
@@ -1040,7 +1029,7 @@
             const div = document.createElement('div');
             div.className = 'schedule-row p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3';
             div.innerHTML = `
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <!-- Hari -->
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Hari</label>
