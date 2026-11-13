@@ -244,18 +244,10 @@
          style="display:none;"></div>
 
     {{-- ══ INPUT TERSEMBUNYI UNTUK BARCODE GUN ══ --}}
-    {{-- Barcode gun "mengetik" ke input ini lalu tekan Enter otomatis --}}
-    <input type="text" id="barcode-gun-input" autocomplete="off"
-           style="position:fixed;top:-200px;left:-200px;width:1px;height:1px;opacity:0;pointer-events:none;"
-           tabindex="-1" aria-hidden="true">
-
-    <form id="barcode-gun-form" style="display:none;">
-        @csrf
-        <input type="hidden" name="qr_data" id="barcode-gun-qr-data">
-        <input type="hidden" name="mode" id="barcode-gun-mode" value="masuk">
-        <input type="hidden" name="latitude" id="barcode-gun-lat">
-        <input type="hidden" name="longitude" id="barcode-gun-lng">
-    </form>
+    {{-- Gunakan div tanpa input — tangkap via keypress pada dokumen --}}
+    <div id="barcode-gun-form-data" style="display:none;"
+         data-csrf="{{ csrf_token() }}"
+         data-store-url="{{ route('teacher.attendance.store') }}"></div>
 
     {{-- Overlay blur gelap, persis desain login --}}
     <div id="at-overlay" style="
@@ -655,58 +647,24 @@
 
     <script>
     // ══ BARCODE GUN HANDLER ══
-    // Menangkap input dari hardware barcode gun 2D yang terhubung ke komputer guru.
-    // Barcode gun mengetik isi QR lalu tekan Enter — kita tangkap di sini.
+    // Tangkap input dari hardware barcode gun 2D via keypress pada dokumen.
+    // Tidak pakai input tersembunyi agar tidak trigger keyboard mobile.
     (function () {
         var cfg      = document.getElementById('at-config');
         var storeUrl = cfg ? cfg.dataset.storeUrl : '/teacher/attendance/store';
-        var overlay  = document.getElementById('at-overlay');
-
-        var input    = document.getElementById('barcode-gun-input');
-        var form     = document.getElementById('barcode-gun-form');
-        var modeEl   = document.getElementById('barcode-gun-mode');
-        var qrEl     = document.getElementById('barcode-gun-qr-data');
-        var latEl    = document.getElementById('barcode-gun-lat');
-        var lngEl    = document.getElementById('barcode-gun-lng');
+        var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        var csrf     = csrfMeta ? csrfMeta.content : '';
 
         var lastSubmitAt = 0;
-        var DEBOUNCE_MS  = 2000; // cegah double scan dalam 2 detik
+        var DEBOUNCE_MS  = 2000;
 
-        // Fokus ke input tersembunyi saat halaman dimuat — HANYA jika user tidak sedang fokus di field lain
-        function refocus() {
-            setTimeout(function () {
-                var active = document.activeElement;
-                var tag = active ? active.tagName.toUpperCase() : '';
-                // Jangan rebut fokus kalau user sedang di input/textarea/select/button nyata
-                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
-                if (input) input.focus({ preventScroll: true });
-            }, 100);
-        }
-        refocus();
-        // Hanya refocus saat visibility change (tab kembali ke foreground)
-        document.addEventListener('visibilitychange', function () {
-            if (!document.hidden) refocus();
-        });
-
-        // Tangkap Enter dari barcode gun via input tersembunyi
-        if (input) {
-            input.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    var raw = input.value.trim();
-                    input.value = '';
-                    if (raw) submitScan(raw);
-                }
-            });
-        }
-
-        // Fallback: kalau barcode gun ngetik langsung ke dokumen (bukan ke input)
+        // Buffer dari barcode gun yang ngetik cepat ke dokumen
         var docBuffer = '';
         var docTimer  = null;
+
         document.addEventListener('keypress', function (e) {
-            if (document.activeElement === input) return; // sudah ditangani input
-            // Abaikan klik tombol / fokus di form lain
-            var tag = document.activeElement ? document.activeElement.tagName : '';
+            // Abaikan jika user sedang di field input nyata
+            var tag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
             if (e.key === 'Enter') {
@@ -723,50 +681,43 @@
 
         function submitScan(raw) {
             var now = Date.now();
-            if (now - lastSubmitAt < DEBOUNCE_MS) return; // debounce
+            if (now - lastSubmitAt < DEBOUNCE_MS) return;
             lastSubmitAt = now;
 
-            // Tentukan mode: kalau sudah check_in dan belum check_out → mode keluar
-            var ciText  = document.querySelector('[data-key="check_in_time"]');
-            var coText  = document.querySelector('[data-key="check_out_time"]');
-            var hasCheckIn  = ciText  && ciText.textContent.trim()  !== '--:--' && ciText.textContent.trim()  !== '';
-            var hasCheckOut = coText  && coText.textContent.trim()  !== '--:--' && coText.textContent.trim()  !== '';
-            var mode = (hasCheckIn && !hasCheckOut) ? 'keluar' : 'masuk';
-
-            qrEl.value   = raw;
-            modeEl.value = mode;
+            var ciText      = document.querySelector('[data-key="check_in_time"]');
+            var coText      = document.querySelector('[data-key="check_out_time"]');
+            var hasCheckIn  = ciText && ciText.textContent.trim() !== '--:--' && ciText.textContent.trim() !== '';
+            var hasCheckOut = coText && coText.textContent.trim() !== '--:--' && coText.textContent.trim() !== '';
+            var mode        = (hasCheckIn && !hasCheckOut) ? 'keluar' : 'masuk';
 
             var overlay = window._atOverlay;
-
-            // Tampilkan loading overlay segera
-            if (window._atShowState)   window._atShowState('loading');
+            if (window._atShowState)  window._atShowState('loading');
             if (overlay) overlay.classList.add('show');
 
-            var send = function () {
-                var fd = new FormData(form);
+            var doSend = function (lat, lng) {
+                var fd = new FormData();
+                fd.append('_token',   csrf);
+                fd.append('qr_data',  raw);
+                fd.append('mode',     mode);
+                fd.append('latitude',  lat || '');
+                fd.append('longitude', lng || '');
+
                 fetch(storeUrl, {
                     method: 'POST',
                     body: fd,
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     credentials: 'same-origin',
                 })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (data.success) {
                         var state = data.mode === 'keluar' ? 'checkout' : 'checkin';
-                        var time  = data.check_in || data.check_out || '';
+                        var time  = data.check_out || data.check_in || '';
                         if (window._atShowOverlay) window._atShowOverlay(state, time);
+                    } else if (data.already_scanned) {
+                        if (window._atShowOverlay) window._atShowOverlay('already', null, { check_in: data.check_in, check_out: data.check_out });
                     } else {
-                        if (data.already_scanned) {
-                            var ciTime = data.check_in  || null;
-                            var coTime = data.check_out || null;
-                            if (window._atShowOverlay) window._atShowOverlay('already', null, { check_in: ciTime, check_out: coTime });
-                        } else {
-                            if (window._atShowOverlay) window._atShowOverlay('failed', null, { message: data.message || 'Gagal', retry: true });
-                        }
+                        if (window._atShowOverlay) window._atShowOverlay('failed', null, { message: data.message || 'Gagal', retry: true });
                     }
                 })
                 .catch(function () {
@@ -774,25 +725,14 @@
                 });
             };
 
-            // Ambil GPS dulu jika tersedia, lalu kirim
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    function (pos) {
-                        latEl.value = pos.coords.latitude;
-                        lngEl.value = pos.coords.longitude;
-                        send();
-                    },
-                    function () {
-                        latEl.value = '';
-                        lngEl.value = '';
-                        send();
-                    },
+                    function (pos) { doSend(pos.coords.latitude, pos.coords.longitude); },
+                    function ()    { doSend('', ''); },
                     { enableHighAccuracy: true, timeout: 5000, maximumAge: 30000 }
                 );
             } else {
-                latEl.value = '';
-                lngEl.value = '';
-                send();
+                doSend('', '');
             }
         }
     })();

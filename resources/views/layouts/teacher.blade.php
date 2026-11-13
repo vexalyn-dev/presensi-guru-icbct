@@ -660,7 +660,6 @@
                     </svg>
                 </div>
                 <span class="bnav-label {{ $isJadwal ? 'bnav-label-active' : '' }}">Jadwal</span>
-                @if($isJadwal)<span class="bnav-dot"></span>@endif
             </a>
 
             {{-- Presensi — tombol tengah menonjol --}}
@@ -684,7 +683,6 @@
                     </svg>
                 </div>
                 <span class="bnav-label {{ $isRiwayat ? 'bnav-label-active' : '' }}">Riwayat</span>
-                @if($isRiwayat)<span class="bnav-dot"></span>@endif
             </a>
 
             {{-- Lainnya --}}
@@ -698,7 +696,6 @@
                     </svg>
                 </div>
                 <span class="bnav-label {{ $isOther ? 'bnav-label-active' : '' }}">Lainnya</span>
-                @if($isOther)<span class="bnav-dot"></span>@endif
             </button>
         </div>
 
@@ -1016,5 +1013,7 @@
         });
     })();
     </script>
+
+    @include('partials.pwa-install-prompt')
 </body>
 </html>

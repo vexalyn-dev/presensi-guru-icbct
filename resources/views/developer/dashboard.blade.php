@@ -169,7 +169,7 @@
 
     {{-- Banner --}}
     <div style="border-radius:18px;overflow:hidden;border:1px solid rgba(99,102,241,.2);box-shadow:0 8px 32px rgba(99,102,241,.1)">
-        <img src="{{ asset('images/banner-vexalyn-dev.png') }}" alt="Vexalyn Dev Banner"
+        <img src="{{ asset('images/banner-vexalyn-dev.png') }}?v={{ filemtime(public_path('images/banner-vexalyn-dev.png')) }}" alt="Vexalyn Dev Banner"
              style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;min-height:180px">
     </div>
 </div>
@@ -1529,7 +1529,7 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
     $devUser  = auth()->user();
     $devPhoto = ($devUser->photo_path ?: $devUser->photo)
         ? asset('storage/' . ($devUser->photo_path ?: $devUser->photo))
-        : asset('images/profile-dev.png');
+        : asset('images/profile-dev.png') . '?v=' . (file_exists(public_path('images/profile-dev.png')) ? filemtime(public_path('images/profile-dev.png')) : 1);
     $totalUsers     = \App\Models\User::count();
     $totalGuruAktif = \App\Models\User::where('role','guru')->where('is_active',true)->count();
     $totalPresensi  = \App\Models\Attendance::whereDate('date', today())->count();
