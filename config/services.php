@@ -53,4 +53,8 @@ return [
         'token' => env('FONNTE_TOKEN', ''),
         'url'   => env('FONNTE_URL', 'https://api.fonnte.com/send'),
     ],
+
+    'holiday' => [
+        'source' => env('HOLIDAY_SOURCE_URL', 'https://publicholidays.co.id/id/'),
+    ],
 ];

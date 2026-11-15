@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Holiday;
+use App\Services\HolidayScraperService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class HolidayController extends Controller
 {
@@ -60,76 +63,52 @@ class HolidayController extends Controller
         return back()->with('success', 'Hari libur berhasil dihapus');
     }
 
-    public function fetchNationalHolidays()
+    public function fetchNationalHolidays(Request $request, HolidayScraperService $scraper)
     {
-        try {
-            $year = Carbon::now()->year;
+        $validated = $request->validate([
+            'year' => 'nullable|integer|between:2000,2100',
+        ]);
 
-            // ── API upset.dev/tanggalmerah ──
-            $res = Http::timeout(15)
-                ->withHeaders(['Accept' => 'application/json'])
-                ->get('https://upset.dev/api/holidays', [
-                    'year' => $year,
+        $year = (int) ($validated['year'] ?? Carbon::now()->year);
+
+        try {
+            $holidays = Cache::remember(
+                "national_holidays_{$year}",
+                now()->addDay(),
+                fn () => $scraper->fetchYear($year)
+            );
+        } catch (\Throwable $e) {
+            Log::error('fetchNationalHolidays error: '.$e->getMessage());
+
+            return back()->with('error', 'Gagal mengambil data libur nasional dari publicholidays.co.id. Coba lagi nanti.');
+        }
+
+        $count = 0;
+
+        foreach ($holidays as $date => $name) {
+            $holiday = Holiday::whereDate('date', $date)
+                ->where('type', 'national')
+                ->first();
+
+            if (! $holiday) {
+                Holiday::create([
+                    'date' => $date,
+                    'name' => $name,
+                    'type' => 'national',
+                    'is_recurring' => false,
                 ]);
 
-            if (!$res->successful()) {
-                return back()->with('error', 'Gagal mengambil data libur dari API. Coba lagi nanti.');
+                $count++;
             }
-
-            $body     = $res->json();
-            // Response envelope: { "data": [...], ... }
-            $holidays = $body['data'] ?? (is_array($body) ? $body : []);
-
-            if (empty($holidays)) {
-                return back()->with('error', 'API tidak mengembalikan data hari libur untuk tahun ' . $year . '.');
-            }
-
-            $count = 0;
-            foreach ($holidays as $holiday) {
-                try {
-                    // Format upset.dev: { "date": "YYYY-MM-DD", "name": "...", "type": "holiday|leave" }
-                    $date = $holiday['date'] ?? null;
-                    $name = $holiday['name'] ?? null;
-
-                    if (!$date || !$name) continue;
-
-                    $parsedDate = Carbon::parse($date)->toDateString();
-
-                    // Pastikan hanya tahun yang diminta
-                    if (Carbon::parse($parsedDate)->year !== $year) continue;
-
-                    $exists = Holiday::where('date', $parsedDate)->where('type', 'national')->exists();
-                    if (!$exists) {
-                        Holiday::create([
-                            'date'         => $parsedDate,
-                            'name'         => $name,
-                            'type'         => 'national',
-                            'is_recurring' => false,
-                        ]);
-                        $count++;
-                    }
-                } catch (\Exception $e) {
-                    continue;
-                }
-            }
-
-            if ($count > 0) {
-                return back()->with('success', "Berhasil menambahkan {$count} hari libur nasional tahun {$year}.");
-            }
-
-            $existingCount = Holiday::where('type', 'national')->whereYear('date', $year)->count();
-            if ($existingCount > 0) {
-                return back()->with('success', "Data libur nasional {$year} sudah ada ({$existingCount} hari). Tidak ada data baru.");
-            }
-
-            return back()->with('error', 'Tidak ada data libur baru yang bisa ditambahkan.');
-
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            return back()->with('error', 'Koneksi ke API gagal. Periksa koneksi internet server.');
-        } catch (\Exception $e) {
-            \Log::error('fetchNationalHolidays error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan: ' . substr($e->getMessage(), 0, 100));
         }
+
+        if ($count > 0) {
+            return back()->with('success', "Berhasil menambahkan {$count} hari libur nasional tahun {$year}.");
+        }
+
+        $existingCount = Holiday::where('type', 'national')->whereYear('date', $year)->count();
+
+        return back()->with('success', "Data libur nasional {$year} sudah ada ({$existingCount} hari). Tidak ada data baru.");
     }
 
     /**
