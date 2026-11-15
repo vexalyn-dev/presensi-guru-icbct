@@ -8,6 +8,8 @@ use RuntimeException;
 
 class HolidayScraperService
 {
+    private const DEFAULT_SOURCE = 'https://publicholidays.co.id/id/';
+
     private const MONTHS = [
         'januari' => 1,
         'februari' => 2,
@@ -23,23 +25,40 @@ class HolidayScraperService
         'desember' => 12,
     ];
 
+    public function __construct(private ?bool $useDom = null)
+    {
+    }
+
     public function fetchYear(int $year): array
     {
-        $response = Http::timeout(20)
+        $source = config('services.holiday.source') ?: self::DEFAULT_SOURCE;
+
+        $response = Http::retry(2, 300)
+            ->timeout(20)
+            ->accept('text/html')
             ->withHeaders([
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
                 'Accept-Language' => 'id-ID,id;q=0.9,en;q=0.8',
             ])
-            ->get(config('services.holiday.source'));
+            ->get($source);
 
         if (! $response->successful()) {
-            throw new RuntimeException('Gagal mengambil halaman sumber libur nasional.');
+            throw new RuntimeException("Sumber libur nasional merespons HTTP {$response->status()}.");
         }
 
         return $this->parseYear($response->body(), $year);
     }
 
     public function parseYear(string $html, int $year): array
+    {
+        if ($this->useDom ?? class_exists(\DOMDocument::class)) {
+            return $this->parseYearWithDom($html, $year);
+        }
+
+        return $this->parseYearWithRegex($html, $year);
+    }
+
+    private function parseYearWithDom(string $html, int $year): array
     {
         $dom = new \DOMDocument();
         $previous = libxml_use_internal_errors(true);
@@ -87,11 +106,7 @@ class HolidayScraperService
                 continue;
             }
 
-            foreach ($this->expandDate($dateText, $year) as $date) {
-                $holidays[$date] = isset($holidays[$date])
-                    ? $holidays[$date].' / '.$name
-                    : $name;
-            }
+            $this->addHoliday($holidays, $dateText, $name, $year);
         }
 
         if ($holidays === []) {
@@ -101,6 +116,64 @@ class HolidayScraperService
         ksort($holidays);
 
         return $holidays;
+    }
+
+    private function parseYearWithRegex(string $html, int $year): array
+    {
+        if (! preg_match('/Libur Nasional\s+'.$year.'\b/i', $html, $heading, PREG_OFFSET_CAPTURE)) {
+            throw new RuntimeException("Data libur nasional tahun {$year} tidak ditemukan di sumber.");
+        }
+
+        $section = substr($html, $heading[0][1]);
+
+        if (! preg_match('/<table\b[^>]*class\s*=\s*"[^"]*publicholidays[^"]*"[^>]*>(.*?)<\/table>/is', $section, $table)
+            && ! preg_match('/<table\b[^>]*>(.*?)<\/table>/is', $section, $table)) {
+            throw new RuntimeException("Tabel libur nasional tahun {$year} tidak ditemukan.");
+        }
+
+        preg_match_all('/<tr\b[^>]*>(.*?)<\/tr>/is', $table[1], $rows);
+
+        $holidays = [];
+
+        foreach ($rows[1] as $row) {
+            preg_match_all('/<td\b[^>]*>(.*?)<\/td>/is', $row, $cells);
+
+            if (count($cells[1]) < 3) {
+                continue;
+            }
+
+            $dateText = $this->normalize(strip_tags($cells[1][0]));
+            $nameHtml = $cells[1][2];
+
+            if (preg_match('/<span\b[^>]*class\s*=\s*"[^"]*summary[^"]*"[^>]*>(.*?)<\/span>/is', $nameHtml, $summary)) {
+                $nameHtml = $summary[1];
+            }
+
+            $name = $this->normalize(strip_tags($nameHtml));
+
+            if ($dateText === '' || $name === '') {
+                continue;
+            }
+
+            $this->addHoliday($holidays, $dateText, $name, $year);
+        }
+
+        if ($holidays === []) {
+            throw new RuntimeException("Tidak ada data libur nasional tahun {$year} yang bisa dibaca.");
+        }
+
+        ksort($holidays);
+
+        return $holidays;
+    }
+
+    private function addHoliday(array &$holidays, string $dateText, string $name, int $year): void
+    {
+        foreach ($this->expandDate($dateText, $year) as $date) {
+            $holidays[$date] = isset($holidays[$date])
+                ? $holidays[$date].' / '.$name
+                : $name;
+        }
     }
 
     private function expandDate(string $text, int $year): array

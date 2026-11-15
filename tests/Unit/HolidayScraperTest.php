@@ -47,13 +47,14 @@ class HolidayScraperTest extends TestCase
 </html>
 HTML;
 
-        $result = (new HolidayScraperService())->parseYear($html, 2026);
-
-        $this->assertSame([
+        $expected = [
             '2026-01-01' => 'Tahun Baru Masehi',
             '2026-03-21' => 'Hari Raya Idul Fitri',
             '2026-03-22' => 'Hari Raya Idul Fitri',
-        ], $result);
+        ];
+
+        $this->assertSame($expected, (new HolidayScraperService())->parseYear($html, 2026));
+        $this->assertSame($expected, (new HolidayScraperService(false))->parseYear($html, 2026));
     }
 
     public function test_it_rejects_missing_year(): void

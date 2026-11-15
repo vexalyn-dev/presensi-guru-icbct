@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Holiday;
 use App\Services\HolidayScraperService;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class HolidayController extends Controller
 {
@@ -70,17 +72,42 @@ class HolidayController extends Controller
         ]);
 
         $year = (int) ($validated['year'] ?? Carbon::now()->year);
+        $cacheKey = "national_holidays_{$year}";
+        $holidays = null;
 
         try {
-            $holidays = Cache::remember(
-                "national_holidays_{$year}",
-                now()->addDay(),
-                fn () => $scraper->fetchYear($year)
-            );
+            $holidays = Cache::get($cacheKey);
         } catch (\Throwable $e) {
-            Log::error('fetchNationalHolidays error: '.$e->getMessage());
+            Log::warning('Holiday cache read failed', [
+                'year' => $year,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
-            return back()->with('error', 'Gagal mengambil data libur nasional dari publicholidays.co.id. Coba lagi nanti.');
+        if (! is_array($holidays) || $holidays === []) {
+            try {
+                $holidays = $scraper->fetchYear($year);
+            } catch (\Throwable $e) {
+                Log::error('fetchNationalHolidays error', [
+                    'year' => $year,
+                    'exception' => $e::class,
+                    'message' => $e->getMessage(),
+                ]);
+
+                return back()->with(
+                    'error',
+                    'Gagal mengambil data libur nasional: '.$this->holidayImportFailureReason($e)
+                );
+            }
+
+            try {
+                Cache::put($cacheKey, $holidays, now()->addDay());
+            } catch (\Throwable $e) {
+                Log::warning('Holiday cache write failed', [
+                    'year' => $year,
+                    'message' => $e->getMessage(),
+                ]);
+            }
         }
 
         $count = 0;
@@ -109,6 +136,29 @@ class HolidayController extends Controller
         $existingCount = Holiday::where('type', 'national')->whereYear('date', $year)->count();
 
         return back()->with('success', "Data libur nasional {$year} sudah ada ({$existingCount} hari). Tidak ada data baru.");
+    }
+
+    private function holidayImportFailureReason(\Throwable $e): string
+    {
+        if ($e instanceof ConnectionException) {
+            return 'server tidak dapat terhubung ke publicholidays.co.id. Periksa koneksi internet server.';
+        }
+
+        if ($e instanceof RuntimeException && $e->getMessage() !== '') {
+            return $e->getMessage();
+        }
+
+        $message = $e->getMessage();
+
+        if (str_contains($message, 'cURL error 60')) {
+            return 'sertifikat SSL server bermasalah.';
+        }
+
+        if (str_contains($message, 'DOMDocument')) {
+            return 'ekstensi PHP dom tidak aktif di server.';
+        }
+
+        return 'terjadi kesalahan internal. Cek storage/logs/laravel.log untuk detail.';
     }
 
     /**
