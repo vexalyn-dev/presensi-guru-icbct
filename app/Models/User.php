@@ -95,9 +95,6 @@ class User extends Authenticatable
         'formatted_id',
         'qr_code_url',
         'role_name',
-        'subject_names',
-        'total_hours',
-        'attendance_stats',
     ];
 
     /**

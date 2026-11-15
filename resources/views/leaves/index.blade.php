@@ -108,7 +108,6 @@
         @forelse($leaveRequests as $leave)
         <div class="card p-5 hover:shadow-lg transition-all"
              data-leave-id="{{ $leave->id }}"
-             data-delete-url="{{ route('teacher.leave.destroy', $leave) }}"
              :class="selectedIds.includes({{ $leave->id }}) ? 'ring-2 ring-blue-400 dark:ring-blue-500 bg-blue-50/50 dark:bg-blue-900/10' : ''"
              oncontextmenu="showLeaveContextMenu(event, this)">
             <div class="flex items-start justify-between gap-4">
@@ -303,15 +302,16 @@
 
     function ctxDeleteLeave() {
         if (!_ctxLeaveTarget) return;
-        const url = _ctxLeaveTarget.dataset.deleteUrl;
-        if (!url) return;
+        const url = document.querySelector('[data-bulk-delete-url]')?.dataset.bulkDeleteUrl ?? '';
+        const id = _ctxLeaveTarget.dataset.leaveId;
+        if (!url || !id) return;
         if (!confirm('Hapus pengajuan ini?')) return;
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = url;
         const token = document.querySelector('meta[name=csrf-token]')?.content || '';
         form.innerHTML = '<input type="hidden" name="_token" value="' + token + '">'
-                       + '<input type="hidden" name="_method" value="DELETE">';
+                       + '<input type="hidden" name="ids[]" value="' + id + '">';
         document.body.appendChild(form);
         form.submit();
     }

@@ -81,14 +81,14 @@
 
                 <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
                     @if($leave->status === 'pending')
-                    <form action="{{ $isPiket ? route('piket.leave-approval.approve', $leave) : route('leave-approval.approve', $leave) }}" method="POST">
+                    <form action="{{ $isPiket ? route('piket.leave-approval.approve', $leave) : route('leaves.approve', $leave) }}" method="POST">
                         @csrf
                         <input type="hidden" name="admin_notes" value="Disetujui oleh piket">
                         <button type="submit" class="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
                             <i data-lucide="check" class="w-3.5 h-3.5"></i> Setujui
                         </button>
                     </form>
-                    <form action="{{ $isPiket ? route('piket.leave-approval.reject', $leave) : route('leave-approval.reject', $leave) }}" method="POST">
+                    <form action="{{ $isPiket ? route('piket.leave-approval.reject', $leave) : route('leaves.reject', $leave) }}" method="POST">
                         @csrf
                         <input type="hidden" name="admin_notes" value="Ditolak oleh piket">
                         <button type="submit" onclick="return confirm('Yakin ingin menolak pengajuan ini?')"
@@ -97,7 +97,7 @@
                         </button>
                     </form>
                     @endif
-                    <a href="{{ $isPiket ? route('piket.leaves.show', $leave) : route('leaves.show', $leave) }}"
+                    <a href="{{ $isPiket ? route('piket.leave-approval.show', $leave) : route('leaves.show', $leave) }}"
                        class="px-3 py-2 bg-navy-800 hover:bg-navy-900 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap">
                         <i data-lucide="eye" class="w-3.5 h-3.5"></i> Detail
                     </a>

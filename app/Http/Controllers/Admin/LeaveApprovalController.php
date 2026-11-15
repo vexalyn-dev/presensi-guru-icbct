@@ -26,7 +26,9 @@ class LeaveApprovalController extends Controller
 
     public function approve(LeaveRequest $leaveRequest)
     {
-        $isPiket = auth()->user()?->isGuruPiket();
+        if ($leaveRequest->status !== 'pending') {
+            return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
 
         $leaveRequest->update([
             'status'      => 'approved',
@@ -35,14 +37,12 @@ class LeaveApprovalController extends Controller
             'approved_at' => now(),
         ]);
 
-        $showRoute = $isPiket ? 'piket.leave-approval.show' : 'teacher.leave.show';
-
         NotificationHelper::send(
             $leaveRequest->user,
             'success',
             'Pengajuan ' . ucfirst($leaveRequest->type) . ' Disetujui',
             'Pengajuan ' . $leaveRequest->type . ' Anda dari tanggal ' . optional($leaveRequest->start_date)->format('d M Y') . ' s/d ' . optional($leaveRequest->end_date)->format('d M Y') . ' telah disetujui.',
-            route($showRoute, $isPiket ? ['leave' => $leaveRequest] : ['leaveRequest' => $leaveRequest]),
+            route('teacher.leave.show', ['leaveRequest' => $leaveRequest]),
             'check-circle',
             'bg-green-100 text-green-600'
         );
@@ -52,7 +52,9 @@ class LeaveApprovalController extends Controller
 
     public function reject(LeaveRequest $leaveRequest)
     {
-        $isPiket = auth()->user()?->isGuruPiket();
+        if ($leaveRequest->status !== 'pending') {
+            return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
 
         $leaveRequest->update([
             'status'      => 'rejected',
@@ -61,14 +63,12 @@ class LeaveApprovalController extends Controller
             'approved_at' => now(),
         ]);
 
-        $showRoute = $isPiket ? 'piket.leave-approval.show' : 'teacher.leave.show';
-
         NotificationHelper::send(
             $leaveRequest->user,
             'error',
             'Pengajuan ' . ucfirst($leaveRequest->type) . ' Ditolak',
             'Pengajuan ' . $leaveRequest->type . ' Anda ditolak. Alasan: ' . (request('admin_notes') ?? '-'),
-            route($showRoute, $isPiket ? ['leave' => $leaveRequest] : ['leaveRequest' => $leaveRequest]),
+            route('teacher.leave.show', ['leaveRequest' => $leaveRequest]),
             'x-circle',
             'bg-red-100 text-red-600'
         );

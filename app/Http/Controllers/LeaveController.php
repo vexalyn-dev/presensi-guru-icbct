@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LeaveRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class LeaveController extends Controller
@@ -116,7 +117,9 @@ class LeaveController extends Controller
             $target->notify(new \App\Notifications\SystemNotification(
                 "Guru {$leaveRequest->user->name} mengajukan {$leaveRequest->type} ({$leaveRequest->start_date->format('d M Y')} - {$leaveRequest->end_date->format('d M Y')})",
                 'info',
-                route('leaves.show', ['leave' => $leaveRequest->id])
+                $target->isGuruPiket()
+                    ? route('piket.leave-approval.show', ['leave' => $leaveRequest->id])
+                    : route('leaves.show', ['leave' => $leaveRequest->id])
             ));
         }
 

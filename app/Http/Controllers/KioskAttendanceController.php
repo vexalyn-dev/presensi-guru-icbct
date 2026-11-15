@@ -44,25 +44,20 @@ class KioskAttendanceController extends Controller
 
         // ── 1. Decode QR ────────────────────────────────────────────────
         $qrData = json_decode($validated['qr_data'], true);
-        if (!$qrData || !is_array($qrData)) {
-            $qrData = ['teacher_id' => $validated['qr_data']];
-        }
-
-        if (!isset($qrData['teacher_id'])) {
-            return $this->fail('QR code tidak valid — teacher ID tidak ditemukan.');
+        if (!is_array($qrData) || !isset($qrData['teacher_id'], $qrData['token'])) {
+            return $this->fail('QR code tidak valid. Gunakan QR resmi dari sistem.', 422);
         }
 
         // ── 2. Cari guru ─────────────────────────────────────────────────
         $teacher = User::where('id', $qrData['teacher_id'])
-            ->where('role', 'guru')
+            ->whereIn('role', ['guru', 'guru_piket'])
             ->first();
 
         if (!$teacher) {
             return $this->fail('Guru tidak ditemukan. QR code tidak valid.', 404);
         }
 
-        // Validasi token jika ada di QR
-        if (isset($qrData['token']) && $teacher->qr_token !== $qrData['token']) {
+        if (!$teacher->qr_token || !hash_equals((string) $teacher->qr_token, (string) $qrData['token'])) {
             $this->logScan($teacher, 'in', 'failed', 'QR token kadaluarsa', $request);
             return $this->fail('QR code sudah kadaluarsa. Minta guru untuk memperbarui QR-nya.', 422);
         }
@@ -79,21 +74,19 @@ class KioskAttendanceController extends Controller
         }
 
         // ── 4. Jadwal ──────────────────────────────────────────────────────
-        if (!TeacherSchedule::isScheduledToday($teacher->id)) {
+        if ($teacher->role === 'guru' && !TeacherSchedule::isScheduledToday($teacher->id)) {
             return $this->fail('Guru tidak dijadwalkan mengajar hari ini.');
         }
 
         $todaySchedule = TeacherSchedule::getTodaySchedule($teacher->id);
 
-        // ── 5. GPS (opsional, skip jika tidak dikirim) ───────────────────
+        // ── 5. GPS ───────────────────────────────────────────────────────
         $lat = $validated['latitude'] ?? null;
         $lng = $validated['longitude'] ?? null;
 
-        if ($lat !== null && $lng !== null) {
-            $gpsValidation = \App\Helpers\GpsHelper::validateLocation($lat, $lng);
-            if (!$gpsValidation['valid']) {
-                return $this->fail($gpsValidation['message']);
-            }
+        $gpsValidation = \App\Helpers\GpsHelper::validateLocation($lat, $lng);
+        if (!$gpsValidation['valid']) {
+            return $this->fail($gpsValidation['message']);
         }
 
         // ── 6. Proses presensi ───────────────────────────────────────────
@@ -148,15 +141,26 @@ class KioskAttendanceController extends Controller
             : 'Tepat Waktu';
 
         DB::transaction(function () use ($teacher, $now, $status, $lat, $lng) {
-            Attendance::create([
-                'user_id'     => $teacher->id,
-                'date'        => today(),
-                'check_in'    => $now->format('H:i:s'),
-                'status'      => $status,
-                'latitude'    => $lat,
-                'longitude'   => $lng,
-                'scan_method' => 'qr_code',
-            ]);
+            $attendance = Attendance::firstOrCreate(
+                ['user_id' => $teacher->id, 'date' => today()],
+                [
+                    'check_in'    => $now->format('H:i:s'),
+                    'status'      => $status,
+                    'latitude'    => $lat,
+                    'longitude'   => $lng,
+                    'scan_method' => 'qr_code',
+                ]
+            );
+
+            if (!$attendance->check_in) {
+                $attendance->update([
+                    'check_in'    => $now->format('H:i:s'),
+                    'status'      => $status,
+                    'latitude'    => $lat,
+                    'longitude'   => $lng,
+                    'scan_method' => 'qr_code',
+                ]);
+            }
 
             try {
                 ActivityLogService::log(
@@ -220,7 +224,7 @@ class KioskAttendanceController extends Controller
                     $u->notify(new SystemNotification(
                         "Guru {$teacher->name} absen ({$status}) via kiosk",
                         'success',
-                        route('attendance.history')
+                        $u->isGuruPiket() ? route('piket.attendance') : route('attendance.history')
                     ));
                 });
         } catch (\Exception $e) {
@@ -274,8 +278,8 @@ class KioskAttendanceController extends Controller
         if (!$phone) return;
         $phone = preg_replace('/^08/', '628', $phone);
         try {
-            Http::withHeaders(['Authorization' => env('FONNTE_TOKEN')])
-                ->post(env('FONNTE_URL'), ['target' => $phone, 'message' => $message]);
+            Http::withHeaders(['Authorization' => config('services.fonnte.token')])
+                ->post(config('services.fonnte.url'), ['target' => $phone, 'message' => $message]);
         } catch (\Exception $e) {
             Log::error("WA kiosk gagal ke {$phone}: " . $e->getMessage());
         }

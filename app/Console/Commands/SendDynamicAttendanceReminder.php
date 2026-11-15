@@ -35,14 +35,14 @@ class SendDynamicAttendanceReminder extends Command
         // Logika Normal
         // ✅ Hanya ambil guru yang punya jadwal HARI INI
         $today = now()->dayOfWeek;
-        $teachers = User::where('role', 'guru')
+        $teachers = User::whereIn('role', ['guru', 'guru_piket'])
             ->where('is_active', true)
             ->whereHas('schedules', function($query) use ($today) {
                 $query->where('day_of_week', $today)
                       ->where('is_active', true);
             })
             ->get();
-        $nowStr = now()->format('H:i'); 
+        $now = now();
         $sentCount = 0;
 
         foreach ($teachers as $teacher) {
@@ -56,10 +56,12 @@ class SendDynamicAttendanceReminder extends Command
 
             $startTime = Carbon::parse($todaySchedule->start_time)->format('H:i');
             $endTime = Carbon::parse($todaySchedule->end_time)->format('H:i');
-            $lateInTime = Carbon::parse($todaySchedule->start_time)->addMinutes(5)->format('H:i'); // +5 Menit
+            $start = Carbon::parse($todaySchedule->start_time);
+            $late = $start->copy()->addMinutes(5);
+            $end = Carbon::parse($todaySchedule->end_time);
 
             // 1. Reminder Masuk (Tepat Waktu)
-            if ($nowStr === $startTime && !$hasCheckedIn) {
+            if ($now->betweenIncluded($start, $start->copy()->addMinutes(4)) && !$hasCheckedIn) {
                 if ($this->sendOnce($teacher, 'checkin_exact')) {
                     $msg = "Assalamualaikum Warahmatullahi Wabarakatuh.\n\n"
                         . "Yth. Bapak/Ibu {$teacher->name},\n\n"
@@ -74,7 +76,7 @@ class SendDynamicAttendanceReminder extends Command
             }
 
             // 2. Reminder Terlambat Masuk (+5 Menit)
-            if ($nowStr === $lateInTime && !$hasCheckedIn) {
+            if ($now->betweenIncluded($late, $late->copy()->addMinutes(30)) && !$hasCheckedIn) {
                 if ($this->sendOnce($teacher, 'checkin_late')) {
                     $msg = "Assalamualaikum Warahmatullahi Wabarakatuh.\n\n"
                         . "Yth. Bapak/Ibu {$teacher->name},\n\n"
@@ -89,7 +91,7 @@ class SendDynamicAttendanceReminder extends Command
             }
 
             // 3. Reminder Pulang (Tepat Waktu)
-            if ($nowStr === $endTime && !$hasCheckedOut) {
+            if ($now->betweenIncluded($end, $end->copy()->addMinutes(30)) && !$hasCheckedOut) {
                 if ($this->sendOnce($teacher, 'checkout_exact')) {
                     $msg = "Assalamualaikum Warahmatullahi Wabarakatuh.\n\n"
                         . "Yth. Bapak/Ibu {$teacher->name},\n \n"
@@ -112,12 +114,12 @@ class SendDynamicAttendanceReminder extends Command
         return Cache::add($key, true, now()->addDay()->endOfDay());
     }
 
-    private function sendWA(string $phone, string $message) {
+    private function sendWA(?string $phone, string $message) {
         if (!$phone) return;
         $phone = preg_replace('/^08/', '628', $phone);
         try {
-            Http::withHeaders(['Authorization' => env('FONNTE_TOKEN')])
-                ->post(env('FONNTE_URL'), ['target' => $phone, 'message' => $message]);
+            Http::withHeaders(['Authorization' => config('services.fonnte.token')])
+                ->post(config('services.fonnte.url'), ['target' => $phone, 'message' => $message]);
         } catch (\Exception $e) {
             $this->error("WA gagal: {$phone}");
         }

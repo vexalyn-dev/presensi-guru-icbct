@@ -39,38 +39,22 @@ class QrCodeController extends Controller
                 'mode' => 'nullable|in:auto,masuk,keluar',
             ]);
 
-            // Decode QR data - Handle both JSON and plain ID
+            // Decode QR data - wajib JSON resmi berisi teacher_id + token
             $qrData = json_decode($validated['qr_data'], true);
 
-            // If not JSON, assume it's teacher_id
-            if (!$qrData || !is_array($qrData)) {
-                $qrData = [
-                    'teacher_id' => $validated['qr_data'],
-                    'token' => null
-                ];
-            }
-
-            if (!isset($qrData['teacher_id'])) {
+            if (!is_array($qrData) || !isset($qrData['teacher_id'], $qrData['token'])) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'QR Code tidak valid - Teacher ID tidak ditemukan'
+                    'message' => 'QR Code tidak valid. Gunakan QR resmi dari sistem.'
                 ], 400);
             }
 
             // Find teacher
             $teacher = User::where('id', $qrData['teacher_id'])
-                ->where('role', 'guru')
+                ->whereIn('role', ['guru', 'guru_piket'])
                 ->first();
 
-            // If token exists in QR, validate it
-            if (isset($qrData['token']) && $teacher) {
-                $teacher = User::where('id', $qrData['teacher_id'])
-                    ->where('qr_token', $qrData['token'])
-                    ->where('role', 'guru')
-                    ->first();
-            }
-
-            if (!$teacher) {
+            if (!$teacher || !$teacher->qr_token || !hash_equals((string) $teacher->qr_token, (string) $qrData['token'])) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Guru tidak ditemukan. QR Code mungkin sudah tidak valid.'
@@ -82,6 +66,21 @@ class QrCodeController extends Controller
                     'success' => false,
                     'message' => 'Akun guru tidak aktif. Hubungi admin.'
                 ], 403);
+            }
+
+            if (\App\Models\Holiday::isHoliday(today())) {
+                $holidayName = \App\Models\Holiday::getHolidayName(today());
+                return response()->json([
+                    'success' => false,
+                    'message' => "Hari ini adalah hari libur ({$holidayName}). Tidak perlu absen."
+                ], 422);
+            }
+
+            if ($teacher->role === 'guru' && !\App\Models\TeacherSchedule::isScheduledToday($teacher->id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Guru tidak dijadwalkan mengajar hari ini.'
+                ], 422);
             }
 
             // GPS Validation
@@ -118,8 +117,12 @@ class QrCodeController extends Controller
 
             if ($existingAttendance) {
                 $now = Carbon::now();
+                $schedule = \App\Models\TeacherSchedule::getTodaySchedule($teacher->id);
+                $endTime = $schedule?->end_time ? Carbon::parse($schedule->end_time)->format('H:i') : '16:00';
+
                 $existingAttendance->update([
                     'check_out' => $now->format('H:i:s'),
+                    'check_out_status' => $now->format('H:i') >= $endTime ? 'Tepat Waktu' : 'Pulang Cepat',
                     'check_out_latitude' => $request->latitude,
                     'check_out_longitude' => $request->longitude,
                 ]);
@@ -156,15 +159,16 @@ class QrCodeController extends Controller
 
             // Create attendance record
             DB::transaction(function () use ($teacher, $today, $now, $status, $request) {
-                Attendance::create([
-                    'user_id' => $teacher->id,
-                    'date' => $today,
-                    'check_in' => $now->format('H:i:s'),
-                    'status' => $status,
-                    'latitude' => $request->latitude,
-                    'longitude' => $request->longitude,
-                    'scan_method' => 'qr_code',
-                ]);
+                Attendance::firstOrCreate(
+                    ['user_id' => $teacher->id, 'date' => $today],
+                    [
+                        'check_in' => $now->format('H:i:s'),
+                        'status' => $status,
+                        'latitude' => $request->latitude,
+                        'longitude' => $request->longitude,
+                        'scan_method' => 'qr_code',
+                    ]
+                );
 
                 // ActivityLog
                 try {
@@ -191,7 +195,7 @@ class QrCodeController extends Controller
                 $target->notify(new SystemNotification(
                     "Guru {$teacher->name} telah absen ({$status})",
                     'success',
-                    route('attendance.history')
+                    $target->isGuruPiket() ? route('piket.attendance') : route('attendance.history')
                 ));
             }
 
@@ -223,7 +227,7 @@ class QrCodeController extends Controller
      */
     public function show(User $teacher)
     {
-        if ($teacher->role !== 'guru') {
+        if (!in_array($teacher->role, ['guru', 'guru_piket'], true)) {
             abort(403);
         }
 
@@ -240,7 +244,7 @@ class QrCodeController extends Controller
      */
     public function download(User $teacher)
     {
-        if ($teacher->role !== 'guru') {
+        if (!in_array($teacher->role, ['guru', 'guru_piket'], true)) {
             abort(403);
         }
         // If QR code does not exist, generate it first
@@ -259,17 +263,13 @@ class QrCodeController extends Controller
      */
     public function regenerate(User $teacher)
     {
-        if ($teacher->role !== 'guru') {
+        if (!in_array($teacher->role, ['guru', 'guru_piket'], true)) {
             abort(403);
         }
 
         try {
-            // Delete old QR
-            if ($teacher->qr_code) {
-                Storage::disk('public')->delete($teacher->qr_code);
-            }
-
-            $teacher->generateQrCode();
+            // Rotasi token + hapus QR lama
+            $teacher->regenerateQrCode();
 
             return back()->with('success', 'QR Code berhasil diperbarui!');
         } catch (\Exception $e) {

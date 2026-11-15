@@ -80,6 +80,10 @@ Route::get('/', function () {
             return redirect()->route('developer.index', config('app.developer_secret_key'));
         }
 
+        if ($user->isGuruPiket()) {
+            return redirect()->route('piket.dashboard');
+        }
+
         return $user->isTeacher()
             ? redirect()->route('teacher.dashboard')
             : redirect()->route('dashboard');
@@ -389,79 +393,6 @@ Route::middleware(['auth', 'role:guru_piket'])->prefix('piket')->name('piket.')-
     Route::post('/notifications/read-all',     [App\Http\Controllers\Piket\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 });
 
-// ============================================================
-// Diagnostic endpoint — buka ini di browser untuk cek session
-// Akses: /debug-session?secret=vexalyn-dev-2026
-// ============================================================
-Route::get('/debug-session', function () {
-    $secret = request('secret');
-    if ($secret !== config('app.developer_secret_key', '')) {
-        abort(404);
-    }
-
-    $sessionDir = storage_path('framework/sessions');
-
-    return response()->json([
-        'php_version'        => PHP_VERSION,
-        'laravel_version'    => app()->version(),
-        'app_env'            => config('app.env'),
-        'app_key_set'        => !empty(config('app.key')),
-        'session_driver'     => config('session.driver'),
-        'session_encrypt'    => config('session.encrypt'),
-        'session_secure'     => config('session.secure'),
-        'session_cookie'     => config('session.cookie'),
-        'session_dir'        => $sessionDir,
-        'dir_exists'         => is_dir($sessionDir),
-        'dir_writable'       => is_writable($sessionDir),
-        'dir_permissions'    => is_dir($sessionDir) ? substr(sprintf('%o', fileperms($sessionDir)), -4) : 'N/A',
-        'web_server'         => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
-        'request_scheme'     => $_SERVER['REQUEST_SCHEME'] ?? 'unknown',
-        'x_forwarded_proto'  => $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'none',
-        'session_started'    => session()->isStarted(),
-        'session_id'         => session()->getId() ?? 'none',
-        'cookie_icb_ct'      => request()->cookies->has('icb_ct_session') ? 'EXISTS' : 'NOT FOUND',
-        'cookie_xsrf'        => request()->cookies->has('XSRF-TOKEN') ? 'EXISTS' : 'NOT FOUND',
-        'all_cookies'        => request()->cookies->keys(),
-    ]);
-});
-
-// ============================================================
-// One-time session fix — clear cache & perbaiki session dir
-// Akses: /fix-session?secret={developer_secret_key}
-// ============================================================
-Route::get('/fix-session', function () {
-    $secret = request('secret');
-    if ($secret !== config('app.developer_secret_key', '')) {
-        abort(404);
-    }
-
-    // Simpan user ID sebelum cache di-clear
-    $userId = auth()->id();
-
-    $sessionDir = storage_path('framework/sessions');
-    @mkdir($sessionDir, 0777, true);
-    @chmod($sessionDir, 0777);
-
-    // Save session sekarang
-    session()->save();
-
-    Artisan::call('config:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('event:clear');
-
-    // Re-login user agar tidak ke-logout setelah cache di-clear
-    if ($userId) {
-        \Illuminate\Support\Facades\Auth::loginUsingId($userId, true);
-    }
-    session()->regenerate(true);
-
-    return redirect()
-        ->route('developer.index', $secret)
-        ->with('success', '✅ Session & cache berhasil diperbaiki. Refresh halaman.');
-});
-
 Route::middleware(['auth'])->group(function () {
     Route::prefix('dev-panel/{secret}')->name('developer.')->group(function () {
         Route::get('/',                          [DeveloperController::class, 'dashboard'])       ->name('index');
@@ -482,10 +413,5 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/clear-routes',              [DeveloperController::class, 'clearRoutes'])       ->name('clear-routes');
     });
 });
-
-// Public developer tool endpoints (no auth, key-based verification)
-Route::get('/run-migrate-secret', [DeveloperController::class, 'runMigrateSecret']);
-Route::get('/run-seeder', [DeveloperController::class, 'runSeeder']);
-Route::get('/clear-all-cache', [DeveloperController::class, 'clearAllCacheSecret']);
 
 

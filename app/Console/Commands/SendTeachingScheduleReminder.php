@@ -3,9 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Helpers\NotificationHelper;
+use App\Models\Holiday;
 use App\Models\TeachingSchedule;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 class SendTeachingScheduleReminder extends Command
 {
@@ -17,7 +19,11 @@ class SendTeachingScheduleReminder extends Command
         $now = Carbon::now();
         $currentDayOfWeek = $now->dayOfWeek;
         $currentTime = $now->format('H:i');
-        
+
+        if (Holiday::isHoliday($now)) {
+            return Command::SUCCESS;
+        }
+
         // Get schedules that start in 10 minutes
         $schedules = TeachingSchedule::with('user')
             ->where('day_of_week', $currentDayOfWeek)
@@ -25,6 +31,10 @@ class SendTeachingScheduleReminder extends Command
             ->get();
 
         foreach ($schedules as $schedule) {
+            if (!$schedule->user) {
+                continue;
+            }
+
             $scheduleTime = Carbon::parse($schedule->start_time);
             $tenMinutesBefore = $scheduleTime->copy()->subMinutes(10);
             
@@ -38,18 +48,19 @@ class SendTeachingScheduleReminder extends Command
                     ->whereNotNull('check_in_time')
                     ->exists();
 
-                if (!$hasCheckedIn) {
+                $cacheKey = "teaching_reminder_{$schedule->id}_" . $now->toDateString();
+                if (!$hasCheckedIn && Cache::add($cacheKey, true, now()->addMinutes(30))) {
                     NotificationHelper::send(
                         $schedule->user,
                         'warning',
                         'Pengingat Jadwal Mengajar',
-                        'Anda memiliki jadwal mengajar di kelas ' . $schedule->classroom->name . ' (Jam ke-' . $schedule->period . ') pada pukul ' . $scheduleTime->format('H:i') . '. Segera lakukan presensi kelas.',
+                        'Anda memiliki jadwal mengajar di kelas ' . ($schedule->classroom?->name ?? '-') . ' (Jam ke-' . $schedule->period . ') pada pukul ' . $scheduleTime->format('H:i') . '. Segera lakukan presensi kelas.',
                         route('teacher.class-attendance'),
                         'alert-circle',
                         'bg-yellow-100 text-yellow-600'
                     );
 
-                    $this->info("Reminder sent to {$schedule->user->name} for class {$schedule->classroom->name}");
+                    $this->info("Reminder sent to {$schedule->user->name} for class " . ($schedule->classroom?->name ?? '-'));
                 }
             }
         }

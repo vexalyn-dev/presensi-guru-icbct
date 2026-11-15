@@ -13,7 +13,7 @@ class GitHubWebhookController extends Controller
     public function handle(Request $request)
     {
         // Verifikasi signature GitHub — secret wajib ada
-        $secret    = env('GITHUB_WEBHOOK_SECRET');
+        $secret    = config('services.github.webhook_secret');
         $signature = $request->header('X-Hub-Signature-256', '');
 
         if (!$secret || !$signature) {

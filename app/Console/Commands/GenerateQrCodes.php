@@ -14,10 +14,10 @@ class GenerateQrCodes extends Command
     {
         $this->info('Generating QR Codes for all teachers...');
         
-        $teachers = User::where('role', 'guru')->get();
+        $teachers = User::whereIn('role', ['guru', 'guru_piket'])->get();
         
         foreach ($teachers as $teacher) {
-            if (empty($teacher->qr_code)) {
+            if (empty($teacher->qr_code) || empty($teacher->qr_token)) {
                 $teacher->generateQrCode();
                 $this->line("✓ QR Code generated for: {$teacher->name}");
             } else {

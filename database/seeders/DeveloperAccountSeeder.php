@@ -18,8 +18,13 @@ class DeveloperAccountSeeder extends Seeder
 
         $role = in_array('developer', $validRoles, true) ? 'developer' : 'admin';
 
-        $email    = env('DEV_EMAIL', 'developer@presensi.icbct.local');
-        $password = env('DEV_PASSWORD', 'Developer123!');
+        $email    = env('DEV_EMAIL');
+        $password = env('DEV_PASSWORD');
+
+        if (!$email || !$password) {
+            $this->command->warn('DeveloperAccountSeeder butuh DEV_EMAIL dan DEV_PASSWORD.');
+            return;
+        }
 
         User::updateOrCreate(
             ['email' => $email],

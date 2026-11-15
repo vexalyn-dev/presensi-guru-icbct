@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <form action="{{ route('teachers.import.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form action="{{ route('teachers.import') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
             @csrf
 
             <!-- File Upload -->

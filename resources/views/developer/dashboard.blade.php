@@ -238,9 +238,9 @@
             <h3><i data-lucide="zap" style="width:17px;height:17px;color:#818cf8"></i> Aksi Cepat</h3>
         </div>
         <div class="actions">
-            <a href="{{ url('/fix-session?secret='.$secret) }}" onclick="return confirmAction(this,'🔧 Perbaiki session dir & hapus semua cache?')" class="action">
+            <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirmAction(this,'🔧 Hapus semua cache?')" class="action">
                 <span class="ico t-warn"><i data-lucide="wrench" style="width:16px;height:16px"></i></span>
-                <div><b>Fix Session</b><small>Perbaiki permissions &amp; clear cache</small></div>
+                <div><b>Clear Cache</b><small>Hapus cache config, route &amp; view</small></div>
                 <i data-lucide="arrow-up-right" class="go" style="width:15px;height:15px"></i>
             </a>
             <a href="{{ route('developer.optimize',$secret) }}" onclick="return confirmAction(this,'⚡ Rebuild semua cache?\n(config, route, view cache)')" class="action">
@@ -989,9 +989,9 @@ document.querySelectorAll('.num[data-count]').forEach(function(el) {
                     <span class="ico ico-lg t-warn"><i data-lucide="zap" style="width:20px;height:20px"></i></span>
                     <div><b>Optimize</b><small>Bangun ulang cache config, route, & view</small></div>
                 </a>
-                <a href="{{ url('/fix-session?secret=' . $secret) }}" onclick="return confirmAction(this, '🔧 Perbaiki session dir & hapus semua cache?')" class="tool">
+                <a href="{{ route('developer.clear-cache', $secret) }}" onclick="return confirmAction(this, '🔧 Hapus semua cache?')" class="tool">
                     <span class="ico ico-lg t-warn"><i data-lucide="wrench" style="width:20px;height:20px"></i></span>
-                    <div><b>Fix Session</b><small>Perbaiki session dir + clear cache</small></div>
+                    <div><b>Clear Cache</b><small>Hapus cache config, route &amp; view</small></div>
                 </a>
                 <button type="button" class="tool" id="debug-toggle-btn" data-debug="{{ $stats['debug'] ? '1' : '0' }}">
                     <span class="ico ico-lg t-bad" id="debug-toggle-ico"><i data-lucide="bug" style="width:20px;height:20px"></i></span>

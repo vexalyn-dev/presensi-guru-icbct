@@ -70,28 +70,31 @@ class AttendanceController extends Controller
         $now = Carbon::now();
         $today = $now->toDateString();
 
-        // Parse QR data — QR guru di-generate dengan field 'teacher_id' (bukan 'user_id')
-        try {
-            $qrData = json_decode($validated['qr_data'], true);
-            if (is_array($qrData)) {
-                $userId = $qrData['teacher_id'] ?? $qrData['user_id'] ?? null;
-                $token = $qrData['token'] ?? null;
+        // Parse QR data — token wajib cocok dengan token akun
+        $qrData = json_decode($validated['qr_data'], true);
+        if (is_array($qrData)) {
+            $userId = $qrData['teacher_id'] ?? $qrData['user_id'] ?? null;
+            $token = $qrData['token'] ?? null;
 
-                if ($userId && $userId != $user->id) {
-                    return $this->_jsonResp(false, 'QR Code tidak valid untuk akun Anda.');
-                }
-                if ($token && $user->qr_token && $token !== $user->qr_token) {
-                    return $this->_jsonResp(false, 'Token QR Code tidak sesuai.');
-                }
-            } else {
-                if ($validated['qr_data'] !== $user->qr_token && $validated['qr_data'] != $user->id) {
-                    return $this->_jsonResp(false, 'Format QR Code tidak valid.');
-                }
+            if ($userId && (int) $userId !== (int) $user->id) {
+                return $this->_jsonResp(false, 'QR Code tidak valid untuk akun Anda.');
             }
-        } catch (\Exception $e) {
-            if ($validated['qr_data'] !== $user->qr_token && $validated['qr_data'] != $user->id) {
+            if (!$token || !$user->qr_token || !hash_equals((string) $user->qr_token, (string) $token)) {
+                return $this->_jsonResp(false, 'Token QR Code tidak sesuai.');
+            }
+        } else {
+            if (!$user->qr_token || !hash_equals((string) $user->qr_token, (string) $validated['qr_data'])) {
                 return $this->_jsonResp(false, 'Format QR Code tidak valid.');
             }
+        }
+
+        if (\App\Models\Holiday::isHoliday(today())) {
+            $holidayName = \App\Models\Holiday::getHolidayName(today());
+            return $this->_jsonResp(false, "Hari ini adalah hari libur ({$holidayName}). Tidak perlu absen.");
+        }
+
+        if ($user->role === 'guru' && !TeacherSchedule::isScheduledToday($user->id)) {
+            return $this->_jsonResp(false, 'Anda tidak dijadwalkan mengajar hari ini.');
         }
 
         // ===== GPS VALIDATION =====
@@ -175,8 +178,16 @@ class AttendanceController extends Controller
                 ]);
             }
 
+            $endSchedule = TeacherSchedule::where('user_id', $user->id)
+                ->where('day_of_week', $now->dayOfWeek)
+                ->where('is_active', true)
+                ->first();
+            $endTimeStr = $endSchedule?->end_time
+                ?: ($user->end_time ?: Setting::get('attendance_end_time', '16:00'));
+
             $attendance->update([
                 'check_out' => $now->format('H:i:s'),
+                'check_out_status' => $now->format('H:i') >= Carbon::parse($endTimeStr)->format('H:i') ? 'Tepat Waktu' : 'Pulang Cepat',
                 'check_out_latitude' => $request->input('latitude'),
                 'check_out_longitude' => $request->input('longitude'),
             ]);
@@ -194,7 +205,7 @@ class AttendanceController extends Controller
     private function _jsonResp(bool $success, string $message, array $data = []): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
     {
         if (request()->ajax() || request()->wantsJson()) {
-            return response()->json(['success' => $success, 'message' => $message, ...$data]);
+            return response()->json(['success' => $success, 'message' => $message, ...$data], $success ? 200 : 422);
         }
         return back()->with($success ? 'success' : 'error', $message);
     }

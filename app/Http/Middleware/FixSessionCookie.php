@@ -20,9 +20,8 @@ class FixSessionCookie
         ];
         foreach ($folders as $folder) {
             if (!is_dir($folder)) {
-                @mkdir($folder, 0777, true);
+                @mkdir($folder, 0755, true);
             }
-            @chmod($folder, 0777);
         }
 
         return $next($request);

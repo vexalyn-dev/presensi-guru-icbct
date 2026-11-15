@@ -114,14 +114,16 @@ class LeaveController extends Controller
         );
 
         // Kirim notifikasi ke semua admin/operator
-        $admins = \App\Models\User::whereIn('role', ['admin', 'operator'])->get();
+        $admins = \App\Models\User::whereIn('role', ['admin', 'operator', 'guru_piket'])->get();
         foreach ($admins as $admin) {
             NotificationHelper::send(
                 $admin,
                 'warning',
                 'Pengajuan ' . ucfirst($validated['type']) . ' Baru',
                 auth()->user()->name . ' mengajukan ' . $validated['type'] . ' dari tanggal ' . Carbon::parse($validated['start_date'])->format('d M Y') . ' s/d ' . Carbon::parse($validated['end_date'])->format('d M Y') . '. Silakan tinjau pengajuan ini.',
-                route('leaves.show', $leaveRequest),
+                $admin->isGuruPiket()
+                    ? route('piket.leave-approval.show', ['leave' => $leaveRequest->id])
+                    : route('leaves.show', $leaveRequest),
                 'file-text',
                 'bg-yellow-100 text-yellow-600'
             );

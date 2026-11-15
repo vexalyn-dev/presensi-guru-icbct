@@ -10,6 +10,11 @@ class DemoAccountSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command->warn('DemoAccountSeeder dilewati di produksi.');
+            return;
+        }
+
         // Akun Admin (full access)
         User::updateOrCreate(
             ['email' => 'admin@smkicb.sch.id'],

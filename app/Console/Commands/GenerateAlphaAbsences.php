@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Attendance;
+use App\Models\Holiday;
 use App\Models\LeaveRequest;
 use App\Models\TeacherSchedule;
 use App\Models\User;
@@ -20,6 +21,11 @@ class GenerateAlphaAbsences extends Command
         $today = Carbon::today();
         $todayDayOfWeek = Carbon::now()->dayOfWeek;
         $now = Carbon::now();
+
+        if (Holiday::isHoliday($today)) {
+            $this->info('Hari libur — tidak ada alpha yang dibuat.');
+            return Command::SUCCESS;
+        }
 
         $teachers = User::where('is_active', true)
             ->whereIn('role', ['guru', 'guru_piket'])
@@ -77,7 +83,7 @@ class GenerateAlphaAbsences extends Command
             ->first();
 
         if ($schedule && $schedule->end_time) {
-            return Carbon::parse($today->format('Y-m-d') . ' ' . $schedule->end_time);
+            return Carbon::parse(Carbon::today()->format('Y-m-d') . ' ' . $schedule->end_time);
         }
 
         if ($teacher->default_check_out) {

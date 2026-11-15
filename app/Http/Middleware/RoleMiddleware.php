@@ -17,18 +17,13 @@ class RoleMiddleware
         $user = auth()->user();
 
         // operator mendapat akses ke semua route yang membutuhkan 'admin'
-        // guru_piket mendapat akses ke route presensi admin (check-status, teachers/data)
-        $effectiveRoles = [];
-        foreach ($roles as $role) {
-            if ($role === 'admin') {
-                $effectiveRoles[] = 'operator';
-                $effectiveRoles[] = 'guru_piket';
-            }
-            $effectiveRoles[] = $role;
+        $effectiveRoles = $roles;
+        if (in_array('admin', $roles, true)) {
+            $effectiveRoles[] = 'operator';
         }
         $effectiveRoles = array_unique($effectiveRoles);
 
-        if (!in_array($user->role, $effectiveRoles)) {
+        if (!in_array($user->role, $effectiveRoles, true)) {
             return $this->redirectByRole($user);
         }
 
@@ -42,6 +37,9 @@ class RoleMiddleware
         }
         if ($user->canAccessAdmin()) {
             return redirect()->route('dashboard');
+        }
+        if ($user->isGuruPiket()) {
+            return redirect()->route('piket.dashboard');
         }
         if ($user->isTeacher()) {
             return redirect()->route('teacher.dashboard');

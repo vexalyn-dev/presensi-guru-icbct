@@ -38,24 +38,27 @@ class AttendanceController extends Controller
 
         try {
             $qrData = json_decode($validated['qr_data'], true);
-            
-            // Support both full JSON dan plain ID
-            if (!$qrData || !is_array($qrData)) {
-                $qrData = ['teacher_id' => $validated['qr_data']];
-            }
-            
-            if (!isset($qrData['teacher_id'])) {
+
+            if (!is_array($qrData) || !isset($qrData['teacher_id'], $qrData['token'])) {
                 return $ajaxRequest
-                    ? response()->json(['success' => false, 'message' => 'QR code tidak valid - Teacher ID tidak ditemukan'], 422)
-                    : back()->with('error', 'QR code tidak valid - Teacher ID tidak ditemukan');
+                    ? response()->json(['success' => false, 'message' => 'QR code tidak valid. Gunakan QR resmi dari sistem.'], 422)
+                    : back()->with('error', 'QR code tidak valid. Gunakan QR resmi dari sistem.');
             }
-            
-            $teacher = User::find($qrData['teacher_id']);
-            
-            if (!$teacher || $teacher->role !== 'guru') {
+
+            $teacher = User::where('id', $qrData['teacher_id'])
+                ->whereIn('role', ['guru', 'guru_piket'])
+                ->first();
+
+            if (!$teacher) {
                 return $ajaxRequest
                     ? response()->json(['success' => false, 'message' => 'Guru tidak ditemukan atau role tidak valid'], 422)
                     : back()->with('error', 'Guru tidak ditemukan atau role tidak valid');
+            }
+
+            if (!$teacher->qr_token || !hash_equals((string) $teacher->qr_token, (string) $qrData['token'])) {
+                return $ajaxRequest
+                    ? response()->json(['success' => false, 'message' => 'QR code sudah kadaluarsa'], 422)
+                    : back()->with('error', 'QR code sudah kadaluarsa');
             }
 
             if (!$teacher->is_active) {
@@ -64,13 +67,6 @@ class AttendanceController extends Controller
                     : back()->with('error', 'Akun guru tidak aktif. Hubungi admin.');
             }
 
-            // Jika ada token, validasi token
-            if (isset($qrData['token']) && $teacher->qr_token !== $qrData['token']) {
-                return $ajaxRequest
-                    ? response()->json(['success' => false, 'message' => 'QR code sudah kadaluarsa'], 422)
-                    : back()->with('error', 'QR code sudah kadaluarsa');
-            }
-            
         } catch (\Exception $e) {
             Log::warning('Attendance store failed: ' . $e->getMessage());
             return $ajaxRequest
@@ -86,7 +82,7 @@ class AttendanceController extends Controller
         }
 
         // ✅ CEK: Apakah guru dijadwalkan hari ini?
-        if (!\App\Models\TeacherSchedule::isScheduledToday($teacher->id)) {
+        if ($teacher->role === 'guru' && !\App\Models\TeacherSchedule::isScheduledToday($teacher->id)) {
             return $ajaxRequest
                 ? response()->json(['success' => false, 'message' => 'Anda tidak dijadwalkan mengajar hari ini.'], 422)
                 : back()->with('error', 'Anda tidak dijadwalkan mengajar hari ini.');
@@ -129,16 +125,17 @@ class AttendanceController extends Controller
         if ($requestedMode === 'keluar') {
             // Operator paksa mode keluar → buat record masuk dulu lalu langsung keluar
             $now = now();
-            $newAttendance = Attendance::create([
-                'user_id'     => $teacher->id,
-                'date'        => today(),
-                'check_in'    => $now->format('H:i:s'),
-                'check_out'   => null,
-                'status'      => 'Tidak Diketahui',
-                'latitude'    => $validated['latitude'] ?? null,
-                'longitude'   => $validated['longitude'] ?? null,
-                'scan_method' => 'qr_code',
-            ]);
+            $newAttendance = Attendance::firstOrCreate(
+                ['user_id' => $teacher->id, 'date' => today()],
+                [
+                    'check_in'    => $now->format('H:i:s'),
+                    'check_out'   => null,
+                    'status'      => 'Tidak Diketahui',
+                    'latitude'    => $validated['latitude'] ?? null,
+                    'longitude'   => $validated['longitude'] ?? null,
+                    'scan_method' => 'qr_code',
+                ]
+            );
             $this->processKeluar($newAttendance, $teacher, $validated, $todaySchedule);
             return $ajaxRequest
                 ? response()->json(['success' => true, 'message' => 'Presensi keluar berhasil dicatat!', 'teacher_name' => $teacher->name, 'attendance_type' => 'keluar', 'status' => $newAttendance->status, 'time' => now()->format('H:i:s')])
@@ -164,16 +161,17 @@ class AttendanceController extends Controller
         $teacherStart = Carbon::parse($teacherStartStr);
         $status = $currentTime->greaterThan($teacherStart) ? 'Terlambat' : 'Tepat Waktu';
 
-        Attendance::create([
-            'user_id' => $teacher->id,
-            'date' => today(),
-            'check_in' => $now->format('H:i:s'),
-            'check_out' => null,
-            'status' => $status,
-            'latitude' => $validated['latitude'] ?? null,
-            'longitude' => $validated['longitude'] ?? null,
-            'scan_method' => 'qr_code',
-        ]);
+        Attendance::firstOrCreate(
+            ['user_id' => $teacher->id, 'date' => today()],
+            [
+                'check_in' => $now->format('H:i:s'),
+                'check_out' => null,
+                'status' => $status,
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'scan_method' => 'qr_code',
+            ]
+        );
 
         // ActivityLog
         try {
@@ -243,6 +241,8 @@ class AttendanceController extends Controller
         $attendance->update([
             'check_out' => $now->format('H:i:s'),
             'check_out_status' => $statusOut,
+            'check_out_latitude' => $validated['latitude'] ?? null,
+            'check_out_longitude' => $validated['longitude'] ?? null,
         ]);
 
         // ActivityLog
@@ -330,8 +330,8 @@ class AttendanceController extends Controller
         if (!$phone) return;
         $phone = preg_replace('/^08/', '628', $phone);
         try {
-            Http::withHeaders(['Authorization' => env('FONNTE_TOKEN')])
-                ->post(env('FONNTE_URL'), [
+            Http::withHeaders(['Authorization' => config('services.fonnte.token')])
+                ->post(config('services.fonnte.url'), [
                     'target' => $phone,
                     'message' => $message,
                 ]);

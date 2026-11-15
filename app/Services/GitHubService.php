@@ -16,8 +16,8 @@ class GitHubService
 
     public function __construct()
     {
-        $this->token = env('GITHUB_TOKEN', '');
-        $this->repo  = env('GITHUB_REPO',  'vexalyn-dev/presensi-guru-icbct');
+        $this->token = config('services.github.token', '');
+        $this->repo  = config('services.github.repo', 'vexalyn-dev/presensi-guru-icbct');
 
         $this->headers = [
             'Authorization'        => 'Bearer ' . $this->token,
