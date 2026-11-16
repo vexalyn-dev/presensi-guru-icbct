@@ -231,6 +231,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::post('/apk', [SettingController::class, 'updateApk'])->name('apk');
         Route::delete('/apk', [SettingController::class, 'deleteApk'])->name('apk.delete');
         Route::post('/reset', [SettingController::class, 'reset'])->name('reset');
+        Route::post('/reset-data', [SettingController::class, 'resetData'])->name('reset-data');
     });
     
     // Messages / CS Chat

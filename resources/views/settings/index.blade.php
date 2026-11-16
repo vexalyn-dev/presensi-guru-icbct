@@ -22,11 +22,15 @@
             </div>
         </div>
 
-        <button @click="showResetModal = true"
-                class="group flex items-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5">
-            <i data-lucide="rotate-ccw" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-300"></i>
-            Reset Default
-        </button>
+        @if(auth()->user()->canAccessAdmin())
+        <div class="flex items-center gap-2">
+            <button @click="showResetDataModal = true"
+                    class="group flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-red-600/20 hover:-translate-y-0.5">
+                <i data-lucide="trash-2" class="w-4 h-4 group-hover:scale-110 transition-transform duration-300"></i>
+                Reset Data
+            </button>
+        </div>
+        @endif
     </div>
 
     <!-- Toast Notification -->
@@ -437,6 +441,16 @@
                             </div>
                             <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Auto logout jika tidak aktif</p>
                         </div>
+
+                        @if(auth()->user()->canAccessAdmin())
+                        <div class="flex items-start md:justify-end md:mt-7">
+                            <button type="button" @click="showResetModal = true"
+                                    class="group flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4 group-hover:rotate-180 transition-transform duration-300"></i>
+                                Reset Default
+                            </button>
+                        </div>
+                        @endif
                     </div>
 
                     <div class="flex justify-end pt-5 border-t border-slate-200 dark:border-slate-700">
@@ -871,6 +885,60 @@
             </div>
         </div>
 
+        <div x-show="showResetDataModal" x-cloak @keydown.escape.window="showResetDataModal = false"
+             @click.self="showResetDataModal = false"
+             class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+             role="dialog" aria-modal="true">
+
+            <div x-show="showResetDataModal"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative z-20 bg-white dark:bg-navy-800 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:max-w-lg w-full border border-slate-200 dark:border-slate-700">
+                <div class="p-6 sm:p-8">
+                    <div class="flex items-start gap-4 mb-5">
+                        <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-navy-800 dark:text-white mb-1">Reset Data Presensi?</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Semua data presensi harian guru dan presensi kelas akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5 mb-6">
+                        <div class="flex items-center justify-between gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="calendar-check" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                                <span class="text-sm font-medium text-navy-800 dark:text-white">Presensi Harian Guru</span>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ $attendanceCount ?? 0 }} data</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="presentation" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                                <span class="text-sm font-medium text-navy-800 dark:text-white">Presensi Kelas Guru</span>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ $classAttendanceCount ?? 0 }} data</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3">
+                        <button @click="showResetDataModal = false" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition-colors">Batal</button>
+                        <form action="{{ route('settings.reset-data') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> Ya, Hapus Data
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -885,6 +953,7 @@
         Alpine.data('settingsApp', () => ({
             activeTab: '{{ session("active_tab", "general") }}',
             showResetModal: false,
+            showResetDataModal: false,
             primaryColor: '{{ old("primary_color", $settings["appearance"]["primary_color"] ?? "#0F172A") }}',
             accentColor: '{{ old("accent_color", $settings["appearance"]["accent_color"] ?? "#FACC15") }}',
             logoPreview: null,
@@ -1275,9 +1344,9 @@
 </script>
 
 <style>
-    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    .fade-in { animation: fadeIn 0.5s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+    .animate-slide-up { animation: slideUp 0.5s ease-out; }
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     [x-cloak] { display: none !important; }
     select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }

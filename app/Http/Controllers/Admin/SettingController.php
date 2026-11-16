@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
+use App\Models\ClassAttendance;
 use App\Models\Setting;
 use App\Models\AppSetting;
 use App\Services\ApkService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
@@ -101,7 +104,12 @@ class SettingController extends Controller
             $apkSetting = null;
         }
 
-        return view('settings.index', compact('settings', 'apkSetting'));
+        return view('settings.index', [
+            'settings' => $settings,
+            'apkSetting' => $apkSetting,
+            'attendanceCount' => Attendance::count(),
+            'classAttendanceCount' => ClassAttendance::count(),
+        ]);
     }
 
     public function updateGeneral(Request $request)
@@ -354,5 +362,23 @@ class SettingController extends Controller
         $this->syncToAppSetting();
 
         return back()->with('success', 'Semua pengaturan berhasil direset ke default!');
+    }
+
+    public function resetData()
+    {
+        $attendanceCount = 0;
+        $classAttendanceCount = 0;
+
+        DB::transaction(function () use (&$attendanceCount, &$classAttendanceCount) {
+            $attendanceCount = Attendance::count();
+            $classAttendanceCount = ClassAttendance::count();
+
+            Attendance::query()->delete();
+            ClassAttendance::query()->delete();
+        });
+
+        return back()
+            ->with('success', "Data presensi berhasil direset ({$attendanceCount} presensi harian dan {$classAttendanceCount} presensi kelas dihapus).")
+            ->with('active_tab', 'attendance');
     }
 }
