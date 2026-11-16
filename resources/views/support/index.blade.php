@@ -17,7 +17,7 @@
                 selected: @json(old('priority') ?: null),
                 opts: [
                     { value: 'low',      label: 'Rendah', bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-700 dark:text-green-400',  icon: 'circle-check' },
-                    { value: 'medium',   label: 'Sedang', bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  icon: 'alert-circle' },
+                    { value: 'medium',   label: 'Sedang', bg: 'bg-amber-100 dark:bg-green-900/30',  text: 'text-amber-700 dark:text-amber-400',  icon: 'alert-circle' },
                     { value: 'high',     label: 'Tinggi', bg: 'bg-orange-100 dark:bg-orange-900/30',text: 'text-orange-700 dark:text-orange-400', icon: 'alert-triangle' },
                     { value: 'critical', label: 'Kritis', bg: 'bg-red-100 dark:bg-red-900/30',      text: 'text-red-700 dark:text-red-400',       icon: 'flame' },
                 ],
@@ -25,6 +25,13 @@
                     this.selected = opt.value;
                     document.getElementById('priority-input').value = opt.value;
                     this.menuOpen = false;
+                },
+                $init: function () {
+                    this.$watch('menuOpen', value => {
+                        if (value && window.lucide) {
+                            setTimeout(() => lucide.createIcons(), 50);
+                        }
+                    });
                 }
             };
         });
@@ -47,6 +54,13 @@
                     this.selected = opt.v;
                     document.getElementById('category-input').value = opt.v;
                     this.menuOpen = false;
+                },
+                $init: function () {
+                    this.$watch('menuOpen', value => {
+                        if (value && window.lucide) {
+                            setTimeout(() => lucide.createIcons(), 50);
+                        }
+                    });
                 }
             };
         });
@@ -65,6 +79,13 @@
                     this.selected = opt.v;
                     document.getElementById('impact-input').value = opt.v;
                     this.menuOpen = false;
+                },
+                $init: function () {
+                    this.$watch('menuOpen', value => {
+                        if (value && window.lucide) {
+                            setTimeout(() => lucide.createIcons(), 50);
+                        }
+                    });
                 }
             };
         });
@@ -359,30 +380,37 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">Jenis Maintenance</label>
-                        <div class="relative" x-data="{
-                            open: false,
-                            selected: '',
-                            selectedIcon: 'wrench',
-                            selectedBg: '',
-                            selectedColor: '',
-                            options: [
-                                {v:'Update Sistem',      icon:'refresh-cw',     bg:'bg-blue-100',   c:'text-blue-600'},
-                                {v:'Perbaikan Database', icon:'database',       bg:'bg-amber-100',  c:'text-amber-600'},
-                                {v:'Backup Data',        icon:'hard-drive',     bg:'bg-green-100',  c:'text-green-600'},
-                                {v:'Optimasi Performa',  icon:'zap',            bg:'bg-purple-100', c:'text-purple-600'},
-                                {v:'Keamanan',           icon:'shield',         bg:'bg-red-100',    c:'text-red-600'},
-                                {v:'Lainnya',            icon:'more-horizontal',bg:'bg-slate-100',  c:'text-slate-600'},
-                            ],
-                            select(opt) {
-                                this.selected = opt.v;
-                                this.selectedIcon = opt.icon;
-                                this.selectedBg = opt.bg;
-                                this.selectedColor = opt.c;
-                                this.open = false;
-                                document.getElementById('maintenance-type-input').value = opt.v;
-                                this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
-                            }
-                        }" @click.outside="open = false">
+                         <div class="relative" x-data="{
+                             open: false,
+                             selected: '',
+                             selectedIcon: 'wrench',
+                             selectedBg: '',
+                             selectedColor: '',
+                             options: [
+                                 {v:'Update Sistem',      icon:'refresh-cw',     bg:'bg-blue-100',   c:'text-blue-600'},
+                                 {v:'Perbaikan Database', icon:'database',       bg:'bg-amber-100',  c:'text-amber-600'},
+                                 {v:'Backup Data',        icon:'hard-drive',     bg:'bg-green-100',  c:'text-green-600'},
+                                 {v:'Optimasi Performa',  icon:'zap',            bg:'bg-purple-100', c:'text-purple-600'},
+                                 {v:'Keamanan',           icon:'shield',         bg:'bg-red-100',    c:'text-red-600'},
+                                 {v:'Lainnya',            icon:'more-horizontal',bg:'bg-slate-100',  c:'text-slate-600'},
+                             ],
+                             select(opt) {
+                                 this.selected = opt.v;
+                                 this.selectedIcon = opt.icon;
+                                 this.selectedBg = opt.bg;
+                                 this.selectedColor = opt.c;
+                                 this.open = false;
+                                 document.getElementById('maintenance-type-input').value = opt.v;
+                                 this.$nextTick(() => { if(window.lucide) lucide.createIcons(); });
+                             },
+                             $init() {
+                                 this.$watch('open', value => {
+                                     if (value && window.lucide) {
+                                         setTimeout(() => lucide.createIcons(), 50);
+                                     }
+                                 });
+                             }
+                         }" @click.outside="open = false">
                             <input type="hidden" name="maintenance_type" id="maintenance-type-input">
 
                             <!-- Trigger Button -->
