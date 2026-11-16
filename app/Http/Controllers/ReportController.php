@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\ClassAttendance;
 use App\Models\Holiday;
 use App\Models\LeaveRequest;
+use App\Models\Setting;
 use App\Models\TeacherSchedule;
 use App\Models\TeachingSchedule;
 use App\Models\User;
@@ -34,7 +35,7 @@ class ReportController extends Controller
         $dates       = $calculated['dates'];
         $totalStats  = $calculated['totalStats'];
 
-        $totalPresensi  = array_sum($totalStats);
+        $totalPresensi  = $totalStats['hadir'] + $totalStats['izin'] + $totalStats['sakit'] + $totalStats['alpha'];
         $totalHadir    = $totalStats['hadir'];
         $kehadiranRate = $totalPresensi > 0 ? round(($totalHadir / $totalPresensi) * 100) : 0;
 
@@ -67,7 +68,7 @@ class ReportController extends Controller
         $dates      = $calculated['dates'];
         $totalStats = $calculated['totalStats'];
 
-        $totalPresensi  = array_sum($totalStats);
+        $totalPresensi  = $totalStats['hadir'] + $totalStats['izin'] + $totalStats['sakit'] + $totalStats['alpha'];
         $totalHadir    = $totalStats['hadir'];
         $kehadiranRate = $totalPresensi > 0 ? round(($totalHadir / $totalPresensi) * 100) : 0;
 
@@ -461,6 +462,9 @@ class ReportController extends Controller
         $reportData = [];
 
         if ($reportType === 'daily') {
+            $dailyEndTime = Setting::get('attendance_end_time', '16:00');
+            $now = Carbon::now();
+
             $attendances = Attendance::whereBetween('date', [$startDate, $endDate])
                 ->get()->groupBy(fn($att) => $att->user_id . '_' . $att->date);
 
@@ -494,6 +498,20 @@ class ReportController extends Controller
 
                     // Jika ada record Presensi, tampilkan langsung (tanpa syarat jadwal kerja)
                     if ($attendance) {
+                        // Scan setelah batas akhir presensi harian tetap dianggap Alpha
+                        $checkIn = $attendance->check_in;
+                        $scannedAfterEnd = $checkIn
+                            && in_array($attendance->status, ['Hadir', 'Tepat Waktu', 'Terlambat'], true)
+                            && Carbon::parse($dateStr . ' ' . Carbon::parse($checkIn)->format('H:i:s'))
+                                ->gt(Carbon::parse($dateStr . ' ' . $dailyEndTime));
+
+                        if ($scannedAfterEnd) {
+                            $teacherData['days'][$dateStr] = ['status' => 'alpha', 'code' => 'A'];
+                            $teacherData['summary']['A']++;
+                            $totalStats['alpha']++;
+                            continue;
+                        }
+
                         $code = match($attendance->status) {
                             'Hadir', 'Tepat Waktu' => 'H',
                             'Terlambat'           => 'T',
@@ -506,7 +524,12 @@ class ReportController extends Controller
                         $teacherData['summary'][$code]++;
                         $statusKey = strtolower($attendance->status);
                         if ($statusKey === 'tepat waktu') $statusKey = 'hadir';
-                        if (isset($totalStats[$statusKey])) $totalStats[$statusKey]++;
+                        if ($statusKey === 'terlambat') {
+                            $totalStats['terlambat']++;
+                            $totalStats['hadir']++;
+                        } elseif (isset($totalStats[$statusKey])) {
+                            $totalStats[$statusKey]++;
+                        }
                         continue;
                     }
 
@@ -540,7 +563,14 @@ class ReportController extends Controller
                         continue;
                     }
 
-                    // Hari kerja, ada jadwal, tidak hadir, tidak izin → Alpha
+                    // Hari kerja, ada jadwal, tidak hadir, tidak izin.
+                    // Sebelum batas akhir presensi harian belum dianggap Alpha.
+                    if (Carbon::parse($dateStr . ' ' . $dailyEndTime)->gt($now)) {
+                        $teacherData['days'][$dateStr] = ['status' => 'pending', 'code' => '-'];
+                        continue;
+                    }
+
+                    // Sudah melewati batas akhir presensi harian → Alpha
                     $teacherData['days'][$dateStr] = ['status' => 'alpha', 'code' => 'A'];
                     $teacherData['summary']['A']++;
                     $totalStats['alpha']++;
@@ -557,6 +587,7 @@ class ReportController extends Controller
                 ->where('end_date', '>=', $startDate)->where('start_date', '<=', $endDate)->get();
             $holidays = Holiday::whereBetween('date', [$startDate, $endDate])->pluck('date')->toArray();
             $today    = Carbon::today();
+            $now      = Carbon::now();
             $teachingSchedules = TeachingSchedule::whereIn('user_id', $teacherIds)
                 ->where('is_active', true)
                 ->with(['classroom', 'subject'])
@@ -637,20 +668,17 @@ class ReportController extends Controller
                     
                     $schedules = $teachingSchedules->get($teacher->id . '_' . $dayOfWeek) ?? collect();
 
-                    // Shared-space records for this teacher+date (scan_method = qr_shared_space)
-                    $sharedSpaceForDay = $classAttendances->filter(function ($att) use ($teacher, $dateStr) {
+                    // Semua scan presensi kelas untuk guru+tanggal ini
+                    $dayAttendances = $classAttendances->filter(function ($att) use ($teacher, $dateStr) {
                         return $att->user_id === $teacher->id
-                            && $att->date->toDateString() === $dateStr
-                            && $att->scan_method === 'qr_shared_space';
+                            && $att->date->toDateString() === $dateStr;
                     });
 
                     $isHoliday = in_array($dateStr, $holidays);
                     $isFuture  = $date->gt($today);
 
                     // Cek apakah ada scan presensi kelas untuk hari ini (scheduled OR shared-space)
-                    $hasAnyClassAttendance = $classAttendances->some(
-                        fn($att) => $att->user_id === $teacher->id && $att->date->toDateString() === $dateStr
-                    );
+                    $hasAnyClassAttendance = $dayAttendances->isNotEmpty();
 
                     // Cek izin/sakit — hanya berlaku jika guru tidak ada scan sama sekali hari ini
                     if (!$hasAnyClassAttendance) {
@@ -658,7 +686,7 @@ class ReportController extends Controller
                             && $l->start_date->toDateString() <= $dateStr
                             && $l->end_date->toDateString() >= $dateStr);
 
-                        if ($onLeave && ($schedules->isNotEmpty() || !$sharedSpaceForDay->isEmpty())) {
+                        if ($onLeave && $schedules->isNotEmpty()) {
                             $code = $onLeave->type === 'sakit' ? 'S' : 'I';
                             $teacherData['days'][$dateStr] = [
                                 'status'     => $onLeave->type,
@@ -674,23 +702,57 @@ class ReportController extends Controller
                         }
                     }
 
-                    if ($isWeekend || $isHoliday || $isFuture || ($schedules->isEmpty() && $sharedSpaceForDay->isEmpty())) {
+                    if ($isWeekend || $isHoliday || $isFuture || ($schedules->isEmpty() && $dayAttendances->isEmpty())) {
                         $teacherData['days'][$dateStr] = ['status' => 'libur', 'code' => '-', 'label' => '-', 'classes' => []];
                         continue;
                     }
 
                     $attendedCount = 0;
                     $lateCount     = 0;
+                    $absentCount   = 0;
                     $totalClasses  = $schedules->count();
                     $classDetails  = [];
+                    $usedAttendances = [];
+                    $matchedBySchedule = [];
+
+                    $sameClassroom = function ($att, $schedule) {
+                        return (int) $att->classroom_id === (int) $schedule->classroom_id
+                            || ($att->selected_classroom_id && (int) $att->selected_classroom_id === (int) $schedule->classroom_id);
+                    };
+
+                    // Pass 1: cocokkan kelas + jam yang sama persis
+                    foreach ($schedules as $schedule) {
+                        $attendance = $dayAttendances->first(function ($att) use ($schedule, &$usedAttendances, $sameClassroom) {
+                            return !in_array($att->id, $usedAttendances, true)
+                                && $att->check_in_time
+                                && $sameClassroom($att, $schedule)
+                                && (int) $att->period === (int) $schedule->period;
+                        });
+
+                        if ($attendance) {
+                            $matchedBySchedule[$schedule->id] = $attendance;
+                            $usedAttendances[] = $attendance->id;
+                        }
+                    }
+
+                    // Pass 2: fallback — kelas sama tapi jam berbeda/null (mis. scan via ruangan bersama)
+                    foreach ($schedules as $schedule) {
+                        if (isset($matchedBySchedule[$schedule->id])) continue;
+
+                        $attendance = $dayAttendances->first(function ($att) use ($schedule, &$usedAttendances, $sameClassroom) {
+                            return !in_array($att->id, $usedAttendances, true)
+                                && $att->check_in_time
+                                && $sameClassroom($att, $schedule);
+                        });
+
+                        if ($attendance) {
+                            $matchedBySchedule[$schedule->id] = $attendance;
+                            $usedAttendances[] = $attendance->id;
+                        }
+                    }
 
                     foreach ($schedules as $schedule) {
-                        $attendance = $classAttendances->first(function($att) use ($teacher, $dateStr, $schedule) {
-                            return $att->user_id === $teacher->id 
-                                && $att->date->toDateString() === $dateStr
-                                && $att->classroom_id === $schedule->classroom_id
-                                && $att->period === $schedule->period;
-                        });
+                        $attendance = $matchedBySchedule[$schedule->id] ?? null;
 
                         $classInfo = [
                             'classroom' => $schedule->classroom->code
@@ -720,25 +782,31 @@ class ReportController extends Controller
                                     }
                                 } else {
                                     $classInfo['status'] = 'A';
+                                    $absentCount++;
                                 }
                             } elseif ($attendance->check_in_time && !$attendance->check_out_time) {
                                 // Masih di kelas (belum scan keluar) — tetap hitung hadir
                                 $attendedCount++;
                                 $classInfo['status'] = 'H';
                             }
+                        } elseif ($schedule->end_time && Carbon::parse($dateStr . ' ' . $schedule->end_time)->lte($now)) {
+                            // Belum scan sampai jam pelajaran berakhir → Alpha
+                            $classInfo['status'] = 'A';
+                            $absentCount++;
+                        } else {
+                            // Jam pelajaran belum berakhir → belum dianggap Alpha
+                            $classInfo['status'] = '-';
                         }
 
                         $classDetails[] = $classInfo;
                     }
 
-                    // ── Shared-space sessions (on-demand, no TeachingSchedule) ──────────
-                    foreach ($sharedSpaceForDay as $ssAtt) {
-                        // Skip if this record's location+period already matched a scheduled class above
-                        $alreadyCounted = $schedules->contains(function ($sch) use ($ssAtt) {
-                            return $sch->classroom_id === $ssAtt->classroom_id && $sch->period === $ssAtt->period;
-                        });
-                        if ($alreadyCounted) continue;
+                    // ── Sesi tambahan: scan yang tidak cocok dengan jadwal (shared-space / on-demand) ──
+                    $unmatchedAttendances = $dayAttendances->reject(function ($att) use ($usedAttendances) {
+                        return in_array($att->id, $usedAttendances, true) || !$att->check_in_time;
+                    });
 
+                    foreach ($unmatchedAttendances as $ssAtt) {
                         $totalClasses++;
 
                         $ssClassRoom = $ssAtt->selectedClassroom ?? $ssAtt->classroom;
@@ -760,6 +828,8 @@ class ReportController extends Controller
                             if ($ssDuration >= 30) {
                                 $attendedCount++;
                                 $ssClassInfo['status'] = 'H';
+                            } else {
+                                $absentCount++;
                             }
                         } elseif ($ssAtt->check_in_time && !$ssAtt->check_out_time) {
                             // Masih di kelas — hitung hadir
@@ -784,10 +854,13 @@ class ReportController extends Controller
                         $teacherData['days'][$dateStr] = ['status' => 'hadir', 'code' => 'H', 'label' => "{$attendedCount}/{$totalClasses}", 'classes' => $classDetails];
                         $teacherData['summary']['H']++;
                         $totalStats['hadir']++;
-                    } else {
+                    } elseif ($absentCount > 0) {
                         $teacherData['days'][$dateStr] = ['status' => 'alpha', 'code' => 'A', 'label' => "0/{$totalClasses}", 'classes' => $classDetails];
                         $teacherData['summary']['A']++;
                         $totalStats['alpha']++;
+                    } else {
+                        // Belum ada jam pelajaran yang berakhir → belum dianggap Alpha
+                        $teacherData['days'][$dateStr] = ['status' => 'pending', 'code' => '-', 'label' => "0/{$totalClasses}", 'classes' => $classDetails];
                     }
                 }
 
