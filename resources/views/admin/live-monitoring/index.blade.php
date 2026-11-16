@@ -460,7 +460,7 @@
         </div>
 
         {{-- Mobile card list --}}
-        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800 max-h-96 overflow-y-auto">
             <template x-for="(item, i) in data.belum_scan_keluar" :key="i">
                 <div class="px-4 py-3 flex items-center gap-3">
                     <template x-if="item.user.photo">
@@ -490,7 +490,7 @@
         </div>
 
         {{-- Desktop table --}}
-        <div class="hidden md:block overflow-x-auto">
+        <div class="hidden md:block max-h-96 overflow-y-auto overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr
@@ -616,7 +616,7 @@
         </div>
 
         {{-- Mobile card --}}
-        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800 max-h-96 overflow-y-auto">
             <template x-for="(item, i) in data.sudah_scan_keluar" :key="i">
                 <div class="px-4 py-3 flex items-center gap-3">
                     <template x-if="item.user.photo">
@@ -644,7 +644,7 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto hidden md:block">
+        <div class="overflow-x-auto hidden md:block max-h-96 overflow-y-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-slate-100 dark:border-slate-800 text-left">
@@ -730,7 +730,7 @@
             ></span>
         </div>
         <div
-            class="divide-y divide-slate-50 dark:divide-slate-800/50 max-h-72 overflow-y-auto"
+            class="divide-y divide-slate-50 dark:divide-slate-800/50 max-h-96 overflow-y-auto"
         >
             <template x-for="(item, i) in data.sudah_selesai" :key="i">
                 <div
