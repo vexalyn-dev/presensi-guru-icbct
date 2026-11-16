@@ -782,10 +782,10 @@ function removeFile(i) { selectedFiles.splice(i, 1); renderFiles(); }
 
     var os = '-';
     if (ua.indexOf('Win') !== -1) os = 'Windows';
+    else if (/iPhone|iPod|iPad/i.test(ua)) os = 'iOS';
     else if (ua.indexOf('Mac') !== -1) os = 'macOS';
     else if (ua.indexOf('Linux') !== -1) os = 'Linux';
     else if (ua.indexOf('Android') !== -1) os = 'Android';
-    else if (/iPhone|iPod|iPad/i.test(ua)) os = 'iOS';
 
     var device = '-';
     if (/Mobi|Android/i.test(ua)) device = 'Mobile';
