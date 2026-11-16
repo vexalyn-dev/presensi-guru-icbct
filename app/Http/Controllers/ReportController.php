@@ -545,6 +545,20 @@ class ReportController extends Controller
                         && $l->end_date->toDateString() >= $dateStr);
 
                     if ($onLeave) {
+                        // Izin perjam (punya jam mulai/selesai) tetap dianggap Hadir;
+                        // kode I/S hanya untuk izin/sakit sehari penuh.
+                        if ($onLeave->start_time || $onLeave->end_time) {
+                            $teacherData['days'][$dateStr] = [
+                                'status'     => 'hadir',
+                                'code'       => 'H',
+                                'start_time' => $onLeave->start_time,
+                                'end_time'   => $onLeave->end_time,
+                            ];
+                            $teacherData['summary']['H']++;
+                            $totalStats['hadir']++;
+                            continue;
+                        }
+
                         $code = $onLeave->type === 'sakit' ? 'S' : 'I';
                         $teacherData['days'][$dateStr] = [
                             'status'     => $onLeave->type,

@@ -90,6 +90,6 @@ class Teacher extends Model
         if ($this->photo) {
             return asset('storage/' . $this->photo);
         }
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=0F172A&color=fff';
+        return asset('images/default-teacher.png');
     }
 }

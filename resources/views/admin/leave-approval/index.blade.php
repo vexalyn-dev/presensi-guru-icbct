@@ -39,7 +39,7 @@
         <div class="card p-5 hover:shadow-lg transition-all">
             <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-4 flex-1 min-w-0">
-                    <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($leave->user->name ?? 'G').'&background=0F172A&color=fff' }}"
+                    <img src="{{ $leave->user->photo_url }}"
                          class="w-11 h-11 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2 mb-1">

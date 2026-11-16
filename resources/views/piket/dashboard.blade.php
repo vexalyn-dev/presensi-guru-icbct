@@ -146,7 +146,7 @@
             <div class="divide-y divide-slate-100 dark:divide-slate-800" data-section="recent">
                 @forelse($recentAttendances as $att)
                 <div class="px-5 py-3.5 flex items-center gap-3">
-                    <img src="{{ $att->user->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($att->user->name ?? 'G').'&background=0F172A&color=fff&size=64' }}"
+                    <img src="{{ $att->user->photo_url ?? asset('images/default-teacher.png') }}"
                          class="w-9 h-9 rounded-lg object-cover flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-navy-800 dark:text-white truncate">{{ $att->user->name ?? '-' }}</p>
@@ -187,7 +187,7 @@
             <div class="divide-y divide-slate-100 dark:divide-slate-800" data-section="pending">
                 @forelse($pendingLeaves as $leave)
                 <div class="px-5 py-3.5 flex items-center gap-3">
-                    <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($leave->user->name ?? 'G').'&background=0F172A&color=fff&size=64' }}"
+                    <img src="{{ $leave->user->photo_url ?? asset('images/default-teacher.png') }}"
                          class="w-9 h-9 rounded-lg object-cover flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-navy-800 dark:text-white truncate">{{ $leave->user->name ?? '-' }}</p>
@@ -311,7 +311,7 @@ function closePiketWelcome() {
         var html = '';
         data.forEach(function(att) {
             html += '<div class="px-5 py-3.5 flex items-center gap-3">'
-                  + '<img src="' + (att.photo || 'https://ui-avatars.com/api/?name=G&background=0F172A&color=fff&size=64') + '" class="w-9 h-9 rounded-lg object-cover flex-shrink-0">'
+                  + '<img src="' + (att.photo || '{{ asset('images/default-teacher.png') }}') + '" class="w-9 h-9 rounded-lg object-cover flex-shrink-0">'
                   + '<div class="flex-1 min-w-0">'
                   + '<p class="text-sm font-semibold text-navy-800 dark:text-white truncate">' + att.name + '</p>'
                   + '<p class="text-xs text-slate-500 dark:text-slate-400">Masuk: ' + att.check_in + (att.check_out ? ' · Keluar: ' + att.check_out : '') + '</p>'
@@ -333,7 +333,7 @@ function closePiketWelcome() {
         var html = '';
         data.forEach(function(leave) {
             html += '<div class="px-5 py-3.5 flex items-center gap-3">'
-                  + '<img src="' + (leave.photo || 'https://ui-avatars.com/api/?name=G&background=0F172A&color=fff&size=64') + '" class="w-9 h-9 rounded-lg object-cover flex-shrink-0">'
+                  + '<img src="' + (leave.photo || '{{ asset('images/default-teacher.png') }}') + '" class="w-9 h-9 rounded-lg object-cover flex-shrink-0">'
                   + '<div class="flex-1 min-w-0">'
                   + '<p class="text-sm font-semibold text-navy-800 dark:text-white truncate">' + leave.name + '</p>'
                   + '<p class="text-xs text-slate-500 dark:text-slate-400">' + leave.type + ' · ' + leave.start + '–' + leave.end + '</p>'

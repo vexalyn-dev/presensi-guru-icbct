@@ -54,7 +54,7 @@ class SubjectController extends Controller
     public function create()
     {
         $teachers = \App\Models\Teacher::orderBy('name')->get(['id', 'name', 'email', 'photo'])->map(function($t) {
-            $t->photo_url = $t->photo ? asset('storage/' . $t->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($t->name) . '&background=0F172A&color=fff';
+            $t->photo_url = $t->photo ? asset('storage/' . $t->photo) : asset('images/default-teacher.png');
             return $t;
         });
         return view('subjects.create', compact('teachers'));
@@ -104,7 +104,7 @@ class SubjectController extends Controller
     public function edit(Subject $subject)
     {
         $teachers = \App\Models\Teacher::with('user')->orderBy('name')->get()->map(function($t) {
-            $t->photo_url = $t->photo ? asset('storage/' . $t->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($t->name) . '&background=0F172A&color=fff';
+            $t->photo_url = $t->photo ? asset('storage/' . $t->photo) : asset('images/default-teacher.png');
             return $t;
         });
         $subject->load('teachers');

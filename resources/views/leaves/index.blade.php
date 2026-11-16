@@ -117,7 +117,7 @@
                            :value="{{ $leave->id }}"
                            x-model="selectedIds"
                            class="mt-1 w-5 h-5 rounded border-2 border-slate-300 text-navy-600 focus:ring-navy-500 cursor-pointer accent-navy-600">
-                    <img src="{{ $leave->user->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($leave->user->name) }}"
+                    <img src="{{ $leave->user->photo_url }}"
                          class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1 flex-wrap">
@@ -366,7 +366,7 @@
                                 <path d="M2 6.5L5 9.5L11 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
-                        <img src="${esc(leave.teacher_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.teacher_name)}`)}"
+                        <img src="${esc(leave.teacher_photo_url || '{{ asset('images/default-teacher.png') }}')}"
                              class="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1 flex-wrap">

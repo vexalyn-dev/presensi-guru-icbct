@@ -58,7 +58,7 @@ class DashboardController extends Controller
             ->take(8)
             ->get()
             ->map(function ($att) {
-                $photo = $att->user?->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($att->user?->name ?? 'G').'&background=0F172A&color=fff&size=64';
+                $photo = $att->user?->photo_url ?? asset('images/default-teacher.png');
                 return [
                     'name'      => $att->user?->name ?? '-',
                     'photo'     => $photo,
@@ -74,7 +74,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get()
             ->map(function ($leave) {
-                $photo = $leave->user?->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($leave->user?->name ?? 'G').'&background=0F172A&color=fff&size=64';
+                $photo = $leave->user?->photo_url ?? asset('images/default-teacher.png');
                 return [
                     'id'        => $leave->id,
                     'name'      => $leave->user?->name ?? '-',

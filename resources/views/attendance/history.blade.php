@@ -273,13 +273,9 @@
                 <div class="p-4">
                     <div class="flex items-center justify-between gap-3 mb-2">
                         <div class="flex items-center gap-2.5 min-w-0">
-                            <img x-show="att.user?.photo_url" :src="att.user?.photo_url || ''" :alt="att.user?.name || '?'"
+                            <img :src="att.user?.photo_url || '{{ asset('images/default-teacher.png') }}'" :alt="att.user?.name || '?'"
                                  class="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0 profile-avatar"
-                                 x-on:error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'">
-                            <div x-show="!att.user?.photo_url"
-                                 class="profile-avatar bg-gradient-to-br from-gold-400 to-gold-500 flex items-center justify-center text-navy-900 font-bold text-sm flex-shrink-0">
-                                <span x-text="att.user?.name?.charAt(0)?.toUpperCase() || '?'"></span>
-                            </div>
+                                 x-on:error="$event.target.src='{{ asset('images/default-teacher.png') }}'">
                             <p class="text-sm font-semibold text-navy-800 dark:text-white truncate" x-text="att.user?.name || '-'"></p>
                         </div>
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0"
@@ -330,15 +326,10 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                     <img x-show="att.user?.photo_url"
-                                         :src="att.user?.photo_url || ''"
+                                     <img :src="att.user?.photo_url || '{{ asset('images/default-teacher.png') }}'"
                                          :alt="att.user?.name || '?'"
                                          class="profile-avatar flex-shrink-0"
-                                         x-on:error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'">
-                                     <div x-show="!att.user?.photo_url"
-                                         class="profile-avatar bg-gradient-to-br from-gold-400 to-gold-500 flex items-center justify-center text-navy-900 font-bold text-sm flex-shrink-0">
-                                        <span x-text="att.user?.name?.charAt(0)?.toUpperCase() || '?'"></span>
-                                    </div>
+                                         x-on:error="$event.target.src='{{ asset('images/default-teacher.png') }}'">
                                     <span class="text-sm font-medium text-navy-800 dark:text-white truncate" x-text="att.user?.name || '-'"></span>
                                 </div>
                             </td>

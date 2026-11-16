@@ -84,7 +84,7 @@
                     @foreach($users as $u)
                     <button type="button" onclick="pickDD('dd-user','inp-user','lbl-user','btn-user','chev-user','{{ $u->id }}','{{ addslashes($u->name) }}')"
                             class="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors {{ $userId==$u->id ? 'font-bold text-navy-800 dark:text-gold-400' : 'text-slate-600 dark:text-slate-300' }}">
-                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 text-[10px] font-bold flex-shrink-0">{{ strtoupper(substr($u->name,0,1)) }}</div>
+                        <img src="{{ $u->photo_url }}" alt="" class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0">
                         <span class="truncate">{{ $u->name }}</span>
                     </button>
                     @endforeach
@@ -166,9 +166,8 @@
                         style="animation: fadeInRow 0.3s ease-out {{ $i * 0.04 }}s both;">
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-xs flex-shrink-0">
-                                    {{ strtoupper(substr($row['user']->name ?? 'X', 0, 1)) }}
-                                </div>
+                                <img src="{{ $row['user']->photo_url ?? asset('images/default-teacher.png') }}" alt=""
+                                     class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0">
                                 <div>
                                     <p class="font-semibold text-navy-800 dark:text-white text-sm leading-tight">{{ $row['user']->name ?? '-' }}</p>
                                     <p class="text-[10px] text-slate-400 font-mono">{{ $row['user']->teacher_code ?? '' }}</p>
@@ -211,9 +210,7 @@
             @php $pct = $row['persentase_ketepatan']; @endphp
             <div class="p-4">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center text-white dark:text-navy-900 font-bold text-xs flex-shrink-0">
-                        {{ strtoupper(substr($row['user']->name ?? 'X', 0, 1)) }}
-                    </div>
+                    <img src="{{ $row['user']->photo_url ?? asset('images/default-teacher.png') }}" alt="" class="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0">
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-navy-800 dark:text-white text-sm truncate">{{ $row['user']->name ?? '-' }}</p>
                         <p class="text-[10px] text-slate-400 font-mono">{{ $row['user']->teacher_code ?? '' }}</p>

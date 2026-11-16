@@ -39,7 +39,7 @@
                     <label class="block text-sm font-semibold text-navy-800 dark:text-white mb-2">
                         Guru <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative" x-data="customSelect('user_id', {{ $teachers->map(fn($t) => ['value' => (string)$t->id, 'label' => $t->name])->values()->toJson() }})">
+                    <div class="relative" x-data="customSelect('user_id', {{ $teachers->map(fn($t) => ['value' => (string)$t->id, 'label' => $t->name, 'photo' => $t->photo_url])->values()->toJson() }})">
                         <button type="button" @click="open = !open"
                                 class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-500 focus:border-transparent transition-all hover:border-navy-300 dark:hover:border-gold-600 flex items-center justify-between group">
                             <div class="flex items-center gap-3">
@@ -62,9 +62,7 @@
                                     <button type="button" @click="selectOption(option); open = false"
                                             class="w-full px-3 py-2.5 rounded-lg text-left text-sm transition-all flex items-center gap-3 group"
                                             :class="selectedValue === option.value ? 'bg-navy-50 dark:bg-navy-900/30 text-navy-700 dark:text-navy-300' : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 flex items-center justify-center flex-shrink-0">
-                                            <span class="text-white dark:text-navy-900 text-xs font-bold" x-text="option.label.charAt(0)"></span>
-                                        </div>
+                                        <img :src="option.photo" alt="" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-slate-200 dark:border-slate-600">
                                         <div class="flex-1 min-w-0">
                                             <p class="font-medium truncate" x-text="option.label"></p>
                                         </div>
@@ -319,7 +317,7 @@
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
-                                <img src="{{ $schedule->user->teacher->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($schedule->user->name) . '&background=0F172A&color=fff' }}" 
+                                <img src="{{ $schedule->user->photo_url ?? asset('images/default-teacher.png') }}" 
                                      class="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700">
                                 <div>
                                     <p class="text-sm font-bold text-navy-800 dark:text-white">{{ $schedule->user->name }}</p>
@@ -400,7 +398,7 @@
             @forelse($schedules as $schedule)
             @php $att = $schedule->todayAttendance; @endphp
             <div class="p-4 flex items-start gap-3">
-                <img src="{{ $schedule->user->teacher->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($schedule->user->name) . '&background=0F172A&color=fff' }}"
+                <img src="{{ $schedule->user->photo_url ?? asset('images/default-teacher.png') }}"
                      class="w-10 h-10 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">

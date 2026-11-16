@@ -461,9 +461,9 @@
                         <div class="relative" x-data="{ open: false }">
                             <button @click.stop="open = !open"
                                     class="flex items-center gap-1.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-1 sm:p-1.5 pr-1.5 sm:pr-2 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-slate-600">
-                                <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}" 
+                                <img src="{{ auth()->user()->photo_url }}"
                                      class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600 flex-shrink-0"
-                                     onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
+                                     onerror="this.src='{{ asset('images/default-teacher.png') }}'">
                                 <div class="hidden sm:block text-left">
                                     <p class="text-sm font-semibold text-navy-800 dark:text-white truncate max-w-[180px]">{{ auth()->user()->name }}</p>
                                     <div class="flex items-center gap-1.5 mt-0.5">
@@ -502,9 +502,9 @@
                                 
                                 <div class="border-b border-slate-100 dark:border-slate-700/80 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-slate-700 dark:to-slate-800 p-4">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ auth()->user()->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0F172A&color=fff' }}"
+                                        <img src="{{ auth()->user()->photo_url }}"
                                              class="w-10 h-10 rounded-full object-cover border-2 border-white/30 flex-shrink-0"
-                                             onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0F172A&color=fff'">
+                                             onerror="this.src='{{ asset('images/default-teacher.png') }}'">
                                         <div class="min-w-0">
                                             <p class="text-sm font-bold text-white break-words leading-snug">{{ auth()->user()->name }}</p>
                                             <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">

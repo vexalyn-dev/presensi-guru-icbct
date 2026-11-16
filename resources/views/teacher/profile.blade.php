@@ -52,7 +52,7 @@
             <div class="flex-shrink-0 relative group cursor-pointer mt-1 md:mt-0" onclick="openPhotoViewer(this.querySelector('img').src)">
                 <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-navy-800 to-navy-900 dark:from-gold-400 dark:to-gold-500 p-1 shadow-xl">
                     <img id="profile-avatar"
-                         src="{{ $profilePhoto ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name).'&background=1E3A5F&color=fff&size=200&bold=true' }}"
+                         src="{{ $profilePhoto ?? auth()->user()->photo_url }}"
                          alt="{{ auth()->user()->name }}"
                          class="w-full h-full rounded-xl object-cover">
                 </div>
@@ -331,7 +331,7 @@ function cancelPhoto() {
 </style>
 
 <script>
-window.profileDefaultPhoto = 'https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=1E3A5F&color=fff&size=200&bold=true';
+window.profileDefaultPhoto = '{{ asset('images/default-teacher.png') }}';
 </script>
 
 @include('partials.photo-cropper')

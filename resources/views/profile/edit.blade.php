@@ -517,7 +517,7 @@
     </style>
 
     <script>
-    window.profileDefaultPhoto = 'https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=1E3A5F&color=fff&size=200&bold=true';
+    window.profileDefaultPhoto = '{{ asset('images/default-teacher.png') }}';
     </script>
 
     @include('partials.photo-cropper')
