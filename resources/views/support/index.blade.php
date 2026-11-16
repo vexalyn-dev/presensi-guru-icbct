@@ -587,6 +587,57 @@ function setType(t) {
     if (window.lucide) lucide.createIcons();
 }
 
+var _overlayRedirectUrl = null;
+var _overlayTimer = null;
+
+function showSupportOverlay(state, message, redirectUrl) {
+    var ov    = document.getElementById('support-ov');
+    var ring  = document.getElementById('sov-ring');
+    var dots  = document.getElementById('sov-dots');
+    var ok    = document.getElementById('sov-icon-success');
+    var err   = document.getElementById('sov-icon-error');
+    var label = document.getElementById('sov-label');
+    var sub   = document.getElementById('sov-sublabel');
+
+    clearTimeout(_overlayTimer);
+    _overlayRedirectUrl = redirectUrl || null;
+
+    ring.style.display = 'none';
+    dots.style.display = 'none';
+    ok.style.display   = 'none';
+    err.style.display  = 'none';
+    ov.classList.add('sov-show');
+
+    if (state === 'loading') {
+        ring.style.display = '';
+        dots.style.display = '';
+        label.textContent = message || 'Mengirim laporan...';
+        sub.textContent   = 'Mohon tunggu sebentar';
+        return;
+    }
+
+    if (state === 'success') {
+        ok.style.display  = 'flex';
+        label.textContent = message || 'Laporan berhasil dikirim!';
+        sub.textContent   = 'Membuka riwayat laporan...';
+        _overlayTimer = setTimeout(function () {
+            hideSupportOverlay();
+            showThanksModal(_overlayRedirectUrl);
+        }, 1200);
+        return;
+    }
+
+    err.style.display = 'flex';
+    label.textContent = message || 'Gagal mengirim laporan.';
+    sub.textContent   = 'Silakan coba lagi';
+    _overlayTimer = setTimeout(hideSupportOverlay, 2500);
+}
+
+function hideSupportOverlay() {
+    clearTimeout(_overlayTimer);
+    document.getElementById('support-ov').classList.remove('sov-show');
+}
+
 function handleSubmit() {
     var form = document.getElementById('support-form');
 
@@ -594,9 +645,12 @@ function handleSubmit() {
     var title = document.getElementById('title-input').value.trim();
     var desc  = document.getElementById('desc-input').value.trim();
     var prio  = document.getElementById('priority-input').value;
-    if (!title || title.length < 5) { document.getElementById('title-input').focus(); return; }
-    if (!desc  || desc.length  < 10){ document.getElementById('desc-input').focus();  return; }
-    if (!prio)                       { return; }
+    var type  = document.getElementById('type-input').value;
+    var cat   = document.getElementById('category-input').value;
+    if (!title || title.length < 5) { document.getElementById('title-input').focus(); showSupportOverlay('error', 'Judul minimal 5 karakter.'); return; }
+    if (!desc  || desc.length  < 10){ document.getElementById('desc-input').focus();  showSupportOverlay('error', 'Deskripsi minimal 10 karakter.'); return; }
+    if (!prio)                       { showSupportOverlay('error', 'Prioritas wajib dipilih.'); return; }
+    if (type === 'bug' && !cat)      { showSupportOverlay('error', 'Kategori wajib dipilih.'); return; }
 
     // Tampilkan overlay loading
     showSupportOverlay('loading');
@@ -615,10 +669,19 @@ function handleSubmit() {
             return res.json().then(function(data) {
                 if (data.success) {
                     showSupportOverlay('success', 'Laporan berhasil dikirim!', data.redirect || null);
-                } else {
-                    showSupportOverlay('error', data.message || 'Gagal mengirim laporan.');
+                    return;
                 }
+                var msg = data.message || 'Gagal mengirim laporan.';
+                if (data.errors) {
+                    var first = Object.keys(data.errors)[0];
+                    if (first && data.errors[first] && data.errors[first][0]) msg = data.errors[first][0];
+                }
+                showSupportOverlay('error', msg);
             });
+        }
+        if (!res.ok) {
+            showSupportOverlay('error', 'Gagal mengirim laporan (' + res.status + '). Coba muat ulang halaman.');
+            return;
         }
         showSupportOverlay('success', 'Laporan berhasil dikirim!', res.url);
     })
@@ -639,7 +702,10 @@ function showThanksModal(redirectUrl) {
         document.body.appendChild(modal);
     }
 
+    modal.classList.remove('hidden');
     modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(10,15,30,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;';
+    box.style.transform = 'translateY(24px) scale(0.96)';
+    box.style.opacity   = '0';
 
     requestAnimationFrame(function() {
         box.style.transform = 'translateY(0) scale(1)';
@@ -669,7 +735,9 @@ function closeThanksModal(redirectUrl) {
     box.style.transform = 'translateY(20px) scale(0.96)';
     box.style.opacity   = '0';
     setTimeout(function() {
-        document.getElementById('thanks-modal').classList.add('hidden');
+        var modal = document.getElementById('thanks-modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
         // Prioritas: redirectUrl argumen → _overlayRedirectUrl global → history.go(-1)
         var dest = redirectUrl || _overlayRedirectUrl || null;
         if (dest) window.location.href = dest;
