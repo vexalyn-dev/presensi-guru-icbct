@@ -38,7 +38,7 @@ class AttendanceHistoryController extends Controller
 
             $stats = [
                 'total'     => (clone $statsBaseQuery)->count(),
-                'hadir'     => (clone $statsBaseQuery)->whereIn('status', ['Hadir', 'Tepat Waktu'])->count(),
+                'hadir'     => (clone $statsBaseQuery)->whereIn('status', ['Hadir', 'Tepat Waktu', 'Terlambat'])->count(),
                 'terlambat' => (clone $statsBaseQuery)->where('status', 'Terlambat')->count(),
                 'alpha'     => (clone $statsBaseQuery)->where('status', 'Alpha')->count(),
                 'izin'      => (clone $statsBaseQuery)->whereIn('status', ['Izin', 'Sakit', 'Cuti'])->count(),
