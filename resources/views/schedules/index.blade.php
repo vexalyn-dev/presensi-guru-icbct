@@ -84,6 +84,116 @@
             </div>
         </div>
 
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                <div class="relative flex-1 sm:w-64 lg:w-80">
+                    <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                    <input type="text" id="scheduleSearch" placeholder="Cari nama, mapel, atau hari..."
+                           class="w-full pl-11 pr-4 py-3 bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 transition-all shadow-sm hover:shadow-md"
+                           oninput="applyTeacherFilter()">
+                </div>
+
+                <div id="scheduleFilterDropdown"
+                    x-data="{
+                        open: false,
+                        selected: '',
+                        get displayText() {
+                            if (this.selected === 'has') return 'Sudah Ada Jadwal';
+                            if (this.selected === 'none') return 'Belum Ada Jadwal';
+                            return 'Semua Jadwal';
+                        },
+                        get displayIcon() {
+                            if (this.selected === 'has') return 'calendar-check';
+                            if (this.selected === 'none') return 'calendar-x';
+                            return 'filter';
+                        },
+                        get displayColor() {
+                            if (this.selected === 'has') return 'text-green-600 dark:text-green-400';
+                            if (this.selected === 'none') return 'text-amber-600 dark:text-amber-400';
+                            return 'text-navy-800 dark:text-white';
+                        },
+                        selectStatus(value) {
+                            this.selected = value;
+                            this.open = false;
+                            document.getElementById('scheduleStatusFilter').value = value;
+                            applyTeacherFilter();
+                        }
+                    }"
+                    @click.away="open = false"
+                    class="relative">
+
+                    <input type="hidden" id="scheduleStatusFilter" value="">
+
+                    <button type="button"
+                            @click="open = !open"
+                            class="group relative flex items-center gap-2.5 pl-4 pr-11 py-3 w-full sm:w-auto bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-gold-400 min-w-[180px]"
+                            :class="open && 'ring-2 ring-navy-800 dark:ring-gold-400 border-navy-800 dark:border-gold-400'">
+                        <i :data-lucide="displayIcon" class="w-4 h-4 transition-colors" :class="displayColor"></i>
+                        <span class="transition-colors" :class="displayColor" x-text="displayText"></span>
+                        <i data-lucide="chevron-down"
+                           class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 transition-transform duration-200"
+                           :class="open && 'rotate-180'"></i>
+                    </button>
+
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute top-full mt-2 w-full min-w-[220px] bg-white dark:bg-navy-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50"
+                         style="display: none;">
+
+                        <div class="py-1">
+                            <button type="button"
+                                    @click="selectStatus('')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50 group"
+                                    :class="selected === '' && 'bg-slate-50 dark:bg-slate-700/50'">
+                                <div class="w-5 h-5 flex items-center justify-center">
+                                    <i data-lucide="filter" class="w-4 h-4 text-navy-800 dark:text-white"></i>
+                                </div>
+                                <span class="flex-1 text-left font-medium text-navy-800 dark:text-white">Semua Jadwal</span>
+                                <svg x-show="selected === ''" class="w-4 h-4 text-navy-800 dark:text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </button>
+
+                            <button type="button"
+                                    @click="selectStatus('has')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-green-50 dark:hover:bg-green-900/20 group"
+                                    :class="selected === 'has' && 'bg-green-50 dark:bg-green-900/20'">
+                                <div class="w-5 h-5 flex items-center justify-center">
+                                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/50"></div>
+                                </div>
+                                <span class="flex-1 text-left font-medium text-green-700 dark:text-green-400">Sudah Ada Jadwal</span>
+                                <svg x-show="selected === 'has'" class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </button>
+
+                            <button type="button"
+                                    @click="selectStatus('none')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-amber-50 dark:hover:bg-amber-900/20 group"
+                                    :class="selected === 'none' && 'bg-amber-50 dark:bg-amber-900/20'">
+                                <div class="w-5 h-5 flex items-center justify-center">
+                                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                                </div>
+                                <span class="flex-1 text-left font-medium text-amber-700 dark:text-amber-400">Belum Ada Jadwal</span>
+                                <svg x-show="selected === 'none'" class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                Menampilkan <span id="scheduleResultCount" class="font-bold text-navy-800 dark:text-white">{{ $teachers->count() }}</span> dari {{ $teachers->count() }} guru
+            </p>
+        </div>
+
         {{-- ════════════════════════════════════════
              LIST VIEW
              ════════════════════════════════════════ --}}
@@ -92,7 +202,13 @@
                 @php
                     $activeSchedules = $teacher->schedules->where('is_active', true)->sortBy('day_of_week');
                 @endphp
-                <div class="card p-5 hover:shadow-xl transition-all duration-300 group">
+                <div class="card p-5 hover:shadow-xl transition-all duration-300 group"
+                     data-schedule-card
+                     data-name="{{ $teacher->name }}"
+                     data-subject="{{ $teacher->subject_display ?: '' }}"
+                     data-code="{{ trim(($teacher->teacher_code ?? '') . ' ' . ($teacher->id_guru ?? '')) }}"
+                     data-days="{{ $activeSchedules->map(fn($s) => \App\Models\TeacherSchedule::getDayName($s->day_of_week))->implode(' ') }}"
+                     data-has-schedule="{{ $activeSchedules->isNotEmpty() ? '1' : '0' }}">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 {{ $activeSchedules->isNotEmpty() ? 'mb-4 pb-4 border-b border-slate-100 dark:border-slate-800' : '' }}">
                         <div class="flex items-center gap-4">
                             <img src="{{ $teacher->photo_url }}"
@@ -150,6 +266,21 @@
                     <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">Tidak ada guru aktif untuk ditampilkan.</p>
                 </div>
             @endforelse
+
+            @if($teachers->isNotEmpty())
+                <div id="empty-list" class="hidden card p-12 text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="search-x" class="w-10 h-10 text-slate-400 dark:text-slate-500"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-navy-800 dark:text-white mb-2">Tidak Ada Hasil</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-4">Tidak ada guru yang cocok dengan pencarian atau filter yang dipilih.</p>
+                    <button type="button" onclick="resetScheduleFilters()"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-navy-800 dark:bg-gold-400 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-xs font-bold transition-all shadow-md">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        Reset Filter
+                    </button>
+                </div>
+            @endif
         </div>
 
         {{-- ════════════════════════════════════════
@@ -158,6 +289,12 @@
         <div id="view-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($teachers as $teacher)
                 <div
+                    data-schedule-card
+                    data-name="{{ $teacher->name }}"
+                    data-subject="{{ $teacher->subject_display ?: '' }}"
+                    data-code="{{ trim(($teacher->teacher_code ?? '') . ' ' . ($teacher->id_guru ?? '')) }}"
+                    data-days="{{ $teacher->schedules->where('is_active', true)->sortBy('day_of_week')->map(fn($s) => \App\Models\TeacherSchedule::getDayName($s->day_of_week))->implode(' ') }}"
+                    data-has-schedule="{{ $teacher->schedules->where('is_active', true)->isNotEmpty() ? '1' : '0' }}"
                     class="card p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group h-full flex flex-col">
 
                     <!-- Teacher Header -->
@@ -237,6 +374,23 @@
                     </div>
                 </div>
             @endforelse
+
+            @if($teachers->isNotEmpty())
+                <div id="empty-grid" class="hidden col-span-full">
+                    <div class="card p-12 text-center">
+                        <div class="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="search-x" class="w-10 h-10 text-slate-400 dark:text-slate-500"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-navy-800 dark:text-white mb-2">Tidak Ada Hasil</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-4">Tidak ada guru yang cocok dengan pencarian atau filter yang dipilih.</p>
+                        <button type="button" onclick="resetScheduleFilters()"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 bg-navy-800 dark:bg-gold-400 hover:opacity-90 text-white dark:text-navy-900 rounded-xl text-xs font-bold transition-all shadow-md">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            Reset Filter
+                        </button>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -245,7 +399,64 @@
             if (window.lucide) lucide.createIcons();
             var saved = localStorage.getItem('schedules_admin_view') || 'grid';
             applyView(saved, false);
+            applyTeacherFilter();
         });
+
+        function applyTeacherFilter() {
+            var input = document.getElementById('scheduleSearch');
+            var statusEl = document.getElementById('scheduleStatusFilter');
+            if (!input || !statusEl) return;
+
+            var q = input.value.toLowerCase().trim();
+            var status = statusEl.value;
+
+            document.querySelectorAll('[data-schedule-card]').forEach(function (card) {
+                var haystack = [
+                    card.dataset.name || '',
+                    card.dataset.subject || '',
+                    card.dataset.code || '',
+                    card.dataset.days || ''
+                ].join(' ').toLowerCase();
+
+                var hasSchedule = card.dataset.hasSchedule === '1';
+                var match = q === '' || haystack.indexOf(q) !== -1;
+                if (status === 'has') match = match && hasSchedule;
+                else if (status === 'none') match = match && !hasSchedule;
+
+                card.classList.toggle('hidden', !match);
+            });
+
+            [[ 'view-list', 'empty-list' ], [ 'view-grid', 'empty-grid' ]].forEach(function (pair) {
+                var container = document.getElementById(pair[0]);
+                if (!container) return;
+                var shown = container.querySelectorAll('[data-schedule-card]:not(.hidden)').length;
+                var emptyEl = document.getElementById(pair[1]);
+                if (emptyEl) emptyEl.classList.toggle('hidden', shown !== 0);
+            });
+
+            var listContainer = document.getElementById('view-list');
+            var countEl = document.getElementById('scheduleResultCount');
+            if (listContainer && countEl) {
+                countEl.textContent = listContainer.querySelectorAll('[data-schedule-card]:not(.hidden)').length;
+            }
+        }
+
+        function resetScheduleFilters() {
+            var input = document.getElementById('scheduleSearch');
+            var statusEl = document.getElementById('scheduleStatusFilter');
+            if (input) input.value = '';
+            if (statusEl) statusEl.value = '';
+
+            var dropdown = document.getElementById('scheduleFilterDropdown');
+            if (dropdown && window.Alpine) {
+                try {
+                    var data = window.Alpine.$data(dropdown);
+                    if (data) data.selected = '';
+                } catch (e) {}
+            }
+
+            applyTeacherFilter();
+        }
 
         function setView(v) {
             var current = localStorage.getItem('schedules_admin_view') || 'grid';
