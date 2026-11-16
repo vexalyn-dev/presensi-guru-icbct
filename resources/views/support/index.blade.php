@@ -207,24 +207,10 @@
                                 <template x-if="selected">
                                     <span class="flex items-center gap-2.5">
                                         <span class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" :class="opts.find(o=>o.value===selected)?.bg">
-                                            <svg class="w-3.5 h-3.5" :class="opts.find(o=>o.value===selected)?.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                {{-- circle-check --}}
-                                                <template x-if="opts.find(o=>o.value===selected)?.icon === 'circle-check'">
-                                                    <g><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></g>
-                                                </template>
-                                                {{-- alert-circle --}}
-                                                <template x-if="opts.find(o=>o.value===selected)?.icon === 'alert-circle'">
-                                                    <g><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></g>
-                                                </template>
-                                                {{-- alert-triangle --}}
-                                                <template x-if="opts.find(o=>o.value===selected)?.icon === 'alert-triangle'">
-                                                    <g><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></g>
-                                                </template>
-                                                {{-- flame --}}
-                                                <template x-if="opts.find(o=>o.value===selected)?.icon === 'flame'">
-                                                    <g><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></g>
-                                                </template>
-                                            </svg>
+                                            <svg x-show="opts.find(o=>o.value===selected)?.icon === 'circle-check'" class="w-3.5 h-3.5" :class="opts.find(o=>o.value===selected)?.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                            <svg x-show="opts.find(o=>o.value===selected)?.icon === 'alert-circle'" class="w-3.5 h-3.5" :class="opts.find(o=>o.value===selected)?.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                            <svg x-show="opts.find(o=>o.value===selected)?.icon === 'alert-triangle'" class="w-3.5 h-3.5" :class="opts.find(o=>o.value===selected)?.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                            <svg x-show="opts.find(o=>o.value===selected)?.icon === 'flame'" class="w-3.5 h-3.5" :class="opts.find(o=>o.value===selected)?.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
                                         </span>
                                         <span class="font-semibold text-navy-800 dark:text-white" x-text="opts.find(o=>o.value===selected)?.label"></span>
                                     </span>
@@ -239,7 +225,10 @@
                                 <button type="button" @click="select(opt)"
                                         class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                                     <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" :class="opt.bg">
-                                        <i :data-lucide="opt.icon" :class="opt.text + ' w-3.5 h-3.5'"></i>
+                                        <svg x-show="opt.icon === 'circle-check'" class="w-3.5 h-3.5" :class="opt.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                        <svg x-show="opt.icon === 'alert-circle'" class="w-3.5 h-3.5" :class="opt.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                        <svg x-show="opt.icon === 'alert-triangle'" class="w-3.5 h-3.5" :class="opt.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        <svg x-show="opt.icon === 'flame'" class="w-3.5 h-3.5" :class="opt.text" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
                                     </div>
                                     <span :class="opt.text + ' font-semibold'" x-text="opt.label"></span>
                                 </button>
@@ -260,7 +249,16 @@
                                 </template>
                                 <template x-if="selected">
                                     <span class="flex items-center gap-2.5">
-                                        <span class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" :class="opts.find(o=>o.v===selected)?.bg"></span>
+                                        <span class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" :class="opts.find(o=>o.v===selected)?.bg">
+                                            <svg x-show="opts.find(o=>o.v===selected)?.icon === 'layout'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                                            <svg x-show="opts.find(o=>o.v===selected)?.icon === 'log-in'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                                            <svg x-show="opts.find(o=>o.v===selected)?.icon === 'scan-line'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+                                            <svg x-show="opts.find(o=>o.v===selected)?.icon === 'database'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                                            <svg x-show="opts.find(o=>o.v===selected)?.icon === 'code-2'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                            <svg x-show="opts.find(o=>o.v===selected)?.icon === 'zap'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                            <svg x-show="opts.find(o=>o.v===selected)?.icon === 'shield-alert'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                            <svg x-show="opts.find(o=>o.v===selected)?.icon === 'more-horizontal'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                        </span>
                                         <span class="font-semibold text-navy-800 dark:text-white" x-text="selected"></span>
                                     </span>
                                 </template>
@@ -274,7 +272,14 @@
                                 <button type="button" @click="select(cat)"
                                         class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
                                     <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" :class="cat.bg">
-                                        <i :data-lucide="cat.icon" :class="cat.c + ' w-3.5 h-3.5'"></i>
+                                        <svg x-show="cat.icon === 'layout'" class="w-3.5 h-3.5" :class="cat.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                                        <svg x-show="cat.icon === 'log-in'" class="w-3.5 h-3.5" :class="cat.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                                        <svg x-show="cat.icon === 'scan-line'" class="w-3.5 h-3.5" :class="cat.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+                                        <svg x-show="cat.icon === 'database'" class="w-3.5 h-3.5" :class="cat.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                                        <svg x-show="cat.icon === 'code-2'" class="w-3.5 h-3.5" :class="cat.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                        <svg x-show="cat.icon === 'zap'" class="w-3.5 h-3.5" :class="cat.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                        <svg x-show="cat.icon === 'shield-alert'" class="w-3.5 h-3.5" :class="cat.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                        <svg x-show="cat.icon === 'more-horizontal'" class="w-3.5 h-3.5" :class="cat.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                                     </div>
                                     <span x-text="cat.v"></span>
                                 </button>
@@ -332,7 +337,12 @@
                                     </template>
                                     <template x-if="selected">
                                         <span class="flex items-center gap-2.5">
-                                            <span class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" :class="opts.find(o=>o.v===selected)?.bg"></span>
+                                            <span class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" :class="opts.find(o=>o.v===selected)?.bg">
+                                                <svg x-show="opts.find(o=>o.v===selected)?.icon === 'user'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                                <svg x-show="opts.find(o=>o.v===selected)?.icon === 'users'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                                <svg x-show="opts.find(o=>o.v===selected)?.icon === 'users-round'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h1"/><circle cx="17" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-4-4h-1"/></svg>
+                                                <svg x-show="opts.find(o=>o.v===selected)?.icon === 'alert-octagon'" class="w-3.5 h-3.5" :class="opts.find(o=>o.v===selected)?.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 21.29 7.14 21.29 16.86 7.86 21.92 1.43 16.86 1.43 7.14 7.86 2"/></svg>
+                                            </span>
                                             <span class="font-semibold text-navy-800 dark:text-white" x-text="selected"></span>
                                         </span>
                                     </template>
@@ -346,7 +356,10 @@
                                     <button type="button" @click="select(imp)"
                                             class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-slate-700 dark:text-slate-300">
                                         <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" :class="imp.bg">
-                                            <i :data-lucide="imp.icon" :class="imp.c + ' w-3.5 h-3.5'"></i>
+                                            <svg x-show="imp.icon === 'user'" class="w-3.5 h-3.5" :class="imp.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                            <svg x-show="imp.icon === 'users'" class="w-3.5 h-3.5" :class="imp.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                            <svg x-show="imp.icon === 'users-round'" class="w-3.5 h-3.5" :class="imp.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h1"/><circle cx="17" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-4-4h-1"/></svg>
+                                            <svg x-show="imp.icon === 'alert-octagon'" class="w-3.5 h-3.5" :class="imp.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 21.29 7.14 21.29 16.86 7.86 21.92 1.43 16.86 1.43 7.14 7.86 2"/></svg>
                                         </div>
                                         <span x-text="imp.v"></span>
                                     </button>
@@ -427,7 +440,12 @@
                                     <template x-if="selected">
                                         <span class="flex items-center gap-2.5">
                                             <span :class="selectedBg + ' w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0'">
-                                                <i :data-lucide="selectedIcon" :class="selectedColor + ' w-3.5 h-3.5'"></i>
+                                                <svg x-show="selectedIcon === 'refresh-cw'" class="w-3.5 h-3.5" :class="selectedColor" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                                                <svg x-show="selectedIcon === 'database'" class="w-3.5 h-3.5" :class="selectedColor" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                                                <svg x-show="selectedIcon === 'hard-drive'" class="w-3.5 h-3.5" :class="selectedColor" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
+                                                <svg x-show="selectedIcon === 'zap'" class="w-3.5 h-3.5" :class="selectedColor" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                                <svg x-show="selectedIcon === 'shield'" class="w-3.5 h-3.5" :class="selectedColor" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                                <svg x-show="selectedIcon === 'more-horizontal'" class="w-3.5 h-3.5" :class="selectedColor" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                                             </span>
                                             <span class="font-semibold text-navy-800 dark:text-white" x-text="selected"></span>
                                         </span>
@@ -450,9 +468,14 @@
                                 <template x-for="opt in options" :key="opt.v">
                                     <button type="button" @click="select(opt)"
                                             class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
-                                        <span :class="opt.bg + ' dark:opacity-80 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform'">
-                                            <i :data-lucide="opt.icon" :class="opt.c + ' w-4 h-4'"></i>
-                                        </span>
+                                         <span :class="opt.bg + ' dark:opacity-80 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform'">
+                                             <svg x-show="opt.icon === 'refresh-cw'" class="w-4 h-4" :class="opt.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                                             <svg x-show="opt.icon === 'database'" class="w-4 h-4" :class="opt.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                                             <svg x-show="opt.icon === 'hard-drive'" class="w-4 h-4" :class="opt.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>
+                                             <svg x-show="opt.icon === 'zap'" class="w-4 h-4" :class="opt.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                             <svg x-show="opt.icon === 'shield'" class="w-4 h-4" :class="opt.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                             <svg x-show="opt.icon === 'more-horizontal'" class="w-4 h-4" :class="opt.c" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                         </span>
                                         <span class="font-medium text-slate-700 dark:text-slate-200" x-text="opt.v"></span>
                                     </button>
                                 </template>
