@@ -277,27 +277,36 @@ class SupportController extends Controller
                         default    => '✅',
                     };
 
-                    $caption  = "*✦ VEXALYN*\n";
-                    $caption .= "*SUPPORT CENTER*\n\n";
-                    $caption .= "*🎫 NEW SUPPORT TICKET*\n";
-                    $caption .= "*`#{$ticket->ticket_id}`*\n\n";
-                    $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                    $caption .= "*📝 SUBJECT* : *{$ticket->title}*\n\n";
-                    $caption .= "*⚠️ PRIORITY* : {$prioEmoji} *" . strtoupper(SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? $ticket->priority) . "*\n\n";
-                    $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
-                    $caption .= "*📄 REPORT DETAILS*\n\n";
-                    $caption .= $ticket->description . "\n\n";
-                    $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                    $caption  = "*✦ *V E X A L Y N**\n";
+                    $caption .= "*      *S U P P O R T  C E N T E R**\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━━━━\n\n";
+                    $caption .= "*◈ **NEW SUPPORT TICKET**\n";
+                    $caption .= "┌ 🎫 TICKET ID\n";
+                    $caption .= "└ *`#{$ticket->ticket_id}`*\n\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━━━━\n\n";
+                    $caption .= "*◈ **TICKET INFORMATION**\n\n";
+                    $caption .= "*✧ **SUBJECT**\n";
+                    $caption .= "   *{$ticket->title}*\n\n";
+                    $caption .= "*⚑ **PRIORITY LEVEL**\n";
+                    $caption .= "   {$prioEmoji} **" . strtoupper(SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? $ticket->priority) . "**\n\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━━━━\n\n";
+                    $caption .= "*◈ **REPORT DETAILS**\n\n";
+                    $caption .= "> *{$ticket->description}*\n\n";
+                    $caption .= "━━━━━━━━━━━━━━━━━━━━\n\n";
 
                     if (!empty($ticket->attachments)) {
-                        $caption .= "*📎 ATTACHMENT*\n\n";
+                        $caption .= "*◈ **ATTACHMENT**\n\n";
                         foreach ($ticket->attachments as $attachment) {
                             if (!empty($attachment['url'])) {
-                                $caption .= "🔗 *{$attachment['url']}*\n\n";
+                                $caption .= "┌ 📎 ATTACHED FILE\n";
+                                $caption .= "└ 🔗 *{$attachment['url']}*\n\n";
+                                break;
                             }
                         }
-                        $caption .= "━━━━━━━━━━━━━━━━━━\n\n";
+                        $caption .= "━━━━━━━━━━━━━━━━━━━━\n\n";
                     }
+
+                    $caption .= "> *_Vexalyn support center_*\n";
 
                     if (!empty($ticket->attachments)) {
                         foreach ($ticket->attachments as $attachment) {
