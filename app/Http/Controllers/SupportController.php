@@ -277,8 +277,7 @@ class SupportController extends Controller
                         default    => '✅',
                     };
 
-                    $caption  = "*✦ *V E X A L Y N**\n";
-                    $caption .= "*      *S U P P O R T  C E N T E R**\n";
+                    $caption  = "*✦ *V E X A L Y N  S U P P O R T  C E N T E R*\n";
                     $caption .= "━━━━━━━━━━━━━━━━━━━━\n\n";
                     $caption .= "*◈ **NEW SUPPORT TICKET**\n";
                     $caption .= "┌ 🎫 TICKET ID\n";
@@ -288,7 +287,8 @@ class SupportController extends Controller
                     $caption .= "*✧ **SUBJECT**\n";
                     $caption .= "   *{$ticket->title}*\n\n";
                     $caption .= "*⚑ **PRIORITY LEVEL**\n";
-                    $caption .= "   {$prioEmoji} **" . strtoupper(SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? $ticket->priority) . "**\n\n";
+                    $priorityLabel = strtoupper(SupportTicket::priorityLabels()[$ticket->priority]['label'] ?? $ticket->priority);
+                    $caption .= "   {$prioEmoji} *{$priorityLabel}*\n\n";
                     $caption .= "━━━━━━━━━━━━━━━━━━━━\n\n";
                     $caption .= "*◈ **REPORT DETAILS**\n\n";
                     $caption .= "> *{$ticket->description}*\n\n";
