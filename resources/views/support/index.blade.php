@@ -770,6 +770,35 @@ function renderFiles() {
     if (window.lucide) lucide.createIcons();
 }
 function removeFile(i) { selectedFiles.splice(i, 1); renderFiles(); }
+
+(function() {
+    var ua = navigator.userAgent || navigator.vendor || window.opera;
+    var browser = '-';
+    if (/Firefox/.test(ua)) browser = 'Firefox';
+    else if (/Edg(e|e)/i.test(ua)) browser = 'Microsoft Edge';
+    else if (/Chrome/.test(ua) && !/Edg(e|e)/i.test(ua)) browser = 'Google Chrome';
+    else if (/Safari/.test(ua) && !/Chrome/.test(ua)) browser = 'Safari';
+    else if (/Opera/.test(ua) || /OPR/.test(ua)) browser = 'Opera';
+
+    var os = '-';
+    if (ua.indexOf('Win') !== -1) os = 'Windows';
+    else if (ua.indexOf('Mac') !== -1) os = 'macOS';
+    else if (ua.indexOf('Linux') !== -1) os = 'Linux';
+    else if (ua.indexOf('Android') !== -1) os = 'Android';
+    else if (/iPhone|iPod|iPad/i.test(ua)) os = 'iOS';
+
+    var device = '-';
+    if (/Mobi|Android/i.test(ua)) device = 'Mobile';
+    else if (/Tablet|iPad/i.test(ua) || (ua.indexOf('Windows') !== -1 && ua.indexOf('Touch') !== -1)) device = 'Tablet';
+    else device = 'Desktop';
+
+    var elB = document.getElementById('show-browser');
+    var elO = document.getElementById('show-os');
+    var elD = document.getElementById('show-device');
+    if (elB) elB.textContent = browser;
+    if (elO) elO.textContent = os;
+    if (elD) elD.textContent = device;
+})();
 </script>
 
 <style>
